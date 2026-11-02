@@ -1,0 +1,118 @@
+/* Read mode: one comfortable column, a sticky contents list on wide screens. */
+.learn {
+  padding-top: clamp(2rem, 1rem + 4vw, 5rem);
+}
+.learn-head {
+  max-width: 46rem;
+}
+.learn-title {
+  font-size: var(--step-head);
+}
+.learn-head .lede {
+  margin-top: 1rem;
+}
+.learn-body {
+  margin-top: clamp(3rem, 2rem + 4vw, 6rem);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 1.5rem;
+}
+.learn-toc {
+  grid-column: 1 / span 3;
+  position: sticky;
+  top: 1.5rem;
+  align-self: start;
+  font-size: var(--step-small);
+}
+.learn-toc ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: grid;
+  gap: 0.15rem;
+}
+.learn-toc a {
+  display: block;
+  padding: 0.4rem 0;
+  text-decoration: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .learn-toc a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+.learn-main {
+  grid-column: 4 / span 7;
+  display: grid;
+  gap: clamp(4rem, 3rem + 3vw, 6rem);
+}
+.topic {
+  display: grid;
+  gap: 1rem;
+  max-width: 68ch;
+  scroll-margin-top: 1.5rem;
+}
+.topic-title {
+  font-size: var(--step-lead);
+}
+.topic-sources {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.tech-only {
+  display: none;
+  color: var(--muted);
+}
+:root[data-mode="technical"] .tech-only {
+  display: block;
+}
+:root[data-mode="technical"] dd .tech-only {
+  display: inline;
+}
+.example {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 18px 20px;
+  display: grid;
+  gap: 6px;
+}
+.example-label {
+  font-weight: 500;
+}
+.example-figure strong {
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.example-note {
+  color: var(--muted);
+}
+.glossary {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0;
+}
+.gloss-row dt {
+  font-weight: 500;
+}
+.gloss-row dd {
+  margin: 0.25rem 0 0;
+}
+.source-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+@media (max-width: 900px) {
+  .learn-toc {
+    position: static;
+    grid-column: 1 / -1;
+    margin-bottom: 3rem;
+  }
+  .learn-main {
+    grid-column: 1 / -1;
+  }
+}

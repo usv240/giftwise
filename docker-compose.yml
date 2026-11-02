@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: giftwise
+      POSTGRES_PASSWORD: giftwise
+      POSTGRES_DB: giftwise
+    ports:
+      - "5432:5432"
+    volumes:
+      - giftwise-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U giftwise"]
+      interval: 5s
+      retries: 10
+volumes:
+  giftwise-pg:

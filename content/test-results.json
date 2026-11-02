@@ -1,0 +1,54 @@
+{
+  "ranAt": "2026-11-02",
+  "build": "Development build on localhost, PayPal sandbox, Postgres 17",
+  "suites": [
+    {
+      "id": "unit",
+      "name": "Rules engine and routing",
+      "command": "npm test",
+      "passed": 26,
+      "total": 26,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE and gift routing"
+    },
+    {
+      "id": "api",
+      "name": "API end to end",
+      "command": "npm run e2e:api",
+      "passed": 50,
+      "total": 50,
+      "what": "Gift checks, presets, bill and fundraiser reading, PayPal orders, routed gifts, receipts, the ledger, developer keys and every error path"
+    },
+    {
+      "id": "ui",
+      "name": "Browser end to end",
+      "command": "npm run e2e:ui",
+      "passed": 46,
+      "total": 46,
+      "what": "The Gift Checker, Try it, the gift page, keyboard use, and the developer flow from new key to a Claude-read bill"
+    },
+    {
+      "id": "a11y",
+      "name": "Accessibility and layout",
+      "command": "npm run e2e:a11y",
+      "passed": 48,
+      "total": 48,
+      "what": "axe WCAG 2.2 AA on 12 pages at desktop and phone widths, light and dark, with no sideways scroll"
+    },
+    {
+      "id": "paypal",
+      "name": "Real PayPal checkout, logged in as the sandbox buyer",
+      "command": "npm run e2e:paypal",
+      "passed": 14,
+      "total": 14,
+      "what": "Both PayPal buttons: the buyer logs in and approves, PayPal captures every payee, the page updates, and the public receipt matches"
+    },
+    {
+      "id": "cases",
+      "name": "Failure cases, live",
+      "command": "POST /api/judges/run",
+      "passed": 7,
+      "total": 7,
+      "what": "Run the seven failure cases on this page yourself"
+    }
+  ]
+}

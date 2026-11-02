@@ -1,0 +1,185 @@
+/* For judges: the path, the live failure cases, criteria and tests. */
+.jp-path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 8px;
+}
+.jp-step {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+}
+.jp-n,
+.case-n {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--accent);
+  min-width: 1.2em;
+}
+.jp-link {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.jp-step p {
+  margin-top: 4px;
+  font-size: 16px;
+}
+.jp-intro {
+  margin-bottom: 1.25rem;
+}
+
+/* Failure-case runner */
+.cases-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+.cases-note {
+  color: var(--muted);
+  font-size: 15px;
+}
+.cases-note[data-tone="attention"] {
+  color: var(--attention);
+}
+.cases-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.case {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 6px 16px;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .case {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .case-state {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+.case-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+.case-expected {
+  margin-top: 2px;
+  font-size: 16px;
+}
+.case-evidence {
+  margin: 10px 0 0;
+  padding-left: 1.1em;
+  display: grid;
+  gap: 4px;
+  font-size: 15px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.case-state {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.case[data-outcome="handled"] .case-state {
+  background: var(--positive);
+  color: var(--positive-ink);
+}
+.case[data-outcome="problem"] .case-state {
+  background: var(--attention);
+  color: var(--surface);
+}
+
+/* Criteria */
+.jp-criteria {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+.jp-criterion {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: 8px 32px;
+  padding: 18px 0;
+  border-top: 1px solid var(--surface-2);
+}
+@media (max-width: 720px) {
+  .jp-criterion {
+    grid-template-columns: 1fr;
+  }
+}
+.jp-criterion dt {
+  font-size: 18px;
+  font-weight: 500;
+}
+.jp-criterion dd {
+  margin: 0;
+  max-width: 68ch;
+}
+.jp-links {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Tests */
+.jp-tests {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 8px;
+}
+.jp-test {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.jp-test-score {
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--positive);
+}
+.jp-test-name {
+  font-weight: 500;
+}
+.jp-test-what {
+  margin-top: 2px;
+  font-size: 15px;
+}
+.jp-test-cmd {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}

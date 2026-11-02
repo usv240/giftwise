@@ -1,0 +1,100 @@
+export type Delivery = "cash" | "vendor" | "item" | "able";
+
+export type Category =
+  | "medical"
+  | "equipment"
+  | "phone"
+  | "internet"
+  | "education"
+  | "utility"
+  | "rent"
+  | "mortgage"
+  | "property_tax"
+  | "food"
+  | "clothing"
+  | "transport"
+  | "personal"
+  | "other";
+
+export const SHELTER_CATEGORIES: readonly Category[] = ["rent", "mortgage", "property_tax", "utility"];
+
+export interface Profile {
+  couple: boolean;
+  /** Lives all month in another person's household and does not pay a share of shelter costs. */
+  livesInAnothersHousehold: boolean;
+  otherUnearnedMonthly: number;
+  earnedMonthly: number;
+  ableEligible: boolean;
+  ableBalance: number;
+  ableContributedThisYear: number;
+  /** Countable savings at the start of the month the gift arrives. */
+  savings: number;
+}
+
+export interface Gift {
+  id: string;
+  /** ISO date, YYYY-MM-DD. */
+  date: string;
+  amount: number;
+  delivery: Delivery;
+  category: Category;
+  giver?: string;
+  /** True when the same giver pays this every month (or more than once a quarter). */
+  recurring?: boolean;
+  label?: string;
+}
+
+export type TreatmentKind = "unearned_cash" | "ism_shelter" | "excluded" | "not_possible";
+
+export interface Treatment {
+  kind: TreatmentKind;
+  ruleIds: string[];
+  /** Eligible for the infrequent or irregular income exclusion. */
+  infrequentEligible: boolean;
+  ambiguous: boolean;
+  ambiguityReason?: string;
+  note?: string;
+}
+
+export interface MonthTrace {
+  month: string;
+  cashIncome: number;
+  shelterPaidByOthers: number;
+  ismValue: number;
+  vtrApplied: boolean;
+  infrequentExcluded: number;
+  generalExcludedFromUnearned: number;
+  generalExcludedFromEarned: number;
+  earnedCountable: number;
+  otherUnearned: number;
+  countableIncome: number;
+  check: number;
+  paymentMonth: string;
+}
+
+export interface Explanation {
+  plain: string;
+  technical: string;
+}
+
+export interface GiftResult {
+  gift: Gift;
+  treatment: Treatment;
+  ruleIds: string[];
+  sourceKeys: string[];
+  incomeMonth: string;
+  paymentMonth: string;
+  /** How much of this gift ends up counted as income after exclusions. */
+  countedAmount: number;
+  checkBaseline: number;
+  checkAfter: number;
+  bestRoute: Delivery;
+  checkWithBestRoute: number;
+  resourcesNextFirst: number;
+  overResourceLimit: boolean;
+  ambiguous: boolean;
+  ambiguityReason?: string;
+  explanation: Explanation;
+  trace: MonthTrace;
+  alternatives: { delivery: Delivery; check: number; possible: boolean; reason?: string }[];
+}

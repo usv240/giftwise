@@ -1,0 +1,188 @@
+/* Public receipt: the total, where each dollar went, the rule, and two live checks. */
+.rc-summary {
+  margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+  max-width: 68rem;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: clamp(20px, 3vw, 32px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: 24px 40px;
+  align-items: end;
+}
+@media (max-width: 800px) {
+  .rc-summary {
+    grid-template-columns: 1fr;
+  }
+}
+.rc-k {
+  font-size: 15px;
+  color: var(--muted);
+}
+.rc-total {
+  font-size: clamp(3.5rem, 2.5rem + 4vw, 6rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.rc-sub {
+  margin-top: 10px;
+  font-size: var(--step-body);
+}
+.rc-facts {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.rc-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--surface-2);
+}
+.rc-facts dt {
+  color: var(--muted);
+}
+.rc-facts dd {
+  margin: 0;
+  font-weight: 500;
+}
+.rc-facts dd[data-kept] {
+  color: var(--positive);
+}
+.rc-lines,
+.rc-rules,
+.rc-sources,
+.rc-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rc-lines {
+  display: grid;
+  gap: 8px;
+}
+.rc-line {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.rc-payee {
+  font-size: 18px;
+  font-weight: 500;
+}
+.rc-for {
+  margin-top: 2px;
+  font-size: 16px;
+}
+.rc-ids {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.rc-amount {
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.rc-rules {
+  display: grid;
+  gap: 16px;
+  max-width: 68ch;
+}
+.rc-rule-name {
+  font-weight: 500;
+}
+.rc-sources-k {
+  margin-top: 24px;
+  font-weight: 500;
+}
+.rc-sources {
+  margin-top: 6px;
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+}
+.rc-version {
+  margin-top: 20px;
+  font-size: 14px;
+}
+.rc-checks {
+  display: grid;
+  gap: 14px;
+}
+.rc-check-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.rc-live {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.rc-live ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+}
+.rc-live li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 16px;
+}
+.rc-live li .muted {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.rc-ledger {
+  font-weight: 500;
+}
+.rc-ledger[data-ok] {
+  color: var(--positive);
+}
+.rc-note {
+  color: var(--attention);
+}
+.rc-events {
+  margin-top: 20px;
+  display: grid;
+  gap: 4px;
+  max-width: 68rem;
+}
+.rc-events li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 16px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: 15px;
+}
+@media (max-width: 640px) {
+  .rc-events li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+.rc-hash {
+  font-size: 14px;
+  color: var(--muted);
+}
+.rc-hash-note {
+  margin-top: 12px;
+  font-size: 14px;
+  max-width: 68ch;
+}

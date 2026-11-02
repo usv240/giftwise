@@ -1,0 +1,185 @@
+[
+  {
+    "id": "wheelchair-repair",
+    "title": "Wheelchair repair",
+    "summary": "Dan pays a $420 repair quote straight to the shop.",
+    "gift": {
+      "amount": 420,
+      "delivery": "vendor",
+      "category": "equipment",
+      "date": "2026-04-10",
+      "giver": "Dan",
+      "label": "Wheelchair repair, Riverside Mobility Repair (sample)"
+    },
+    "document": "riverside-mobility-quote.png",
+    "expected": {
+      "check_after": 994,
+      "best_route": "vendor"
+    }
+  },
+  {
+    "id": "birthday-cash",
+    "title": "Birthday cash",
+    "summary": "Uncle Joe wants to send $300 in cash for her birthday.",
+    "gift": {
+      "amount": 300,
+      "delivery": "cash",
+      "category": "other",
+      "date": "2026-04-10",
+      "giver": "Uncle Joe",
+      "label": "Birthday cash"
+    },
+    "expected": {
+      "check_after": 774,
+      "best_route": "item"
+    }
+  },
+  {
+    "id": "electric-bill",
+    "title": "Electric bill",
+    "summary": "Her sister Lucy pays the $138 electric bill every month.",
+    "gift": {
+      "amount": 138,
+      "delivery": "vendor",
+      "category": "utility",
+      "recurring": true,
+      "date": "2026-04-10",
+      "giver": "Lucy",
+      "label": "Electric bill, Northside Electric Co-op (sample)"
+    },
+    "document": "northside-electric-bill.png",
+    "expected": {
+      "check_after": 876,
+      "best_route": "able"
+    }
+  },
+  {
+    "id": "rent-help",
+    "title": "Rent help",
+    "summary": "Her brother Dan pays her $800 rent every month.",
+    "gift": {
+      "amount": 800,
+      "delivery": "vendor",
+      "category": "rent",
+      "recurring": true,
+      "date": "2026-04-10",
+      "giver": "Dan",
+      "label": "Monthly rent"
+    },
+    "expected": {
+      "check_after": 662.67,
+      "best_route": "able"
+    }
+  },
+  {
+    "id": "laptop-college",
+    "title": "Laptop for college",
+    "summary": "Aunt June pays $649 for a laptop at the college bookstore.",
+    "gift": {
+      "amount": 649,
+      "delivery": "vendor",
+      "category": "education",
+      "date": "2026-04-10",
+      "giver": "Aunt June",
+      "label": "Laptop, Eastgate College Bookstore (sample)"
+    },
+    "document": "eastgate-bookstore-quote.png",
+    "expected": {
+      "check_after": 994,
+      "best_route": "vendor"
+    }
+  },
+  {
+    "id": "groceries",
+    "title": "Groceries",
+    "summary": "Her friend Priya pays for $150 of grocery delivery.",
+    "gift": {
+      "amount": 150,
+      "delivery": "vendor",
+      "category": "food",
+      "date": "2026-04-10",
+      "giver": "Priya",
+      "label": "Grocery delivery"
+    },
+    "expected": {
+      "check_after": 994,
+      "best_route": "vendor"
+    }
+  },
+  {
+    "id": "van-fundraiser",
+    "title": "Accessible van fundraiser",
+    "summary": "Friends raised $6,000 for an accessible van conversion.",
+    "gift": {
+      "amount": 6000,
+      "delivery": "cash",
+      "category": "transport",
+      "date": "2026-04-10",
+      "giver": "Fundraiser",
+      "label": "Van conversion fundraiser"
+    },
+    "url": "/samples/fundraiser.html",
+    "expected": {
+      "check_after": 0,
+      "best_route": "vendor"
+    }
+  },
+  {
+    "id": "march-month",
+    "title": "A busy month",
+    "summary": "Six gifts in March from four people.",
+    "gifts": [
+      {
+        "date": "2026-03-02",
+        "giver": "Rosa",
+        "amount": 65,
+        "delivery": "vendor",
+        "category": "phone",
+        "recurring": true,
+        "label": "Phone bill"
+      },
+      {
+        "date": "2026-03-05",
+        "giver": "Dan",
+        "amount": 800,
+        "delivery": "able",
+        "category": "rent",
+        "recurring": true,
+        "label": "Rent via ABLE"
+      },
+      {
+        "date": "2026-03-09",
+        "giver": "Aunt June",
+        "amount": 40,
+        "delivery": "cash",
+        "category": "other",
+        "label": "Card with cash"
+      },
+      {
+        "date": "2026-03-14",
+        "giver": "Priya",
+        "amount": 150,
+        "delivery": "vendor",
+        "category": "food",
+        "label": "Groceries"
+      },
+      {
+        "date": "2026-03-20",
+        "giver": "Uncle Joe",
+        "amount": 250,
+        "delivery": "cash",
+        "category": "other",
+        "label": "Spring gift"
+      },
+      {
+        "date": "2026-03-28",
+        "giver": "Rosa",
+        "amount": 90,
+        "delivery": "vendor",
+        "category": "medical",
+        "label": "Therapy co-pay"
+      }
+    ],
+    "expected": {}
+  }
+]

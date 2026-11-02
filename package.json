@@ -6,21 +6,47 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:push": "drizzle-kit push",
+    "verify-ledger": "tsx --env-file=.env.local scripts/verify-ledger.ts",
+    "e2e:api": "node tests/e2e/api.mjs",
+    "e2e:ui": "node --env-file-if-exists=.env.local tests/e2e/ui.mjs",
+    "e2e:paypal": "node --env-file-if-exists=.env.local tests/e2e/paypal-button.mjs",
+    "e2e:a11y": "node tests/e2e/pages-a11y.mjs",
+    "e2e:routed": "tsx --env-file=.env.local scripts/routed-gift-e2e.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "@floating-ui/react": "^0.27.20",
+    "@onkernel/sdk": "^0.139.0",
+    "@paypal/paypal-server-sdk": "^2.5.0",
+    "drizzle-orm": "^0.45.4",
     "next": "16.4.3",
+    "papaparse": "^5.7.0",
+    "pg": "^8.23.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "sharp": "^0.35.5",
+    "sonner": "^2.0.8",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
+    "@types/papaparse": "^5.5.2",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "axe-core": "^4.14.0",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
+    "playwright-core": "^1.64.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
   }
 }

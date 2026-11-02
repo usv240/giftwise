@@ -1,0 +1,44 @@
+# Render Blueprint: the Giftwise web service and its Postgres database.
+# In the Render Dashboard choose New > Blueprint, pick this repository, and fill in the values marked sync: false.
+services:
+  - type: web
+    name: giftwise
+    runtime: node
+    plan: starter # 0.5 CPU, 512 MB, always on
+    region: oregon
+    buildCommand: npm ci && npm run build
+    preDeployCommand: npx drizzle-kit push --force # create or update the tables before each release
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: giftwise-db
+          property: connectionString
+      - key: AUDIT_SALT
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_VENDOR_EMAIL
+        sync: false
+      - key: PAYPAL_ABLE_EMAIL
+        sync: false
+
+databases:
+  - name: giftwise-db
+    plan: basic-256mb # 0.1 CPU, 256 MB
+    databaseName: giftwise
+    user: giftwise
+    postgresMajorVersion: "17"
+    diskSizeGB: 1
+    region: oregon
+    ipAllowList: [] # reachable only from services in this Render workspace

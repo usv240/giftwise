@@ -1,0 +1,469 @@
+{
+  "page.home": {
+    "title": "This page in short",
+    "what": "Giftwise helps friends and family give to a person on SSI without lowering her monthly check.",
+    "why": "Try the Gift Checker beside the headline, or take the 2-minute tour for a guided walk through every part.",
+    "technical": "Landing page. The Gift Checker runs the same rules engine (v2026.1) in the browser that the API runs on the server.",
+    "learnMore": {
+      "label": "Open the judge guide",
+      "href": "/judges"
+    }
+  },
+  "hero.who": {
+    "title": "Who Giftwise is for",
+    "what": "People who receive SSI (Supplemental Security Income), the family and friends who help them, and the benefits counselors who advise them.",
+    "why": "About 7.3 million people receive SSI. Gifts are common, and the way a gift arrives decides whether it lowers the check.",
+    "learnMore": {
+      "label": "Learn how SSI counts gifts",
+      "href": "/learn"
+    }
+  },
+  "gift-checker.about": {
+    "title": "Gift Checker",
+    "what": "Type an amount and choose how it reaches her. The check updates right away.",
+    "why": "It shows the difference between giving cash and paying a shop directly, using Social Security's 2026 numbers.",
+    "technical": "Client-side call to evaluateGift() in src/lib/rules (deterministic, no AI). Sample profile: living alone, no other income, savings $1,240.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "gift-checker.amount": {
+    "title": "Gift amount",
+    "what": "How much the gift is worth, in dollars.",
+    "why": "Larger cash gifts lower the check more. Payments to a shop are not counted at any size."
+  },
+  "gift-checker.route": {
+    "title": "How the gift reaches her",
+    "what": "Cash goes to her. Pay the shop means the giver pays the seller directly. Toward rent means family pays her rent.",
+    "why": "Social Security counts cash as income, does not count payments made straight to a shop for her needs, and counts rent help as housing support.",
+    "technical": "cash: R-CASH-01. Pay the shop: R-VEND-01 (20 CFR 416.1103(g), POMS SI 00815.400). Rent: R-SHEL-01, with R-ABLE-01 as the better route. PayPal Orders v2 with payee set to the vendor.",
+    "learnMore": {
+      "label": "Read the rule",
+      "href": "/learn#vendor-payments"
+    },
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "gift-checker.result": {
+    "title": "Her check",
+    "what": "Her SSI payment after this gift. The 2026 full amount for one person is $994 a month.",
+    "why": "Counted income lowers the check dollar for dollar after small exclusions.",
+    "technical": "check = federal benefit rate minus countable income (after the $60 quarterly and $20 monthly exclusions)."
+  },
+  "gift-checker.rma": {
+    "title": "Why the change comes two months later",
+    "what": "Income counted in one month changes the check two months later.",
+    "why": "Social Security uses retrospective monthly accounting, so a gift in April affects the June check.",
+    "technical": "POMS SI 02005.001. Engine: payment month = income month + 2.",
+    "learnMore": {
+      "label": "How timing works",
+      "href": "/learn#timing"
+    }
+  },
+  "view.mode": {
+    "title": "Plain or Technical",
+    "what": "Plain shows short explanations in everyday words. Technical adds rule numbers, API calls and the tools used.",
+    "why": "Families and judges can read the same page at the level that suits them."
+  },
+  "view.labels": {
+    "title": "Info labels",
+    "what": "Shows or hides the word \"info\" beside each i button.",
+    "why": "The i buttons always work. The label makes them easier to spot on a first visit."
+  },
+  "view.theme": {
+    "title": "Theme",
+    "what": "Light is the default. Dark is easier on the eyes at night. System follows your device setting.",
+    "why": "Choose whichever is most comfortable to read."
+  },
+  "view.text": {
+    "title": "Text size",
+    "what": "Large makes all text about a fifth bigger.",
+    "why": "Comfortable reading for everyone, including people with low vision."
+  },
+  "stack.strip": {
+    "title": "Every tool, with a job",
+    "what": "These are the tools Giftwise is built with. Each one does one specific job here.",
+    "why": "Open any name to see what it does in Giftwise, or visit How it is built for the full list with live status.",
+    "learnMore": {
+      "label": "How it is built",
+      "href": "/stack"
+    }
+  },
+  "stack.paypal": {
+    "title": "PayPal",
+    "what": "Moves the money: donors pay the shop directly, and every payment lands in her monthly ledger.",
+    "why": "Paying the shop instead of the person is what keeps her full check.",
+    "technical": "Orders v2 with purchase_units[0].payee = vendor, JS SDK v6 buttons, Webhooks, Payouts (ABLE), Transaction Search, Vault, Agent Toolkit and the PayPal MCP server. Sandbox only."
+  },
+  "stack.claude": {
+    "title": "Claude Opus 5.5",
+    "what": "Reads bills and quotes, finds the matching rule, and runs the two AI reviewers.",
+    "why": "It does the reading and checking a benefits counselor would do, with a source for every answer.",
+    "technical": "claude-opus-5-5 with adaptive thinking, vision, structured outputs (zod), and server-side fallbacks. The money math is done by deterministic code, never the model."
+  },
+  "stack.ag-studio": {
+    "title": "AG Studio and AG Grid",
+    "what": "The counselor dashboard that shows each household's month, plus the ledger tables.",
+    "why": "Counselors can ask the dashboard questions and see answers built as charts.",
+    "technical": "ag-studio-react with custom widgets and a Studio Agent Framework analyst using a Claude adapter. ag-grid-react for the ledger."
+  },
+  "stack.bryntum": {
+    "title": "Bryntum Calendar",
+    "what": "A calendar that shows when each gift counts and when her check changes.",
+    "why": "SSI rules depend on dates. Seeing them on a calendar makes the timing clear.",
+    "technical": "@bryntum/calendar (trial) via @bryntum/calendar-react, themed with site tokens, with a keyboard alternative to dragging."
+  },
+  "stack.channel3": {
+    "title": "Channel3",
+    "what": "Finds the exact item to buy when someone wants to give cash.",
+    "why": "Giving the item itself keeps her full check.",
+    "technical": "POST /v1/search and GET /v1/products/{id} on api.trychannel3.com, plus the Channel3 MCP server for the assistant. Results cached for 24 hours."
+  },
+  "stack.elastic": {
+    "title": "Elastic",
+    "what": "Searches Social Security's rulebook and returns the exact passage behind each answer.",
+    "why": "Every answer cites its source, and the newest rule always comes first.",
+    "technical": "Elastic Cloud Serverless, semantic_text with hybrid search, effective-date ranking, and an Agent Builder agent reached through its MCP server. Falls back to Postgres full-text search."
+  },
+  "stack.kernel": {
+    "title": "KERNEL",
+    "what": "Opens fundraiser pages in a cloud browser to read them, and checks nightly for rule updates.",
+    "why": "Families can paste a fundraiser link and see how to deliver every dollar safely.",
+    "technical": "@onkernel/sdk browsers.create with a Playwright script, live view link in Technical mode."
+  },
+  "stack.zapier": {
+    "title": "Zapier",
+    "what": "Bills forwarded by email start a review, and statements and thank-you notes go out automatically.",
+    "why": "Families keep using the email and Drive they already know.",
+    "technical": "Zapier MCP called through the Anthropic MCP connector; inbound trigger posts to /api/zapier/inbound."
+  },
+  "stack.render": {
+    "title": "Render",
+    "what": "Hosts the site and its database, and runs the monthly statements and benchmark jobs.",
+    "why": "Reliable hosting keeps the demo live through judging.",
+    "technical": "Render web service, managed Postgres, Render Workflows tasks, and cron jobs, defined in render.yaml."
+  },
+  "stack.apimatic": {
+    "title": "APIMatic",
+    "what": "We built the PayPal integration with APIMatic's PayPal Context Plugin, and publish our own API docs and SDKs with APIMatic.",
+    "why": "Developers can add benefit-safe giving to their own apps quickly.",
+    "technical": "@paypal/paypal-server-sdk (APIMatic-generated), npx context-plugins install paypal, OpenAPI spec published to an APIMatic portal with TypeScript and Python SDKs."
+  },
+  "stack.postman": {
+    "title": "Postman",
+    "what": "A public collection of the Giftwise API, with a runner that repeats our benchmark.",
+    "why": "Anyone can check our results for themselves in one click.",
+    "technical": "Collection generated from OpenAPI with tests on every request; collection runner over benchmark/cases.json."
+  },
+  "stack.astropods": {
+    "title": "Astropods",
+    "what": "Hosts the AI reviewer agent and records a trace of every run.",
+    "why": "Each review can be inspected step by step.",
+    "technical": "astropods.yml blueprint deployed with the ast CLI; the app calls the hosted agent and falls back to running in-process."
+  },
+  "intro.rule": {
+    "title": "The rule behind Giftwise",
+    "what": "When someone pays a shop directly for something she needs, other than housing, Social Security does not count it as her income.",
+    "why": "The same gift sent as cash would be counted, so the way a gift arrives matters.",
+    "technical": "20 CFR 416.1103(g); POMS SI 00815.400 (Example 2: a sister pays the phone company).",
+    "learnMore": {
+      "label": "Read the rule",
+      "href": "/learn#vendor-payments"
+    }
+  },
+  "how.steps": {
+    "title": "From a need to a payment",
+    "what": "A caregiver adds a need, Giftwise checks the rule, a donor pays the shop with PayPal, and her month stays steady.",
+    "why": "Each step shows its result, so everyone knows where things stand.",
+    "technical": "Vision extraction, rules engine plus Elastic citation, PaymentPlan approval, PayPal Orders v2 capture, webhook to the ledger."
+  },
+  "showcase.board": {
+    "title": "Sample requests",
+    "what": "Eight requests from a sample household and how Giftwise delivered each one. Select a row to see why.",
+    "why": "Everyday needs each have a best route: pay the shop, give the item, or use her ABLE account.",
+    "technical": "Each row runs evaluateGift() live with the 2026 rules."
+  },
+  "rules.list": {
+    "title": "The seven numbers",
+    "what": "The 2026 amounts that decide most gift questions.",
+    "why": "Knowing them makes the rest of the rules easy to follow.",
+    "learnMore": {
+      "label": "All the rules, explained",
+      "href": "/learn"
+    }
+  },
+  "rules.limit": {
+    "title": "Savings limit",
+    "what": "Countable savings must be $2,000 or less at the start of each month ($3,000 for a couple).",
+    "why": "Cash kept past the end of the month counts toward this limit.",
+    "technical": "POMS SI 01110.003 and SI 01110.600."
+  },
+  "rules.fbr": {
+    "title": "Full SSI payment",
+    "what": "The most SSI pays one person in 2026 is $994 a month, before any state supplement.",
+    "why": "Counted income lowers this amount.",
+    "technical": "Federal benefit rate, 2026 COLA."
+  },
+  "rules.infrequent": {
+    "title": "One-off gift exclusion",
+    "what": "The first $60 a quarter of one-off income, such as a single gift, is not counted.",
+    "why": "Small occasional gifts usually leave the check unchanged.",
+    "technical": "POMS SI 00810.410. Since July 2004 the first $60 is excluded even when the total is higher."
+  },
+  "rules.gie": {
+    "title": "General exclusion",
+    "what": "The first $20 of income each month is not counted.",
+    "why": "It applies to most income, including cash gifts and housing support.",
+    "technical": "POMS SI 00810.420."
+  },
+  "rules.pmv": {
+    "title": "Housing support cap",
+    "what": "When someone else pays her rent or utilities, the check goes down by at most $351.33 a month in 2026.",
+    "why": "Sending that money to her ABLE account instead keeps the full check.",
+    "technical": "Presumed maximum value, POMS SI 00835.901. Applies to shelter only since September 30, 2024."
+  },
+  "rules.able-limit": {
+    "title": "ABLE yearly limit",
+    "what": "Up to $20,000 a year can be added to an ABLE account, from everyone combined.",
+    "why": "Giftwise tracks the total so gifts stay within it.",
+    "technical": "2026 limit; SSA Spotlight on ABLE accounts."
+  },
+  "rules.able-balance": {
+    "title": "ABLE balance",
+    "what": "The first $100,000 in an ABLE account does not count toward the $2,000 savings limit.",
+    "why": "Gifts can build savings there without affecting SSI.",
+    "technical": "POMS SI 01130.740."
+  },
+  "stats.example": {
+    "title": "A sample year",
+    "what": "Each bar is the help a sample household received in one month through Giftwise.",
+    "why": "Every gift was routed the benefit-safe way, so none of it was counted and her check stayed $994 every month.",
+    "technical": "Sample data. Each gift was evaluated with the rules engine (v2026.1); counted income was $0 in every month. Not a forecast for any real person."
+  },
+  "research.row": {
+    "title": "Sources",
+    "what": "The rules and research Giftwise is built on. Each name opens the original source.",
+    "why": "Every answer in Giftwise can be traced back to these documents.",
+    "learnMore": {
+      "label": "All sources",
+      "href": "/learn#sources"
+    }
+  },
+  "dev.teaser": {
+    "title": "For developers",
+    "what": "Other apps can check any gift with one API call, or connect an AI agent through our MCP server.",
+    "why": "Giving platforms, ABLE programs and caseworker tools can make every gift benefit-safe.",
+    "technical": "POST /api/v1/check-gift, bearer key gw_test_..., OpenAPI 3.1, MCP at /api/mcp.",
+    "learnMore": {
+      "label": "Get an API key",
+      "href": "/developers"
+    }
+  },
+  "built.list": {
+    "title": "How it is built",
+    "what": "Every tool in Giftwise and the one job it does.",
+    "why": "Each tool is visible in the product, not just listed.",
+    "learnMore": {
+      "label": "Live status of every tool",
+      "href": "/stack"
+    }
+  },
+  "faq.list": {
+    "title": "Questions",
+    "what": "Short answers to what people ask most.",
+    "why": "Hover or tap a question to see its answer."
+  },
+  "cta.dialog": {
+    "title": "Start a gift page",
+    "what": "Type who the page is for and choose your role. It opens a sample workspace you can explore right away.",
+    "why": "No sign-up is needed, and every payment runs in PayPal's sandbox."
+  },
+  "page.learn": {
+    "title": "About this page",
+    "what": "Each section explains one rule in plain words, with a worked example and its source.",
+    "why": "Knowing these rules is how families give without lowering the check.",
+    "technical": "Worked examples are computed live by the rules engine (v2026.1). Technical mode shows rule IDs and manual sections."
+  },
+  "page.try": {
+    "title": "About this page",
+    "what": "Test Giftwise with your own situation, or open one of the ready-made examples.",
+    "why": "You can see exactly how a gift would be counted before anyone sends money.",
+    "technical": "Describe and CSV tabs run the deterministic engine. Bill and fundraiser tabs call Claude Opus 5.5 (vision) and KERNEL. Nothing you enter is stored unless you save it."
+  },
+  "try.describe": {
+    "title": "Describe a gift",
+    "what": "Enter the amount, what it is for, and how it would reach her.",
+    "why": "Giftwise shows her check and the best way to give.",
+    "technical": "POST /api/v1/check-gift"
+  },
+  "try.csv": {
+    "title": "A month of gifts",
+    "what": "Upload or paste a list of gifts as CSV. A template is available to download.",
+    "why": "Several gifts in one quarter share the $60 exclusion, so the whole month matters.",
+    "technical": "POST /api/v1/plan-month. Columns: date, giver, amount, description, paid_to (person, shop, able, item), category, recurring."
+  },
+  "try.bill": {
+    "title": "A bill or quote",
+    "what": "Upload or photograph a bill or a quote. Claude reads it and Giftwise checks the rule.",
+    "why": "Most needs start as a piece of paper. This turns it into a safe payment plan.",
+    "technical": "POST /api/v1/read-bill: Claude Opus 5.5 vision with a structured output schema, then the rules engine and Elastic citations.",
+    "sponsor": [
+      "Claude",
+      "Elastic"
+    ]
+  },
+  "try.fundraiser": {
+    "title": "A fundraiser page",
+    "what": "Paste a link to a public fundraising page. Giftwise reads it and shows how every dollar can reach her benefit-safe.",
+    "why": "Fundraisers often raise cash, which counts as income. A plan can deliver the same help without lowering the check.",
+    "technical": "POST /api/v1/analyze-fundraiser: KERNEL cloud browser reads the page, Claude extracts goal and uses, the engine plans routes.",
+    "sponsor": [
+      "KERNEL",
+      "Claude"
+    ]
+  },
+  "try.presets": {
+    "title": "Ready-made examples",
+    "what": "Eight examples from a sample household. Open one to see the full result, or download its files to try them yourself.",
+    "why": "They cover the common cases: repairs, cash, utilities, rent, school, food, a fundraiser and a busy month.",
+    "technical": "Inputs and expected results live in content/presets. Downloads include the JSON input, the expected output and any sample documents."
+  },
+  "try.profile": {
+    "title": "Her situation",
+    "what": "A few facts that change how gifts are counted.",
+    "why": "For example, living in someone else's home changes how housing help is counted.",
+    "technical": "Profile fields: couple, livesInAnothersHousehold, otherUnearnedMonthly, earnedMonthly, ableEligible, savings."
+  },
+  "try.result": {
+    "title": "The result",
+    "what": "Her check after this gift, the best way to give, and the rule behind it.",
+    "why": "You can see the difference before choosing how to give."
+  },
+  "page.gift": {
+    "title": "About this page",
+    "what": "This is a gift page. Each item is something Maya needs, and you pay for it straight to the shop with PayPal.",
+    "why": "Paying the shop directly is not counted as her income, so her SSI check stays $994.",
+    "technical": "Server creates a PayPal Orders v2 order with purchase_units[0].payee set to the shop's sandbox account, the PayPal JavaScript SDK v6 opens checkout, and the server captures it. Every step is written to the audit ledger.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "gift.needs": {
+    "title": "Her needs",
+    "what": "Things Maya needs right now. Each shows where the money goes and the rule that keeps her check whole.",
+    "why": "Choosing a specific need means your gift arrives the benefit-safe way.",
+    "technical": "Rows from the needs table; each is checked with evaluateGift() before an order is created, and the server refuses any route that would lower the check."
+  },
+  "gift.route.vendor": {
+    "title": "Paid straight to the shop",
+    "what": "Your PayPal payment goes directly to the shop, not to Maya and not to Giftwise.",
+    "why": "Social Security does not count payments made directly to a shop for her needs, other than housing, as income.",
+    "technical": "PayPal Orders v2 'pay another account': payee.email_address is the vendor. Rule R-VEND-01, 20 CFR 416.1103(g), POMS SI 00815.400.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "gift.route.able": {
+    "title": "Paid to her ABLE account",
+    "what": "Help with utilities or rent goes to her ABLE account, and she pays the bill from it in the same month.",
+    "why": "Utilities paid by someone else count as housing support. Money given to her ABLE account does not.",
+    "technical": "PayPal Orders v2 with payee set to the ABLE sandbox account. Rules R-ABLE-01 and R-ABLE-02, POMS SI 01130.740.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "gift.month": {
+    "title": "Her month",
+    "what": "Her SSI check and what has been given this month.",
+    "why": "Every gift on this page is counted as $0 income, so the check stays $994.",
+    "technical": "Totals from captured payments in the database; counted income from the rules engine."
+  },
+  "gift.any": {
+    "title": "Give any amount",
+    "what": "Type any amount. Giftwise splits it across her open needs, paid straight to each shop, and puts what is left in her ABLE account.",
+    "why": "The same money given as cash would lower her check. Routed this way, every dollar arrives and her check stays the same.",
+    "technical": "routeGift() fills open needs in order and checks every line with the rules engine; any line that would lower the check is skipped. The server rebuilds the plan, then creates one PayPal Orders v2 order with one purchase unit per payee, so one checkout pays every recipient.",
+    "sponsor": [
+      "PayPal",
+      "Claude"
+    ]
+  },
+  "gift.receipt": {
+    "title": "Public receipt",
+    "what": "Anyone with this link can see where the money went, which rule kept her check whole, and a live check against PayPal.",
+    "why": "A receipt you can check yourself is easier to trust than a promise.",
+    "technical": "Payments and audit events from the database. 'Check with PayPal' calls GET /v2/checkout/orders/{id} live; 'Verify the ledger' recomputes every SHA-256 hash in the audit chain.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "gift.sandbox": {
+    "title": "Testing with PayPal sandbox",
+    "what": "This demo uses PayPal's sandbox, a practice version of PayPal where no real money moves.",
+    "why": "Anyone can try the full payment safely. Use the sandbox buyer login from TESTING.md in the project repository.",
+    "technical": "api-m.sandbox.paypal.com and the sandbox JavaScript SDK at www.sandbox.paypal.com/web-sdk/v6/core."
+  },
+  "page.status": {
+    "title": "About this page",
+    "what": "A live check of every service Giftwise uses: PayPal, Claude, the database and each sponsor tool.",
+    "why": "If a service is not reachable, Giftwise uses its fallback so the demo keeps working. This page shows which mode each one is in.",
+    "technical": "GET /api/health runs the same checks and returns JSON."
+  },
+  "page.about": {
+    "title": "About this page",
+    "what": "What Giftwise is, what it is not, how it handles your data, and credits.",
+    "why": "So you know exactly what to expect before you use it."
+  },
+  "page.judges": {
+    "title": "About this page",
+    "what": "A short path through Giftwise for judges, the failure cases run live, and the latest test results.",
+    "why": "So you can check every claim yourself in a few minutes.",
+    "technical": "The failure-case runner is POST /api/judges/run. It creates small PayPal sandbox orders and runs the same capture and order code the gift page uses."
+  },
+  "judges.cases": {
+    "title": "Failure cases",
+    "what": "Seven ways a payment can go wrong, each run live against the PayPal sandbox.",
+    "why": "A payment product is only as good as what it does when something fails.",
+    "technical": "Declines use PayPal's sandbox negative testing (PayPal-Mock-Response: INSTRUMENT_DECLINED). Double clicks share one PayPal-Request-Id. The ledger check edits a copy in memory, never the stored ledger.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "judges.tests": {
+    "title": "Test results",
+    "what": "Each automated test suite, how many checks passed, and the command that runs it.",
+    "why": "You can run the same commands from the repository and get the same results.",
+    "technical": "Unit tests use Vitest. Browser checks use Playwright with real Chrome and axe-core."
+  },
+  "page.developers": {
+    "title": "About this page",
+    "what": "Everything a developer needs to add benefit-safe giving checks to their own product: a free key, a live playground and code samples.",
+    "why": "Giving platforms, ABLE programs and AI agents can check a gift before it is sent.",
+    "technical": "Keys are gw_test_ plus 32 random bytes in base62. Only the SHA-256 hash is stored. Limits are counted per key in Postgres."
+  },
+  "dev.keys": {
+    "title": "Sandbox keys",
+    "what": "A free key for testing. It is shown once; Giftwise keeps only a fingerprint of it.",
+    "why": "Keys give you higher limits and a usage page, and you can rotate or revoke them anytime.",
+    "technical": "POST /api/keys returns the key once. Rotate and revoke are tied to this browser through an httpOnly cookie, with no passwords."
+  },
+  "dev.playground": {
+    "title": "Playground",
+    "what": "Send real requests to the live API and see the full response, plus the same call in cURL, JavaScript and Python.",
+    "why": "You can see exactly what your code will get back before you write it.",
+    "technical": "Requests go to the same endpoints your code will call, through the same key check and rate limits."
+  },
+  "page.docs": {
+    "title": "About this page",
+    "what": "The reference for every endpoint: fields, examples, errors and limits.",
+    "why": "So you can build against the API without guessing.",
+    "technical": "Field tables are generated from the Zod schemas every request is validated with, the same source as /openapi.json."
+  },
+  "page.keys": {
+    "title": "About this page",
+    "what": "The keys created in this browser, the calls they made, and buttons to rotate or revoke them.",
+    "why": "You stay in control of every key.",
+    "technical": "GET /api/keys reads usage from the api_requests table. Rotate issues a new key and revokes the old one in one step."
+  }
+}

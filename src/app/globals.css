@@ -1,26 +1,347 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Giftwise tokens. Palette: "Creator Tech" adapted (see plan/01_design_system.md section 3).
+   One accent (blue) for actions and links. Orange (--mark) is a fill for the first-of-month marker only. */
+:root,
+:root[data-theme="light"] {
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface-2: #e8eaf0;
+  --ink: #21232e;
+  --muted: #5a5d6b;
+  --accent: #105bff;
+  --accent-ink: #ffffff;
+  --mark: #fe8500;
+  --mark-ink: #21232e;
+  --positive: #17734a;
+  --positive-ink: #ffffff;
+  --tint-blue: #dce8ff;
+  --tint-blue-ink: #0a3a80;
+  --attention: #9a4b00;
+  --board: #21232e;
+  --board-row: #2c2f3d;
+  --board-ink: #f2f2ee;
+  --board-muted: #b9bbc6;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="dark"] {
+  --bg: #17181f;
+  --surface: #21232e;
+  --surface-2: #2a2d3a;
+  --ink: #f2f2ee;
+  --muted: #a9abb6;
+  --accent: #6e9bff;
+  --accent-ink: #0b0c10;
+  --mark: #fe8500;
+  --mark-ink: #0b0c10;
+  --positive: #5bd69a;
+  --positive-ink: #0b0c10;
+  --tint-blue: #1c2b4d;
+  --tint-blue-ink: #bfd3ff;
+  --attention: #fe8500;
+  --board: #0f1015;
+  --board-row: #1d1f29;
+  --board-ink: #f2f2ee;
+  --board-muted: #a9abb6;
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root[data-theme="system"] {
+    --bg: #17181f;
+    --surface: #21232e;
+    --surface-2: #2a2d3a;
+    --ink: #f2f2ee;
+    --muted: #a9abb6;
+    --accent: #6e9bff;
+    --accent-ink: #0b0c10;
+    --mark: #fe8500;
+    --mark-ink: #0b0c10;
+    --positive: #5bd69a;
+  --positive-ink: #0b0c10;
+    --tint-blue: #1c2b4d;
+    --tint-blue-ink: #bfd3ff;
+    --attention: #fe8500;
+    --board: #0f1015;
+    --board-row: #1d1f29;
+    --board-ink: #f2f2ee;
+    --board-muted: #a9abb6;
+    color-scheme: dark;
   }
 }
 
+:root {
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-display: clamp(4rem, 2.5rem + 6vw, 8.5rem);
+  --margin: clamp(1rem, 0.5rem + 2.2vw, 2rem);
+  --section-gap: clamp(6rem, 4rem + 8vw, 13rem);
+  --radius-btn: 4px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 140ms;
+  --dur-tip: 140ms;
+  --dur-menu: 200ms;
+}
+
+:root[data-text="large"] {
+  font-size: 118.75%;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-mark: var(--mark);
+  --color-positive: var(--positive);
+  --color-attention: var(--attention);
+  --color-tint-blue: var(--tint-blue);
+  --color-tint-blue-ink: var(--tint-blue-ink);
+  --font-sans: var(--font-clash), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  background: var(--bg);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-clash), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--step-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--margin);
+  top: -100px;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-btn);
+}
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* Buttons: flat, one fill, 4px radius everywhere. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-btn);
+  font-weight: 500;
+  font-size: var(--step-body);
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out), background-color 160ms ease;
+  border: 0;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-ink {
+  background: var(--ink);
+  color: var(--bg);
+}
+.btn-quiet {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.text-link {
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--ink) 40%, transparent);
+  transition: text-decoration-color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .text-link:hover {
+    text-decoration-color: var(--ink);
+  }
+  .btn-primary:hover {
+    background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+  }
+}
+
+/* Page frame: one pair of equal margins everywhere. */
+.frame {
+  padding-left: var(--margin);
+  padding-right: var(--margin);
+}
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(0.75rem, 0.4rem + 1.2vw, 1.5rem);
+}
+
+/* Section entrance: elements are always fully visible in the DOM; Reveal.tsx animates them with the
+   Web Animations API as they scroll into view, so scanners and no-JS readers always see the final state. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Info labels can be hidden from the View menu. */
+:root[data-labels="off"] .info-label {
+  display: none;
+}
+
+/* Product fragments keep their own conventions (data-ui). */
+[data-ui] {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+/* Info toggletip (plan/01_design_system.md section 5). */
+.info-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  vertical-align: middle;
+  background: none;
+  border: 0;
+  padding: 5px;
+  margin: -5px 0;
+  min-height: 32px;
+  cursor: pointer;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--step-small);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+}
+@media (pointer: coarse) {
+  .info-trigger {
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+  }
+}
+.info-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.info-dot::before {
+  content: "i";
+}
+.info-trigger:active .info-dot {
+  transform: scale(0.92);
+}
+@media (hover: hover) and (pointer: fine) {
+  .info-trigger:hover .info-dot {
+    background: var(--tint-blue);
+    color: var(--tint-blue-ink);
+  }
+}
+.info-pop {
+  z-index: 80;
+  width: max-content;
+  max-width: min(340px, calc(100vw - 24px));
+  background: var(--ink);
+  color: var(--bg);
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.45;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+  transform-origin: top left;
+  animation: info-in var(--dur-tip) var(--ease-out);
+}
+.info-pop[data-instant] {
+  animation: none;
+}
+.info-pop p + p {
+  margin-top: 0.5rem;
+}
+.info-pop-title {
+  font-weight: 500;
+}
+.info-pop-why,
+.info-pop-tech,
+.info-pop-sponsor {
+  color: color-mix(in srgb, var(--bg) 82%, var(--ink));
+}
+.info-pop-tech {
+  font-size: 14px;
+}
+.info-pop .text-link {
+  color: var(--bg);
+  text-decoration-color: color-mix(in srgb, var(--bg) 50%, transparent);
+}
+@keyframes info-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
 }

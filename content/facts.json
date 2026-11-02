@@ -1,0 +1,28 @@
+{
+  "rulesVersion": "2026.1",
+  "year": 2026,
+  "values": {
+    "fbr_individual": { "value": 994.0, "label": "SSI federal payment, individual, per month (2026)", "source": "ssa-cola-2026", "verified": true },
+    "fbr_couple": { "value": 1491.0, "label": "SSI federal payment, couple, per month (2026)", "source": "poms-si-00835-901", "verified": false, "note": "Derived from the published couple PMV of $517.00 (one third of the couple rate plus $20). Confirm against SSA's 2026 COLA fact sheet." },
+    "resource_limit_individual": { "value": 2000, "label": "Countable savings limit, individual", "source": "poms-si-01110-003", "verified": true },
+    "resource_limit_couple": { "value": 3000, "label": "Countable savings limit, couple", "source": "poms-si-01110-003", "verified": true },
+    "general_income_exclusion": { "value": 20, "label": "General income exclusion per month", "source": "poms-si-00810-420", "verified": true },
+    "infrequent_unearned_per_quarter": { "value": 60, "label": "Infrequent or irregular unearned income excluded per calendar quarter", "source": "poms-si-00810-410", "verified": true },
+    "infrequent_earned_per_quarter": { "value": 30, "label": "Infrequent or irregular earned income excluded per calendar quarter", "source": "poms-si-00810-410", "verified": true },
+    "earned_income_exclusion": { "value": 65, "label": "Earned income exclusion per month (then half of the rest)", "source": "poms-si-00820-500", "verified": true },
+    "pmv_individual": { "value": 351.33, "label": "Presumed maximum value of in-kind support, individual (2026)", "source": "poms-si-00835-901", "verified": true },
+    "pmv_couple": { "value": 517.0, "label": "Presumed maximum value of in-kind support, couple (2026)", "source": "poms-si-00835-901", "verified": true },
+    "vtr_individual": { "value": 331.33, "label": "One-third reduction, individual (2026)", "source": "poms-si-00835-901", "verified": true },
+    "vtr_couple": { "value": 497.0, "label": "One-third reduction, couple (2026)", "source": "poms-si-00835-901", "verified": true },
+    "able_annual_limit": { "value": 20000, "label": "ABLE contributions per year from all sources (2026)", "source": "ssa-spotlight-able-2026", "verified": true },
+    "able_resource_exclusion": { "value": 100000, "label": "ABLE balance not counted toward savings", "source": "poms-si-01130-740", "verified": true },
+    "able_onset_age": { "value": 46, "label": "ABLE eligibility: disability began before this age (from Jan 1, 2026)", "source": "ssa-spotlight-able-2026", "verified": true },
+    "ism_food_removed_on": { "value": "2024-09-30", "label": "Date food stopped counting as in-kind support", "source": "fr-89-21199", "verified": true },
+    "rma_lag_months": { "value": 2, "label": "Months between receiving income and the check it changes", "source": "poms-si-02005-001", "verified": true }
+  },
+  "audience": {
+    "ssi_recipients": { "value": "7.3 million", "label": "People receiving SSI (Sept 2026)", "source": "ssa-monthly-snapshot", "verified": true },
+    "survey_unsure": { "value": "44%", "label": "US adults unsure whether medical fundraising affects benefits", "source": "hhl-survey-2026", "verified": true },
+    "able_newly_eligible": { "value": "about 6 million", "label": "People newly eligible for ABLE accounts from Jan 1, 2026", "source": "able-nrc-age-adjustment", "verified": true }
+  }
+}

@@ -1,0 +1,150 @@
+/* Shared product components (used on several routes). */
+
+.checker-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 4px;
+}
+.cta-dialog .checker-seg {
+  grid-template-columns: repeat(2, 1fr);
+}
+.checker-seg-opt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: 44px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.checker-seg-opt[data-on] {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+}
+.checker-seg-opt input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.checker-seg-opt:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Result card */
+.result-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+.result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.result-title {
+  font-weight: 500;
+  font-size: 16px;
+}
+.result-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.5rem;
+}
+.result-k {
+  font-size: 14px;
+  color: var(--muted);
+}
+.result-v {
+  font-size: 48px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.result-v[data-kept] {
+  color: var(--positive);
+}
+.result-plain {
+  font-size: 16px;
+}
+.result-attention {
+  color: var(--attention);
+  font-size: 16px;
+}
+.result-tech {
+  font-size: 14px;
+  color: var(--muted);
+}
+.result-rules summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 15px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+.result-rules ul {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  font-size: 14px;
+  display: grid;
+  gap: 4px;
+}
+.result-rules a {
+  color: var(--accent);
+}
+
+/* Month results */
+.month-results {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+.month-name {
+  font-size: 14px;
+  color: var(--muted);
+}
+.month-check {
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+.month-check[data-kept] {
+  color: var(--positive);
+}
+.month-detail {
+  font-size: 14px;
+}
+.month-gifts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 2px;
+}
+.month-gift {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  padding: 8px 0;
+  font-size: 15px;
+}
+.month-gift-note {
+  grid-column: 1 / -1;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+

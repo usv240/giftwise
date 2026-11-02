@@ -1,0 +1,28 @@
+[
+ {
+  "file": "public/media/wheelchair-basketball.webm",
+  "media": "video",
+  "poster": "public/media/wheelchair-basketball-poster.jpg",
+  "ref": "commons:35591169",
+  "title": "Wheelchair basketball",
+  "creator": "Splash tv",
+  "creatorUrl": null,
+  "date": "2014-09-23",
+  "license": "CC BY-SA 4.0",
+  "licenseCode": "by-sa",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "creditRequired": true,
+  "page": "https://commons.wikimedia.org/wiki/File:Wheelchair_basketball.webm",
+  "via": "Wikimedia Commons",
+  "video": "https://upload.wikimedia.org/wikipedia/commons/transcoded/2/24/Wheelchair_basketball.webm/Wheelchair_basketball.webm.480p.vp9.webm",
+  "width": 854,
+  "height": 480,
+  "duration": 14.4,
+  "bytes": 2399097,
+  "credit": "\"Wheelchair basketball\" by Splash tv, CC BY-SA 4.0, via Wikimedia Commons",
+  "notes": [
+   "Share-alike: an altered version (recoloured, combined with other pictures) must be shared under the same licence."
+  ],
+  "saved": "2026-11-01T23:43:53.778Z"
+ }
+]
