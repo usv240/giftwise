@@ -9,10 +9,19 @@ import { ResetSample } from "@/components/gift/ResetSample";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
-import { DEFAULT_PROFILE, evaluateGift, usd, type Category, type Delivery } from "@/lib/rules";
+import { DEFAULT_PROFILE, evaluateGift, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import "./gift.css";
 
-export const metadata: Metadata = { title: "Help Maya", description: "Every gift on this page is paid straight to the shop through PayPal, so her SSI check stays the same." };
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const data = dbConfigured() ? await getHousehold(slug) : null;
+  const name = data?.household.name ?? "someone";
+  return {
+    title: `Help ${name}`,
+    description: `Every gift on this page is paid straight to the shop through PayPal, so ${name}'s SSI check stays the same.`,
+    robots: data && !data.household.isSample ? { index: false } : undefined,
+  };
+}
 
 async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -22,13 +31,16 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
   const data = await getHousehold(slug);
   if (!data) notFound();
   const { household, needs, payments } = data;
+  const profile: Profile = { ...DEFAULT_PROFILE, ...(household.profile as Partial<Profile>) };
+  const w = pronounWords(profile.pronoun);
+  const cash = evaluateGift({ id: "cash", date: today(), amount: 300, delivery: "cash", category: "other" }, profile);
   // Payments are newest first, so the first row per need is the latest one.
   const paidByNeed = new Map<number, (typeof payments)[number]>();
   for (const p of payments) if (p.needId && !paidByNeed.has(p.needId)) paidByNeed.set(p.needId, p);
   const views: NeedView[] = needs.map((n) => {
     const r = evaluateGift(
       { id: `n${n.id}`, date: today(), amount: Number(n.amount), delivery: n.route as Delivery, category: n.category as Category, recurring: n.recurring },
-      DEFAULT_PROFILE,
+      profile,
     );
     const p = paidByNeed.get(n.id);
     return {
@@ -55,93 +67,97 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
   const latest = payments[0]?.orderId ?? null;
 
   return (
-    <div className="gift-layout">
-      <div className="gift-needs">
+    <>
+      <header className="gift-head">
         <div className="title-row">
-          <h2 className="gift-h2">What {household.name} needs</h2>
-          <Info id="gift.needs" />
+          <h1 className="gift-title">Help {household.name}</h1>
+          <Info id="page.gift" />
         </div>
-        <div className="gift-list">
-          {views.map((v) => (
-            <NeedCard key={v.id} need={v} name={household.name} />
-          ))}
-        </div>
-      </div>
-      <aside className="gift-aside" aria-labelledby="month-h">
-        <GiveAny slug={slug} name={household.name} needs={openNeeds(needs)} date={today()} />
-        <div className="gift-month" data-ui>
+        <p className="gift-note">{household.note}</p>
+        <p className="gift-sample muted">
+          {household.isSample
+            ? "Sample household for the demo. Names and shops are fictional."
+            : "Made from a fundraiser page, in the PayPal sandbox. Figures assume the 2026 federal SSI amount and no other income. In the sandbox, every shop is paid through one test business account."}
+        </p>
+      </header>
+      <div className="gift-layout">
+        <div className="gift-needs">
           <div className="title-row">
-            <h2 id="month-h" className="gift-month-title">
-              {household.name}&rsquo;s month
-            </h2>
-            <Info id="gift.month" label="" />
+            <h2 className="gift-h2">What {household.name} needs</h2>
+            <Info id="gift.needs" />
           </div>
-          <p className="gift-k">SSI check, every month</p>
-          <p className="gift-check tabular">$994</p>
-          <dl className="gift-facts">
-            <div>
-              <dt>Given so far</dt>
-              <dd className="tabular">{usd(paidTotal)}</dd>
+          <div className="gift-list">
+            {views.map((v) => (
+              <NeedCard key={v.id} need={v} name={household.name} />
+            ))}
+          </div>
+        </div>
+        <aside className="gift-aside" aria-labelledby="month-h">
+          <GiveAny slug={slug} name={household.name} needs={openNeeds(needs)} date={today()} profile={profile} />
+          <div className="gift-month" data-ui>
+            <div className="title-row">
+              <h2 id="month-h" className="gift-month-title">
+                {household.name}&rsquo;s month
+              </h2>
+              <Info id="gift.month" label="" />
             </div>
-            <div>
-              <dt>Still needed</dt>
-              <dd className="tabular">{usd(openTotal)}</dd>
-            </div>
-            {saved > 0 && (
+            <p className="gift-k">SSI check, every month</p>
+            <p className="gift-check tabular">{usd(cash.checkBaseline)}</p>
+            <dl className="gift-facts">
               <div>
-                <dt>Saved in her ABLE account</dt>
-                <dd className="tabular">{usd(saved)}</dd>
+                <dt>Given so far</dt>
+                <dd className="tabular">{usd(paidTotal)}</dd>
               </div>
+              <div>
+                <dt>Still needed</dt>
+                <dd className="tabular">{usd(openTotal)}</dd>
+              </div>
+              {saved > 0 && (
+                <div>
+                  <dt>Saved in {w.poss} ABLE account</dt>
+                  <dd className="tabular">{usd(saved)}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Counted as income</dt>
+                <dd className="tabular">$0</dd>
+              </div>
+            </dl>
+            {latest && (
+              <Link className="text-link gift-latest" href={`/r/${latest}`}>
+                See the latest receipt
+              </Link>
             )}
-            <div>
-              <dt>Counted as income</dt>
-              <dd className="tabular">$0</dd>
-            </div>
-          </dl>
-          {latest && (
-            <Link className="text-link gift-latest" href={`/r/${latest}`}>
-              See the latest receipt
-            </Link>
-          )}
-        </div>
-        <details className="gift-cash">
-          <summary>Prefer to give cash?</summary>
-          <p>
-            Cash counts as her income. A $300 cash gift would lower her check to $774. Paying for one of these needs instead keeps her full $994.{" "}
-            <Link className="text-link" href="/try">
-              Check any gift
-            </Link>
-          </p>
-        </details>
-        <div className="gift-sandbox">
-          <div className="title-row">
-            <p className="gift-sandbox-title">Paying in the sandbox</p>
-            <Info id="gift.sandbox" label="" />
           </div>
-          <p>No real money moves. Pay with the PayPal sandbox buyer login listed in the project&rsquo;s TESTING.md.</p>
-          <ResetSample slug={slug} />
-        </div>
-      </aside>
-    </div>
+          <details className="gift-cash">
+            <summary>Prefer to give cash?</summary>
+            <p>
+              Cash counts as {w.poss} income. A $300 cash gift would lower {w.poss} check to {usd(cash.checkAfter)}. Paying for one of these needs instead keeps {w.poss} full{" "}
+              {usd(cash.checkBaseline)}.{" "}
+              <Link className="text-link" href="/try">
+                Check any gift
+              </Link>
+            </p>
+          </details>
+          <div className="gift-sandbox">
+            <div className="title-row">
+              <p className="gift-sandbox-title">Paying in the sandbox</p>
+              <Info id="gift.sandbox" label="" />
+            </div>
+            <p>No real money moves. Pay with the PayPal sandbox buyer login listed in the project&rsquo;s TESTING.md.</p>
+            {household.isSample && <ResetSample slug={slug} />}
+          </div>
+        </aside>
+      </div>
+    </>
   );
 }
 
-// The header is the static shell; the slug is runtime data, so it is read inside Suspense.
+// The slug is runtime data, so the whole page, header included, is read inside Suspense.
 export default function Page({ params }: { params: Promise<{ slug: string }> }) {
   return (
     <div className="gift frame">
-      <header className="gift-head">
-        <div className="title-row">
-          <h1 className="gift-title">Help Maya</h1>
-          <Info id="page.gift" />
-        </div>
-        <p className="gift-note">
-          Maya is 29 and lives on her own. She uses a wheelchair and is starting community college. Every gift here goes straight to the shop, so her SSI check stays the same. With love,
-          Rosa (her mom)
-        </p>
-        <p className="gift-sample muted">Sample household for the demo. Names and shops are fictional.</p>
-      </header>
-      <Suspense fallback={<p className="gift-empty">Loading her needs…</p>}>
+      <Suspense fallback={<p className="gift-empty">Loading the gift page…</p>}>
         <GiftPage params={params} />
       </Suspense>
     </div>

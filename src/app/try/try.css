@@ -395,3 +395,20 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Make a gift page from a fundraiser */
+.make-page {
+  gap: 14px;
+}
+.make-pronouns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.make-need {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+}
+.make-page .info-dot {
+  background: var(--surface);
+}

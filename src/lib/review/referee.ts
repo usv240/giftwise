@@ -26,11 +26,14 @@ export type Review = { authority: AuthorityId; answer: Answer; passage_id: strin
 export type Vote = Review & { valid: boolean; setAsideReason?: string; passage?: Passage };
 export type Decision = "shelter" | "not_shelter" | "unsure";
 
+// En and em dashes, built from their code points so the source stays free of them.
+const DASHES = new RegExp(`[${String.fromCharCode(0x2013, 0x2014)}]`, "g");
+
 const norm = (s: string) =>
   s
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
-    .replace(/[–—]/g, "-")
+    .replace(DASHES, "-")
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();

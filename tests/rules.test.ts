@@ -4,6 +4,18 @@ import { DEFAULT_PROFILE, RULES, computeMonth, evaluateGift, markInfrequency, pl
 const base: Profile = { ...DEFAULT_PROFILE, savings: 1240 };
 const g = (over: Partial<Gift>): Gift => ({ id: "t", date: "2026-04-10", amount: 1000, delivery: "cash", category: "other", ...over });
 
+describe("pronouns in explanations", () => {
+  it("uses their for they/them, and never changes the math", () => {
+    const g = { id: "p", date: "2026-11-10", amount: 420, delivery: "vendor" as const, category: "equipment" as const };
+    const they = evaluateGift(g, { ...DEFAULT_PROFILE, pronoun: "they" });
+    const she = evaluateGift(g, DEFAULT_PROFILE);
+    expect(they.explanation.plain).toMatch(/Their \w+ check stays/);
+    expect(they.explanation.plain).not.toMatch(/\bher\b/i);
+    expect(she.explanation.plain).toMatch(/Her \w+ check stays/);
+    expect(they.checkAfter).toBe(she.checkAfter);
+  });
+});
+
 describe("hero numbers", () => {
   it("R-CASH-01, R-INFREQ-01, R-GIE-01: a one-off $1,000 cash gift leaves $920 counted and a $74 check", () => {
     const r = evaluateGift(g({}), base);

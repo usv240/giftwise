@@ -69,6 +69,16 @@ export const ENDPOINTS: Endpoint[] = [
     keyed: true,
   },
   {
+    id: "gift-pages",
+    method: "POST",
+    path: "/api/v1/gift-pages",
+    title: "Create a gift page",
+    summary:
+      "Turn a list of needs, for example from a fundraiser, into a live gift page where every dollar is paid straight to the shop or the ABLE account through PayPal. The rules engine picks each route. Sandbox pages, five a day per visitor.",
+    example: { name: "Jordan", pronoun: "they", organizer: "Sam", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] },
+    keyed: true,
+  },
+  {
     id: "presets",
     method: "GET",
     path: "/api/presets/{id}",

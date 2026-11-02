@@ -38,10 +38,10 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export const MAX_UNITS = 10;
 
 /**
- * Route one gift of any amount, benefit-safe: fill her open needs in order (paid straight to each shop),
- * then send what is left to her ABLE account. The rules engine checks every line.
+ * Route one gift of any amount, benefit-safe: fill the open needs in order (paid straight to each shop),
+ * then send what is left to the person's ABLE account. The rules engine checks every line.
  */
-export function routeGift(amount: number, needs: OpenNeed[], date: string, profile: Profile = DEFAULT_PROFILE): RoutedGift {
+export function routeGift(amount: number, needs: OpenNeed[], date: string, profile: Profile = DEFAULT_PROFILE, ableName = "Maya's ABLE account"): RoutedGift {
   let left = round2(Math.max(0, amount));
   const lines: RoutedLine[] = [];
   for (const n of needs) {
@@ -72,7 +72,7 @@ export function routeGift(amount: number, needs: OpenNeed[], date: string, profi
         referenceId: "able-savings",
         needId: null,
         title: "savings for later",
-        payeeName: "Maya's ABLE account",
+        payeeName: ableName,
         payeeAccount: "able",
         route: "able",
         category: "other",

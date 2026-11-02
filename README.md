@@ -21,6 +21,8 @@ About 7.3 million people receive SSI (September 2026). SSI counts cash gifts as 
 - **PayPal:** Orders v2 with several payees in one order, the JavaScript SDK v6 button, server-side capture with `PayPal-Request-Id` idempotency, live order lookups, and sandbox negative testing for declined cards.
 - **Eight failure cases, run live** on `/judges`: declined card, double click, unapproved payment, a browser changing the amount or payee, a gift that would lower her check, an AI reviewer that gets the rule wrong, an edited ledger entry, and refunds.
 - **Claude (`claude-opus-5-5`):** reads bills, quotes and fundraiser pages into structured data. The rules engine, not the model, decides where the money goes.
+- **Two reviewers, two rulebooks:** when a bill might be a housing cost, one Claude reviewer reads only the regulations and the Federal Register, the other only SSA's operating manual. Each must quote its rulebook word for word, a program checks every quote, and Giftwise acts only when both checked answers agree.
+- **Fundraiser to gift page:** paste a fundraiser link and Giftwise makes a live gift page where every stated use is paid straight to the shop or the ABLE account, with the pronouns the organizer chooses.
 - **Developer API:** free sandbox keys stored only as hashes, rate limits, OpenAPI 3.1 at `/openapi.json`, docs and a live playground at `/developers`.
 - **Design:** light and dark themes, phone and desktop, an Info button on every element, and WCAG 2.2 AA checked with axe.
 
@@ -44,12 +46,12 @@ npm run dev -- -p 3100        # http://localhost:3100
 
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine and routing | `npm test` | 26 of 26 |
-| API end to end | `npm run e2e:api` | 50 of 50 |
-| Browser end to end | `npm run e2e:ui` | 46 of 46 |
-| Accessibility, 12 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 48 of 48 page views |
+| Rules engine and routing | `npm test` | 40 of 40 |
+| API end to end | `npm run e2e:api` | 56 of 56 |
+| Browser end to end | `npm run e2e:ui` | 50 of 50 |
+| Accessibility, 14 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 56 of 56 page views |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |
-| Failure cases against the PayPal sandbox | `/judges` | 7 of 7 |
+| Failure cases against the PayPal sandbox | `/judges` | 8 of 8 |
 
 Set `BASE_URL` to run the end-to-end suites against a deployed copy.
 

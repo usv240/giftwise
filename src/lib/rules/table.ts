@@ -10,7 +10,7 @@ export const RULES: Record<string, RuleRow> = {
   "R-CASH-01": {
     id: "R-CASH-01",
     name: "Cash gifts are unearned income",
-    plain: "Cash or a check given to her counts as income in the month it arrives, after small exclusions.",
+    plain: "Cash or a check given to the person counts as income in the month it arrives, after small exclusions.",
     sourceKeys: ["cfr-416-1121", "poms-si-00830-520", "poms-si-00810-410", "poms-si-00810-420"],
   },
   "R-INFREQ-01": {
@@ -40,7 +40,7 @@ export const RULES: Record<string, RuleRow> = {
   "R-SHEL-VTR": {
     id: "R-SHEL-VTR",
     name: "Living in another person's household",
-    plain: "When she lives in someone else's home all month without paying her share of housing, a fixed one-third reduction applies instead.",
+    plain: "When the person lives in someone else's home all month without paying a share of housing, a fixed one-third reduction applies instead.",
     sourceKeys: ["poms-si-00835-200", "poms-si-00835-901"],
   },
   "R-FOOD-01": {
@@ -52,7 +52,7 @@ export const RULES: Record<string, RuleRow> = {
   "R-ITEM-01": {
     id: "R-ITEM-01",
     name: "Gift of an item for personal use",
-    plain: "A gift of an item for her personal or household use, such as a laptop or a chair, is not counted as income.",
+    plain: "A gift of an item for personal or household use, such as a laptop or a chair, is not counted as income.",
     sourceKeys: ["cfr-416-1103-g", "poms-si-01130-430"],
   },
   "R-EDU-01": {
@@ -64,13 +64,13 @@ export const RULES: Record<string, RuleRow> = {
   "R-ABLE-01": {
     id: "R-ABLE-01",
     name: "Contributions to an ABLE account",
-    plain: "Money put into her ABLE account by others is not her income, and the first $100,000 in it does not count toward savings.",
+    plain: "Money others put into the person's ABLE account is not income, and the first $100,000 in it does not count toward savings.",
     sourceKeys: ["poms-si-01130-740", "ssa-spotlight-able-2026"],
   },
   "R-ABLE-02": {
     id: "R-ABLE-02",
     name: "ABLE withdrawals for housing",
-    plain: "Money she takes from her ABLE account for housing is not income when she spends it in the same month.",
+    plain: "Money taken from an ABLE account for housing is not income when it is spent in the same month it is taken out.",
     sourceKeys: ["poms-si-01130-740"],
   },
   "R-RES-01": {

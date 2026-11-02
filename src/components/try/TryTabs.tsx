@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Info } from "../Info";
 import { ResultCard } from "../ResultCard";
+import { MakeGiftPage } from "./MakeGiftPage";
 import { ReviewPanel } from "./ReviewPanel";
 import { usePrefs } from "../prefs";
 import { DEFAULT_PROFILE, evaluateGift, monthName, planMonths, usd, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
@@ -283,19 +284,30 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
             <button type="submit" className="btn btn-primary try-go">
               Check it
             </button>
+            <button
+              type="button"
+              className="btn btn-quiet try-go"
+              onClick={() => {
+                const sample = `${window.location.origin}/samples/fundraiser.html`;
+                setUrl(sample);
+                run(JSON.stringify({ url: sample }));
+              }}
+            >
+              Use the sample fundraiser
+            </button>
           </form>
         )}
         <p className="muted try-privacy">What you upload is used only to show your result and is deleted within 7 days.</p>
       </div>
       <div className="ai-state" aria-live="polite">
         {state.status === "idle" && <p className="muted">Your result appears here. You can also open the {kind === "bill" ? "Wheelchair repair or Electric bill" : "Accessible van fundraiser"} example on the right.</p>}
-        {state.status === "working" && <p>{kind === "bill" ? "Reading the bill and checking the rule…" : "Opening the page in a cloud browser and reading it…"}</p>}
+        {state.status === "working" && <p>{kind === "bill" ? "Reading the bill and checking the rule…" : "Reading the page and planning each use…"}</p>}
         {state.status === "unavailable" && (
           <p className="result-attention">{state.message ?? "The live AI service is not connected on this server yet. The ready-made examples show the full result."}</p>
         )}
         {state.status === "error" && <p className="result-attention">{state.message}</p>}
         {state.status === "done" && kind === "bill" && <BillResult data={state.data as BillData} />}
-        {state.status === "done" && kind === "fundraiser" && <FundraiserResult data={state.data as FundraiserData} />}
+        {state.status === "done" && kind === "fundraiser" && <FundraiserResult data={state.data as FundraiserData} url={url} />}
       </div>
     </div>
   );
@@ -365,13 +377,13 @@ function BillResult({ data }: { data: BillData }) {
 type FundraiserData = {
   page: { title: string; read_via: string; live_view_url: string | null };
   fundraiser: { raised_amount: number | null; goal_amount: number | null };
-  plan: { use: string; amount: number; route: Delivery; check_if_cash: number; check_with_route: number }[];
+  plan: { use: string; amount: number; category: Category; likely_vendor: string | null; route: Delivery; check_if_cash: number; check_with_route: number }[];
   summary: string;
 };
 
 const ROUTE_WORDS: Record<string, string> = { vendor: "Pay the shop", item: "Give the item", able: "To her ABLE account", cash: "Cash" };
 
-function FundraiserResult({ data }: { data: FundraiserData }) {
+function FundraiserResult({ data, url }: { data: FundraiserData; url: string }) {
   const { prefs } = usePrefs();
   return (
     <div className="ai-result">
@@ -396,6 +408,7 @@ function FundraiserResult({ data }: { data: FundraiserData }) {
           </p>
         )}
       </div>
+      <MakeGiftPage uses={data.plan.map((p) => ({ use: p.use, amount: p.amount, category: p.category, likely_vendor: p.likely_vendor }))} sourceUrl={url} />
     </div>
   );
 }

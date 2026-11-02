@@ -106,6 +106,20 @@ ok("the referee routes it to her ABLE account at $994", /ABLE account.*\$994/.te
 await page.getByRole("button", { name: "What if a reviewer gets it wrong?" }).click();
 ok("a made-up quote is set aside and her check stays $994", (await page.locator(".rv-card[data-set-aside]").count()) === 1 && /\$994/.test((await page.locator(".rv-outcome").textContent()) ?? "") && /\$876/.test((await page.locator(".rv-trusted").textContent()) ?? ""));
 
+// 7c. A fundraiser becomes a gift page: Claude reads the sample, the form makes a page with every need payable
+await page.goto(B + "/try", { waitUntil: "networkidle" });
+await page.getByRole("tab", { name: "A fundraiser page" }).click();
+await page.getByRole("button", { name: "Use the sample fundraiser" }).click();
+await page.locator(".make-page").waitFor({ timeout: 120000 });
+const uses = await page.locator(".make-need").count();
+await page.getByLabel("Their first name").fill("Maya");
+await page.getByLabel("she/her").check();
+await page.getByLabel("Your name (optional)").fill("E2E");
+await page.getByRole("button", { name: "Make the gift page" }).click();
+await page.waitForURL(/\/g\/maya-[0-9a-f]{6}$/, { timeout: 60000, waitUntil: "commit" });
+await page.locator(".need").first().waitFor({ timeout: 60000 });
+ok("fundraiser becomes a live gift page with every use as a payable need", uses >= 2 && (await page.locator(".need").count()) === uses, `${uses} uses`);
+
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });
 await page.waitForTimeout(3500);

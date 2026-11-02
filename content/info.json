@@ -437,5 +437,11 @@
     "title": "Manual reviewer",
     "what": "Reads only Social Security’s Program Operations Manual System (POMS), the instructions SSA staff follow.",
     "why": "The manual has the worked examples staff use day to day. Its answer is compared with the regulations reviewer’s."
+  },
+  "try.makepage": {
+    "title": "Make a gift page",
+    "what": "Turns what a fundraiser asks for into a live gift page. Givers pay each need through PayPal, straight to the shop or the ABLE account.",
+    "why": "Money raised as cash counts as income and can lower the SSI check. The same help, paid to the shop, does not.",
+    "technical": "POST /api/v1/gift-pages. The rules engine picks each route: housing goes to the ABLE account, everything else to the shop. Sandbox only; five pages a day per visitor."
   }
 }

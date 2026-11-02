@@ -7,11 +7,11 @@ import sources from "../../../../content/sources.json";
 import { Info } from "@/components/Info";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { db, dbConfigured, schema } from "@/lib/db";
-import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery } from "@/lib/rules";
+import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import "../../pages.css";
 import "./receipt.css";
 
-export const metadata: Metadata = { title: "Receipt", description: "Where a Giftwise gift went, the rule that kept her check whole, and a live check against PayPal." };
+export const metadata: Metadata = { title: "Receipt", description: "Where a Giftwise gift went, the rule that kept the SSI check whole, and a live check against PayPal." };
 
 const SRC = sources as Record<string, { title: string; url: string; publisher?: string }>;
 const ACTION: Record<string, string> = {
@@ -19,7 +19,7 @@ const ACTION: Record<string, string> = {
   "paypal.routed_order.created": "PayPal order created, split by the rules",
   "paypal.order.captured": "Payment completed by PayPal",
 };
-const ROUTE: Record<string, string> = { vendor: "Paid straight to the shop", able: "Paid to her ABLE account" };
+const ROUTE: Record<string, string> = { vendor: "Paid straight to the shop", able: "Paid to the ABLE account" };
 const when = (d: Date) => d.toLocaleString("en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" });
 
 async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
@@ -38,16 +38,17 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
     .where(or(eq(schema.auditEvents.ref, `order:${orderId}`), sql`${schema.auditEvents.detail}->>'orderId' = ${orderId}`))
     .orderBy(asc(schema.auditEvents.id));
 
-  const name = household?.name ?? "her";
-  const hers = household?.name ? `${household.name}’s` : "her";
+  const name = household?.name ?? "the person";
+  const hers = household?.name ? `${household.name}’s` : "the person’s";
+  const profile: Profile = { ...DEFAULT_PROFILE, ...((household?.profile ?? {}) as Partial<Profile>) };
   const date = rows[0].createdAt.toISOString().slice(0, 10);
   const lines = rows.map((r) => {
     const need = needs.find((n) => n.id === r.needId);
     const check = evaluateGift(
       { id: r.referenceId, date, amount: Number(r.amount), delivery: r.route as Delivery, category: (need?.category ?? "other") as Category, recurring: need?.recurring },
-      DEFAULT_PROFILE,
+      profile,
     );
-    return { row: r, title: need?.title ?? "Savings in her ABLE account", check };
+    return { row: r, title: need?.title ?? `Savings in ${hers} ABLE account`, check };
   });
   const captured = rows.every((r) => r.status === "captured");
   const total = rows.reduce((s, r) => s + Number(r.amount), 0);
@@ -56,7 +57,7 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
   const checkAfter = computeMonth(
     monthOf(date),
     lines.map((l) => ({ id: l.row.referenceId, date, amount: Number(l.row.amount), delivery: l.row.route as Delivery, category: l.check.gift.category })),
-    DEFAULT_PROFILE,
+    profile,
   ).check;
   const payer = rows.find((r) => r.payerName)?.payerName?.split(" ")[0];
 
@@ -79,7 +80,7 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
             <dd className="tabular">$0</dd>
           </div>
           <div>
-            <dt>Her SSI check after this gift</dt>
+            <dt>{hers} SSI check after this gift</dt>
             <dd className="tabular" data-kept="">
               {usd(checkAfter)}
             </dd>
@@ -112,7 +113,7 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
       </section>
 
       <section className="page-section" aria-labelledby="rc-why">
-        <h2 id="rc-why">Why her check stays the same</h2>
+        <h2 id="rc-why">Why {hers} check stays the same</h2>
         <ul className="rc-rules">
           {ruleIds.map((id) => {
             const rule = RULES[id];
@@ -180,7 +181,7 @@ export default function Page({ params }: { params: Promise<{ orderId: string }> 
           <h1 className="page-title">Receipt</h1>
           <Info id="gift.receipt" />
         </div>
-        <p className="lede">A public record of one gift: who was paid, how much, and the rule that kept her check whole. Anyone with this link can check it against PayPal.</p>
+        <p className="lede">A public record of one gift: who was paid, how much, and the rule that kept the SSI check whole. Anyone with this link can check it against PayPal.</p>
       </header>
       <Suspense fallback={<p className="page-loading">Loading the receipt…</p>}>
         <Receipt params={params} />

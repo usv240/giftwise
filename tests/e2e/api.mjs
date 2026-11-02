@@ -84,6 +84,18 @@ r = await fetch(B + "/openapi.json");
 j = await r.json();
 ok("openapi lists review-bill with its request schema", Boolean(j.paths?.["/api/v1/review-bill"]?.post?.requestBody));
 
+// Gift pages from a list of needs: the engine picks each route, and the page uses the chosen pronouns
+r = await post("/api/v1/gift-pages", { name: "Jordan", pronoun: "they", organizer: "E2E", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] });
+j = await r.json();
+ok("gift-pages: the lift is paid straight to the shop, rent goes to the ABLE account, check stays $994", r.status === 200 && j.data.needs[0].route === "vendor" && j.data.needs[1].route === "able" && j.data.needs.every((n) => n.check_after === 994), `${r.status} ${JSON.stringify(j.data?.needs?.map((n) => n.route))}`);
+if (j.data?.url) {
+  r = await fetch(B + j.data.url);
+  const text = ((await r.text()).match(/<body[\s\S]*<\/body>/)?.[0] ?? "").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ");
+  ok("the new page reads Help Jordan and uses their, never her or she", r.status === 200 && text.includes("Help Jordan") && /\btheir\b/.test(text) && !/\b(her|she)\b/i.test(text));
+}
+r = await post("/api/v1/gift-pages", { name: "<b>x</b>", pronoun: "she", needs: [{ title: "Chair", amount: 50, category: "equipment" }] });
+ok("gift-pages rejects a name that is not letters", r.status === 400, `${r.status}`);
+
 // PayPal order creation through the app (server picks amount + payee)
 r = await post("/api/paypal/orders", { needId: 4 });
 j = await r.json();

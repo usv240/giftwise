@@ -61,6 +61,33 @@ export const ReviewBillRequest = z.object({
   profile: ProfileSchema.optional(),
 });
 
+export const GiftPageRequest = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1)
+    .max(40)
+    .regex(/^\p{L}[\p{L} .'-]*$/u, "Use letters only.")
+    .describe("First name of the person who receives SSI, as it should appear on the page."),
+  pronoun: z.enum(["she", "he", "they"]).describe("How the page refers to them: she/her, he/him or they/them."),
+  organizer: z.string().trim().max(60).optional().describe("Who is organizing, for the thank-you line. Optional."),
+  note: z.string().trim().max(400).optional().describe("A short note to givers. Optional; a plain default is written if empty."),
+  source_url: z.string().url().max(2000).optional().describe("The fundraiser page the needs came from. Optional."),
+  needs: z
+    .array(
+      z.object({
+        title: z.string().trim().min(2).max(80).describe("What the money is for, in a few words."),
+        amount: z.number().min(1).max(20000).describe("Dollars still needed."),
+        category: CategorySchema,
+        vendor: z.string().trim().max(80).nullable().optional().describe("The kind of business that would be paid, for example a van conversion shop."),
+        recurring: z.boolean().optional(),
+      }),
+    )
+    .min(1)
+    .max(8)
+    .describe("What the page asks for. Giftwise decides each route: housing goes to the ABLE account, everything else straight to the shop."),
+});
+
 export const KeyRequest = z.object({
   name: z.string().min(1).max(80).describe("Your name or your team's."),
   email: z.email().max(200),

@@ -18,7 +18,12 @@ export type Category =
 
 export const SHELTER_CATEGORIES: readonly Category[] = ["rent", "mortgage", "property_tax", "utility"];
 
+/** Whose check it is, for the wording only: she/her, he/him or they/them. */
+export type Pronoun = "she" | "he" | "they";
+
 export interface Profile {
+  /** Wording only; never changes the math. Defaults to she/her. */
+  pronoun?: Pronoun;
   couple: boolean;
   /** Lives all month in another person's household and does not pay a share of shelter costs. */
   livesInAnothersHousehold: boolean;

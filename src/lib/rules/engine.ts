@@ -8,6 +8,7 @@ import {
   type GiftResult,
   type MonthTrace,
   type Profile,
+  type Pronoun,
   type Treatment,
 } from "./types";
 
@@ -281,34 +282,35 @@ function explain(
   const inc = monthName(trace.month);
   const full = usd(baseline.check);
   const label = CATEGORY_LABEL[gift.category];
+  const w = pronounWords(profile.pronoun);
   let plain: string;
 
   if (t.kind === "not_possible") {
     plain =
       t.note === "not_able_eligible"
         ? "An ABLE account is for people whose disability began before age 46. Another route will work better here."
-        : "Housing is paid as a bill, not given as an item. Try paying the bill through her ABLE account.";
+        : `Housing is paid as a bill, not given as an item. Try paying the bill through ${w.poss} ABLE account.`;
   } else if (t.kind === "unearned_cash") {
     const excl = round2(trace.infrequentExcluded + trace.generalExcludedFromUnearned);
-    plain = `Cash counts as income. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so her ${pay} check would be ${usd(trace.check)}.`;
-    if (bestCheck > trace.check) plain += ` ${routePhrase(best)} keeps ${usd(bestCheck)}.`;
-    if (overLimit) plain += ` Kept as cash, her savings would be ${usd(resourcesNextFirst)} on the 1st, over the limit.`;
+    plain = `Cash counts as income. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
+    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
+    if (overLimit) plain += ` Kept as cash, ${w.poss} savings would be ${usd(resourcesNextFirst)} on the 1st, over the limit.`;
   } else if (t.kind === "ism_shelter") {
     plain = trace.vtrApplied
-      ? `Because she lives in someone else's home, help with ${label} lowers her ${pay} check by a fixed ${usd(vtr(profile.couple))}, to ${usd(trace.check)}.`
-      : `Help with ${label} counts as housing support, up to ${usd(pmv(profile.couple))} a month. ${usd(counted)} would be counted, so her ${pay} check would be ${usd(trace.check)}.`;
-    if (bestCheck > trace.check) plain += ` ${routePhrase(best)} keeps ${usd(bestCheck)}.`;
+      ? `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple))}, to ${usd(trace.check)}.`
+      : `Help with ${label} counts as housing support, up to ${usd(pmv(profile.couple))} a month. ${usd(counted)} would be counted, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
+    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
   } else if (t.ruleIds.includes("R-FOOD-01")) {
-    plain = `Food paid for by others has not been counted since September 30, 2024. Her ${pay} check stays ${usd(trace.check)}.`;
+    plain = `Food paid for by others has not been counted since September 30, 2024. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`;
   } else if (t.ruleIds.includes("R-EDU-01")) {
-    plain = `A gift used for tuition, books or school supplies is not counted. Her ${pay} check stays ${usd(trace.check)}. Keep the receipts.`;
+    plain = `A gift used for tuition, books or school supplies is not counted. ${w.Poss} ${pay} check stays ${usd(trace.check)}. Keep the receipts.`;
   } else if (t.ruleIds.includes("R-ABLE-01")) {
-    plain = `A gift to her ABLE account is not counted, and the first $100,000 in it does not count toward savings. Her ${pay} check stays ${usd(trace.check)}.`;
+    plain = `A gift to ${w.poss} ABLE account is not counted, and the first $100,000 in it does not count toward savings. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`;
     if (t.ambiguous && t.ambiguityReason) plain += ` ${t.ambiguityReason}`;
   } else if (t.ruleIds.includes("R-ITEM-01")) {
-    plain = `A gift of the item itself is not counted as income. Her ${pay} check stays ${usd(trace.check)}.`;
+    plain = `A gift of the item itself is not counted as income. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`;
   } else {
-    plain = `Paid straight to the shop, so it is not counted. Her ${pay} check stays ${full}.`;
+    plain = `Paid straight to the shop, so it is not counted. ${w.Poss} ${pay} check stays ${full}.`;
   }
 
   const rules = t.ruleIds.map((id) => `${id} (${RULES[id]?.name})`).join("; ");
@@ -321,14 +323,20 @@ function explain(
   return { plain, technical };
 }
 
-function routePhrase(d: Delivery) {
+/** she/her, he/him or they/them, for the explanations. */
+export function pronounWords(p: Pronoun = "she") {
+  const poss = p === "he" ? "his" : p === "they" ? "their" : "her";
+  return { subj: p, poss, Poss: poss[0].toUpperCase() + poss.slice(1), lives: p === "they" ? "live" : "lives" };
+}
+
+function routePhrase(d: Delivery, w = pronounWords()) {
   switch (d) {
     case "vendor":
       return "Paying the shop directly";
     case "item":
       return "Giving the item itself";
     case "able":
-      return "Sending it to her ABLE account";
+      return `Sending it to ${w.poss} ABLE account`;
     default:
       return "Giving cash";
   }

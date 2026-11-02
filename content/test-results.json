@@ -6,33 +6,33 @@
       "id": "unit",
       "name": "Rules engine and routing",
       "command": "npm test",
-      "passed": 26,
-      "total": 26,
-      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE and gift routing"
+      "passed": 40,
+      "total": 40,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, and the reviewers’ referee"
     },
     {
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 50,
-      "total": 50,
-      "what": "Gift checks, presets, bill and fundraiser reading, PayPal orders, routed gifts, receipts, the ledger, developer keys and every error path"
+      "passed": 56,
+      "total": 56,
+      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, PayPal orders, routed gifts, receipts, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 46,
-      "total": 46,
-      "what": "The Gift Checker, Try it, the gift page, keyboard use, and the developer flow from new key to a Claude-read bill"
+      "passed": 50,
+      "total": 50,
+      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, the gift page, keyboard use, and the developer flow"
     },
     {
       "id": "a11y",
       "name": "Accessibility and layout",
       "command": "npm run e2e:a11y",
-      "passed": 48,
-      "total": 48,
-      "what": "axe WCAG 2.2 AA on 12 pages at desktop and phone widths, light and dark, with no sideways scroll"
+      "passed": 56,
+      "total": 56,
+      "what": "axe WCAG 2.2 AA on 14 pages, including a generated gift page, at desktop and phone widths, light and dark, with no sideways scroll"
     },
     {
       "id": "paypal",
@@ -46,9 +46,9 @@
       "id": "cases",
       "name": "Failure cases, live",
       "command": "POST /api/judges/run",
-      "passed": 7,
-      "total": 7,
-      "what": "Run the seven failure cases on this page yourself"
+      "passed": 8,
+      "total": 8,
+      "what": "Run the eight failure cases on this page yourself"
     }
   ]
 }

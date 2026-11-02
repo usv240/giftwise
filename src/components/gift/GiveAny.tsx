@@ -7,13 +7,14 @@ import { Info } from "../Info";
 import { usePrefs } from "../prefs";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { routeGift, type OpenNeed, type RoutedLine } from "@/lib/routing";
-import { usd } from "@/lib/rules";
+import { DEFAULT_PROFILE, pronounWords, usd, type Profile } from "@/lib/rules";
 
 /**
- * "Give any amount": the donor types a number; the rules engine routes it across her needs and her ABLE account,
+ * "Give any amount": the donor types a number; the rules engine routes it across the open needs and the ABLE account,
  * and one PayPal checkout pays every recipient directly.
  */
-export function GiveAny({ slug, name, needs, date }: { slug: string; name: string; needs: OpenNeed[]; date: string }) {
+export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE }: { slug: string; name: string; needs: OpenNeed[]; date: string; profile?: Profile }) {
+  const w = pronounWords(profile.pronoun);
   const { prefs } = usePrefs();
   const router = useRouter();
   const [raw, setRaw] = useState("500");
@@ -21,7 +22,7 @@ export function GiveAny({ slug, name, needs, date }: { slug: string; name: strin
   // The lines the donor saw when they paid. The page refreshes after payment, so `plan` moves on to what is still open.
   const [paidLines, setPaidLines] = useState<RoutedLine[]>([]);
   const amount = Math.min(10000, Math.max(0, Number(raw.replace(/[^0-9.]/g, "")) || 0));
-  const plan = useMemo(() => routeGift(amount, needs, date), [amount, needs, date]);
+  const plan = useMemo(() => routeGift(amount, needs, date, profile, `${name}'s ABLE account`), [amount, needs, date, profile, name]);
   const ready = amount >= 1 && plan.lines.length > 0;
 
   if (receipt) {
@@ -32,7 +33,7 @@ export function GiveAny({ slug, name, needs, date }: { slug: string; name: strin
       <div className="give-any" data-ui role="status">
         <p className="give-done">Thank you{receipt.payerFirstName ? `, ${receipt.payerFirstName}` : ""}.</p>
         <p>
-          Your {usd(Number(receipt.amount))} went straight to {captures.length} {captures.length === 1 ? "recipient" : "recipients"} in one PayPal payment. {name} keeps her full check.
+          Your {usd(Number(receipt.amount))} went straight to {captures.length} {captures.length === 1 ? "recipient" : "recipients"} in one PayPal payment. {name} keeps {w.poss} full check.
         </p>
         <ul className="give-lines">
           {captures.map((c) => (
@@ -95,7 +96,9 @@ export function GiveAny({ slug, name, needs, date }: { slug: string; name: strin
               </p>
             </div>
           </div>
-          <p className="give-note">Her check either way. One PayPal payment pays every recipient directly. Nothing goes to her bank or to Giftwise.</p>
+          <p className="give-note">
+            {w.Poss} check either way. One PayPal payment pays every recipient directly. Nothing goes to {w.poss} bank or to Giftwise.
+          </p>
           {prefs.mode === "technical" && (
             <p className="give-tech">
               One Orders v2 order with {plan.lines.length} purchase {plan.lines.length === 1 ? "unit" : "units"}, each with its own payee. Rules:{" "}

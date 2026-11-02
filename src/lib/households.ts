@@ -1,5 +1,7 @@
+import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "./db";
+import { DEFAULT_PROFILE, SHELTER_CATEGORIES, evaluateGift, pronounWords, type Category, type Pronoun } from "./rules";
 
 export type NeedRow = typeof schema.needs.$inferSelect;
 export type PaymentRow = typeof schema.payments.$inferSelect;
@@ -10,7 +12,7 @@ export const SAMPLE = {
   name: "Maya",
   caregiverName: "Rosa",
   note: "Maya is 29 and lives on her own. She uses a wheelchair and is starting community college. Thank you for helping with these. Every gift on this page goes straight to the shop, so her SSI check stays the same. With love, Rosa (her mom)",
-  profile: { couple: false, livesInAnothersHousehold: false, otherUnearnedMonthly: 0, earnedMonthly: 0, ableEligible: true, savings: 1240 },
+  profile: { pronoun: "she", couple: false, livesInAnothersHousehold: false, otherUnearnedMonthly: 0, earnedMonthly: 0, ableEligible: true, savings: 1240 },
   needs: [
     { title: "Wheelchair repair", detail: "New push rims and a brake adjustment.", category: "equipment", route: "vendor", payeeName: "Riverside Mobility Repair", payeeAccount: "vendor", amount: "420.00", recurring: false },
     { title: "Laptop for college", detail: "For her online classes this spring.", category: "education", route: "vendor", payeeName: "Eastgate College Bookstore", payeeAccount: "vendor", amount: "649.00", recurring: false },
@@ -95,4 +97,48 @@ export async function resetSample() {
     await d.delete(schema.payments).where(inArray(schema.payments.needId, needs.map((n) => n.id)));
     await d.update(schema.needs).set({ status: "open", funded: "0" }).where(eq(schema.needs.householdId, h.id));
   }
+}
+
+export type NewNeed = { title: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean };
+
+/** "a van conversion shop" -> "Van conversion shop". */
+function payeeLabel(vendor: string | null | undefined) {
+  const v = (vendor ?? "").trim().replace(/^(a|an|the)\s+/i, "");
+  return v ? v[0].toUpperCase() + v.slice(1, 80) : "The shop";
+}
+
+/**
+ * Create a gift page from a fundraiser's stated uses. The rules engine, not the caller, decides each route:
+ * housing goes to the person's ABLE account; everything else is paid straight to the shop.
+ */
+export async function createGiftPage(o: { name: string; pronoun: Pronoun; organizer?: string; note?: string; sourceUrl?: string; needs: NewNeed[] }) {
+  const d = db();
+  const w = pronounWords(o.pronoun);
+  const slug = `${o.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "page"}-${randomBytes(3).toString("hex")}`;
+  const note =
+    o.note?.trim() ||
+    `${o.name} receives SSI. Every gift on this page is paid straight to the shop or to ${w.poss} ABLE account, so ${w.poss} SSI check stays the same.${o.organizer ? ` With thanks, ${o.organizer}.` : ""}`;
+  const [household] = await d
+    .insert(schema.households)
+    .values({ slug, name: o.name, caregiverName: o.organizer ?? "", note, profile: { ...DEFAULT_PROFILE, pronoun: o.pronoun }, isSample: false })
+    .returning();
+  const rows = o.needs.map((n, i) => {
+    const housing = SHELTER_CATEGORIES.includes(n.category);
+    const r = evaluateGift({ id: `new-${i}`, date: new Date().toISOString().slice(0, 10), amount: n.amount, delivery: housing ? "able" : "vendor", category: n.category, recurring: n.recurring }, { ...DEFAULT_PROFILE, pronoun: o.pronoun });
+    const row = {
+      householdId: household.id,
+      title: n.title.slice(0, 80),
+      detail: housing ? `Housing paid by someone else lowers the check, so this goes to ${w.poss} ABLE account.` : (o.sourceUrl ? "From the fundraiser." : ""),
+      category: n.category,
+      route: housing ? "able" : "vendor",
+      payeeName: housing ? `${o.name}'s ABLE account` : payeeLabel(n.vendor),
+      payeeAccount: housing ? "able" : "vendor",
+      amount: n.amount.toFixed(2),
+      recurring: Boolean(n.recurring),
+      sortOrder: i,
+    };
+    return { row, checkAfter: r.checkAfter };
+  });
+  await d.insert(schema.needs).values(rows.map((x) => x.row));
+  return { slug, household, needs: rows.map(({ row, checkAfter }) => ({ title: row.title, route: row.route, payee: row.payeeName, amount: Number(row.amount), check_after: checkAfter })) };
 }
