@@ -1,0 +1,85 @@
+{
+  "recorded_at": "2026-11-02T19:01:48.174Z",
+  "model": "claude-opus-5-5",
+  "tools": [
+    "check_gift",
+    "get_gift_page",
+    "plan_gift",
+    "review_bill",
+    "start_gift_checkout"
+  ],
+  "ms": 15589,
+  "steps": [
+    {
+      "kind": "ask",
+      "text": "I'm June, Maya's aunt. Her birthday is this week and I want to give her $300. Should I just send her the cash? She's on SSI, and her family made a Giftwise page for her: maya."
+    },
+    {
+      "kind": "call",
+      "tool": "get_gift_page",
+      "input": {
+        "slug": "maya"
+      }
+    },
+    {
+      "kind": "result",
+      "tool": "get_gift_page",
+      "text": "Gift page for Maya (/g/maya). Open needs: Wheelchair repair: $420 still needed, paid to Riverside Mobility Repair; Laptop for college: $649 still needed, paid to Eastgate College Bookstore; Electric bill, November: $138 still needed, paid to Maya's ABLE account; Therapy co-pay: $90 still needed, paid to Northside Physical Therapy. Any amount can also go to her ABLE account.",
+      "isError": false
+    },
+    {
+      "kind": "call",
+      "tool": "check_gift",
+      "input": {
+        "amount": 300,
+        "delivery": "cash"
+      }
+    },
+    {
+      "kind": "result",
+      "tool": "check_gift",
+      "text": "Cash counts as income. $300 minus $80 in exclusions leaves $220 counted in November, so their January check would be $774. Giving the item itself keeps $994. Sources: 20 CFR 416.1121: types of unearned income, including gifts; POMS SI 00830.520: Gifts; POMS SI 00810.410: Infrequent or Irregular Income Exclusion; POMS SI 00810.420: $20 General Income Exclusion; POMS SI 02005.001: Retrospective monthly accounting.",
+      "isError": false
+    },
+    {
+      "kind": "call",
+      "tool": "plan_gift",
+      "input": {
+        "slug": "maya",
+        "amount": 300
+      }
+    },
+    {
+      "kind": "result",
+      "tool": "plan_gift",
+      "text": "$300 for Maya: $300 to Riverside Mobility Repair (Wheelchair repair). Her check stays $994. Given as cash, it would be $774.",
+      "isError": false
+    },
+    {
+      "kind": "say",
+      "text": "Happy early birthday to Maya. I'd hold off on sending cash.\n\n**What cash would do:** SSI counts a cash gift as income. After the standard exclusions, $220 of your $300 would count against her, so her January check would drop from $994 to $774. She'd lose $220 of your gift.\n\n**What I suggest instead:** Put the full $300 toward her wheelchair repair on her Giftwise page. Giftwise would pay Riverside Mobility Repair directly. Paying a business directly for something that isn't housing doesn't count against her, so her check stays at $994. That repair still needs $420, so your gift would cover most of it.\n\nShould I set up the PayPal checkout for $300 to the wheelchair repair? You'd approve it yourself in PayPal, and nothing is charged until you do. I can also split it differently, for example part toward her $90 therapy co-pay."
+    },
+    {
+      "kind": "ask",
+      "text": "That makes sense. Yes, please set up the $300 that way."
+    },
+    {
+      "kind": "call",
+      "tool": "start_gift_checkout",
+      "input": {
+        "slug": "maya",
+        "amount": 300
+      }
+    },
+    {
+      "kind": "result",
+      "tool": "start_gift_checkout",
+      "text": "PayPal checkout ready for $300 to Maya, paid to 1 recipient. The person giving should open this link and approve in PayPal: [PayPal approval link]. After they approve, the receipt will be at /r/[receipt].",
+      "isError": false
+    },
+    {
+      "kind": "say",
+      "text": "Your checkout is ready. It sends the full $300 to Riverside Mobility Repair for Maya's wheelchair repair. Paid this way, her check stays at $994. As cash, it would have dropped to $774.\n\nTo finish, open this link and approve the payment in PayPal:\n[PayPal approval link]\n\nNothing has been charged yet. It only goes through once you approve it. Your receipt will then be here:\n/r/[receipt]\n\nThis version of Giftwise uses PayPal's test system, called the sandbox. That means no real money will move, even after you approve. If you want the gift to actually reach the repair shop, check with Maya's family on how they take real payments.\n\nWhat a thoughtful birthday gift. Getting her wheelchair fixed is something she'll really feel."
+    }
+  ]
+}

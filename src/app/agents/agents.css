@@ -1,0 +1,95 @@
+/* For AI agents: the assistant's conversation and how to connect */
+.ag {
+  display: grid;
+  gap: 14px;
+}
+.ag-source {
+  font-size: 14px;
+}
+.ag-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  max-width: 760px;
+}
+.ag-step {
+  display: grid;
+  gap: 6px;
+}
+.ag-ask,
+.ag-say {
+  border-radius: 20px;
+  padding: 16px 20px;
+}
+.ag-ask {
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+  justify-self: end;
+  max-width: 88%;
+}
+.ag-say {
+  background: var(--surface);
+}
+.ag-who {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.ag-call,
+.ag-result {
+  margin-left: 20px;
+  padding-left: 14px;
+  border-left: 2px solid var(--surface-2);
+  font-size: 14px;
+}
+.ag-call {
+  border-left-color: var(--accent);
+}
+.ag-tool {
+  font-weight: 500;
+  color: var(--accent);
+  margin-right: 6px;
+}
+.ag-result-text {
+  color: var(--muted);
+}
+.ag-result[data-error] .ag-result-text {
+  color: var(--attention);
+}
+.ag-json {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ag-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.ag-actions p {
+  flex-basis: 100%;
+}
+.ag-k {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+.ag-rules {
+  display: grid;
+  gap: 8px;
+  padding-left: 1.1rem;
+}
+@media (max-width: 640px) {
+  .ag-ask {
+    max-width: 100%;
+  }
+  .ag-call,
+  .ag-result {
+    margin-left: 8px;
+  }
+}

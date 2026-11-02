@@ -4,7 +4,9 @@ import facts from "../../../content/facts.json";
 import results from "../../../content/test-results.json";
 import { Info } from "@/components/Info";
 import { CaseRunner } from "@/components/judges/CaseRunner";
+import { EvalResults } from "@/components/judges/EvalResults";
 import "../pages.css";
+import "../developers/dev.css";
 import "./judges.css";
 
 export const metadata: Metadata = { title: "For judges", description: "The five-minute path through Giftwise, every failure case run live, and the test results." };
@@ -14,6 +16,7 @@ const PATH = [
   { href: "/g/maya", label: "Maya's gift page", look: "Type $1,500 in Give any amount. Giftwise splits it across her needs and her ABLE account, and one PayPal checkout pays five recipients directly." },
   { href: "/g/maya", label: "Pay in the sandbox", look: "Use the sandbox buyer login in TESTING.md. When it completes, open the receipt." },
   { href: "/try", label: "Try it", look: "Read the sample electric bill with Claude, or check any gift. Switch View to Technical to see rule ids and API details." },
+  { href: "/agents", label: "An AI agent asks first", look: "A Claude assistant uses the Giftwise MCP server to check a gift, plan it, and start a PayPal checkout the giver approves. Run it live." },
   { href: "#failure-cases", label: "Failure cases", look: "Run all eight checks below. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer." },
   { href: "/status", label: "Status and stack", look: "Every service and sponsor tool, and whether it is live or using its fallback right now." },
 ];
@@ -22,7 +25,16 @@ const CRITERIA = [
   { name: "Technological implementation", where: "One PayPal order paying several payees, server-side capture with idempotency, live order checks, sandbox negative testing, Claude structured outputs checked by a deterministic rules engine.", links: [["/status", "Status"], ["/stack", "Stack"]] },
   { name: "Design", where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA.", links: [["/g/maya", "Gift page"], ["/try", "Try it"]] },
   { name: "Potential impact", where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). Gifts given as cash can lower the check. Every answer cites the regulation or SSA's operating manual.`, links: [["/learn", "The rules, explained"]] },
-  { name: "Innovation", where: "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt.", links: [["/g/maya", "Give any amount"]] },
+  {
+    name: "Innovation",
+    where:
+      "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt. AI assistants can ask Giftwise first over MCP, and two reviewers with different rulebooks must quote their source word for word.",
+    links: [
+      ["/g/maya", "Give any amount"],
+      ["/agents", "For AI agents"],
+      ["/try/presets/electric-bill", "The two reviewers"],
+    ],
+  },
   { name: "Presentation", where: "This page, the demo video, and a sample household you can reset to the same starting point at any time.", links: [["/about", "About"]] },
 ] as const;
 
@@ -63,6 +75,14 @@ export default function JudgesPage() {
         </div>
         <p className="page-prose jp-intro">Payments fail in ordinary ways: a declined card, a double click, a browser that sends the wrong amount. Each check below runs the real code against the PayPal sandbox.</p>
         <CaseRunner />
+      </section>
+
+      <section id="evaluation" className="page-section" aria-labelledby="eval-h">
+        <div className="title-row">
+          <h2 id="eval-h">The two reviewers, measured</h2>
+          <Info id="judges.eval" label="" />
+        </div>
+        <EvalResults />
       </section>
 
       <section className="page-section" aria-labelledby="crit-h">

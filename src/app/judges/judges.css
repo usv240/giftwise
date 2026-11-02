@@ -183,3 +183,22 @@
   font-size: 14px;
   color: var(--muted);
 }
+
+/* The two reviewers, measured */
+.ev {
+  display: grid;
+  gap: 14px;
+}
+.ev-basis {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.ev-cases summary {
+  cursor: pointer;
+  color: var(--accent);
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}

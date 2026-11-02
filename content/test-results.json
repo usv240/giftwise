@@ -14,25 +14,25 @@
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 56,
-      "total": 56,
-      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, PayPal orders, routed gifts, receipts, the ledger, developer keys and every error path"
+      "passed": 62,
+      "total": 62,
+      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the MCP server, PayPal orders, routed gifts, receipts, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 50,
-      "total": 50,
-      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, the gift page, keyboard use, and the developer flow"
+      "passed": 51,
+      "total": 51,
+      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, the For agents page, the gift page, keyboard use, and the developer flow"
     },
     {
       "id": "a11y",
       "name": "Accessibility and layout",
       "command": "npm run e2e:a11y",
-      "passed": 56,
-      "total": 56,
-      "what": "axe WCAG 2.2 AA on 14 pages, including a generated gift page, at desktop and phone widths, light and dark, with no sideways scroll"
+      "passed": 60,
+      "total": 60,
+      "what": "axe WCAG 2.2 AA on 15 pages, including a generated gift page and For agents, at desktop and phone widths, light and dark, with no sideways scroll"
     },
     {
       "id": "paypal",
@@ -41,6 +41,14 @@
       "passed": 14,
       "total": 14,
       "what": "Both PayPal buttons: the buyer logs in and approves, PayPal captures every payee, the page updates, and the public receipt matches"
+    },
+    {
+      "id": "agent",
+      "name": "An AI agent starts a checkout over MCP",
+      "command": "npm run e2e:agent",
+      "passed": 5,
+      "total": 5,
+      "what": "The agent calls start_gift_checkout, the sandbox buyer approves the PayPal link, and Giftwise captures on return and shows the receipt"
     },
     {
       "id": "cases",

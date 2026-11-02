@@ -173,4 +173,26 @@ ok("openapi.json is 3.1 and lists every endpoint", j.openapi === "3.1.0" && ["/a
 r = await fetch(B + "/api/presets/not-a-preset");
 ok("unknown preset -> 404 in the standard envelope", r.status === 404 && (await r.json()).error?.code === "not_found");
 
+// The MCP server, called with an API key the way an agent would: initialize, list tools, call one, and answer bad input as a tool error
+const keyed = { "Content-Type": "application/json", Authorization: `Bearer ${rotated}` };
+const mcp = (method, params, id = 1) => post("/api/mcp", { jsonrpc: "2.0", id, method, params }, keyed);
+r = await mcp("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "e2e", version: "1" } });
+j = await r.json();
+ok("MCP initialize names the server and agrees a protocol version", r.status === 200 && j.result?.serverInfo?.name === "giftwise" && j.result?.protocolVersion === "2025-06-18");
+r = await post("/api/mcp", { jsonrpc: "2.0", method: "notifications/initialized" }, keyed);
+ok("MCP notification -> 202 with no body", r.status === 202);
+r = await mcp("tools/list");
+j = await r.json();
+const names = (j.result?.tools ?? []).map((t) => t.name);
+ok("MCP lists the five tools with input schemas", ["check_gift", "get_gift_page", "plan_gift", "review_bill", "start_gift_checkout"].every((n) => names.includes(n)) && j.result.tools.every((t) => t.inputSchema?.type === "object"), names.join(","));
+r = await mcp("tools/call", { name: "plan_gift", arguments: { slug: "maya", amount: 500 } });
+j = await r.json();
+ok("MCP plan_gift splits $500 so her check stays $994 (cash would be $574)", j.result?.structuredContent?.check_with_giftwise === 994 && j.result?.structuredContent?.check_if_cash === 574, j.result?.content?.[0]?.text?.slice(0, 80));
+r = await mcp("tools/call", { name: "check_gift", arguments: { amount: "lots" } });
+j = await r.json();
+ok("MCP bad arguments come back as a tool error the agent can read", r.status === 200 && j.result?.isError === true && /amount/.test(j.result?.content?.[0]?.text ?? ""));
+r = await mcp("nope/never");
+j = await r.json();
+ok("MCP unknown method -> JSON-RPC -32601", j.error?.code === -32601);
+
 console.log(`\n${pass} passed, ${fail} failed`);

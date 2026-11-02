@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Developers", description: "Add benef
 const USES = [
   { who: "Giving and fundraising platforms", what: "Check a gift before it is sent, and suggest the benefit-safe way to give it." },
   { who: "ABLE programs and caseworker tools", what: "Plan a month of gifts and see which ones change the check, with sources a counselor can verify." },
-  { who: "AI agents", what: "Call one endpoint before buying for someone on SSI. Answers are structured and cite the rule." },
+  { who: "AI agents", what: "Connect the Giftwise MCP server and check before buying for someone on SSI. Answers are structured and cite the rule. See For AI agents." },
 ];
 
 export default function DevelopersPage() {

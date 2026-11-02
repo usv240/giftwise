@@ -1,0 +1,896 @@
+{
+  "ran_at": "2026-11-02T19:10:05.372Z",
+  "model": "claude-opus-5-5",
+  "amount": 150,
+  "quotes_checked": 40,
+  "quotes_total": 40,
+  "summary": {
+    "regs": {
+      "clear_cases": 18,
+      "correct": 18,
+      "wrong": 0,
+      "abstained": 0,
+      "all_cases": 20,
+      "check_kept_whole": 20
+    },
+    "poms": {
+      "clear_cases": 18,
+      "correct": 18,
+      "wrong": 0,
+      "abstained": 0,
+      "all_cases": 20,
+      "check_kept_whole": 20
+    },
+    "referee": {
+      "clear_cases": 18,
+      "correct": 18,
+      "wrong": 0,
+      "abstained": 0,
+      "all_cases": 20,
+      "check_kept_whole": 20
+    }
+  },
+  "cases": [
+    {
+      "id": "electric",
+      "description": "Northside Electric Co-op. Monthly bill for residential electric service at her apartment.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists electricity.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Electricity is listed as shelter, so if someone else pays her electric bill directly, it counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Electricity for her home is on the manual's list of shelter costs, so someone else paying it counts as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "gas",
+      "description": "Metro Gas Company. Natural gas service for heating and cooking at her home.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists gas.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Gas service for the home is listed as shelter, so someone else paying it counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Gas service for the home is on the manual's list of shelter costs, so someone else paying it counts as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "propane",
+      "description": "Lakeside Propane. Delivery of 100 gallons of propane for heating her home.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists heating fuel.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Propane used to heat her home is heating fuel, which the rules list as shelter."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Propane delivered to heat her home is heating fuel, which the manual lists as a shelter cost."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "water",
+      "description": "City of Brookfield Utilities. Quarterly residential water and sewer service.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists water and sewerage.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Shelter. Water and sewer service are named in the rules as shelter costs, so someone else paying this bill counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Water and sewer service are both on the manual's list of shelter items, so someone else paying it counts as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "garbage",
+      "description": "Valley Waste Services. Curbside garbage pickup at her home, monthly.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists garbage collection services.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. The rules list garbage collection as shelter, so when someone else pays this bill it counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Garbage pickup at her home is on the manual's list of shelter items, so a third party paying it counts as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "rent",
+      "description": "Maple Court Apartments. December rent for her apartment, unit 4B.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists rent.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Rent is listed as shelter, so paying her apartment rent for her counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Rent is listed as shelter, so if someone else pays it to the landlord, it counts as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "mortgage",
+      "description": "First Home Mortgage. Monthly mortgage payment on the house she owns.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists mortgage payments.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1103-g-examples",
+        "cite": "20 CFR 416.1103(g) (Examples)",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. When someone else pays her mortgage directly to the lender, the rules treat it as in-kind support for housing."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. A mortgage payment on the home she lives in counts as shelter, so someone else paying it counts as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "property-tax",
+      "description": "Brookfield County Treasurer. Real property tax installment on her home.",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists real property taxes.",
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. The rules list real property taxes as shelter, so someone else paying her home's property tax counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Real property taxes on her home are listed as a shelter item, so someone else paying them counts as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "phone",
+      "description": "Horizon Wireless. Monthly cell phone plan in her name.",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00815.400B.2: a sister paying the phone bill does not result in income.",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A cell phone plan isn't on the list of housing costs, so someone else paying it shouldn't count as shelter support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00815-400-example-phone",
+        "cite": "POMS SI 00815.400B.2",
+        "quote_checked": true,
+        "reason": "Not shelter. Phone service isn't food or shelter, so another person paying her cell phone bill doesn't count as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "internet",
+      "description": "FastNet. Home internet service, monthly.",
+      "truth": "not_shelter",
+      "basis": "Not in the shelter list of 20 CFR 416.1130(b)(1); POMS SI 00835.465D.1 says its list of household costs is the only one used.",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Home internet isn't on the list of housing costs that count, so someone else paying it doesn't count as housing support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Home internet is not on the manual's closed list of housing costs, so a family member paying it doesn't count as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "cable",
+      "description": "CableVision. Cable television package, monthly.",
+      "truth": "not_shelter",
+      "basis": "Not in the shelter list of 20 CFR 416.1130(b)(1) or POMS SI 00835.020B.36.",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Cable TV isn't on the list of housing costs that count, so someone else paying it shouldn't count as in-kind support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Cable TV is not on the manual's closed list of housing costs, so a relative paying it directly does not count as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "groceries",
+      "description": "FreshMart. Weekly groceries delivered to her apartment.",
+      "truth": "not_shelter",
+      "basis": "89 FR 21199: food is no longer counted as in-kind support from September 30, 2024.",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1121-h-ism",
+        "cite": "20 CFR 416.1121(h)",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Groceries are food, and food no longer counts as in-kind support. Only housing costs like rent, mortgage, and utilities do."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Not a shelter cost: groceries are food, not housing. When someone else pays the grocer, it still counts as in-kind support in the form of food."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "therapy",
+      "description": "Northside Physical Therapy. Co-pay for a weekly therapy session.",
+      "truth": "not_shelter",
+      "basis": "Not a shelter item; not in 20 CFR 416.1130(b)(1).",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A physical therapy co-pay is a medical bill, and it isn't on the list of housing costs that count as shelter."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A physical therapy co-pay is a medical bill, not one of the housing costs on the manual's list, so someone else paying it isn't in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "wheelchair",
+      "description": "Riverside Mobility Repair. New push rims and a brake adjustment for her wheelchair.",
+      "truth": "not_shelter",
+      "basis": "Not a shelter item; not in 20 CFR 416.1130(b)(1).",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Not shelter. A wheelchair repair isn't housing, and it isn't on the regulation's list of shelter costs, so someone else paying it doesn't count as in-kind support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Wheelchair repair is not rent, mortgage, property taxes, or a utility, so it is not on the manual's list of shelter costs."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "tuition",
+      "description": "Eastgate Community College. Spring semester tuition.",
+      "truth": "not_shelter",
+      "basis": "Not a shelter item; not in 20 CFR 416.1130(b)(1).",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. College tuition isn't housing, so a family member paying it directly to the college doesn't count as housing help under these rules."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. College tuition isn't on the manual's list of housing costs, so someone else paying it directly to the college isn't counted as housing support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "car-insurance",
+      "description": "SafeDrive Auto Insurance. Six-month premium for her car.",
+      "truth": "not_shelter",
+      "basis": "Not a shelter item; POMS SI 00835.465D.3 counts only property insurance required by a mortgage holder.",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Car insurance is not on the list of housing costs, so someone else paying it does not count as housing support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote_checked": true,
+        "reason": "Not shelter. Car insurance isn't on the list of housing costs, so a relative paying it directly doesn't count as in-kind support."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "renters-insurance",
+      "description": "HomeShield. Monthly renters insurance premium for her apartment.",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.465D.3 counts only property insurance required by a mortgage holder; renters insurance is not.",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote_checked": true,
+        "reason": "Not shelter. Renters insurance is not on the regulations' list of shelter costs, so someone else paying it should not count as housing support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-insurance",
+        "cite": "POMS SI 00835.465D.3",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Renters insurance is chosen by the renter, and only insurance a mortgage lender requires counts as a housing cost."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "storage",
+      "description": "SafeKeep Self Storage. Monthly rent for a storage unit holding her furniture.",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.020B.36: shelter is living quarters; a storage unit is not.",
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1103-g-examples",
+        "cite": "20 CFR 416.1103(g) (Examples)",
+        "quote_checked": true,
+        "reason": "Not shelter. A storage unit holds her furniture, not her. Like the lawn-service example, someone paying it does not give her housing."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote_checked": true,
+        "reason": "Not shelter. A storage unit holds her furniture but is not where she lives. Only housing costs for her living quarters count as shelter."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "home-insurance",
+      "description": "Brookfield Mutual. Homeowners insurance premium on her house, required by her mortgage lender.",
+      "truth": "contested",
+      "basis": "POMS SI 00835.020B.36 and SI 00835.465D.3 count property insurance required by a mortgage holder; the shelter list in 20 CFR 416.1130(b)(1) does not include insurance.",
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Unclear. Homeowners insurance is not on the shelter list, but the lender requires it, and these passages don't say whether that makes it part of the mortgage payment."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-465-insurance",
+        "cite": "POMS SI 00835.465D.3",
+        "quote_checked": true,
+        "reason": "Yes, it's a shelter cost. Her mortgage lender requires this homeowners insurance, and that kind of insurance counts as a housing cost when someone else pays it."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        }
+      }
+    },
+    {
+      "id": "bundle",
+      "description": "SuperLink. One bill for residential electric service and home internet together.",
+      "truth": "contested",
+      "basis": "Electricity is shelter and internet is not, so a single payment for both is mixed.",
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote_checked": true,
+        "reason": "Unclear. The electricity part is a shelter cost, but home internet is not on the shelter list. The rules don't say how to treat one bill that combines both."
+      },
+      "poms": {
+        "answer": "unclear",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote_checked": true,
+        "reason": "Unclear. The electric part counts as shelter, but the internet part does not. The bill doesn't show how much each part costs, and the manual doesn't address bundled bills like this."
+      },
+      "outcome": {
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "poms": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        }
+      }
+    }
+  ],
+  "ms": 39682
+}

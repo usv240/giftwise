@@ -443,5 +443,29 @@
     "what": "Turns what a fundraiser asks for into a live gift page. Givers pay each need through PayPal, straight to the shop or the ABLE account.",
     "why": "Money raised as cash counts as income and can lower the SSI check. The same help, paid to the shop, does not.",
     "technical": "POST /api/v1/gift-pages. The rules engine picks each route: housing goes to the ABLE account, everything else to the shop. Sandbox only; five pages a day per visitor."
+  },
+  "page.agents": {
+    "title": "About this page",
+    "what": "How AI assistants use Giftwise: they check a gift before giving to someone on SSI, and can prepare a PayPal checkout that only the giver approves.",
+    "why": "More giving now starts with an assistant. A check the assistant can call keeps the gift from lowering someone’s monthly check.",
+    "technical": "Model Context Protocol over Streamable HTTP at /api/mcp, stateless JSON-RPC. Five tools; four only read."
+  },
+  "agents.demo": {
+    "title": "An assistant that asks first",
+    "what": "A Claude assistant answering a real question from June, Maya’s aunt. It has no knowledge of SSI rules beyond what the Giftwise tools return.",
+    "why": "It shows the whole path: what cash would do, the safer way, and a PayPal checkout June approves herself.",
+    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Tools are discovered with tools/list and every call is a tools/call over HTTP to /api/mcp."
+  },
+  "agents.connect": {
+    "title": "Connect your agent",
+    "what": "Add the Giftwise MCP server to Claude Code or any MCP client with one URL.",
+    "why": "Any assistant can then check a gift before it gives.",
+    "technical": "Streamable HTTP, protocol versions 2025-03-26 to 2025-11-25, JSON responses, no session. Rate limit 20 requests a minute per client."
+  },
+  "judges.eval": {
+    "title": "The two reviewers, measured",
+    "what": "Twenty bills paid by someone else, each labeled from the rule text, run through both reviewers. The table shows how often each setup was right and whether the check stayed whole.",
+    "why": "A claim about AI should come with a measurement. These numbers come from one recorded run, not from a description.",
+    "technical": "scripts/run-eval.ts over content/eval/bills.json; results in content/eval-results.json. Accuracy counts only the 18 clear cases; the check is scored under the true reading, and for the two contested cases under both readings."
   }
 }

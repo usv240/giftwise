@@ -16,7 +16,8 @@
     "e2e:ui": "node --env-file-if-exists=.env.local tests/e2e/ui.mjs",
     "e2e:paypal": "node --env-file-if-exists=.env.local tests/e2e/paypal-button.mjs",
     "e2e:a11y": "node tests/e2e/pages-a11y.mjs",
-    "e2e:routed": "tsx --env-file=.env.local scripts/routed-gift-e2e.ts"
+    "e2e:routed": "tsx --env-file=.env.local scripts/routed-gift-e2e.ts",
+    "e2e:agent": "node --env-file-if-exists=.env.local tests/e2e/agent-checkout.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

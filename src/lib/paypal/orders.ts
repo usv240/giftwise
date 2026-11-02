@@ -1,4 +1,4 @@
-import { ApiError, PaypalWalletContextShippingPreference, type PaymentSource } from "@paypal/paypal-server-sdk";
+import { ApiError, PaypalExperienceUserAction, PaypalWalletContextShippingPreference, type PaymentSource } from "@paypal/paypal-server-sdk";
 import { CheckoutPaymentIntent, orders } from "./client";
 
 /** Nothing is shipped to the donor, so PayPal checkout asks for no address and shows who is asking. */
@@ -49,7 +49,11 @@ export type Unit = { referenceId: string; description: string; amount: number; p
  * One PayPal order that pays several recipients directly: each purchase unit has its own payee
  * (the shop, the clinic, her ABLE account). The donor approves once.
  */
-export async function createRoutedOrder(units: Unit[], requestId: string) {
+/**
+ * redirect: set for checkouts that do not use the JavaScript button (for example, an AI agent hands a person the approval link).
+ * PayPal then sends the person back to returnUrl, where Giftwise captures the payment.
+ */
+export async function createRoutedOrder(units: Unit[], requestId: string, redirect?: { returnUrl: string; cancelUrl: string }) {
   const { result } = await orders().createOrder({
     paypalRequestId: requestId,
     prefer: "return=representation",
@@ -66,7 +70,9 @@ export async function createRoutedOrder(units: Unit[], requestId: string) {
           payee: { emailAddress: u.payeeEmail },
         };
       }),
-      paymentSource: checkout,
+      paymentSource: redirect
+        ? { paypal: { experienceContext: { ...checkout.paypal!.experienceContext, returnUrl: redirect.returnUrl, cancelUrl: redirect.cancelUrl, userAction: PaypalExperienceUserAction.PayNow } } }
+        : checkout,
     },
   });
   return result;

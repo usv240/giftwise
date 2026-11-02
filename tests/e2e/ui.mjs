@@ -120,6 +120,11 @@ await page.waitForURL(/\/g\/maya-[0-9a-f]{6}$/, { timeout: 60000, waitUntil: "co
 await page.locator(".need").first().waitFor({ timeout: 60000 });
 ok("fundraiser becomes a live gift page with every use as a payable need", uses >= 2 && (await page.locator(".need").count()) === uses, `${uses} uses`);
 
+// 7d. For AI agents: the recorded conversation shows June, the assistant, and each Giftwise tool it called over MCP
+await page.goto(B + "/agents", { waitUntil: "networkidle" });
+const tools = await page.locator(".ag-tool").allTextContents();
+ok("For agents page shows the assistant calling Giftwise tools, ending with a checkout June approves", (await page.locator(".ag-ask").count()) === 2 && tools.includes("check_gift") && tools.at(-1) === "start_gift_checkout", tools.join(","));
+
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });
 await page.waitForTimeout(3500);
