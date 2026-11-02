@@ -22,17 +22,17 @@
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 51,
-      "total": 51,
-      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, the For agents page, the gift page, keyboard use, and the developer flow"
+      "passed": 53,
+      "total": 53,
+      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its filters, the gift page, keyboard use, and the developer flow"
     },
     {
       "id": "a11y",
       "name": "Accessibility and layout",
       "command": "npm run e2e:a11y",
-      "passed": 60,
-      "total": 60,
-      "what": "axe WCAG 2.2 AA on 15 pages, including a generated gift page and For agents, at desktop and phone widths, light and dark, with no sideways scroll"
+      "passed": 64,
+      "total": 64,
+      "what": "axe WCAG 2.2 AA on 16 pages, including a generated gift page, For agents and the AG Studio dashboard, at desktop and phone widths, light and dark, with no sideways scroll"
     },
     {
       "id": "paypal",

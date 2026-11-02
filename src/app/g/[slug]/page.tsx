@@ -128,6 +128,11 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
                 See the latest receipt
               </Link>
             )}
+            {household.isSample && (
+              <Link className="text-link gift-latest" href="/dashboard">
+                See {household.name}&rsquo;s year
+              </Link>
+            )}
           </div>
           <details className="gift-cash">
             <summary>Prefer to give cash?</summary>

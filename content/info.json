@@ -103,10 +103,10 @@
     "technical": "claude-opus-5-5 with adaptive thinking, vision, structured outputs (zod), and server-side fallbacks. The money math is done by deterministic code, never the model."
   },
   "stack.ag-studio": {
-    "title": "AG Studio and AG Grid",
-    "what": "The counselor dashboard that shows each household's month, plus the ledger tables.",
-    "why": "Counselors can ask the dashboard questions and see answers built as charts.",
-    "technical": "ag-studio-react with custom widgets and a Studio Agent Framework analyst using a Claude adapter. ag-grid-react for the ledger."
+    "title": "AG Studio",
+    "what": "The dashboard of Maya’s year: every gift, how it reached her, and her SSI check each month compared with cash.",
+    "why": "Families and counselors see at a glance that the help arrived and the check stayed whole, and can build their own views.",
+    "technical": "ag-studio and ag-studio-react 3.0 with two data sources on a shared calendar, a theme mapped to the site tokens for light and dark, and a custom Giftwise check widget that runs the rules engine on the filtered rows."
   },
   "stack.render": {
     "title": "Render",
@@ -467,5 +467,11 @@
     "what": "Twenty bills paid by someone else, each labeled from the rule text, run through both reviewers. The table shows how often each setup was right and whether the check stayed whole.",
     "why": "A claim about AI should come with a measurement. These numbers come from one recorded run, not from a description.",
     "technical": "scripts/run-eval.ts over content/eval/bills.json; results in content/eval-results.json. Accuracy counts only the 18 clear cases; the check is scored under the true reading, and for the two contested cases under both readings."
+  },
+  "page.dashboard": {
+    "title": "About this page",
+    "what": "A dashboard of every gift to Maya this year: who gave, what it paid for, how it reached her, and her SSI check each month.",
+    "why": "Families and counselors can see at a glance that the help arrived and her check stayed whole, and what cash would have cost.",
+    "technical": "AG Studio 3.0 with two data sources (gifts and months) on a shared calendar, themed from the site tokens. The Giftwise check widget is a custom widget that runs the rules engine on whatever the filters leave in view."
   }
 }

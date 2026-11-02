@@ -8,7 +8,7 @@ const AXE = readFileSync("node_modules/axe-core/axe.min.js", "utf8");
 const order = await (await fetch(`${B}/api/paypal/gift-orders`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "maya", amount: 300 }) })).json();
 // A gift page made from a list of needs, they/them, so the generated pages are checked too.
 const made = await (await fetch(`${B}/api/v1/gift-pages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Jordan", pronoun: "they", organizer: "E2E", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] }) })).json();
-const routes = ["/", "/try", "/try/presets/electric-bill", "/learn", "/g/maya", ...(made.data?.url ? [made.data.url] : []), "/judges", "/agents", "/developers", "/developers/docs", "/developers/keys", "/status", "/stack", "/about", ...(order.data?.id ? [`/r/${order.data.id}`] : [])];
+const routes = ["/", "/try", "/try/presets/electric-bill", "/learn", "/g/maya", ...(made.data?.url ? [made.data.url] : []), "/judges", "/agents", "/dashboard", "/developers", "/developers/docs", "/developers/keys", "/status", "/stack", "/about", ...(order.data?.id ? [`/r/${order.data.id}`] : [])];
 
 const b = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
 let failed = 0;

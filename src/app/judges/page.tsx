@@ -17,13 +17,22 @@ const PATH = [
   { href: "/g/maya", label: "Pay in the sandbox", look: "Use the sandbox buyer login in TESTING.md. When it completes, open the receipt." },
   { href: "/try", label: "Try it", look: "Read the sample electric bill with Claude, or check any gift. Switch View to Technical to see rule ids and API details." },
   { href: "/agents", label: "An AI agent asks first", look: "A Claude assistant uses the Giftwise MCP server to check a gift, plan it, and start a PayPal checkout the giver approves. Run it live." },
+  { href: "/dashboard", label: "Maya's year", look: "An AG Studio dashboard of every gift and her check each month, compared with cash. Press a giver: the Giftwise widget reruns the rules engine on just their gifts." },
   { href: "#failure-cases", label: "Failure cases", look: "Run all eight checks below. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer." },
   { href: "/status", label: "Status and stack", look: "Every service and sponsor tool, and whether it is live or using its fallback right now." },
 ];
 
 const CRITERIA = [
   { name: "Technological implementation", where: "One PayPal order paying several payees, server-side capture with idempotency, live order checks, sandbox negative testing, Claude structured outputs checked by a deterministic rules engine.", links: [["/status", "Status"], ["/stack", "Stack"]] },
-  { name: "Design", where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA.", links: [["/g/maya", "Gift page"], ["/try", "Try it"]] },
+  {
+    name: "Design",
+    where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA. The AG Studio dashboard takes its colors and fonts from the same tokens.",
+    links: [
+      ["/g/maya", "Gift page"],
+      ["/try", "Try it"],
+      ["/dashboard", "Maya's year"],
+    ],
+  },
   { name: "Potential impact", where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). Gifts given as cash can lower the check. Every answer cites the regulation or SSA's operating manual.`, links: [["/learn", "The rules, explained"]] },
   {
     name: "Innovation",

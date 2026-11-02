@@ -24,6 +24,13 @@ const TOOLS: Tool[] = [
     files: ["src/lib/ai/claude.ts", "src/lib/ai/tasks.ts", "src/app/api/v1/read-bill/route.ts"],
   },
   {
+    id: "ag-studio",
+    name: "AG Studio",
+    job: "The dashboard of Maya's year: every gift, how it reached her, and her check each month compared with cash.",
+    how: "ag-studio-react 3.0 with gifts and months data sources on a shared calendar, a theme built from the site tokens, and a custom widget that runs the rules engine on whatever the filters leave in view.",
+    files: ["src/components/dashboard/FamilyStudio.tsx", "src/components/dashboard/CheckWidget.tsx", "src/components/dashboard/theme.ts", "src/lib/dashboard/data.ts"],
+  },
+  {
     id: "render",
     name: "Render",
     job: "Hosts the site and its Postgres database.",

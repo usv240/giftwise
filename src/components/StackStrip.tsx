@@ -6,6 +6,7 @@ import { Info } from "./Info";
 export const STACK = [
   { id: "paypal", name: "PayPal" },
   { id: "claude", name: "Claude" },
+  { id: "ag-studio", name: "AG Studio" },
   { id: "render", name: "Render" },
   { id: "apimatic", name: "APIMatic" },
 ] as const;

@@ -33,6 +33,7 @@ const HOW = [
 const BUILT = [
   { id: "paypal", tool: "PayPal", job: "Pays the shop directly, and keeps the month's ledger" },
   { id: "claude", tool: "Claude Opus 5.5", job: "Reads bills and runs the two reviewers" },
+  { id: "ag-studio", tool: "AG Studio", job: "The dashboard of Maya's year, with a rules-engine widget" },
   { id: "render", tool: "Render", job: "Hosts the site and its database" },
   { id: "apimatic", tool: "APIMatic", job: "Generated the PayPal SDK Giftwise builds with" },
 ];

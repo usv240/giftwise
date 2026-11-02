@@ -13,7 +13,9 @@ const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, a
 const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message.slice(0, 140)));
-page.on("console", (m) => { if (m.type() === "error" && !/favicon|paypal|sandbox\.paypal|cookie/i.test(m.text())) errors.push(m.text().slice(0, 140)); });
+// AG Studio prints its licence notice as console errors until NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY is set; that banner is not an app error.
+const AG_LICENCE = /AG Studio Core License|License Key Not Found|trial license key|unlocked for trial|^\*+$|^\* .*\*$/;
+page.on("console", (m) => { if (m.type() === "error" && !/favicon|paypal|sandbox\.paypal|cookie/i.test(m.text()) && !AG_LICENCE.test(m.text().trim())) errors.push(m.text().slice(0, 140)); });
 
 // 1. Landing: Gift Checker
 await page.goto(B + "/", { waitUntil: "networkidle" });
@@ -124,6 +126,16 @@ ok("fundraiser becomes a live gift page with every use as a payable need", uses 
 await page.goto(B + "/agents", { waitUntil: "networkidle" });
 const tools = await page.locator(".ag-tool").allTextContents();
 ok("For agents page shows the assistant calling Giftwise tools, ending with a checkout June approves", (await page.locator(".ag-ask").count()) === 2 && tools.includes("check_gift") && tools.at(-1) === "start_gift_checkout", tools.join(","));
+
+// 7e. Maya's year in AG Studio: the Giftwise widget runs the rules engine, and reruns when a giver filter is pressed
+await page.goto(B + "/dashboard", { waitUntil: "load" });
+await page.locator(".gw-check").waitFor({ timeout: 90000 });
+const allYear = (await page.locator(".gw-check").innerText()).replace(/\s+/g, " ");
+ok("dashboard widget: $994 every month with Giftwise, far lower as cash", /\$994 Every month, \d+ months/.test(allYear) && /dropped to \$0/.test(allYear), allYear.slice(0, 90));
+await page.locator(".fd-studio button").filter({ hasText: /^Dan$/ }).first().click();
+await page.waitForFunction(() => /5 months in view/.test(document.querySelector(".gw-check")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});
+const danOnly = (await page.locator(".gw-check").innerText()).replace(/\s+/g, " ");
+ok("filtering to one giver reruns the rules engine on just those gifts", /5 months in view/.test(danOnly) && danOnly !== allYear, danOnly.slice(0, 90));
 
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });
