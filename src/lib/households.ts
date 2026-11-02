@@ -93,6 +93,8 @@ export async function resetSample() {
   if (!h) return;
   const needs = await d.select({ id: schema.needs.id }).from(schema.needs).where(eq(schema.needs.householdId, h.id));
   await d.delete(schema.payments).where(eq(schema.payments.householdId, h.id));
+  // Fund grants to the sample household go too; PayPal and the audit ledger keep their own records.
+  await d.delete(schema.payouts).where(eq(schema.payouts.householdId, h.id));
   if (needs.length) {
     await d.delete(schema.payments).where(inArray(schema.payments.needId, needs.map((n) => n.id)));
     await d.update(schema.needs).set({ status: "open", funded: "0" }).where(eq(schema.needs.householdId, h.id));

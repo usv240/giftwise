@@ -18,12 +18,15 @@ async function main() {
   const pageIds = pages.map((p) => p.id);
   if (pageIds.length) {
     await d.delete(schema.payments).where(inArray(schema.payments.householdId, pageIds));
+    await d.delete(schema.payouts).where(inArray(schema.payouts.householdId, pageIds));
     await d.delete(schema.needs).where(inArray(schema.needs.householdId, pageIds));
     await d.delete(schema.households).where(inArray(schema.households.id, pageIds));
   }
 
   // The gift-pages log rows in this local database, which count toward the five-a-day limit. Run against a local database only.
   await d.delete(schema.apiRequests).where(eq(schema.apiRequests.endpoint, "gift-pages"));
+  // The same for payout batches, which are limited to three a day per visitor.
+  await d.delete(schema.apiRequests).where(eq(schema.apiRequests.endpoint, "org-payouts"));
   console.log(`Removed ${keyIds.length} test keys and ${pageIds.length} test gift pages, and reset the local gift-page count.`);
   process.exit(0);
 }

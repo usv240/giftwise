@@ -62,6 +62,34 @@ export const payments = pgTable(
   (t) => [uniqueIndex("payments_order_ref_idx").on(t.orderId, t.referenceId)],
 );
 
+/** One item of a PayPal Payouts batch: an organization's grant, routed by the rules engine to one payee. */
+export const payouts = pgTable(
+  "payouts",
+  {
+    id: serial("id").primaryKey(),
+    batchId: text("batch_id").notNull(),
+    /** sender_item_id sent to PayPal: household id and the routed line, so each item maps back to its need. */
+    senderItemId: text("sender_item_id").notNull(),
+    funder: text("funder").notNull(),
+    householdId: integer("household_id").references(() => households.id),
+    needId: integer("need_id").references(() => needs.id),
+    title: text("title").notNull().default(""),
+    payeeName: text("payee_name").notNull(),
+    payeeEmail: text("payee_email").notNull(),
+    route: text("route").notNull(),
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    /** PayPal's item status: PENDING | SUCCESS | FAILED | UNCLAIMED | RETURNED | ONHOLD | BLOCKED | REFUNDED | REVERSED */
+    status: text("status").notNull().default("PENDING"),
+    itemId: text("item_id"),
+    transactionId: text("transaction_id"),
+    /** Set once the item has counted toward its need, so a resync never counts it twice. */
+    countedAt: timestamp("counted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("payouts_batch_item_idx").on(t.batchId, t.senderItemId)],
+);
+
 export const auditEvents = pgTable("audit_events", {
   id: serial("id").primaryKey(),
   at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),

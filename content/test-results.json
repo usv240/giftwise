@@ -14,25 +14,25 @@
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 63,
-      "total": 63,
-      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the MCP server, PayPal orders, routed gifts, receipts, webhook signature checks, the ledger, developer keys and every error path"
+      "passed": 70,
+      "total": 70,
+      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the MCP server, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 54,
-      "total": 54,
-      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its filters, the gift page, keyboard use, and the developer flow"
+      "passed": 56,
+      "total": 56,
+      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page, keyboard use, and the developer flow"
     },
     {
       "id": "a11y",
       "name": "Accessibility and layout",
       "command": "npm run e2e:a11y",
-      "passed": 64,
-      "total": 64,
-      "what": "axe WCAG 2.2 AA on 16 pages, including a generated gift page, For agents and the AG Studio dashboard, at desktop and phone widths, light and dark, with no sideways scroll"
+      "passed": 68,
+      "total": 68,
+      "what": "axe WCAG 2.2 AA on 17 pages, including a generated gift page, For agents, the AG Studio dashboard and For organizations, at desktop and phone widths, light and dark, with no sideways scroll"
     },
     {
       "id": "paypal",

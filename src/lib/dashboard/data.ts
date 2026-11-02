@@ -58,6 +58,27 @@ export async function dashboardData() {
           source: "Paid on this site",
         });
       }
+      // Grants a fund sent through PayPal Payouts that PayPal reports as paid.
+      const grants = await db()
+        .select()
+        .from(schema.payouts)
+        .where(and(eq(schema.payouts.householdId, data.household.id), eq(schema.payouts.status, "SUCCESS")));
+      for (const g of grants) {
+        const need = data.needs.find((n) => n.id === g.needId);
+        const category = (need?.category ?? "other") as Category;
+        rows.push({
+          date: g.updatedAt.toISOString().slice(0, 10),
+          giver: g.funder.replace(/ \(sample\)$/, ""),
+          need: need?.title ?? "Savings",
+          paidTo: g.payeeName,
+          route: ROUTE_LABEL[g.route as Delivery] ?? g.route,
+          delivery: g.route as Delivery,
+          whatFor: CATEGORY_LABEL[category],
+          category,
+          amount: Number(g.amount),
+          source: "Fund payout on this site",
+        });
+      }
     }
   }
   rows.sort((a, b) => a.date.localeCompare(b.date));

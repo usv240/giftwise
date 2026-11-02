@@ -3,6 +3,7 @@ import { audit } from "@/lib/audit";
 import { db, dbConfigured, schema } from "@/lib/db";
 import { captureAndRecord, syncFromPayPal } from "@/lib/paypal/capture";
 import { paypalConfigured, paypalRest } from "@/lib/paypal/client";
+import { syncBatch } from "@/lib/paypal/payouts";
 
 /**
  * POST /api/paypal/webhook: PayPal tells Giftwise when a checkout is approved, a payment completes, or one is
@@ -55,6 +56,10 @@ export async function POST(req: Request) {
     result = (await captureAndRecord(orderId, { actor: "webhook" })).kind;
   } else if (type === "PAYMENT.CAPTURE.COMPLETED" && orderId) {
     result = (await syncFromPayPal(orderId, "webhook")).kind;
+  } else if (type.startsWith("PAYMENT.PAYOUTS-ITEM.") || type.startsWith("PAYMENT.PAYOUTSBATCH.")) {
+    // A payout item succeeded, failed, was unclaimed or returned: refresh the whole batch from PayPal.
+    const batchId = (r as { payout_batch_id?: string; batch_header?: { payout_batch_id?: string } }).payout_batch_id ?? (r as { batch_header?: { payout_batch_id?: string } }).batch_header?.payout_batch_id;
+    if (batchId) result = (await syncBatch(batchId, "webhook")).ok ? "synced" : "sync_failed";
   } else if (captureId && (type === "PAYMENT.CAPTURE.REFUNDED" || type === "PAYMENT.CAPTURE.REVERSED" || type === "PAYMENT.CAPTURE.DENIED")) {
     const status = type === "PAYMENT.CAPTURE.DENIED" ? "declined" : "refunded";
     const updated = await db().update(schema.payments).set({ status }).where(eq(schema.payments.captureId, captureId)).returning({ id: schema.payments.id });

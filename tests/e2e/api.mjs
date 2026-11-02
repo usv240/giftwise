@@ -199,4 +199,30 @@ ok("MCP unknown method -> JSON-RPC -32601", j.error?.code === -32601);
 r = await post("/api/paypal/webhook", { id: "WH-TEST", event_type: "PAYMENT.CAPTURE.REFUNDED", resource: { id: "NOPE" } });
 ok("unsigned PayPal webhook is refused", r.status === 400 || r.status === 503, `${r.status}`);
 
+
+// Payouts for organizations: the rules route each grant, one PayPal batch pays every payee, and PayPal reports each item paid
+r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 900 }] });
+ok("org payouts over the per-household sandbox limit -> 400", r.status === 400, `${r.status}`);
+r = await post("/api/org/payouts", { grants: [{ slug: "nobody-here", amount: 20 }] });
+ok("org payouts to an unknown page -> 422", r.status === 422, `${r.status}`);
+r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }], preview: true });
+j = await r.json();
+ok("org payouts preview routes a $10 grant and keeps the check at $994", r.status === 200 && j.data.preview === true && j.data.items.length >= 1 && j.data.households[0].checkWithGrant === 994, JSON.stringify(j.data?.items?.map((i) => i.payeeName)));
+r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }] });
+j = await r.json();
+const payoutBatch = j.data?.batch_id;
+ok("org payouts sends one PayPal Payouts batch", r.status === 200 && /^[A-Z0-9]{8,30}$/.test(payoutBatch ?? ""), `${r.status} ${payoutBatch ?? j.error?.message}`);
+if (payoutBatch) {
+  let b = null;
+  for (let i = 0; i < 20; i++) {
+    b = (await (await fetch(`${B}/api/org/payouts/${payoutBatch}`)).json()).data;
+    if (b?.batch_status === "SUCCESS") break;
+    await new Promise((res) => setTimeout(res, 3000));
+  }
+  ok("PayPal reports the batch sent, with a transaction id for every item", b?.batch_status === "SUCCESS" && b.items.every((i) => i.status === "SUCCESS" && i.transaction_id), `${b?.batch_status} ${b?.items?.map((i) => i.status).join(",")}`);
+  ok("each paid item is checked against PayPal's transaction report", b?.items.every((i) => ["found", "waiting"].includes(i.in_paypal_report)), b?.items?.map((i) => i.in_paypal_report).join(","));
+}
+r = await fetch(`${B}/api/org/payouts/NOTABATCH1`);
+ok("unknown payout batch -> 404", r.status === 404, `${r.status}`);
+await post("/api/demo/reset", {});
 console.log(`\n${pass} passed, ${fail} failed`);

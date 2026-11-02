@@ -139,6 +139,15 @@ ok("filtering to one giver reruns the rules engine on just those gifts", /5 mont
 await page.getByRole("button", { name: "Edit the dashboard" }).click();
 ok("edit mode opens the AG Studio assistant with Giftwise prompt starters", await page.getByRole("button", { name: "What if it were cash?" }).isVisible({ timeout: 15000 }).catch(() => false));
 
+// 7f. For organizations: the fund's live PayPal balance, and a grant routed before anything is sent (no payout here)
+await page.goto(B + "/organizations", { waitUntil: "load" });
+await page.locator(".org-household").first().waitFor({ timeout: 60000 });
+ok("organizations page shows the fund's PayPal balance", /\$[\d,]+/.test((await page.locator(".org-balance").textContent()) ?? ""));
+await page.getByLabel("Grant to Maya in dollars").fill("120");
+await page.getByRole("button", { name: "Show the routing" }).click();
+await page.locator(".org-plans").waitFor({ timeout: 30000 });
+ok("a $120 grant is routed so her check stays $994", /Check stays \$994/.test((await page.locator(".org-plans").innerText()) ?? ""));
+
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });
 await page.waitForTimeout(3500);

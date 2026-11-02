@@ -94,7 +94,7 @@
     "title": "PayPal",
     "what": "Moves the money: donors pay the shop directly, and every payment lands in her monthly ledger.",
     "why": "Paying the shop instead of the person is what keeps her full check.",
-    "technical": "Orders v2 with a payee on each purchase unit, so one checkout can pay several recipients. JavaScript SDK v6 buttons, server-side capture with PayPal-Request-Id idempotency, approval links with a return capture for AI agents, signature-verified webhooks, live order lookups and sandbox negative testing. Sandbox only."
+    "technical": "Orders v2 with a payee on each purchase unit, so one checkout can pay several recipients. JavaScript SDK v6 buttons, server-side capture with PayPal-Request-Id idempotency, approval links with a return capture for AI agents, Payouts batches for funds, Transaction Search and the Balances API for reconciliation, signature-verified webhooks, and sandbox negative testing. Sandbox only."
   },
   "stack.claude": {
     "title": "Claude Opus 5.5",
@@ -473,5 +473,29 @@
     "what": "A dashboard of every gift to Maya this year: who gave, what it paid for, how it reached her, and her SSI check each month.",
     "why": "Families and counselors can see at a glance that the help arrived and her check stayed whole, and what cash would have cost.",
     "technical": "AG Studio 3.0. The Giftwise check is a custom widget that runs the rules engine on the filtered rows. In edit mode the AI Assistant is the Studio Agent Framework on Claude, through /api/studio-ai, with the rules engine added as the ssi_rules_engine tool."
+  },
+  "page.organizations": {
+    "title": "About this page",
+    "what": "How a foundation, mutual-aid fund or church that already holds money for families can pay many families’ needs at once.",
+    "why": "A grant sent as cash can lower someone’s SSI check just like a gift. Paid to the shop or the ABLE account, it does not.",
+    "technical": "PayPal Payouts: one batch, one item per payee, each grant routed by the rules engine. The Balances API shows the fund’s balance, and Transaction Search confirms each payout in PayPal’s own report."
+  },
+  "org.fund": {
+    "title": "The sample fund",
+    "what": "A fictional fund. Its money sits in its own PayPal account, which in the sandbox is this app’s business account.",
+    "why": "Giftwise never holds the money. The fund pays each shop and ABLE account directly.",
+    "technical": "GET /v1/reporting/balances. PayPal refreshes this figure periodically, so it can lag a recent payout."
+  },
+  "org.grants": {
+    "title": "Choose the grants",
+    "what": "Pick an amount for each household. Giftwise splits each one across that household’s open needs and ABLE account.",
+    "why": "Every line is checked by the rules engine, and a grant that would lower a check is not sent.",
+    "technical": "POST /api/org/payouts with preview: true returns the routing only. Sandbox limits keep the fund usable for everyone."
+  },
+  "org.batch": {
+    "title": "The payout batch",
+    "what": "PayPal’s live status for every item in the batch, and whether it already appears in PayPal’s transaction report.",
+    "why": "The fund can show its board or its auditors exactly where every dollar went.",
+    "technical": "GET /v1/payments/payouts/{id} for item status and transaction ids; Transaction Search (/v1/reporting/transactions) to confirm each one. Paid items count toward their needs once, however often the batch is refreshed. Payout webhooks refresh it too."
   }
 }
