@@ -94,7 +94,7 @@
     "title": "PayPal",
     "what": "Moves the money: donors pay the shop directly, and every payment lands in her monthly ledger.",
     "why": "Paying the shop instead of the person is what keeps her full check.",
-    "technical": "Orders v2 with a payee on each purchase unit, so one checkout can pay several recipients. JavaScript SDK v6 buttons, server-side capture with PayPal-Request-Id idempotency, live order lookups and sandbox negative testing. Sandbox only."
+    "technical": "Orders v2 with a payee on each purchase unit, so one checkout can pay several recipients. JavaScript SDK v6 buttons, server-side capture with PayPal-Request-Id idempotency, approval links with a return capture for AI agents, signature-verified webhooks, live order lookups and sandbox negative testing. Sandbox only."
   },
   "stack.claude": {
     "title": "Claude Opus 5.5",

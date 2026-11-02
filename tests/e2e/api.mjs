@@ -195,4 +195,8 @@ r = await mcp("nope/never");
 j = await r.json();
 ok("MCP unknown method -> JSON-RPC -32601", j.error?.code === -32601);
 
+// PayPal webhooks: an event without a valid PayPal signature is never accepted (400, or 503 where webhooks are not set up)
+r = await post("/api/paypal/webhook", { id: "WH-TEST", event_type: "PAYMENT.CAPTURE.REFUNDED", resource: { id: "NOPE" } });
+ok("unsigned PayPal webhook is refused", r.status === 400 || r.status === 503, `${r.status}`);
+
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -14,9 +14,9 @@
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 62,
-      "total": 62,
-      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the MCP server, PayPal orders, routed gifts, receipts, the ledger, developer keys and every error path"
+      "passed": 63,
+      "total": 63,
+      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the MCP server, PayPal orders, routed gifts, receipts, webhook signature checks, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",

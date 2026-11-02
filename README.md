@@ -18,7 +18,7 @@ About 7.3 million people receive SSI (September 2026). SSI counts cash gifts as 
 
 ## What is inside
 
-- **PayPal:** Orders v2 with several payees in one order, the JavaScript SDK v6 button, server-side capture with `PayPal-Request-Id` idempotency, live order lookups, and sandbox negative testing for declined cards.
+- **PayPal:** Orders v2 with several payees in one order, the JavaScript SDK v6 button, server-side capture with `PayPal-Request-Id` idempotency, approval links that capture on return, signature-verified webhooks as a safety net, live order lookups, and sandbox negative testing for declined cards.
 - **Eight failure cases, run live** on `/judges`: declined card, double click, unapproved payment, a browser changing the amount or payee, a gift that would lower her check, an AI reviewer that gets the rule wrong, an edited ledger entry, and refunds.
 - **Claude (`claude-opus-5-5`):** reads bills, quotes and fundraiser pages into structured data. The rules engine, not the model, decides where the money goes.
 - **Two reviewers, two rulebooks:** when a bill might be a housing cost, one Claude reviewer reads only the regulations and the Federal Register, the other only SSA's operating manual. Each must quote its rulebook word for word and a program checks every quote. Giftwise takes a reading only when both checked answers agree; otherwise it uses the route that keeps the check whole under either reading. Measured on 20 labeled bills: every clear case right, all 40 quotes found word for word, and the check kept whole in all 20 (results on `/judges`).
@@ -48,7 +48,7 @@ npm run dev -- -p 3100        # http://localhost:3100
 | Suite | Command | Result |
 |---|---|---|
 | Rules engine and routing | `npm test` | 40 of 40 |
-| API end to end | `npm run e2e:api` | 62 of 62 |
+| API end to end | `npm run e2e:api` | 63 of 63 |
 | Browser end to end | `npm run e2e:ui` | 51 of 51 |
 | Accessibility, 15 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 60 of 60 page views |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |

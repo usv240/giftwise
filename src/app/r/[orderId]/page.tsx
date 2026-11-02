@@ -18,6 +18,11 @@ const ACTION: Record<string, string> = {
   "paypal.order.created": "PayPal order created",
   "paypal.routed_order.created": "PayPal order created, split by the rules",
   "paypal.order.captured": "Payment completed by PayPal",
+  "paypal.webhook.checkout.order.approved": "PayPal reported the giver's approval (webhook)",
+  "paypal.webhook.payment.capture.completed": "PayPal confirmed a payment (webhook)",
+  "paypal.webhook.payment.capture.refunded": "PayPal reported a refund (webhook)",
+  "paypal.webhook.payment.capture.reversed": "PayPal reported a reversal (webhook)",
+  "paypal.webhook.payment.capture.denied": "PayPal reported a declined payment (webhook)",
 };
 const ROUTE: Record<string, string> = { vendor: "Paid straight to the shop", able: "Paid to the ABLE account" };
 const when = (d: Date) => d.toLocaleString("en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" });
@@ -150,7 +155,10 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
         <ol className="rc-events">
           {events.map((e) => (
             <li key={e.id}>
-              <span>{ACTION[e.action] ?? e.action}</span>
+              <span>
+                {ACTION[e.action] ?? e.action}
+                {e.actor === "agent" ? ", started by an AI agent for the giver to approve" : ""}
+              </span>
               <span className="muted">{when(e.at)}</span>
               <span className="rc-hash tabular" title={e.hash}>
                 {e.hash.slice(0, 16)}

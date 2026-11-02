@@ -25,6 +25,12 @@ export async function runChecks(): Promise<Check[]> {
   return [
     { id: "paypal", name: "PayPal sandbox", mode: pp?.ok ? "live" : "not_connected", detail: pp ? pp.detail : "Credentials not set", ms: pp?.ms },
     { id: "claude", name: "Claude Opus 5.5", mode: aiAvailable() ? "live" : "fallback", detail: aiAvailable() ? "API key set; bill and fundraiser reading are live" : "Ready-made examples show saved results" },
+    {
+      id: "webhooks",
+      name: "PayPal webhooks",
+      mode: process.env.PAYPAL_WEBHOOK_ID?.trim() ? "live" : "not_connected",
+      detail: process.env.PAYPAL_WEBHOOK_ID?.trim() ? "Every event is signature-checked with PayPal before use" : "Webhook ID not set; payments are captured on the server either way",
+    },
     { id: "database", name: "Postgres", mode: database?.ok ? "live" : "not_connected", detail: database ? database.detail : "DATABASE_URL not set", ms: database?.ms },
   ];
 }
