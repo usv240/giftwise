@@ -104,9 +104,9 @@
   },
   "stack.ag-studio": {
     "title": "AG Studio",
-    "what": "The dashboard of Maya’s year: every gift, how it reached her, and her SSI check each month compared with cash.",
+    "what": "The dashboard of Maya’s year, and an assistant inside it that builds widgets and answers questions with the Giftwise rules engine.",
     "why": "Families and counselors see at a glance that the help arrived and the check stayed whole, and can build their own views.",
-    "technical": "ag-studio and ag-studio-react 3.0 with two data sources on a shared calendar, a theme mapped to the site tokens for light and dark, and a custom Giftwise check widget that runs the rules engine on the filtered rows."
+    "technical": "ag-studio 3.0 with two data sources on a shared calendar, a theme mapped to the site tokens, a custom Giftwise check widget, and the Studio Agent Framework: the five built-in agents run on Claude Haiku 5.5 through our own AgLlmAdapter, and the lead and data agents also get the rules engine as a tool."
   },
   "stack.render": {
     "title": "Render",
@@ -472,6 +472,6 @@
     "title": "About this page",
     "what": "A dashboard of every gift to Maya this year: who gave, what it paid for, how it reached her, and her SSI check each month.",
     "why": "Families and counselors can see at a glance that the help arrived and her check stayed whole, and what cash would have cost.",
-    "technical": "AG Studio 3.0 with two data sources (gifts and months) on a shared calendar, themed from the site tokens. The Giftwise check widget is a custom widget that runs the rules engine on whatever the filters leave in view."
+    "technical": "AG Studio 3.0. The Giftwise check is a custom widget that runs the rules engine on the filtered rows. In edit mode the AI Assistant is the Studio Agent Framework on Claude, through /api/studio-ai, with the rules engine added as the ssi_rules_engine tool."
   }
 }

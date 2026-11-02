@@ -27,8 +27,8 @@ const TOOLS: Tool[] = [
     id: "ag-studio",
     name: "AG Studio",
     job: "The dashboard of Maya's year: every gift, how it reached her, and her check each month compared with cash.",
-    how: "ag-studio-react 3.0 with gifts and months data sources on a shared calendar, a theme built from the site tokens, and a custom widget that runs the rules engine on whatever the filters leave in view.",
-    files: ["src/components/dashboard/FamilyStudio.tsx", "src/components/dashboard/CheckWidget.tsx", "src/components/dashboard/theme.ts", "src/lib/dashboard/data.ts"],
+    how: "ag-studio-react 3.0 with gifts and months data sources on a shared calendar, a theme built from the site tokens, a custom widget that runs the rules engine on whatever the filters leave in view, and the Studio Agent Framework running on Claude through our own adapter, with the rules engine as an extra tool.",
+    files: ["src/components/dashboard/FamilyStudio.tsx", "src/components/dashboard/CheckWidget.tsx", "src/components/dashboard/studioAi.ts", "src/lib/studio-ai/translate.ts"],
   },
   {
     id: "render",

@@ -24,7 +24,7 @@ About 7.3 million people receive SSI (September 2026). SSI counts cash gifts as 
 - **Two reviewers, two rulebooks:** when a bill might be a housing cost, one Claude reviewer reads only the regulations and the Federal Register, the other only SSA's operating manual. Each must quote its rulebook word for word and a program checks every quote. Giftwise takes a reading only when both checked answers agree; otherwise it uses the route that keeps the check whole under either reading. Measured on 20 labeled bills: every clear case right, all 40 quotes found word for word, and the check kept whole in all 20 (results on `/judges`).
 - **Fundraiser to gift page:** paste a fundraiser link and Giftwise makes a live gift page where every stated use is paid straight to the shop or the ABLE account, with the pronouns the organizer chooses.
 - **For AI agents:** an MCP server at `/api/mcp` with five tools. An assistant can check a gift, read a gift page, plan a gift, ask the two reviewers, and start a PayPal checkout that only the giver can approve; Giftwise captures when PayPal sends the giver back. `/agents` shows a Claude assistant doing exactly that, and runs it live.
-- **Maya's year, in AG Studio:** `/dashboard` shows every gift and her check each month with Giftwise and as cash, themed from the site tokens in light and dark. A custom Giftwise widget runs the rules engine on whatever the filters leave in view.
+- **Maya's year, in AG Studio:** `/dashboard` shows every gift and her check each month with Giftwise and as cash, themed from the site tokens in light and dark. A custom Giftwise widget runs the rules engine on whatever the filters leave in view. In edit mode, AG Studio's own agents run on Claude through our adapter (AG Studio ships none for Claude), and can call the rules engine to answer what-if questions such as "what if that rent help had been cash?"
 - **Developer API:** free sandbox keys stored only as hashes, rate limits, OpenAPI 3.1 at `/openapi.json`, docs and a live playground at `/developers`.
 - **Design:** light and dark themes, phone and desktop, an Info button on every element, and WCAG 2.2 AA checked with axe.
 
@@ -48,9 +48,9 @@ npm run dev -- -p 3100        # http://localhost:3100
 
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine and routing | `npm test` | 40 of 40 |
+| Rules engine and routing | `npm test` | 45 of 45 |
 | API end to end | `npm run e2e:api` | 63 of 63 |
-| Browser end to end | `npm run e2e:ui` | 53 of 53 |
+| Browser end to end | `npm run e2e:ui` | 54 of 54 |
 | Accessibility, 16 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 64 of 64 page views |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 of 5 |

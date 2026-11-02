@@ -14,7 +14,7 @@ const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message.slice(0, 140)));
 // AG Studio prints its licence notice as console errors until NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY is set; that banner is not an app error.
-const AG_LICENCE = /AG Studio Core License|License Key Not Found|trial license key|unlocked for trial|^\*+$|^\* .*\*$/;
+const AG_LICENCE = /AG Studio [A-Za-z ]*License|License Key Not Found|trial license key|unlocked for trial|^\*+$|^\* .*\*$/;
 page.on("console", (m) => { if (m.type() === "error" && !/favicon|paypal|sandbox\.paypal|cookie/i.test(m.text()) && !AG_LICENCE.test(m.text().trim())) errors.push(m.text().slice(0, 140)); });
 
 // 1. Landing: Gift Checker
@@ -136,6 +136,8 @@ await page.locator(".fd-studio button").filter({ hasText: /^Dan$/ }).first().cli
 await page.waitForFunction(() => /5 months in view/.test(document.querySelector(".gw-check")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});
 const danOnly = (await page.locator(".gw-check").innerText()).replace(/\s+/g, " ");
 ok("filtering to one giver reruns the rules engine on just those gifts", /5 months in view/.test(danOnly) && danOnly !== allYear, danOnly.slice(0, 90));
+await page.getByRole("button", { name: "Edit the dashboard" }).click();
+ok("edit mode opens the AG Studio assistant with Giftwise prompt starters", await page.getByRole("button", { name: "What if it were cash?" }).isVisible({ timeout: 15000 }).catch(() => false));
 
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });

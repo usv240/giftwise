@@ -1,10 +1,11 @@
 "use client";
 
-import { enableStudioDevValidations, type AgDefaultRegistry, type AgWidgetsConfig } from "ag-studio";
+import { AgStudioAiModule, enableStudioDevValidations, type AgDefaultRegistry, type AgWidgetsConfig } from "ag-studio";
 import { AgStudio, AgStudioProvider, createWidgets } from "ag-studio-react";
 import { useEffect, useMemo, useState } from "react";
 import CheckWidget, { type GiftwiseRegistry } from "./CheckWidget";
 import { initialReport, studioData } from "./report";
+import { studioAi } from "./studioAi";
 import { giftwiseTheme } from "./theme";
 import type { GiftRow, MonthRow } from "@/lib/dashboard/data";
 
@@ -68,8 +69,8 @@ export default function FamilyStudio({ gifts, months }: { gifts: GiftRow[]; mont
         </button>
       </div>
       <div className="fd-studio">
-        <AgStudioProvider licenseKey={process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY || undefined}>
-          <AgStudio<GiftwiseRegistry> style={{ height: "100%", width: "100%" }} data={data} initialState={initialReport} widgets={widgets} mode={mode} theme={giftwiseTheme} />
+        <AgStudioProvider licenseKey={process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY || undefined} modules={[AgStudioAiModule]}>
+          <AgStudio<GiftwiseRegistry> style={{ height: "100%", width: "100%" }} data={data} initialState={initialReport} widgets={widgets} mode={mode} theme={giftwiseTheme} ai={studioAi} />
         </AgStudioProvider>
       </div>
     </div>

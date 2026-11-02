@@ -6,9 +6,9 @@
       "id": "unit",
       "name": "Rules engine and routing",
       "command": "npm test",
-      "passed": 40,
-      "total": 40,
-      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, and the reviewers’ referee"
+      "passed": 45,
+      "total": 45,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, and the AG Studio to Claude translation"
     },
     {
       "id": "api",
@@ -22,8 +22,8 @@
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 53,
-      "total": 53,
+      "passed": 54,
+      "total": 54,
       "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its filters, the gift page, keyboard use, and the developer flow"
     },
     {
