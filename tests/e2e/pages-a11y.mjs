@@ -6,7 +6,7 @@ const AXE = readFileSync("node_modules/axe-core/axe.min.js", "utf8");
 
 // A receipt needs a real order: start one (no payment) so its page exists.
 const order = await (await fetch(`${B}/api/paypal/gift-orders`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: "maya", amount: 300 }) })).json();
-const routes = ["/", "/try", "/learn", "/g/maya", "/judges", "/developers", "/developers/docs", "/developers/keys", "/status", "/stack", "/about", ...(order.data?.id ? [`/r/${order.data.id}`] : [])];
+const routes = ["/", "/try", "/try/presets/electric-bill", "/learn", "/g/maya", "/judges", "/developers", "/developers/docs", "/developers/keys", "/status", "/stack", "/about", ...(order.data?.id ? [`/r/${order.data.id}`] : [])];
 
 const b = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
 let failed = 0;

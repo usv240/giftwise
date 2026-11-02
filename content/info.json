@@ -84,7 +84,7 @@
   "stack.strip": {
     "title": "Every tool, with a job",
     "what": "These are the tools Giftwise is built with. Each one does one specific job here.",
-    "why": "Open any name to see what it does in Giftwise, or visit How it is built for the full list with live status.",
+    "why": "Open any name to see what it does in Giftwise, or visit How it is built for where each one lives in the code.",
     "learnMore": {
       "label": "How it is built",
       "href": "/stack"
@@ -94,7 +94,7 @@
     "title": "PayPal",
     "what": "Moves the money: donors pay the shop directly, and every payment lands in her monthly ledger.",
     "why": "Paying the shop instead of the person is what keeps her full check.",
-    "technical": "Orders v2 with purchase_units[0].payee = vendor, JS SDK v6 buttons, Webhooks, Payouts (ABLE), Transaction Search, Vault, Agent Toolkit and the PayPal MCP server. Sandbox only."
+    "technical": "Orders v2 with a payee on each purchase unit, so one checkout can pay several recipients. JavaScript SDK v6 buttons, server-side capture with PayPal-Request-Id idempotency, live order lookups and sandbox negative testing. Sandbox only."
   },
   "stack.claude": {
     "title": "Claude Opus 5.5",
@@ -108,59 +108,17 @@
     "why": "Counselors can ask the dashboard questions and see answers built as charts.",
     "technical": "ag-studio-react with custom widgets and a Studio Agent Framework analyst using a Claude adapter. ag-grid-react for the ledger."
   },
-  "stack.bryntum": {
-    "title": "Bryntum Calendar",
-    "what": "A calendar that shows when each gift counts and when her check changes.",
-    "why": "SSI rules depend on dates. Seeing them on a calendar makes the timing clear.",
-    "technical": "@bryntum/calendar (trial) via @bryntum/calendar-react, themed with site tokens, with a keyboard alternative to dragging."
-  },
-  "stack.channel3": {
-    "title": "Channel3",
-    "what": "Finds the exact item to buy when someone wants to give cash.",
-    "why": "Giving the item itself keeps her full check.",
-    "technical": "POST /v1/search and GET /v1/products/{id} on api.trychannel3.com, plus the Channel3 MCP server for the assistant. Results cached for 24 hours."
-  },
-  "stack.elastic": {
-    "title": "Elastic",
-    "what": "Searches Social Security's rulebook and returns the exact passage behind each answer.",
-    "why": "Every answer cites its source, and the newest rule always comes first.",
-    "technical": "Elastic Cloud Serverless, semantic_text with hybrid search, effective-date ranking, and an Agent Builder agent reached through its MCP server. Falls back to Postgres full-text search."
-  },
-  "stack.kernel": {
-    "title": "KERNEL",
-    "what": "Opens fundraiser pages in a cloud browser to read them, and checks nightly for rule updates.",
-    "why": "Families can paste a fundraiser link and see how to deliver every dollar safely.",
-    "technical": "@onkernel/sdk browsers.create with a Playwright script, live view link in Technical mode."
-  },
-  "stack.zapier": {
-    "title": "Zapier",
-    "what": "Bills forwarded by email start a review, and statements and thank-you notes go out automatically.",
-    "why": "Families keep using the email and Drive they already know.",
-    "technical": "Zapier MCP called through the Anthropic MCP connector; inbound trigger posts to /api/zapier/inbound."
-  },
   "stack.render": {
     "title": "Render",
-    "what": "Hosts the site and its database, and runs the monthly statements and benchmark jobs.",
+    "what": "Hosts the site and its Postgres database.",
     "why": "Reliable hosting keeps the demo live through judging.",
-    "technical": "Render web service, managed Postgres, Render Workflows tasks, and cron jobs, defined in render.yaml."
+    "technical": "A Render web service and a managed Postgres database, both defined in render.yaml. Tables are created by a pre-deploy command on every release."
   },
   "stack.apimatic": {
     "title": "APIMatic",
-    "what": "We built the PayPal integration with APIMatic's PayPal Context Plugin, and publish our own API docs and SDKs with APIMatic.",
-    "why": "Developers can add benefit-safe giving to their own apps quickly.",
-    "technical": "@paypal/paypal-server-sdk (APIMatic-generated), npx context-plugins install paypal, OpenAPI spec published to an APIMatic portal with TypeScript and Python SDKs."
-  },
-  "stack.postman": {
-    "title": "Postman",
-    "what": "A public collection of the Giftwise API, with a runner that repeats our benchmark.",
-    "why": "Anyone can check our results for themselves in one click.",
-    "technical": "Collection generated from OpenAPI with tests on every request; collection runner over benchmark/cases.json."
-  },
-  "stack.astropods": {
-    "title": "Astropods",
-    "what": "Hosts the AI reviewer agent and records a trace of every run.",
-    "why": "Each review can be inspected step by step.",
-    "technical": "astropods.yml blueprint deployed with the ast CLI; the app calls the hosted agent and falls back to running in-process."
+    "what": "Generated the PayPal Server SDK that Giftwise uses for every Orders call.",
+    "why": "A typed SDK catches mistakes in PayPal requests before they reach PayPal.",
+    "technical": "@paypal/paypal-server-sdk, generated by APIMatic, for creating, reading and capturing orders."
   },
   "intro.rule": {
     "title": "The rule behind Giftwise",
@@ -176,7 +134,7 @@
     "title": "From a need to a payment",
     "what": "A caregiver adds a need, Giftwise checks the rule, a donor pays the shop with PayPal, and her month stays steady.",
     "why": "Each step shows its result, so everyone knows where things stand.",
-    "technical": "Vision extraction, rules engine plus Elastic citation, PaymentPlan approval, PayPal Orders v2 capture, webhook to the ledger."
+    "technical": "Claude vision extraction, the rules engine with cited sources, PayPal Orders v2 with a payee per purchase unit, server-side capture, and a hash-chained ledger."
   },
   "showcase.board": {
     "title": "Sample requests",
@@ -289,7 +247,7 @@
     "title": "About this page",
     "what": "Test Giftwise with your own situation, or open one of the ready-made examples.",
     "why": "You can see exactly how a gift would be counted before anyone sends money.",
-    "technical": "Describe and CSV tabs run the deterministic engine. Bill and fundraiser tabs call Claude Opus 5.5 (vision) and KERNEL. Nothing you enter is stored unless you save it."
+    "technical": "Describe and CSV tabs run the deterministic engine. Bill and fundraiser tabs ask Claude Opus 5.5 to read the document. Nothing you enter is stored unless you save it."
   },
   "try.describe": {
     "title": "Describe a gift",
@@ -307,19 +265,17 @@
     "title": "A bill or quote",
     "what": "Upload or photograph a bill or a quote. Claude reads it and Giftwise checks the rule.",
     "why": "Most needs start as a piece of paper. This turns it into a safe payment plan.",
-    "technical": "POST /api/v1/read-bill: Claude Opus 5.5 vision with a structured output schema, then the rules engine and Elastic citations.",
+    "technical": "POST /api/v1/read-bill: Claude Opus 5.5 vision with a structured output schema, then the rules engine and its cited sources.",
     "sponsor": [
-      "Claude",
-      "Elastic"
+      "Claude"
     ]
   },
   "try.fundraiser": {
     "title": "A fundraiser page",
     "what": "Paste a link to a public fundraising page. Giftwise reads it and shows how every dollar can reach her benefit-safe.",
     "why": "Fundraisers often raise cash, which counts as income. A plan can deliver the same help without lowering the check.",
-    "technical": "POST /api/v1/analyze-fundraiser: KERNEL cloud browser reads the page, Claude extracts goal and uses, the engine plans routes.",
+    "technical": "POST /api/v1/analyze-fundraiser: Giftwise fetches the public page, Claude extracts the goal and what the money is for, and the engine plans benefit-safe routes.",
     "sponsor": [
-      "KERNEL",
       "Claude"
     ]
   },
@@ -423,9 +379,9 @@
   },
   "judges.cases": {
     "title": "Failure cases",
-    "what": "Seven ways a payment can go wrong, each run live against the PayPal sandbox.",
+    "what": "Eight ways a gift can go wrong: seven run live against the PayPal sandbox, and one where an AI reviewer gets the rule wrong.",
     "why": "A payment product is only as good as what it does when something fails.",
-    "technical": "Declines use PayPal's sandbox negative testing (PayPal-Mock-Response: INSTRUMENT_DECLINED). Double clicks share one PayPal-Request-Id. The ledger check edits a copy in memory, never the stored ledger.",
+    "technical": "Declines use PayPal's sandbox negative testing (PayPal-Mock-Response: INSTRUMENT_DECLINED). Double clicks share one PayPal-Request-Id. The ledger check edits a copy in memory, never the stored ledger. The reviewer case replays the recorded Electric bill review with one quote replaced, through the same referee code the API uses.",
     "sponsor": [
       "PayPal"
     ]
@@ -465,5 +421,21 @@
     "what": "The keys created in this browser, the calls they made, and buttons to rotate or revoke them.",
     "why": "You stay in control of every key.",
     "technical": "GET /api/keys reads usage from the api_requests table. Rotate issues a new key and revokes the old one in one step."
+  },
+  "review.panel": {
+    "title": "Two reviewers, two rulebooks",
+    "what": "Two AI reviewers decide whether a bill is a housing cost. One reads only the federal regulations and the Federal Register. The other reads only Social Security’s operating manual.",
+    "why": "Housing paid by someone else lowers her check, so this one question decides where the money should go. Two independent readings, each with its quote checked, are harder to get wrong than one.",
+    "technical": "POST /api/v1/review-bill. Each reviewer is claude-opus-5-5 with a structured output whose passage_id is limited to its own rulebook. The referee is plain code: a quote must appear word for word in the passage it cites. Giftwise acts on a reading only when both checked answers agree; otherwise the rules engine picks the route with the best worst case."
+  },
+  "review.regs": {
+    "title": "Regulations reviewer",
+    "what": "Reads only the federal regulations (20 CFR Part 416) and the Federal Register.",
+    "why": "The regulations are the law SSA applies. A second reviewer reads SSA’s manual, so each answer is checked against a different source."
+  },
+  "review.poms": {
+    "title": "Manual reviewer",
+    "what": "Reads only Social Security’s Program Operations Manual System (POMS), the instructions SSA staff follow.",
+    "why": "The manual has the worked examples staff use day to day. Its answer is compared with the regulations reviewer’s."
   }
 }

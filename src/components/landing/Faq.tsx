@@ -29,7 +29,7 @@ export const FAQS = [
   },
   {
     q: "How do I know an answer is right?",
-    a: "Every answer cites the rule. Two AI reviewers check each unclear case from opposite sides, and fixed rules, not AI, do the money math. Our test against Social Security's own worked examples is on the Benchmark page.",
+    a: "Every answer cites the rule. When a bill might be a housing cost, two AI reviewers each check it against a different rulebook and must quote it word for word, and fixed rules, not AI, do the money math. Our test against Social Security's own worked examples is on the Benchmark page.",
   },
   {
     q: "Can my app use this?",

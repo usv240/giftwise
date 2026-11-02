@@ -48,6 +48,19 @@ export const AnalyzeFundraiserRequest = z.object({
   url: z.string().min(8).max(2000).describe("A public fundraiser page, http or https. A path on this site, such as /samples/fundraiser.html, also works."),
 });
 
+export const ReviewBillRequest = z.object({
+  description: z.string().min(3).max(2000).describe("What the bill is for, in its own words: the business, the service and any line items."),
+  amount: z.number().min(1).max(100000).describe("Amount someone else would pay, in US dollars."),
+  category: CategorySchema.describe("The category the bill was read as. Housing categories (rent, mortgage, property tax, utility) are the ones the reviewers settle."),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .describe("Date it is paid, YYYY-MM-DD. Defaults to today."),
+  recurring: z.boolean().optional().describe("True when the same person pays it every month."),
+  profile: ProfileSchema.optional(),
+});
+
 export const KeyRequest = z.object({
   name: z.string().min(1).max(80).describe("Your name or your team's."),
   email: z.email().max(200),

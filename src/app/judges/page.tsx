@@ -14,7 +14,7 @@ const PATH = [
   { href: "/g/maya", label: "Maya's gift page", look: "Type $1,500 in Give any amount. Giftwise splits it across her needs and her ABLE account, and one PayPal checkout pays five recipients directly." },
   { href: "/g/maya", label: "Pay in the sandbox", look: "Use the sandbox buyer login in TESTING.md. When it completes, open the receipt." },
   { href: "/try", label: "Try it", look: "Read the sample electric bill with Claude, or check any gift. Switch View to Technical to see rule ids and API details." },
-  { href: "#failure-cases", label: "Failure cases", look: "Run all seven checks below. They create real sandbox orders and show what PayPal answered." },
+  { href: "#failure-cases", label: "Failure cases", look: "Run all eight checks below. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer." },
   { href: "/status", label: "Status and stack", look: "Every service and sponsor tool, and whether it is live or using its fallback right now." },
 ];
 

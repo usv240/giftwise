@@ -99,6 +99,13 @@ ok("Preset JSON downloads", d2.suggestedFilename() === "giftwise-electric-bill.j
 const [d3] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Download the sample document" }).click()]);
 ok("Preset sample document downloads", d3.suggestedFilename().endsWith(".png"), d3.suggestedFilename());
 
+// 7b. The two reviewers on the Electric bill example: recorded answers, and the wrong-answer test
+await page.goto(B + "/try/presets/electric-bill", { waitUntil: "networkidle" });
+ok("Electric bill example shows both reviewers with checked quotes", (await page.locator(".rv-card").count()) === 2 && (await page.locator(".rv-check[data-ok]").count()) === 2);
+ok("the referee routes it to her ABLE account at $994", /ABLE account.*\$994/.test((await page.locator(".rv-outcome").textContent()) ?? ""));
+await page.getByRole("button", { name: "What if a reviewer gets it wrong?" }).click();
+ok("a made-up quote is set aside and her check stays $994", (await page.locator(".rv-card[data-set-aside]").count()) === 1 && /\$994/.test((await page.locator(".rv-outcome").textContent()) ?? "") && /\$876/.test((await page.locator(".rv-trusted").textContent()) ?? ""));
+
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });
 await page.waitForTimeout(3500);

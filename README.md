@@ -19,7 +19,7 @@ About 7.3 million people receive SSI (September 2026). SSI counts cash gifts as 
 ## What is inside
 
 - **PayPal:** Orders v2 with several payees in one order, the JavaScript SDK v6 button, server-side capture with `PayPal-Request-Id` idempotency, live order lookups, and sandbox negative testing for declined cards.
-- **Seven failure cases, run live** on `/judges`: declined card, double click, unapproved payment, a browser changing the amount or payee, a gift that would lower her check, an edited ledger entry, and refunds.
+- **Eight failure cases, run live** on `/judges`: declined card, double click, unapproved payment, a browser changing the amount or payee, a gift that would lower her check, an AI reviewer that gets the rule wrong, an edited ledger entry, and refunds.
 - **Claude (`claude-opus-5-5`):** reads bills, quotes and fundraiser pages into structured data. The rules engine, not the model, decides where the money goes.
 - **Developer API:** free sandbox keys stored only as hashes, rate limits, OpenAPI 3.1 at `/openapi.json`, docs and a live playground at `/developers`.
 - **Design:** light and dark themes, phone and desktop, an Info button on every element, and WCAG 2.2 AA checked with axe.

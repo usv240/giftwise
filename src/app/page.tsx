@@ -32,17 +32,9 @@ const HOW = [
 
 const BUILT = [
   { id: "paypal", tool: "PayPal", job: "Pays the shop directly, and keeps the month's ledger" },
-  { id: "claude", tool: "Claude Opus 5.5", job: "Reads bills, checks the rule, runs the two reviewers" },
-  { id: "elastic", tool: "Elastic", job: "Finds the exact rule passage, newest rule first" },
-  { id: "channel3", tool: "Channel3", job: "Turns a cash request into the exact item to buy" },
-  { id: "ag-studio", tool: "AG Studio", job: "The counselor's month dashboard and its AI analyst" },
-  { id: "bryntum", tool: "Bryntum", job: "The calendar that shows when a gift counts" },
-  { id: "kernel", tool: "KERNEL", job: "Reads fundraiser pages and watches for rule updates" },
-  { id: "zapier", tool: "Zapier", job: "Bills arrive by email; statements go to Drive" },
-  { id: "render", tool: "Render", job: "Hosting, database and monthly workflows" },
-  { id: "apimatic", tool: "APIMatic", job: "PayPal SDK to build with; SDKs and docs for our API" },
-  { id: "postman", tool: "Postman", job: "Public collection and a one-click benchmark runner" },
-  { id: "astropods", tool: "Astropods", job: "Hosts and traces the reviewer agent" },
+  { id: "claude", tool: "Claude Opus 5.5", job: "Reads bills and runs the two reviewers" },
+  { id: "render", tool: "Render", job: "Hosts the site and its database" },
+  { id: "apimatic", tool: "APIMatic", job: "Generated the PayPal SDK Giftwise builds with" },
 ];
 
 const RESEARCH = ["cfr-416-1103-g", "poms-si-00815-400", "poms-si-01130-740", "fr-89-21199", "ssa-understanding-ssi-living", "sna-crowdfunding", "hhl-survey-2026", "berliner-kenworthy-2017"];

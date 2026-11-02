@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Info } from "../Info";
 import { ResultCard } from "../ResultCard";
+import { ReviewPanel } from "./ReviewPanel";
 import { usePrefs } from "../prefs";
 import { DEFAULT_PROFILE, evaluateGift, monthName, planMonths, usd, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
 
@@ -301,7 +302,16 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
 }
 
 type BillData = {
-  bill: { vendor_name: string; vendor_category: Category; amount_due: number; due_date: string | null; is_shelter_cost: boolean; confidence: number; explanation: { plain: string; technical: string } };
+  bill: {
+    vendor_name: string;
+    vendor_category: Category;
+    amount_due: number;
+    due_date: string | null;
+    is_shelter_cost: boolean;
+    confidence: number;
+    line_items: { description: string; amount: number }[];
+    explanation: { plain: string; technical: string };
+  };
 };
 
 /** What Claude read, side by side with the engine's answer for paying that bill. */
@@ -338,6 +348,16 @@ function BillResult({ data }: { data: BillData }) {
         {prefs.mode === "technical" && <p className="result-tech">{b.explanation.technical} Confidence {Math.round(b.confidence * 100)}%.</p>}
       </div>
       <ResultCard result={result} title={`If someone pays ${b.vendor_name}`} />
+      {result.ambiguous && result.treatment.kind === "ism_shelter" && (
+        <ReviewPanel
+          input={{
+            description: [`${b.vendor_name}.`, ...(b.line_items ?? []).map((l) => `${l.description}: ${usd(l.amount)}`)].join(" "),
+            amount: b.amount_due,
+            category: b.vendor_category,
+            date: result.gift.date,
+          }}
+        />
+      )}
     </div>
   );
 }

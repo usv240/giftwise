@@ -7,6 +7,9 @@ import { paypalRest } from "../paypal/client";
 import { routeGift } from "../routing";
 import { DEFAULT_PROFILE, evaluateGift, usd } from "../rules";
 import { CASES, type CaseId } from "./list";
+import electricReview from "../../../content/reviews/electric-bill.json";
+import type { RecordedReview } from "@/components/try/ReviewPanel";
+import { referee, routeForDecision, type Review } from "../review/referee";
 
 export type ScenarioResult = {
   id: string;
@@ -207,6 +210,28 @@ const RUNS: Record<CaseId, () => Promise<Run>> = {
         evidence: [
           `Paying $800 rent straight to the landlord would make her check ${usd(direct.checkAfter)} (rule ${direct.ruleIds.join(", ")})`,
           `Giftwise skipped that route and sent ${plan.lines.map((l) => `${usd(l.amount)} to ${l.payeeName}`).join(", ")}; her check stays ${usd(plan.checkWithRouting)}`,
+        ],
+      };
+    }),
+  reviewer: () =>
+    timed(async () => {
+      // The real reviews recorded for the Electric bill example, with the Manual reviewer's answer replaced by a wrong one.
+      const real = (electricReview as RecordedReview).data.reviews;
+      const toReview = (r: (typeof real)[number]): Review => ({ authority: r.authority, answer: r.answer, passage_id: r.passage_id, quote: r.quote, reason_plain: r.reason.plain, reason_technical: r.reason.technical, confidence: r.confidence });
+      const wrong = "Electric bills paid by a family member are never counted as income.";
+      const reviews = real.map((r) => (r.authority === "poms" ? { ...toReview(r), answer: "not_shelter" as const, quote: wrong } : toReview(r)));
+      const ref = referee(reviews);
+      const gift = { id: "electric", date: "2026-04-10", amount: 138, delivery: "vendor" as const, category: "utility" as const, recurring: true };
+      const out = routeForDecision(gift, ref.decision);
+      const trusted = evaluateGift(gift, DEFAULT_PROFILE).checkAfter;
+      const pomsVote = ref.votes.find((v) => v.authority === "poms");
+      const ok = pomsVote?.valid === false && ref.decision === "unsure" && out.route === "able" && out.check === 994;
+      return {
+        ok,
+        evidence: [
+          `Test answer: the Manual reviewer says the $138 electric bill is not a housing cost, quoting "${wrong}"`,
+          `Referee: ${pomsVote?.setAsideReason ?? "accepted"} (${pomsVote?.passage_id})`,
+          `Rules engine: send it to her ABLE account, her check stays ${usd(out.check ?? 0)}. Trusting the wrong answer and paying the company would have made it ${usd(trusted)}`,
         ],
       };
     }),

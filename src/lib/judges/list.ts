@@ -5,6 +5,7 @@ export const CASES = [
   { id: "unapproved", title: "Someone tries to complete a payment PayPal has not approved", expected: "PayPal refuses, nothing is charged, and the message is plain." },
   { id: "tamper", title: "A browser tries to change the amount or the payee", expected: "The server ignores both. Amount and payee come only from the need record." },
   { id: "rules", title: "A gift would lower her check", expected: "The rules engine skips that route and sends the money a benefit-safe way." },
+  { id: "reviewer", title: "An AI reviewer gets the rule wrong", expected: "Its quote is not in its rulebook, so the referee sets it aside and her check stays whole." },
   { id: "ledger", title: "Someone edits a past ledger entry", expected: "Recomputing the chain finds the exact entry that changed." },
   { id: "refund", title: "Only the shop can send money back", expected: "Giftwise cannot pull money from a shop. PayPal allows the refund only from the account that received it." },
 ] as const;

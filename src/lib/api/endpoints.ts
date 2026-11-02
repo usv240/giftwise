@@ -58,6 +58,17 @@ export const ENDPOINTS: Endpoint[] = [
     keyed: true,
   },
   {
+    id: "review-bill",
+    method: "POST",
+    path: "/api/v1/review-bill",
+    title: "Ask the two reviewers",
+    summary:
+      "Two Claude reviewers decide whether a bill paid by someone else is a housing cost. One reads the regulations and the Federal Register, the other SSA's operating manual, and each must quote its rulebook word for word. A program checks every quote, and the rules engine picks the route.",
+    example: { description: "Northside Electric Co-op, residential electric service, monthly bill", amount: 138, category: "utility", recurring: true },
+    ai: true,
+    keyed: true,
+  },
+  {
     id: "presets",
     method: "GET",
     path: "/api/presets/{id}",

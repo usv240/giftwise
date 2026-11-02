@@ -73,6 +73,17 @@ else ok("analyze-fundraiser live plans every use so her check stays $994", r.sta
 r = await post("/api/v1/analyze-fundraiser", { url: "ftp://x" });
 ok("analyze-fundraiser rejects non-http url", r.status === 400, `${r.status}`);
 
+// Two reviewers, two rulebooks: each quote must be found word for word, and the engine picks the route
+r = await post("/api/v1/review-bill", { amount: 10 });
+ok("review-bill without a description -> 400", r.status === 400, `${r.status}`);
+r = await post("/api/v1/review-bill", { description: "Northside Electric Co-op, residential electric service", amount: 138, category: "utility", date: "2026-04-10", recurring: true });
+j = await r.json();
+if (r.status === 503) ok("review-bill live (skipped: AI not configured)", true);
+else ok("review-bill live: both reviewers quote their own rulebook, agree it is housing, and the engine routes to ABLE at $994", r.status === 200 && j.data.reviews.length === 2 && j.data.reviews.every((v) => v.quote_checked) && new Set(j.data.reviews.map((v) => v.authority)).size === 2 && j.data.referee.decision === "shelter" && j.data.outcome.route === "able" && j.data.outcome.check_after === 994, `${j.data?.referee?.decision} ${j.data?.outcome?.route} ${j.data?.outcome?.check_after}`);
+r = await fetch(B + "/openapi.json");
+j = await r.json();
+ok("openapi lists review-bill with its request schema", Boolean(j.paths?.["/api/v1/review-bill"]?.post?.requestBody));
+
 // PayPal order creation through the app (server picks amount + payee)
 r = await post("/api/paypal/orders", { needId: 4 });
 j = await r.json();
@@ -146,7 +157,7 @@ r = await fetch(B + "/api/v1/check-gift", { method: "POST", headers: { Authoriza
 ok("rotate: old key stops, new key works", oldStatus === 401 && r.status === 200, `${oldStatus} then ${r.status}`);
 r = await fetch(B + "/openapi.json");
 j = await r.json();
-ok("openapi.json is 3.1 and lists every endpoint", j.openapi === "3.1.0" && Object.keys(j.paths).length === 8 && Boolean(j.paths["/api/v1/check-gift"].post.requestBody.content["application/json"].schema.properties.gift));
+ok("openapi.json is 3.1 and lists every endpoint", j.openapi === "3.1.0" && ["/api/v1/check-gift", "/api/v1/plan-month", "/api/v1/read-bill", "/api/v1/analyze-fundraiser", "/api/v1/review-bill", "/api/presets/{id}", "/api/ledger/verify", "/api/health", "/api/keys"].every((p) => j.paths[p]) && Boolean(j.paths["/api/v1/check-gift"].post.requestBody.content["application/json"].schema.properties.gift));
 r = await fetch(B + "/api/presets/not-a-preset");
 ok("unknown preset -> 404 in the standard envelope", r.status === 404 && (await r.json()).error?.code === "not_found");
 

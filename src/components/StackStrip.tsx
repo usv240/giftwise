@@ -2,19 +2,12 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { Info } from "./Info";
 
+// Only tools that are running in this build. Add one here when it ships, not before.
 export const STACK = [
   { id: "paypal", name: "PayPal" },
   { id: "claude", name: "Claude" },
-  { id: "ag-studio", name: "AG Studio" },
-  { id: "bryntum", name: "Bryntum" },
-  { id: "channel3", name: "Channel3" },
-  { id: "elastic", name: "Elastic" },
-  { id: "kernel", name: "KERNEL" },
-  { id: "zapier", name: "Zapier" },
   { id: "render", name: "Render" },
   { id: "apimatic", name: "APIMatic" },
-  { id: "postman", name: "Postman" },
-  { id: "astropods", name: "Astropods" },
 ] as const;
 
 /** Shown above the footer on every page: every tool used, with what it does here. */

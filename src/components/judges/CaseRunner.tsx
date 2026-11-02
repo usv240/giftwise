@@ -31,7 +31,7 @@ export function CaseRunner() {
     <div className="cases">
       <div className="cases-bar">
         <button type="button" className="btn btn-primary" onClick={run} disabled={state === "running"}>
-          {state === "running" ? "Running against PayPal…" : results ? "Run all seven again" : "Run all seven checks"}
+          {state === "running" ? "Running against PayPal…" : results ? "Run all eight again" : "Run all eight checks"}
         </button>
         <p className="cases-note" role="status" data-tone={state === "error" ? "attention" : undefined}>
           {state === "running" ? "Creating real sandbox orders. This takes about 15 seconds." : note || "Each run creates small sandbox orders. No real money moves."}

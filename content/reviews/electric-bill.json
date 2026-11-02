@@ -1,0 +1,81 @@
+{
+  "recorded_at": "2026-11-02T17:27:21.433Z",
+  "model": "claude-opus-5-5",
+  "input": {
+    "description": "Northside Electric Co-op (sample). Monthly bill for residential electric service at her apartment.",
+    "amount": 138,
+    "category": "utility",
+    "date": "2026-04-10",
+    "recurring": true
+  },
+  "data": {
+    "reviews": [
+      {
+        "authority": "regs",
+        "answer": "shelter",
+        "passage_id": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1130",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "set_aside_reason": null,
+        "reason": {
+          "plain": "Yes, this is a shelter cost. Electricity is on the regulation's list of shelter items, so someone else paying it counts as in-kind support.",
+          "technical": "20 CFR 416.1130(b)(1) lists \"electricity\" among the items included in shelter. It also says ISM considers shelter \"that you receive because someone else pays for it.\" A third party paying the electric co-op directly is therefore in-kind shelter. Under 416.1103(g), the payment itself is not income, but what the recipient receives because of it is. The FR 2024-06464 rule confirms that shelter expenses, including electricity, remain in ISM after September 30, 2024."
+        },
+        "confidence": 0.95
+      },
+      {
+        "authority": "poms",
+        "answer": "shelter",
+        "passage_id": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835020",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "set_aside_reason": null,
+        "reason": {
+          "plain": "Yes, this is a shelter cost. Electricity for her home is on the manual's list of shelter costs, so someone else paying it counts as in-kind support.",
+          "technical": "SI 00835.020B.36 lists \"electricity\" among the shelter costs. SI 00835.465D.1 and SI 00815.400A confirm the rule: a third-party payment to the vendor is not itself income, but the shelter received as a result is ISM."
+        },
+        "confidence": 0.95
+      }
+    ],
+    "referee": {
+      "decision": "shelter",
+      "agreed": true,
+      "summary": "Both reviewers found it in their own rulebook: this bill is a housing cost."
+    },
+    "outcome": {
+      "route": "able",
+      "check_after": 994,
+      "readings": [
+        "utility"
+      ],
+      "routes": [
+        {
+          "delivery": "vendor",
+          "possible": true,
+          "check": 876,
+          "ruleIds": [
+            "R-SHEL-01",
+            "R-GIE-01"
+          ]
+        },
+        {
+          "delivery": "able",
+          "possible": true,
+          "check": 994,
+          "ruleIds": [
+            "R-ABLE-01",
+            "R-ABLE-02"
+          ]
+        }
+      ],
+      "rule_ids": [
+        "R-ABLE-01",
+        "R-ABLE-02"
+      ]
+    }
+  }
+}
