@@ -5,6 +5,7 @@ import { AiRefusedError, aiAvailable } from "@/lib/ai/claude";
 import { readFundraiser } from "@/lib/ai/tasks";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Category } from "@/lib/rules";
 import { readPage, safePublicUrl } from "@/lib/sponsors/kernel";
+import { publicOrigin } from "@/lib/origin";
 
 const SHELTER: Category[] = ["rent", "mortgage", "property_tax", "utility"];
 
@@ -13,7 +14,7 @@ async function handle(req: Request) {
   const started = Date.now();
   const parsed = AnalyzeFundraiserRequest.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail("invalid_request", "Send JSON with a url field.", 400);
-  const url = safePublicUrl(parsed.data.url.startsWith("/") ? new URL(parsed.data.url, req.url).toString() : parsed.data.url);
+  const url = safePublicUrl(parsed.data.url.startsWith("/") ? new URL(parsed.data.url, publicOrigin(req)).toString() : parsed.data.url);
   if (!url) return fail("invalid_request", "Use a public web address that starts with http or https.", 400);
   if (!aiAvailable()) {
     return fail("upstream_unavailable", "Reading fundraiser pages needs the AI service, which is not connected on this server yet. Open the Accessible van fundraiser example to see the full result.", 503);

@@ -2,8 +2,8 @@
 
 Giftwise runs on PayPal's sandbox, a practice version of PayPal where no real money moves. You do not need a Giftwise account.
 
-- **Hosted demo:** added when the app is deployed.
-- **Start here:** `/judges` has the five-minute path, the failure cases you can run live, and the latest test results.
+- **Hosted demo:** [giftwise-405i.onrender.com](https://giftwise-405i.onrender.com), hosted on Render.
+- **Start here:** [`/judges`](https://giftwise-405i.onrender.com/judges) has the five-minute path, the failure cases you can run live, and the latest test results.
 
 ## PayPal sandbox buyer login
 

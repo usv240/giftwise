@@ -2,8 +2,8 @@
 
 Benefit-safe giving for people on SSI. Family and friends give through PayPal, and Giftwise pays the shop, the clinic or the person's ABLE account directly, so the monthly check stays whole.
 
-- **Live demo:** HOSTED_URL (PayPal sandbox, no Giftwise login needed)
-- **For judges:** start at [`/judges`](HOSTED_URL/judges). The sandbox buyer login and step-by-step checks are in [TESTING.md](TESTING.md).
+- **Live demo:** [giftwise-405i.onrender.com](https://giftwise-405i.onrender.com) (PayPal sandbox, no Giftwise login needed)
+- **For judges:** start at [`/judges`](https://giftwise-405i.onrender.com/judges). The sandbox buyer login and step-by-step checks are in [TESTING.md](TESTING.md).
 
 ## The problem in one number
 

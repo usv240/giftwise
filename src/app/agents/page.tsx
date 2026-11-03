@@ -7,10 +7,11 @@ import { TOOLS } from "@/lib/mcp/tools";
 import "../pages.css";
 import "../developers/dev.css";
 import "./agents.css";
+import { HOSTED_URL } from "@/lib/origin";
 
 export const metadata: Metadata = { title: "For AI agents", description: "Giftwise's MCP server: AI assistants check a gift before giving to someone on SSI, and prepare a PayPal checkout only the giver can approve." };
 
-const HOST = (process.env.RENDER_EXTERNAL_URL || "https://giftwise.onrender.com").replace(/\/$/, "");
+const HOST = (process.env.RENDER_EXTERNAL_URL || HOSTED_URL).replace(/\/$/, "");
 
 export default function AgentsPage() {
   const url = `${HOST}/api/mcp`;

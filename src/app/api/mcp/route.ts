@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { guard } from "@/lib/api/keys";
 import { INSTRUCTIONS, SERVER_INFO, TOOLS, type ToolResult } from "@/lib/mcp/tools";
+import { publicOrigin } from "@/lib/origin";
 
 /**
  * The Giftwise MCP server: Model Context Protocol over Streamable HTTP, stateless, answering each JSON-RPC request with
@@ -23,10 +24,7 @@ const schemaOf = (s: z.ZodType) => {
   return rest;
 };
 
-function origin(req: Request) {
-  // Render sets RENDER_EXTERNAL_URL to the public address; elsewhere the request's own origin is right.
-  return (process.env.RENDER_EXTERNAL_URL || new URL(req.url).origin).replace(/\/$/, "");
-}
+const origin = publicOrigin;
 
 async function handle(msg: Rpc, req: Request) {
   const id = msg.id;

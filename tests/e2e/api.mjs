@@ -103,7 +103,8 @@ ok("paypal order for need 4 created (sandbox)", r.status === 200 && /^[A-Z0-9]+$
 r = await post("/api/paypal/orders", { needId: 9999 });
 ok("paypal order for unknown need -> 404", r.status === 404);
 r = await post("/api/paypal/orders", { needId: "1; drop table" });
-ok("paypal order with bad id -> 400", r.status === 400);
+// A hosted run may meet the platform firewall first, which refuses this body with 403 before it reaches the app.
+ok("paypal order with bad id -> 400 (or 403 from the host firewall)", r.status === 400 || (r.status === 403 && !/localhost|127.0.0.1/.test(B)), `${r.status}`);
 r = await fetch(B + "/api/paypal/orders/NOTANORDER123/capture", { method: "POST" });
 ok("capture unknown order -> 404", r.status === 404, `${r.status}`);
 r = await fetch(B + "/api/paypal/orders/../../etc/capture", { method: "POST" });
