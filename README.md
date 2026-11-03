@@ -37,12 +37,13 @@ The demo runs in PayPal's sandbox. Here is what changes when real money moves. T
 - **Fundraiser to gift page:** paste a fundraiser link and Giftwise makes a live gift page where every stated use is paid straight to the shop or the ABLE account, with the pronouns the organizer chooses.
 - **The report to Social Security:** people on SSI must tell SSA about changes in income, including help from family, within 10 days after the month ends (20 CFR 416.714). `/g/maya/report` writes that report from the gifts: which ones to tell SSA about, the check each month decides, a call script, and for every other gift the rule that says it is not income and the PayPal capture or payout that proves where the money went. Press **As cash** to see the report the same gifts would have needed. Also as CSV, at `GET /api/v1/ssa-report`, and as an MCP tool.
 - **For AI agents:** an MCP server at `/api/mcp` with six tools. An assistant can check a gift, read a gift page, plan a gift, ask the two reviewers, write the month's report to Social Security, and start a PayPal checkout that only the giver can approve; Giftwise captures when PayPal sends the giver back. `/agents` shows a Claude assistant doing exactly that, and runs it live. After it starts the checkout, the assistant reads the order from PayPal itself: it asks PayPal's hosted MCP server (`get_order`) and reads PayPal's Orders API when that server cannot run the call, so the giver hears PayPal's record, not only Giftwise's.
+- **Her benefit calendar, in Bryntum:** `/g/maya/calendar` puts every gift on the day it arrived, each report to Social Security on the 10th, and each check on the 1st, in light and dark. SSI counts income by calendar month and gives the $60 exclusion once a quarter, so the day matters: press **As cash**, drag Aunt June's $150 from October 28 to November 2, and the calendar shows her December check rising from $456 to $606 while January's drops from $994 to $864. A form does the same move without dragging.
 - **Maya's year, in AG Studio:** `/dashboard` shows every gift and her check each month with Giftwise and as cash, themed from the site tokens in light and dark. A custom Giftwise widget runs the rules engine on whatever the filters leave in view. In edit mode, AG Studio's own agents run on Claude through our adapter (AG Studio ships none for Claude), and can call the rules engine to answer what-if questions such as "what if that rent help had been cash?"
 - **For organizations:** `/organizations` lets a fund that already holds money for families (a disability foundation, a mutual-aid fund, a church) pay many households' needs in one PayPal Payouts batch. The rules engine routes each grant, every item goes straight to the shop or the ABLE account, and Transaction Search confirms each payout in PayPal's own report.
 - **Developer API:** free sandbox keys stored only as hashes, rate limits, OpenAPI 3.1 at `/openapi.json`, docs and a live playground at `/developers`.
 - **Design:** light and dark themes, phone and desktop, an Info button on every element, and WCAG 2.2 AA checked with axe.
 
-Built with Next.js 16, React 19, TypeScript, Postgres 17, Drizzle and AG Studio 3.0, hosted on Render.
+Built with Next.js 16, React 19, TypeScript, Postgres 17, Drizzle, AG Studio 3.0 and Bryntum Calendar 7.3, hosted on Render.
 
 ## Run it yourself
 
@@ -64,11 +65,11 @@ To host your own copy, [`render.yaml`](render.yaml) creates the web service, its
 
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 64 of 64 |
+| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 68 of 68 |
 | Social Security's own worked examples (rules engine, and Claude alone as the baseline) | `npm run eval:ssa` | 12 of 13 (Claude alone 9 of 13) |
 | API end to end | `npm run e2e:api` | 84 of 84 |
-| Browser end to end | `npm run e2e:ui` | 57 of 57 |
-| Accessibility, 19 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 76 of 76 page views |
+| Browser end to end | `npm run e2e:ui` | 58 of 58 |
+| Accessibility, 20 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 80 of 80 page views |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 of 5 |
 | Failure cases against the PayPal sandbox | `/judges` | 8 of 8 |

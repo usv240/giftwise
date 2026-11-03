@@ -1,0 +1,174 @@
+/* The benefit calendar: view switch and legend, the Bryntum calendar, then the move form and what it changed. */
+.bc-links {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.bc-section {
+  max-width: none;
+}
+.bc-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+.bc-views {
+  display: inline-flex;
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 3px;
+}
+.bc-view {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms var(--ease-out);
+}
+.bc-view:active {
+  transform: scale(0.97);
+}
+.bc-view[aria-pressed="true"] {
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+.bc-view:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.bc-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 15px;
+}
+.bc-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.bc-legend li::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--positive);
+}
+.bc-legend li[data-k="counts"]::before {
+  background: #e8890c;
+}
+.bc-legend li[data-k="ssa"]::before {
+  background: #2a7ae2;
+}
+.bc-reset {
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  min-height: 40px;
+}
+.bc-hint {
+  margin-top: 10px;
+  max-width: 70ch;
+}
+/* Bryntum fills its parent, so the parent needs a real height. */
+.bc-cal {
+  margin-top: 14px;
+  height: min(760px, 80vh);
+  min-height: 520px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.bc-loading {
+  padding: 24px;
+}
+.bc-tip {
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.45;
+}
+.bc-under {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 18px 32px;
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .bc-under {
+    grid-template-columns: 1fr;
+  }
+}
+.bc-k {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.bc-move {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: grid;
+  gap: 10px;
+}
+.bc-move label {
+  display: grid;
+  gap: 4px;
+  font-size: 15px;
+}
+.bc-move select,
+.bc-move input {
+  min-height: 44px;
+  font: inherit;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--muted);
+  background: var(--bg);
+  color: var(--ink);
+  max-width: 100%;
+}
+.bc-move .btn {
+  justify-self: start;
+}
+.bc-moves {
+  padding: 16px 0;
+}
+.bc-moves ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
+  max-width: 70ch;
+}
+
+/* Inside Bryntum: the sidebar is off, so its unlabeled toggle goes too. Toolbar buttons and event text use the site's ink
+   so they meet contrast in both themes; the bar's tint and edge still carry the color. These override the vendor's own
+   colors, so they need the extra weight. */
+.bc-cal .b-toolbar .b-button,
+.bc-cal .b-toolbar .b-button .b-button-label {
+  color: var(--ink) !important;
+}
+.bc-cal .b-cal-event-body,
+.bc-cal .b-cal-event-body .b-cal-event-desc,
+.bc-cal .b-cal-event-body .b-event-time {
+  color: var(--ink) !important;
+}
+.bc-cal .b-calendar-day-header.b-weekend,
+.bc-cal .b-calendar-day-header.b-non-working-day {
+  color: var(--ink) !important;
+}
+.bc-cal .b-cal-cell-header,
+.bc-cal .b-cal-cell-header .b-day-num {
+  color: var(--ink) !important;
+}

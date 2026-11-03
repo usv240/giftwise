@@ -8,6 +8,7 @@ export const STACK = [
   { id: "claude", name: "Claude" },
   { id: "ag-studio", name: "AG Studio" },
   { id: "render", name: "Render" },
+  { id: "bryntum", name: "Bryntum" },
   { id: "apimatic", name: "APIMatic" },
 ] as const;
 

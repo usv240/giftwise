@@ -39,6 +39,13 @@ const TOOLS: Tool[] = [
     files: ["render.yaml", "workflows/src/main.ts", "workflows/src/checks.ts", "src/app/api/checks/start/route.ts"],
   },
   {
+    id: "bryntum",
+    name: "Bryntum Calendar",
+    job: "Maya's benefit calendar: each gift on the day it arrived, each report to Social Security on its due date, and the check each 1st of the month pays.",
+    how: "Bryntum Calendar 7.3 (trial) in month and agenda views. Dragging a gift to another day reruns the rules engine in the browser and lists which checks changed; a form does the same without dragging. The light or dark Bryntum theme is loaded to match the site.",
+    files: ["src/components/calendar/BenefitCalendar.tsx", "src/lib/calendar/model.ts", "src/app/vendor/bryntum/[file]/route.ts"],
+  },
+  {
     id: "apimatic",
     name: "APIMatic",
     job: "Generated the PayPal Server SDK that Giftwise uses for every Orders call.",

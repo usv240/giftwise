@@ -82,6 +82,10 @@ The runner can be started again 20 seconds after the last run.
 3. Open the PayPal link from the live run and approve it with the sandbox buyer login above. PayPal sends you back to Giftwise, which captures the payment and opens the receipt.
 4. To connect your own agent, use the command on the page: `claude mcp add --transport http giftwise <hosted URL>/api/mcp`.
 
+## Maya's benefit calendar, in Bryntum
+
+Open `/g/maya/calendar`. Gifts are green when they do not count and orange when they do; Social Security's dates are blue (the check on the 1st, the report due on the 10th). Press **As cash**, then drag Aunt June's $150 on October 28 to November 2, or use **Move a gift** below the calendar. **What moving it did** lists each check that changed: December rises from $456 to $606 and January drops from $994 to $864, because the gift moved to a later income month. The calendar is Bryntum Calendar 7.3.7 (the free trial, so it shows a trial watermark), and its theme follows the site's light and dark mode.
+
 ## Maya's year, in AG Studio
 
 1. Open `/dashboard`. It shows a fictional sample year of gifts to Maya, plus every gift paid on this site, and her check each month with Giftwise and as cash.
@@ -153,11 +157,11 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 64 passed |
+| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 68 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 12 of 13 match SSA (Claude alone 9 of 13) |
 | API end to end | `npm run e2e:api` | 84 passed |
-| Browser end to end | `npm run e2e:ui` | 57 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 76 page views pass |
+| Browser end to end | `npm run e2e:ui` | 58 passed |
+| Accessibility and layout | `npm run e2e:a11y` | All 80 page views pass |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |

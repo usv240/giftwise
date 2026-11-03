@@ -36,6 +36,7 @@ const CRITERIA = [
       ["/g/maya", "Gift page"],
       ["/try", "Try it"],
       ["/dashboard", "Maya's year"],
+      ["/g/maya/calendar", "Her benefit calendar"],
     ],
   },
   {

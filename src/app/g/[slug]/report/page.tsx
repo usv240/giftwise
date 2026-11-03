@@ -300,6 +300,9 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
       <p className="rp-back">
         <Link className="text-link" href={`/g/${slug}`}>
           Back to {r.name}&rsquo;s page
+        </Link>{" "}
+        <Link className="text-link" href={`/g/${slug}/calendar`}>
+          See every gift on {r.name}&rsquo;s benefit calendar
         </Link>
         {subject.isSample && (
           <>

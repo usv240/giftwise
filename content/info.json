@@ -120,6 +120,12 @@
     "why": "A demo that is checked every night keeps working through judging, and any failure is found before a judge finds it.",
     "technical": "render.yaml defines the web service, managed Postgres, the giftwise-checks Render Workflow (one task per check, run in parallel with retries) and a nightly cron job that starts it with the Render SDK's workflows.startTask. Tables are created by a pre-deploy command on every release."
   },
+  "stack.bryntum": {
+    "title": "Bryntum",
+    "what": "The benefit calendar: every gift on its day, when each report is due, and the check each month pays.",
+    "why": "SSI counts income by calendar month and quarter, so seeing gifts on a calendar shows why the day a gift arrives can matter.",
+    "technical": "@bryntum/calendar 7.3.7 (trial) with the React wrapper. onDragMoveEnd reruns planMonths(); the move form gives the same result without dragging (WCAG 2.5.7)."
+  },
   "stack.apimatic": {
     "title": "APIMatic",
     "what": "Generated the PayPal Server SDK that Giftwise uses for every Orders call.",
@@ -465,8 +471,8 @@
   "agents.demo": {
     "title": "An assistant that asks first",
     "what": "A Claude assistant answering a real question from June, Maya’s aunt. It has no knowledge of SSI rules beyond what the Giftwise tools return.",
-    "why": "It shows the whole path: what cash would do, the safer way, and a PayPal checkout June approves herself.",
-    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Tools are discovered with tools/list and every call is a tools/call over HTTP to /api/mcp."
+    "why": "It shows the whole path: what cash would do, the safer way, a PayPal checkout June approves herself, and PayPal’s own record of what that order pays.",
+    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Giftwise tools are discovered with tools/list and called with tools/call over HTTP to /api/mcp. paypal_get_order asks PayPal’s hosted MCP server (mcp.sandbox.paypal.com, SSE transport, get_order) and reads GET /v2/checkout/orders/{id} when that server cannot run the call."
   },
   "agents.connect": {
     "title": "Connect your agent",
@@ -524,6 +530,12 @@
     "sponsor": [
       "PayPal"
     ]
+  },
+  "page.calendar": {
+    "title": "Benefit calendar",
+    "what": "Every gift on the day it arrived, the day each report to Social Security is due, and the check each 1st of the month pays.",
+    "why": "SSI counts income by calendar month and gives the $60 exclusion for one-time gifts once per quarter, so the day a gift lands can change the check. Move a gift to see it.",
+    "technical": "Bryntum Calendar 7.3 (trial) in month and agenda views, with drag to move and a form that does the same without dragging. Each move reruns planMonths() from the rules engine in the browser. The theme follows the site's light and dark mode."
   },
   "report.tell": {
     "title": "What to tell Social Security",

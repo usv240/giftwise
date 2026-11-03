@@ -158,6 +158,18 @@ await realQs.first().locator("summary").click();
 const realFirst = await realQs.first().innerText();
 ok("How this works for real: five questions, each opens with its sources", (await realQs.count()) === 5 && /business account/.test(realFirst) && (await realQs.first().locator(".rw-src a").count()) >= 2, realFirst.slice(0, 80));
 
+// 8b. The benefit calendar (Bryntum): gifts on their days, and moving a cash gift into the next month moves it to a later check
+await page.goto(B + "/g/maya/calendar", { waitUntil: "networkidle" });
+await page.locator(".b-cal-event").first().waitFor({ timeout: 60000 }).catch(() => {});
+const calEvents = await page.locator(".b-cal-event").count();
+await page.getByRole("button", { name: "As cash" }).click();
+const lastOpt = (await page.locator(".bc-move select option").count()) - 1;
+await page.locator(".bc-move select").selectOption({ index: lastOpt });
+await page.locator(".bc-move input[type=date]").fill("2026-11-02");
+await page.getByRole("button", { name: "Move it" }).click();
+const moved = (await page.locator(".bc-moves").innerText()).replace(/\s+/g, " ");
+ok("Benefit calendar shows the gifts, and moving a cash gift into November changes which check it lowers", calEvents >= 5 && /check \$[\d,.]+ to \$[\d,.]+/.test(moved), `${calEvents} events; ${moved.slice(0, 120)}`);
+
 // 9. Header links: which pages are missing
 const hrefs = [...new Set(await page.$$eval("header a, footer a", (as) => as.map((a) => a.getAttribute("href")).filter((h) => h && h.startsWith("/"))))];
 const broken = [];

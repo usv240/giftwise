@@ -6,9 +6,9 @@
       "id": "unit",
       "name": "Rules engine, routing, the SSA report, the checks workflow and the cited answers",
       "command": "npm test",
-      "passed": 64,
-      "total": 64,
-      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, the checks workflow's fan-out and retries,, the AG Studio to Claude translation, a known source behind every real-world answer, and Social Security's own worked examples"
+      "passed": 68,
+      "total": 68,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, the checks workflow's fan-out and retries,, the AG Studio to Claude translation, a known source behind every real-world answer, and Social Security's own worked examples, and the benefit calendar's checks and due dates"
     },
     {
       "id": "api",
@@ -22,17 +22,17 @@
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 57,
-      "total": 57,
-      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page and its real-world answers, keyboard use, and the developer flow"
+      "passed": 58,
+      "total": 58,
+      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page and its real-world answers, the benefit calendar, keyboard use, and the developer flow"
     },
     {
       "id": "a11y",
       "name": "Accessibility and layout",
       "command": "npm run e2e:a11y",
-      "passed": 76,
-      "total": 76,
-      "what": "axe WCAG 2.2 AA on 19 pages, including the SSA report as given and as cash, a generated gift page, For agents, the AG Studio dashboard and For organizations, at desktop and phone widths, light and dark, with no sideways scroll"
+      "passed": 80,
+      "total": 80,
+      "what": "axe WCAG 2.2 AA on 20 pages, including the SSA report as given and as cash, the benefit calendar, a generated gift page, For agents, the AG Studio dashboard and For organizations, at desktop and phone widths, light and dark, with no sideways scroll"
     },
     {
       "id": "paypal",
