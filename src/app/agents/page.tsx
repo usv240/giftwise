@@ -33,7 +33,7 @@ export default function AgentsPage() {
           <h2 id="demo-h">An assistant that asks first</h2>
           <Info id="agents.demo" label="" />
         </div>
-        <p className="page-prose">A Claude assistant that knows nothing about SSI, connected to Giftwise only through the MCP server below. Every tool it calls goes over MCP.</p>
+        <p className="page-prose">A Claude assistant that knows nothing about SSI, connected to Giftwise only through the MCP server below. After it starts the checkout, it reads the order from PayPal itself, so June hears what PayPal says it will pay, not only what Giftwise says. It asks PayPal&rsquo;s hosted MCP server first (its get_order tool) and reads PayPal&rsquo;s Orders API when that server cannot run the call.</p>
         <AgentDemo recorded={recorded as AgentRun} />
       </section>
 

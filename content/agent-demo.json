@@ -1,14 +1,16 @@
 {
-  "recorded_at": "2026-11-02T19:01:48.174Z",
+  "recorded_at": "2026-11-03T15:52:11.870Z",
   "model": "claude-opus-5-5",
   "tools": [
     "check_gift",
     "get_gift_page",
     "plan_gift",
     "review_bill",
-    "start_gift_checkout"
+    "get_ssa_report",
+    "start_gift_checkout",
+    "paypal_get_order"
   ],
-  "ms": 15589,
+  "ms": 17714,
   "steps": [
     {
       "kind": "ask",
@@ -32,7 +34,8 @@
       "tool": "check_gift",
       "input": {
         "amount": 300,
-        "delivery": "cash"
+        "delivery": "cash",
+        "category": "other"
       }
     },
     {
@@ -57,7 +60,7 @@
     },
     {
       "kind": "say",
-      "text": "Happy early birthday to Maya. I'd hold off on sending cash.\n\n**What cash would do:** SSI counts a cash gift as income. After the standard exclusions, $220 of your $300 would count against her, so her January check would drop from $994 to $774. She'd lose $220 of your gift.\n\n**What I suggest instead:** Put the full $300 toward her wheelchair repair on her Giftwise page. Giftwise would pay Riverside Mobility Repair directly. Paying a business directly for something that isn't housing doesn't count against her, so her check stays at $994. That repair still needs $420, so your gift would cover most of it.\n\nShould I set up the PayPal checkout for $300 to the wheelchair repair? You'd approve it yourself in PayPal, and nothing is charged until you do. I can also split it differently, for example part toward her $90 therapy co-pay."
+      "text": "June, I'd hold off on sending cash. Social Security counts a cash gift as income. After $80 in exclusions, $220 of your $300 would count, and her January SSI check would drop from $994 to $774. So the gift would cost her $220.\n\nInstead, I suggest putting the full $300 toward her wheelchair repair. Giftwise would pay Riverside Mobility Repair directly, and her check would stay at $994. The repair still needs $420, so this is a big help. Other options on her page: the laptop for college, a therapy co-pay ($90), or her ABLE account.\n\nWould you like me to set up the $300 payment to the wheelchair repair? Once you say yes, I'll send you a PayPal link to approve. Nothing is paid until you approve it yourself."
     },
     {
       "kind": "ask",
@@ -78,8 +81,21 @@
       "isError": false
     },
     {
+      "kind": "call",
+      "tool": "paypal_get_order",
+      "input": {
+        "id": "[order id]"
+      }
+    },
+    {
+      "kind": "result",
+      "tool": "paypal_get_order",
+      "text": "{\"source\":\"PayPal's own record, read from the PayPal Orders API (GET /v2/checkout/orders/{id}) because PayPal's hosted MCP server could not run get_order (PAYPAL_API_SETUP_ERROR).\",\"id\":\"[order id]\",\"status\":\"PAYER_ACTION_REQUIRED\",\"purchase_units\":[{\"reference_id\":\"need-1\",\"for\":\"Wheelchair repair for Maya\",\"amount\":\"300.00\",\"paid_to_paypal_account\":\"sb-...@business.example.com\"}]}",
+      "isError": false
+    },
+    {
       "kind": "say",
-      "text": "Your checkout is ready. It sends the full $300 to Riverside Mobility Repair for Maya's wheelchair repair. Paid this way, her check stays at $994. As cash, it would have dropped to $774.\n\nTo finish, open this link and approve the payment in PayPal:\n[PayPal approval link]\n\nNothing has been charged yet. It only goes through once you approve it. Your receipt will then be here:\n/r/[receipt]\n\nThis version of Giftwise uses PayPal's test system, called the sandbox. That means no real money will move, even after you approve. If you want the gift to actually reach the repair shop, check with Maya's family on how they take real payments.\n\nWhat a thoughtful birthday gift. Getting her wheelchair fixed is something she'll really feel."
+      "text": "Your gift is ready for you to approve, June. If you sent cash, her January check would drop from $994 to $774. Paid this way, it stays at $994.\n\nPayPal's own record shows this order will pay $300 for Maya's wheelchair repair, and it's waiting for your approval.\n\nOpen this link and approve it in PayPal:\n[PayPal approval link]\n\nNothing has been paid yet. Once you approve, your receipt will be here:\n/r/[receipt]\n\nThis version of Giftwise runs on PayPal's test system, so no real money will move.\n\nWhat a lovely birthday gift."
     }
   ]
 }

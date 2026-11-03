@@ -15,7 +15,9 @@ async function main() {
       .join("")
       .replace(/https:\/\/www\.sandbox\.paypal\.com\/checkoutnow\?token=[A-Z0-9]+/g, "[PayPal approval link]")
       .replace(/\/r\/[A-Z0-9]{10,24}/g, "/r/[receipt]");
-  const steps = run.steps.map((s) => ("text" in s ? { ...s, text: local(s.text) } : s));
+  // The order this run created exists only in the database it ran against, so its id is hidden too.
+  const hideId = (t: string) => t.replace(/"id":"[A-Z0-9]{17}"/g, '"id":"[order id]"');
+  const steps = run.steps.map((s) => ("text" in s ? { ...s, text: hideId(local(s.text)) } : s.kind === "call" ? { ...s, input: JSON.parse(hideId(JSON.stringify(s.input))) } : s));
   writeFileSync("content/agent-demo.json", JSON.stringify({ recorded_at: new Date().toISOString(), model: run.model, tools: run.tools, ms: run.ms, steps }, null, 2) + "\n");
   for (const s of steps) {
     if (s.kind === "call") console.log(`> ${s.tool}(${JSON.stringify(s.input)})`);

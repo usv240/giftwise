@@ -125,7 +125,7 @@ ok("fundraiser becomes a live gift page with every use as a payable need", uses 
 // 7d. For AI agents: the recorded conversation shows June, the assistant, and each Giftwise tool it called over MCP
 await page.goto(B + "/agents", { waitUntil: "networkidle" });
 const tools = await page.locator(".ag-tool").allTextContents();
-ok("For agents page shows the assistant calling Giftwise tools, ending with a checkout June approves", (await page.locator(".ag-ask").count()) === 2 && tools.includes("check_gift") && tools.at(-1) === "start_gift_checkout", tools.join(","));
+ok("For agents page shows the assistant calling Giftwise tools, starting a checkout June approves, then reading the order from PayPal", (await page.locator(".ag-ask").count()) === 2 && tools.includes("check_gift") && tools.indexOf("start_gift_checkout") >= 0 && tools.at(-1) === "paypal_get_order", tools.join(","));
 
 // 7e. Maya's year in AG Studio: the Giftwise widget runs the rules engine, and reruns when a giver filter is pressed
 await page.goto(B + "/dashboard", { waitUntil: "load" });

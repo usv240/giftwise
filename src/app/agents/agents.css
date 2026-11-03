@@ -48,12 +48,14 @@
   border-left-color: var(--accent);
 }
 .ag-tool {
+  overflow-wrap: anywhere;
   font-weight: 500;
   color: var(--accent);
   margin-right: 6px;
 }
 .ag-result-text {
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 .ag-result[data-error] .ag-result-text {
   color: var(--attention);

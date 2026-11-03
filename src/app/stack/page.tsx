@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Info } from "@/components/Info";
 import "../pages.css";
+import "../developers/dev.css";
 
 export const metadata: Metadata = { title: "How it is built", description: "Every tool in Giftwise, the one job it does, and where it lives in the code." };
 
@@ -46,6 +47,23 @@ const TOOLS: Tool[] = [
   },
 ];
 
+/** Every PayPal API and tool Giftwise calls, read from the code: the call, its job here, and the file. */
+const PAYPAL_APIS: { api: string; call: string; job: string; file: string }[] = [
+  { api: "OAuth 2.0", call: "POST /v1/oauth2/token", job: "One cached access token for every call below.", file: "src/lib/paypal/client.ts" },
+  { api: "Orders v2: create", call: "POST /v2/checkout/orders", job: "One order with a purchase unit and payee for each recipient, through the APIMatic-generated Server SDK.", file: "src/lib/paypal/orders.ts" },
+  { api: "Orders v2: capture", call: "POST /v2/checkout/orders/{id}/capture", job: "Captures every payee once, with PayPal-Request-Id, so a double click cannot pay twice.", file: "src/lib/paypal/capture.ts" },
+  { api: "Orders v2: show", call: "GET /v2/checkout/orders/{id}", job: "Check with PayPal now on every receipt, and the assistant's read of the order.", file: "src/lib/paypal/capture.ts" },
+  { api: "Orders v2: confirm payment source", call: "POST /v2/checkout/orders/{id}/confirm-payment-source", job: "Pays with a sandbox test card in the failure cases, standing in for the giver.", file: "src/lib/judges/scenarios.ts" },
+  { api: "Payments v2: refund", call: "POST /v2/payments/captures/{id}/refund", job: "The refund failure case: PayPal lets only the shop send money back.", file: "src/lib/judges/scenarios.ts" },
+  { api: "JavaScript SDK v6", call: "web-sdk/v6/core", job: "The PayPal button on each need.", file: "src/components/gift/PayPalPay.tsx" },
+  { api: "Payouts", call: "POST /v1/payments/payouts, GET /v1/payments/payouts/{id}", job: "A fund pays many households' needs in one batch.", file: "src/lib/paypal/payouts.ts" },
+  { api: "Transaction Search", call: "GET /v1/reporting/transactions", job: "Confirms each payout in PayPal's own transaction report.", file: "src/lib/paypal/reporting.ts" },
+  { api: "Balances", call: "GET /v1/reporting/balances", job: "Shows the fund's PayPal balance before it sends a batch.", file: "src/lib/paypal/reporting.ts" },
+  { api: "Webhooks", call: "POST /v1/notifications/verify-webhook-signature", job: "Captures a payment if the giver never comes back, after checking PayPal's signature.", file: "src/app/api/paypal/webhook/route.ts" },
+  { api: "Negative testing", call: "PayPal-Mock-Response header", job: "Makes the sandbox decline on purpose, for the failure cases.", file: "src/lib/paypal/capture.ts" },
+  { api: "PayPal MCP server", call: "mcp.sandbox.paypal.com/sse, tool get_order", job: "The assistant on /agents reads the order from PayPal itself. It falls back to the Orders API while PayPal's server cannot run the call.", file: "src/lib/agent/paypal-mcp.ts" },
+];
+
 export default function StackPage() {
   return (
     <div className="page frame">
@@ -80,6 +98,44 @@ export default function StackPage() {
           </li>
         ))}
       </ul>
+
+      <section id="paypal-apis" className="page-section" aria-labelledby="pp-apis-h">
+        <div className="title-row">
+          <h2 id="pp-apis-h">Every PayPal API Giftwise calls</h2>
+          <Info id="stack.paypal_apis" label="" />
+        </div>
+        <p className="page-prose">
+          {PAYPAL_APIS.length} PayPal APIs and tools, each with one job. All run against the PayPal sandbox. Going live changes only the base URL, the client ID and the secret.
+        </p>
+        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="PayPal APIs Giftwise calls">
+          <table className="doc-table">
+            <thead>
+              <tr>
+                <th scope="col">PayPal</th>
+                <th scope="col">Call</th>
+                <th scope="col">What it does here</th>
+                <th scope="col">Where</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PAYPAL_APIS.map((a) => (
+                <tr key={a.api}>
+                  <td>{a.api}</td>
+                  <td>
+                    <code>{a.call}</code>
+                  </td>
+                  <td>{a.job}</td>
+                  <td>
+                    <a className="text-link" href={REPO + a.file} target="_blank" rel="noreferrer">
+                      {a.file.split("/").pop()}
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

@@ -13,6 +13,7 @@ const TOOL_WORDS: Record<string, string> = {
   plan_gift: "Plans the gift",
   review_bill: "Asks the two reviewers",
   start_gift_checkout: "Starts a PayPal checkout for June to approve",
+  paypal_get_order: "Reads the order from PayPal itself, not from Giftwise",
 };
 
 /** Plain text with **bold** and bare links, the way the assistant writes it. Nothing is rendered as HTML. */
@@ -72,8 +73,8 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
     <div className="ag">
       <p className="muted ag-source">
         {live
-          ? `Run live just now with ${run.model}: ${calls} tool calls over MCP in ${Math.round(run.ms / 1000)} seconds.`
-          : `Recorded ${run.recorded_at ? new Date(run.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" }) : ""} with ${run.model}: ${calls} tool calls over MCP. The PayPal link from the recording is removed; a live run makes a fresh one.`}
+          ? `Run live just now with ${run.model}: ${calls} tool calls in ${Math.round(run.ms / 1000)} seconds.`
+          : `Recorded ${run.recorded_at ? new Date(run.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" }) : ""} with ${run.model}: ${calls} tool calls. The PayPal link from the recording is removed; a live run makes a fresh one.`}
       </p>
       <ol className="ag-steps" aria-live="polite">
         {run.steps.map((s, i) => {

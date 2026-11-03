@@ -4,7 +4,7 @@ export const DeliverySchema = z.enum(["cash", "vendor", "item", "able"]).describ
 
 export const CategorySchema = z
   .enum(["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "event", "other"])
-  .describe("What the money is for. Rent, mortgage, property tax and utilities are housing (shelter).");
+  .describe("What the money is for. Rent, mortgage, property tax and utilities are housing (shelter). event means tickets to a game, show or other event; a birthday or holiday gift of money is other.");
 
 export const GiftSchema = z.object({
   amount: z.number().min(0).max(100000).describe("Gift amount in US dollars."),
