@@ -1,7 +1,5 @@
-import { and, eq } from "drizzle-orm";
-import sample from "../../../content/sample-year.json";
-import { db, dbConfigured, schema } from "@/lib/db";
-import { getHousehold } from "@/lib/households";
+import { giftSubject } from "@/lib/report/data";
+import type { ReportGift } from "@/lib/report/ssa";
 import { CATEGORY_LABEL, ROUTE_LABEL } from "./labels";
 import { DEFAULT_PROFILE, monthOf, planMonths, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
 
@@ -9,7 +7,6 @@ import { DEFAULT_PROFILE, monthOf, planMonths, type Category, type Delivery, typ
 export type GiftRow = { date: string; giver: string; need: string; paidTo: string; route: string; delivery: Delivery; whatFor: string; category: Category; amount: number; source: string };
 export type MonthRow = { month: string; given: number; checkWithGiftwise: number; checkIfCash: number; kept: number };
 
-type Sample = { date: string; giver: string; need: string; paidTo: string; delivery: Delivery; category: Category; amount: number; recurring: boolean };
 
 /** Her check for each income month, given the gifts as they were delivered, and if every one had been cash instead. */
 export function monthsFor(gifts: (Gift & { recurring?: boolean })[], profile: Profile = DEFAULT_PROFILE): MonthRow[] {
@@ -21,68 +18,24 @@ export function monthsFor(gifts: (Gift & { recurring?: boolean })[], profile: Pr
   });
 }
 
-/** The sample year plus every gift actually paid on this site for the sample household. */
+const SOURCE: Record<ReportGift["evidence"]["kind"], string> = { sample: "Sample year", paypal_capture: "Paid on this site", paypal_payout: "Fund payout on this site" };
+
+/** The sample year plus every gift actually paid on this site for the sample household. Same loader as the SSA report. */
 export async function dashboardData() {
-  const rows: GiftRow[] = (sample.gifts as Sample[]).map((g) => ({
+  const subject = await giftSubject("maya");
+  const all = subject?.gifts ?? [];
+  const rows: GiftRow[] = all.map((g) => ({
     date: g.date,
     giver: g.giver,
     need: g.need,
     paidTo: g.paidTo,
-    route: ROUTE_LABEL[g.delivery],
+    route: ROUTE_LABEL[g.delivery] ?? g.delivery,
     delivery: g.delivery,
     whatFor: CATEGORY_LABEL[g.category],
     category: g.category,
     amount: g.amount,
-    source: "Sample year",
+    source: SOURCE[g.evidence.kind],
   }));
-  if (dbConfigured()) {
-    const data = await getHousehold("maya");
-    if (data) {
-      const live = await db()
-        .select()
-        .from(schema.payments)
-        .where(and(eq(schema.payments.householdId, data.household.id), eq(schema.payments.status, "captured")));
-      for (const p of live) {
-        const need = data.needs.find((n) => n.id === p.needId);
-        const category = (need?.category ?? "other") as Category;
-        rows.push({
-          date: (p.capturedAt ?? p.createdAt).toISOString().slice(0, 10),
-          giver: p.payerName?.split(" ")[0] ?? "A giver",
-          need: need?.title ?? "Savings",
-          paidTo: p.payeeName,
-          route: ROUTE_LABEL[p.route as Delivery] ?? p.route,
-          delivery: p.route as Delivery,
-          whatFor: CATEGORY_LABEL[category],
-          category,
-          amount: Number(p.amount),
-          source: "Paid on this site",
-        });
-      }
-      // Grants a fund sent through PayPal Payouts that PayPal reports as paid.
-      const grants = await db()
-        .select()
-        .from(schema.payouts)
-        .where(and(eq(schema.payouts.householdId, data.household.id), eq(schema.payouts.status, "SUCCESS")));
-      for (const g of grants) {
-        const need = data.needs.find((n) => n.id === g.needId);
-        const category = (need?.category ?? "other") as Category;
-        rows.push({
-          date: g.updatedAt.toISOString().slice(0, 10),
-          giver: g.funder.replace(/ \(sample\)$/, ""),
-          need: need?.title ?? "Savings",
-          paidTo: g.payeeName,
-          route: ROUTE_LABEL[g.route as Delivery] ?? g.route,
-          delivery: g.route as Delivery,
-          whatFor: CATEGORY_LABEL[category],
-          category,
-          amount: Number(g.amount),
-          source: "Fund payout on this site",
-        });
-      }
-    }
-  }
-  rows.sort((a, b) => a.date.localeCompare(b.date));
-  const sampleGifts = sample.gifts as Sample[];
-  const gifts = rows.map((r, i) => ({ id: `g${i}`, date: r.date, amount: r.amount, delivery: r.delivery, category: r.category, giver: r.giver, recurring: sampleGifts.find((s) => s.date === r.date && s.giver === r.giver)?.recurring ?? false }));
+  const gifts = all.map((g) => ({ id: g.id, date: g.date, amount: g.amount, delivery: g.delivery, category: g.category, giver: g.giver, recurring: g.recurring ?? false }));
   return { gifts: rows, months: monthsFor(gifts) };
 }

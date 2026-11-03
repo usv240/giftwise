@@ -1,22 +1,22 @@
 {
-  "ranAt": "2026-11-02",
+  "ranAt": "2026-11-03",
   "build": "Development build on localhost, PayPal sandbox, Postgres 17",
   "suites": [
     {
       "id": "unit",
-      "name": "Rules engine and routing",
+      "name": "Rules engine, routing and the SSA report",
       "command": "npm test",
-      "passed": 45,
-      "total": 45,
-      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, and the AG Studio to Claude translation"
+      "passed": 56,
+      "total": 56,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, and the AG Studio to Claude translation"
     },
     {
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 70,
-      "total": 70,
-      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the MCP server, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
+      "passed": 78,
+      "total": 78,
+      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the monthly SSA report and its CSV, the MCP server, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",
@@ -30,9 +30,9 @@
       "id": "a11y",
       "name": "Accessibility and layout",
       "command": "npm run e2e:a11y",
-      "passed": 68,
-      "total": 68,
-      "what": "axe WCAG 2.2 AA on 17 pages, including a generated gift page, For agents, the AG Studio dashboard and For organizations, at desktop and phone widths, light and dark, with no sideways scroll"
+      "passed": 76,
+      "total": 76,
+      "what": "axe WCAG 2.2 AA on 19 pages, including the SSA report as given and as cash, a generated gift page, For agents, the AG Studio dashboard and For organizations, at desktop and phone widths, light and dark, with no sideways scroll"
     },
     {
       "id": "paypal",

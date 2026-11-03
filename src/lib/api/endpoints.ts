@@ -10,6 +10,8 @@ export type Endpoint = {
   upload?: boolean;
   ai?: boolean;
   keyed: boolean;
+  /** Query parameters for GET endpoints. The first example values make the playground's request. */
+  query?: { name: string; description: string; example?: string; enum?: string[] }[];
 };
 
 export const ENDPOINTS: Endpoint[] = [
@@ -76,6 +78,21 @@ export const ENDPOINTS: Endpoint[] = [
     summary:
       "Turn a list of needs, for example from a fundraiser, into a live gift page where every dollar is paid straight to the shop or the ABLE account through PayPal. The rules engine picks each route. Sandbox pages, five a day per visitor.",
     example: { name: "Jordan", pronoun: "they", organizer: "Sam", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] },
+    keyed: true,
+  },
+  {
+    id: "ssa-report",
+    method: "GET",
+    path: "/api/v1/ssa-report",
+    title: "Monthly report to SSA",
+    summary:
+      "One month of a gift page's gifts, written up as SSI reporting asks: what to tell Social Security by the 10th of the next month, and the PayPal capture or payout behind every gift that is not income. Add view=cash to see the report the same gifts would have needed as cash, or format=csv for a spreadsheet.",
+    query: [
+      { name: "page", description: 'Gift page id, the part after /g/. The sample page is "maya".', example: "maya" },
+      { name: "month", description: "Income month, like 2026-10. Defaults to the month whose report is due next.", example: "2026-10" },
+      { name: "view", description: '"given" (default) or "cash".', enum: ["given", "cash"] },
+      { name: "format", description: "csv for a spreadsheet instead of JSON.", enum: ["csv"] },
+    ],
     keyed: true,
   },
   {

@@ -128,6 +128,9 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
                 See the latest receipt
               </Link>
             )}
+            <Link className="text-link gift-latest" href={`/g/${slug}/report`}>
+              {household.name}&rsquo;s report to Social Security
+            </Link>
             {household.isSample && (
               <Link className="text-link gift-latest" href="/dashboard">
                 See {household.name}&rsquo;s year

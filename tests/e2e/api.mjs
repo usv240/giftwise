@@ -174,8 +174,30 @@ ok("openapi.json is 3.1 and lists every endpoint", j.openapi === "3.1.0" && ["/a
 r = await fetch(B + "/api/presets/not-a-preset");
 ok("unknown preset -> 404 in the standard envelope", r.status === 404 && (await r.json()).error?.code === "not_found");
 
-// The MCP server, called with an API key the way an agent would: initialize, list tools, call one, and answer bad input as a tool error
+// Calls from here on use the rotated test key, the way an integration or an agent would.
 const keyed = { "Content-Type": "application/json", Authorization: `Bearer ${rotated}` };
+
+// The monthly report to Social Security, written from the gifts
+// Keyed, so the suite stays inside the 20-a-minute limit for calls without a key.
+r = await fetch(B + "/api/v1/ssa-report?page=maya&month=2026-10", { headers: keyed });
+j = await r.json();
+ok("ssa-report October as given: 5 gifts, nothing counts, check stays $994, due November 10", r.status === 200 && j.data?.status === "nothing_counts" && j.data?.totals?.gifts === 5 && j.data?.totals?.check === 994 && j.data?.due?.date === "2026-11-10", `${j.data?.status} ${j.data?.totals?.check}`);
+ok("ssa-report records every gift with a rule and a cited source", (j.data?.lines ?? []).every((l) => l.section === "records" && l.rule_ids.length > 0 && l.sources.every((s) => s.url.startsWith("https://"))));
+r = await fetch(B + "/api/v1/ssa-report?page=maya&month=2026-10&view=cash", { headers: keyed });
+j = await r.json();
+ok("ssa-report the same October as cash: 5 gifts to tell SSA, $538 counted, check $456, a call script", j.data?.status === "report" && j.data?.totals?.tell === 5 && j.data?.totals?.counted === 538 && j.data?.totals?.check === 456 && j.data?.script?.length === 7, `${j.data?.totals?.counted} ${j.data?.totals?.check}`);
+r = await fetch(B + "/api/v1/ssa-report?page=maya&month=2026-10&format=csv", { headers: keyed });
+const reportCsvText = await r.text();
+ok("ssa-report CSV download has a header and one row per gift", r.status === 200 && (r.headers.get("content-type") ?? "").startsWith("text/csv") && reportCsvText.trim().split("\n").length === 6 && reportCsvText.startsWith("date,from,for,paid_to,amount,tell_ssa"));
+r = await fetch(B + "/api/v1/ssa-report?page=maya&month=2026-13", { headers: keyed });
+ok("ssa-report bad month -> 400", r.status === 400);
+r = await fetch(B + "/api/v1/ssa-report?page=nobody-at-all", { headers: keyed });
+ok("ssa-report unknown page -> 404", r.status === 404);
+r = await fetch(B + "/g/maya/report?month=2026-10");
+const rpHtml = await r.text();
+ok("report page renders the verdict and the PayPal proof column", r.status === 200 && rpHtml.includes("Nothing here counts as income.") && rpHtml.includes("For your records"));
+
+// The MCP server, called with an API key the way an agent would: initialize, list tools, call one, and answer bad input as a tool error
 const mcp = (method, params, id = 1) => post("/api/mcp", { jsonrpc: "2.0", id, method, params }, keyed);
 r = await mcp("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "e2e", version: "1" } });
 j = await r.json();
@@ -185,10 +207,13 @@ ok("MCP notification -> 202 with no body", r.status === 202);
 r = await mcp("tools/list");
 j = await r.json();
 const names = (j.result?.tools ?? []).map((t) => t.name);
-ok("MCP lists the five tools with input schemas", ["check_gift", "get_gift_page", "plan_gift", "review_bill", "start_gift_checkout"].every((n) => names.includes(n)) && j.result.tools.every((t) => t.inputSchema?.type === "object"), names.join(","));
+ok("MCP lists the six tools with input schemas", ["check_gift", "get_gift_page", "get_ssa_report", "plan_gift", "review_bill", "start_gift_checkout"].every((n) => names.includes(n)) && j.result.tools.every((t) => t.inputSchema?.type === "object"), names.join(","));
 r = await mcp("tools/call", { name: "plan_gift", arguments: { slug: "maya", amount: 500 } });
 j = await r.json();
 ok("MCP plan_gift splits $500 so her check stays $994 (cash would be $574)", j.result?.structuredContent?.check_with_giftwise === 994 && j.result?.structuredContent?.check_if_cash === 574, j.result?.content?.[0]?.text?.slice(0, 80));
+r = await mcp("tools/call", { name: "get_ssa_report", arguments: { slug: "maya", month: "2026-10" } });
+j = await r.json();
+ok("MCP get_ssa_report: October needs no income report, due November 10", j.result?.structuredContent?.status === "nothing_counts" && j.result?.structuredContent?.due?.date === "2026-11-10" && /Nothing here counts as income/.test(j.result?.content?.[0]?.text ?? ""), j.result?.content?.[0]?.text?.slice(0, 80));
 r = await mcp("tools/call", { name: "check_gift", arguments: { amount: "lots" } });
 j = await r.json();
 ok("MCP bad arguments come back as a tool error the agent can read", r.status === 200 && j.result?.isError === true && /amount/.test(j.result?.content?.[0]?.text ?? ""));

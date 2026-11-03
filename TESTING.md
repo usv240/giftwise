@@ -81,6 +81,15 @@ The runner can be started again 20 seconds after the last run.
 
 Without an AG Studio licence key the dashboard shows AG Studio's trial watermark; add `NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY` to remove it.
 
+## Maya's report to Social Security
+
+1. Open `/g/maya/report`. It opens on the month whose report is due next, with the deadline (10 days after the month ends).
+2. The verdict for the gifts as given: nothing counts as income. Each gift is listed with the rule that says why, a link to the regulation or SSA manual section, and its PayPal capture or payout as proof. Gifts from the fictional sample year say they have no PayPal record; gifts you pay on Maya's page appear with their PayPal capture id and a link to the receipt.
+3. Press **As cash**. The same month becomes the report Maya would have had to file: every gift to tell SSA about, what counts, her lower check two months later, and a call script.
+4. **Print or save as PDF** keeps just the report; **Download CSV** gives the same lines as a spreadsheet. Set **View** to Technical to see the rule ids.
+
+The same report is at `GET /api/v1/ssa-report?page=maya&month=2026-10` and as the MCP tool `get_ssa_report`.
+
 ## For organizations: one payout batch
 
 1. Open `/organizations`. The sample fund's balance comes live from PayPal's Balances API.
@@ -134,10 +143,10 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine and routing | `npm test` | 45 passed |
-| API end to end | `npm run e2e:api` | 70 passed |
+| Rules engine, routing and the SSA report | `npm test` | 56 passed |
+| API end to end | `npm run e2e:api` | 78 passed |
 | Browser end to end | `npm run e2e:ui` | 56 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 68 page views pass |
+| Accessibility and layout | `npm run e2e:a11y` | All 76 page views pass |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |

@@ -7,7 +7,7 @@ import sources from "../../../../content/sources.json";
 import { Info } from "@/components/Info";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { db, dbConfigured, schema } from "@/lib/db";
-import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthName, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import "../../pages.css";
 import "./receipt.css";
 
@@ -170,7 +170,10 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
       </section>
 
       {household && (
-        <p className="page-section">
+        <p className="page-section rc-next">
+          <Link className="text-link" href={`/g/${household.slug}/report?month=${monthOf(date)}`}>
+            See this gift on {hers} {monthName(monthOf(date))} report to Social Security
+          </Link>
           <Link className="text-link" href={`/g/${household.slug}`}>
             Back to {name}&rsquo;s page
           </Link>

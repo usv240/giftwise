@@ -186,3 +186,8 @@
   font-size: 14px;
   max-width: 68ch;
 }
+.rc-next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+}

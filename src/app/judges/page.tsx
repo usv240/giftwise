@@ -15,6 +15,7 @@ const PATH = [
   { href: "/", label: "Home", look: "The problem in one number: $1,000 given as cash leaves Maya a $74 check two months later. Paying the shop for what she needs keeps all $994." },
   { href: "/g/maya", label: "Maya's gift page", look: "Type $1,500 in Give any amount. Giftwise splits it across her needs and her ABLE account, and one PayPal checkout pays five recipients directly." },
   { href: "/g/maya", label: "Pay in the sandbox", look: "Use the sandbox buyer login in TESTING.md. When it completes, open the receipt." },
+  { href: "/g/maya/report", label: "Her report to Social Security", look: "SSI asks for changes in income by the 10th of the next month. Giftwise writes Maya's report from the gifts, with the PayPal record behind every line. Press As cash to see the report she would otherwise have to file, and the call script that comes with it." },
   { href: "/try", label: "Try it", look: "Read the sample electric bill with Claude, or check any gift. Switch View to Technical to see rule ids and API details." },
   { href: "/agents", label: "An AI agent asks first", look: "A Claude assistant uses the Giftwise MCP server to check a gift, plan it, and start a PayPal checkout the giver approves. Run it live." },
   { href: "/organizations", label: "A fund pays many families", look: "Send a grant as one PayPal Payouts batch. Each item goes straight to a shop or ABLE account, and Transaction Search confirms it in PayPal's report." },

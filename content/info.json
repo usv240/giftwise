@@ -448,7 +448,7 @@
     "title": "About this page",
     "what": "How AI assistants use Giftwise: they check a gift before giving to someone on SSI, and can prepare a PayPal checkout that only the giver approves.",
     "why": "More giving now starts with an assistant. A check the assistant can call keeps the gift from lowering someone’s monthly check.",
-    "technical": "Model Context Protocol over Streamable HTTP at /api/mcp, stateless JSON-RPC. Five tools; four only read."
+    "technical": "Model Context Protocol over Streamable HTTP at /api/mcp, stateless JSON-RPC. Six tools; five only read."
   },
   "agents.demo": {
     "title": "An assistant that asks first",
@@ -497,5 +497,35 @@
     "what": "PayPal’s live status for every item in the batch, and whether it already appears in PayPal’s transaction report.",
     "why": "The fund can show its board or its auditors exactly where every dollar went.",
     "technical": "GET /v1/payments/payouts/{id} for item status and transaction ids; Transaction Search (/v1/reporting/transactions) to confirm each one. Paid items count toward their needs once, however often the batch is refreshed. Payout webhooks refresh it too."
+  },
+  "page.report": {
+    "title": "The report to Social Security",
+    "what": "People on SSI tell Social Security about changes in income, including help from family and friends, by the 10th of the next month. Giftwise writes that report from the gifts themselves.",
+    "why": "Every gift was checked by the rules before PayPal moved the money, so each line can say whether it changes the check, and show the PayPal record that proves where the money went.",
+    "technical": "buildReport() in src/lib/report/ssa.ts runs the rules engine over every gift on the page (sample year, PayPal captures and PayPal Payouts items), applies the quarterly exclusion across months, and dates the deadline by 20 CFR 416.714(a). Also at GET /api/v1/ssa-report and the get_ssa_report MCP tool.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "report.tell": {
+    "title": "What to tell Social Security",
+    "what": "Gifts that change income this month: cash, and housing costs someone else paid. Each comes with the sentence to say on the call.",
+    "why": "Reporting them on time keeps the check right and avoids a deduction for a late report.",
+    "technical": "A line goes here when the gift is cash, or classify() returns ism_shelter (rent, mortgage, property tax or utilities paid to the supplier). Counted income is countableIncome for the month minus the same month with no gifts."
+  },
+  "report.records": {
+    "title": "For your records",
+    "what": "Gifts that are not income, each with the rule that says so and the PayPal payment behind it.",
+    "why": "If Social Security asks about help from family, these show the money went to the shop or the ABLE account, not to the person.",
+    "technical": "Evidence is the PayPal capture id from Orders v2 (linked to its public receipt) or the transaction id of a PayPal Payouts item. Sample-year gifts have no PayPal record and say so.",
+    "sponsor": [
+      "PayPal"
+    ]
+  },
+  "report.how": {
+    "title": "How to report",
+    "what": "Call Social Security, use the TTY line, or visit or write any Social Security office. The call script lists exactly what to say.",
+    "why": "The script is written from the gifts, so nothing is left out and nothing extra is said.",
+    "technical": "Phone numbers and wording are quoted from SSA pages and 20 CFR 416.708, 416.714 and 416.724, stored word for word in content/reporting.json."
   }
 }

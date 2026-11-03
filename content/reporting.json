@@ -1,0 +1,51 @@
+{
+  "about": "Word-for-word passages on reporting to Social Security, used by the monthly report. Kept apart from authorities.json so the two reviewers' rulebooks do not change.",
+  "fetched": "2026-11-03",
+  "phone": "1-800-772-1213",
+  "tty": "1-800-325-0778",
+  "penalties": [25, 50, 100],
+  "passages": [
+    {
+      "id": "cfr-416-708-c",
+      "source": "cfr-416-708",
+      "cite": "20 CFR 416.708(c)(1)",
+      "text": "Unless the circumstances in § 416.709(a) and (c) apply, you must report to us any increase or decrease in your income"
+    },
+    {
+      "id": "cfr-416-708-d",
+      "source": "cfr-416-708",
+      "cite": "20 CFR 416.708(d)",
+      "text": "You must report to us any resources you receive or part with"
+    },
+    {
+      "id": "cfr-416-714-a",
+      "source": "cfr-416-714",
+      "cite": "20 CFR 416.714(a)",
+      "text": "You should report to us as soon as an event listed in § 416.708 happens. If you do not report within 10 days after the close of the month in which the event happens, your report will be late. We may impose a penalty deduction from your benefits for a late report (see §§ 416.722 through 416.732)."
+    },
+    {
+      "id": "cfr-416-724-a",
+      "source": "cfr-416-724",
+      "cite": "20 CFR 416.724(a)",
+      "text": "(1) $25 for a report overdue in the first penalty period; (2) $50 for a report overdue in the second penalty period; and (3) $100 for a report overdue in the third (or any following) penalty period."
+    },
+    {
+      "id": "ssa-reporting-help",
+      "source": "ssa-ssi-reporting",
+      "cite": "SSA, Reporting Responsibilities",
+      "text": "Change in help with living expenses from friends or relatives."
+    },
+    {
+      "id": "ssa-reporting-when",
+      "source": "ssa-ssi-reporting",
+      "cite": "SSA, Reporting Responsibilities",
+      "text": "Report any changes that may affect your SSI as soon as possible and no later than 10 days after the end of the month in which the change occurred."
+    },
+    {
+      "id": "ssa-spotlight-how",
+      "source": "ssa-spotlight-rights",
+      "cite": "SSA, Spotlight on Rights and Responsibilities",
+      "text": "Please visit or write any Social Security office, or call our toll-free number at 1-800-772-1213."
+    }
+  ]
+}

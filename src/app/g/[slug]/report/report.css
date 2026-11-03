@@ -1,0 +1,471 @@
+/* The monthly report to Social Security: one sheet, read on screen, printed, or read aloud on a call. */
+.report {
+  padding-bottom: clamp(3rem, 2rem + 3vw, 5rem);
+}
+
+/* Month, view and actions sit above the sheet and never print. */
+.rp-bar {
+  margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  max-width: 68rem;
+}
+.rp-bar .btn {
+  min-height: 40px;
+  padding: 0.5rem 0.95rem;
+  font-size: 16px;
+}
+.rp-months {
+  display: grid;
+  grid-template-columns: auto minmax(8.5rem, auto) auto;
+  align-items: center;
+  gap: 8px;
+}
+.rp-months .btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+}
+.rp-month {
+  text-align: center;
+  font-weight: 500;
+}
+.rp-views {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  gap: 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.rp-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 16px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    transform var(--dur-press) var(--ease-out);
+}
+.rp-view:active {
+  transform: scale(0.97);
+}
+.rp-view[aria-current="page"] {
+  background: var(--surface);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+.rp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+@media (max-width: 720px) {
+  .rp-months {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .rp-months .btn:last-child {
+    justify-self: end;
+  }
+  .rp-months .btn:first-child {
+    justify-self: start;
+  }
+  .rp-views {
+    width: 100%;
+  }
+  .rp-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .rp-actions .btn {
+    flex: 1 1 0;
+  }
+}
+
+/* The sheet itself. */
+.rp-sheet {
+  margin-top: 20px;
+  max-width: 68rem;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: clamp(22px, 2rem + 1vw, 56px);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent),
+    0 12px 32px -18px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+.rp-meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--surface-2);
+}
+@media (max-width: 720px) {
+  .rp-meta {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+.rp-meta dt {
+  font-size: 15px;
+  color: var(--muted);
+}
+.rp-meta dd {
+  margin: 2px 0 0;
+  font-weight: 500;
+  font-size: var(--step-body);
+}
+.rp-meta dd[data-due="due_soon"] {
+  color: var(--attention);
+}
+
+.rp-verdict {
+  padding: clamp(28px, 2rem + 2vw, 56px) 0 clamp(24px, 1.5rem + 1vw, 40px);
+  border-bottom: 1px solid var(--surface-2);
+}
+.rp-headline {
+  font-size: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  max-width: 18ch;
+}
+.rp-whatif {
+  margin-top: 14px;
+  font-size: var(--step-body);
+  color: var(--attention);
+  font-weight: 500;
+}
+.rp-summary {
+  margin-top: 16px;
+  font-size: var(--step-lead);
+  line-height: 1.4;
+  max-width: 60ch;
+}
+.rp-figures {
+  margin: clamp(24px, 1.5rem + 1vw, 36px) 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, max-content));
+  gap: 12px clamp(28px, 2rem + 2vw, 64px);
+}
+@media (max-width: 640px) {
+  .rp-figures {
+    grid-template-columns: 1fr;
+  }
+}
+.rp-figures dt {
+  font-size: 15px;
+  color: var(--muted);
+}
+.rp-figures dd {
+  margin: 4px 0 0;
+  font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.rp-figures dd[data-kept] {
+  color: var(--positive);
+}
+.rp-sheet[data-status="report"] .rp-figures div:nth-child(2) dd {
+  color: var(--attention);
+}
+.rp-contrast {
+  margin-top: 20px;
+  font-size: 16px;
+  max-width: 64ch;
+}
+
+/* Each part of the sheet. More room above a heading than below it. */
+.rp-part {
+  padding-top: clamp(28px, 1.75rem + 1vw, 44px);
+}
+.rp-part h3 {
+  font-size: var(--step-lead);
+  font-weight: 500;
+}
+.rp-part-lede {
+  margin-top: 6px;
+  max-width: 64ch;
+}
+.rp-none {
+  margin-top: 8px;
+  max-width: 64ch;
+}
+
+.rp-tell,
+.rp-todo,
+.rp-quotes {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.rp-tell {
+  display: grid;
+  gap: 10px;
+}
+.rp-tell li {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.rp-tell-say {
+  font-size: var(--step-body);
+  font-weight: 500;
+}
+.rp-tell-why {
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* The records table: a real table on wide screens, stacked rows on a phone. */
+.rp-table {
+  margin-top: 14px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.rp-table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid var(--surface-2);
+  white-space: nowrap;
+}
+.rp-table td {
+  padding: 14px 12px 14px 0;
+  border-bottom: 1px solid var(--surface-2);
+  vertical-align: top;
+}
+.rp-table tr:last-child td {
+  border-bottom: 0;
+}
+.rp-num {
+  text-align: right;
+  white-space: nowrap;
+}
+.rp-table td.rp-num {
+  font-size: 17px;
+  font-weight: 500;
+}
+.rp-for {
+  display: block;
+  font-weight: 500;
+}
+.rp-to {
+  display: block;
+  color: var(--muted);
+}
+.rp-why {
+  max-width: 34ch;
+}
+.rp-proof {
+  overflow-wrap: anywhere;
+  max-width: 16ch;
+}
+.rp-tech {
+  font-size: 14px;
+}
+.rp-flag {
+  display: block;
+  margin-top: 4px;
+  color: var(--attention);
+}
+@media (max-width: 860px) {
+  .rp-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .rp-table,
+  .rp-table tbody,
+  .rp-table tr,
+  .rp-table td {
+    display: block;
+  }
+  .rp-table tr {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--surface-2);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 16px;
+  }
+  .rp-table tr:last-child {
+    border-bottom: 0;
+  }
+  .rp-table td {
+    padding: 0;
+    border: 0;
+  }
+  .rp-table td[data-label="Date"],
+  .rp-table td[data-label="From"] {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .rp-table td[data-label="From"] {
+    text-align: right;
+  }
+  .rp-table td[data-label="Why"],
+  .rp-table td[data-label="Proof"] {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+  .rp-table td[data-label="Proof"] {
+    font-size: 14px;
+  }
+}
+
+.rp-todo {
+  display: grid;
+  gap: 10px;
+  max-width: 68ch;
+}
+.rp-check {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  cursor: pointer;
+}
+.rp-check input {
+  margin: 0.15em 0 0;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--positive);
+  cursor: pointer;
+}
+.rp-check input:checked + span {
+  color: var(--muted);
+}
+.rp-check input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.rp-phone {
+  margin-top: 10px;
+  max-width: 68ch;
+}
+.rp-script {
+  margin-top: 16px;
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 18px 20px;
+  max-width: 68ch;
+}
+.rp-script-k {
+  font-weight: 500;
+}
+.rp-script ol {
+  margin: 8px 0 14px;
+  padding-left: 1.3em;
+  display: grid;
+  gap: 6px;
+  font-size: var(--step-body);
+}
+.rp-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.rp-copy-note {
+  font-size: 15px;
+  color: var(--positive);
+}
+.rp-penalty {
+  margin-top: 16px;
+  font-size: 15px;
+  max-width: 68ch;
+}
+
+.rp-law {
+  margin-top: clamp(28px, 1.75rem + 1vw, 44px);
+  border-top: 1px solid var(--surface-2);
+}
+.rp-quotes {
+  display: grid;
+  gap: 14px;
+  max-width: 72ch;
+}
+.rp-quotes blockquote {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.rp-cite {
+  font-size: 14px;
+}
+.rp-scope {
+  margin-top: 18px;
+  font-size: 14px;
+  max-width: 72ch;
+}
+.rp-back {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+/* On paper: the sheet alone, black on white, links shown as their text. */
+@media print {
+  .site-header,
+  .stack-strip,
+  .footer-tiles,
+  .rp-bar,
+  .rp-back,
+  .rp-copy,
+  .info-trigger,
+  .rp-head .lede {
+    display: none !important;
+  }
+  .report {
+    padding: 0;
+  }
+  .rp-head {
+    margin: 0;
+  }
+  .rp-sheet {
+    margin: 12px 0 0;
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: none;
+  }
+  .rp-tell li,
+  .rp-script {
+    background: none;
+    padding: 0;
+  }
+  .rp-headline {
+    font-size: 28pt;
+  }
+  .rp-table tr {
+    break-inside: avoid;
+  }
+}
+
+/* Rule ids and other technical detail, shown with the header's Explain switch set to Technical. */
+.rp-sheet .tech-only {
+  display: none;
+  color: var(--muted);
+}
+:root[data-mode="technical"] .rp-sheet .tech-only {
+  display: block;
+}

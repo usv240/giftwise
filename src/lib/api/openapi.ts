@@ -33,7 +33,8 @@ export function openapi(server: string) {
         default: { $ref: "#/components/responses/Error" },
       },
     };
-    if (e.path.includes("{id}")) op.parameters = [{ name: "id", in: "path", required: true, schema: { type: "string" } }, { name: "format", in: "query", schema: { type: "string", enum: ["csv"] } }];
+    if (e.query) op.parameters = e.query.map((p) => ({ name: p.name, in: "query", description: p.description, schema: { type: "string", ...(p.enum ? { enum: p.enum } : {}), ...(p.example ? { example: p.example } : {}) } }));
+    if (e.path.includes("{id}")) op.parameters =[{ name: "id", in: "path", required: true, schema: { type: "string" } }, { name: "format", in: "query", schema: { type: "string", enum: ["csv"] } }];
     if (BODIES[e.id]) op.requestBody = { required: true, content: { "application/json": { schema: BODIES[e.id], example: e.example } } };
     if (e.upload) {
       op.requestBody = {

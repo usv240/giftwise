@@ -6,7 +6,9 @@ import { CategorySchema, DeliverySchema } from "@/lib/api/schemas";
 import { getHousehold, openNeeds } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
 import { routeGift } from "@/lib/routing";
-import { DEFAULT_PROFILE, evaluateGift, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
+import { giftSubject } from "@/lib/report/data";
+import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
+import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
 
 /** What a tool returns: plain text for the model, structured data for programs. */
@@ -123,6 +125,30 @@ export const TOOLS = [
     },
   }),
   tool({
+    name: "get_ssa_report",
+    title: "Write the monthly report to Social Security",
+    description:
+      "People on SSI must tell Social Security about changes in income, including help from friends and family, within 10 days after the month ends. For a Giftwise gift page, this writes one month's report from the gifts themselves: which gifts to tell SSA about, what counts, the check it decides, and the PayPal record that shows every other gift went straight to a shop or the ABLE account. Read-only; it never contacts Social Security.",
+    input: z.object({
+      slug,
+      month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional().describe("Income month, YYYY-MM. Defaults to the month whose report is due next."),
+      view: z.enum(["given", "cash"]).default("given").describe('"given" for the gifts as they were made; "cash" for the report the same gifts would have needed as cash.'),
+    }),
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    run: async (i, ctx) => {
+      const s = await giftSubject(i.slug);
+      if (!s) return { text: `No gift page named "${i.slug}".`, isError: true };
+      const now = today();
+      const months = [...new Set(s.gifts.map((g) => monthOf(g.date)))];
+      const r = buildReport({ name: s.name, profile: s.profile, gifts: s.gifts, month: i.month ?? currentReportMonth(now, months), today: now, view: i.view });
+      const tell = r.lines.filter((l) => l.section === "tell");
+      return {
+        text: `${r.name}'s report for ${r.monthLabel}, due ${r.due.label}: ${r.headline} ${r.summary}${tell.length ? ` To tell SSA: ${tell.map((l) => l.say).join(" ")}` : ""} Call ${r.how.phone} (TTY ${r.how.tty}) or visit any Social Security office. Full report: ${ctx.origin}/g/${s.slug}/report?month=${r.month}${r.view === "cash" ? "&view=cash" : ""}.`,
+        data: reportJson(r),
+      };
+    },
+  }),
+  tool({
     name: "start_gift_checkout",
     title: "Start a PayPal checkout for a gift",
     description:
@@ -142,4 +168,4 @@ export const TOOLS = [
 
 export const SERVER_INFO = { name: "giftwise", title: "Giftwise", version: "2026.11.2" };
 export const INSTRUCTIONS =
-  "Giftwise helps people give to someone who receives SSI without lowering their monthly check. Call check_gift before suggesting cash. To give to a person with a Giftwise page, read it with get_gift_page, show the split with plan_gift, and start_gift_checkout returns a PayPal link the giver approves themselves. Sandbox only.";
+  "Giftwise helps people give to someone who receives SSI without lowering their monthly check. Call check_gift before suggesting cash. To give to a person with a Giftwise page, read it with get_gift_page, show the split with plan_gift, and start_gift_checkout returns a PayPal link the giver approves themselves. For the person receiving SSI, get_ssa_report writes the month's report to Social Security from the gifts. Sandbox only.";

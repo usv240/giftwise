@@ -11,7 +11,10 @@ type Lang = "curl" | "js" | "python";
 const PLAYABLE = ENDPOINTS.filter((e) => e.id !== "health");
 const SAMPLE_BILL = "/samples/northside-electric-bill.png";
 const pretty = (v: unknown) => JSON.stringify(v, null, 2);
-const pathFor = (e: Endpoint) => e.path.replace("{id}", "electric-bill");
+const pathFor = (e: Endpoint) => {
+  const q = (e.query ?? []).filter((p) => p.example).map((p) => `${p.name}=${encodeURIComponent(p.example ?? "")}`);
+  return e.path.replace("{id}", "electric-bill") + (q.length ? `?${q.join("&")}` : "");
+};
 
 /** Get a key (shown once), then send real requests to the live API with it. */
 export function DevConsole() {
