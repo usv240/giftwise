@@ -1,5 +1,9 @@
-# Render Blueprint: the Giftwise web service and its Postgres database.
+# Render Blueprint: the Giftwise web service, its Postgres database, and the outside checks.
 # In the Render Dashboard choose New > Blueprint, pick this repository, and fill in the values marked sync: false.
+#
+#   giftwise          the web app (Next.js) and its API
+#   giftwise-checks   a Render Workflow: one task per check, run in parallel with retries (workflows/)
+#   giftwise-nightly  a cron job that starts the checks every night
 services:
   - type: web
     name: giftwise
@@ -11,6 +15,9 @@ services:
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeployTrigger: commit
+    buildFilter:
+      ignoredPaths:
+        - workflows/**
     envVars:
       - key: NODE_VERSION
         value: "24"
@@ -20,6 +27,15 @@ services:
           property: connectionString
       - key: AUDIT_SALT
         generateValue: true
+      - key: CHECKS_SECRET # shared with giftwise-checks, so only the workflow can file results
+        generateValue: true
+      - key: CHECKS_WORKFLOW_SLUG
+        fromService:
+          type: workflow
+          name: giftwise-checks
+          property: slug
+      - key: RENDER_API_KEY # lets "Run the checks now" on /judges start the workflow
+        sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: PAYPAL_CLIENT_ID
@@ -31,6 +47,48 @@ services:
       - key: PAYPAL_VENDOR_EMAIL
         sync: false
       - key: PAYPAL_ABLE_EMAIL
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      - key: NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY
+        sync: false
+
+  - type: workflow
+    name: giftwise-checks
+    runtime: node
+    region: oregon
+    rootDir: workflows
+    buildCommand: npm ci
+    startCommand: npm start
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: APP_URL # checked from outside, through the public address, the way a judge sees it
+        value: https://giftwise-405i.onrender.com
+      - key: CHECKS_SECRET
+        fromService:
+          type: web
+          name: giftwise
+          envVarKey: CHECKS_SECRET
+
+  - type: cron
+    name: giftwise-nightly
+    runtime: node
+    region: oregon
+    schedule: "0 9 * * *" # 09:00 UTC: 4 AM Eastern, 1 AM Pacific
+    rootDir: workflows
+    buildCommand: npm ci
+    startCommand: npm run trigger
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: CHECKS_WORKFLOW_SLUG
+        fromService:
+          type: workflow
+          name: giftwise-checks
+          property: slug
+      - key: RENDER_API_KEY
         sync: false
 
 databases:

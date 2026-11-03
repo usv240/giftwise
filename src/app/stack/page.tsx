@@ -33,9 +33,9 @@ const TOOLS: Tool[] = [
   {
     id: "render",
     name: "Render",
-    job: "Hosts the site and its Postgres database.",
-    how: "A web service and a managed Postgres database, both defined in render.yaml. A pre-deploy command creates or updates the tables on every release.",
-    files: ["render.yaml"],
+    job: "Hosts the site and its Postgres database, and checks the live demo from outside every night with Render Workflows.",
+    how: "A web service, a managed Postgres database, a Render Workflow and a cron job, all in one render.yaml. The workflow fans out one task per check (each failure case against the PayPal sandbox, each page on the judges' path, each public API promise) with retries, and files the run with the app; the cron job starts it nightly with the Render SDK, and /judges can start it on demand.",
+    files: ["render.yaml", "workflows/src/main.ts", "workflows/src/checks.ts", "src/app/api/checks/start/route.ts"],
   },
   {
     id: "apimatic",

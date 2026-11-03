@@ -19,6 +19,7 @@ About 7.3 million people receive SSI (September 2026). SSI counts cash gifts as 
 ## What is inside
 
 - **PayPal:** Orders v2 with several payees in one order, the JavaScript SDK v6 button, server-side capture with `PayPal-Request-Id` idempotency, approval links that capture on return, Payouts batches for organizations, Transaction Search and the Balances API for reconciliation, signature-verified webhooks as a safety net, live order lookups, and sandbox negative testing for declined cards.
+- **Checked every night, from outside, on Render Workflows:** `workflows/` is a Render Workflow that fans out one task per check, in parallel with retries: each failure case against the PayPal sandbox, each page on the judges' path, and each public API promise (22 in all). A Render cron job starts it nightly; **Run the checks now** on `/judges` starts it on demand, and the results show there and on `/status`. Running the checks in parallel also surfaced a real race in the audit ledger (two appends at once could fork the hash chain); appends now take a Postgres advisory lock, and `npm run test:ledger-race` fires 60 at once to prove it.
 - **Eight failure cases, run live** on `/judges`: declined card, double click, unapproved payment, a browser changing the amount or payee, a gift that would lower her check, an AI reviewer that gets the rule wrong, an edited ledger entry, and refunds.
 - **Claude (`claude-opus-5-5`):** reads bills, quotes and fundraiser pages into structured data. The rules engine, not the model, decides where the money goes.
 - **Two reviewers, two rulebooks:** when a bill might be a housing cost, one Claude reviewer reads only the regulations and the Federal Register, the other only SSA's operating manual. Each must quote its rulebook word for word and a program checks every quote. Giftwise takes a reading only when both checked answers agree; otherwise it uses the route that keeps the check whole under either reading. Measured on 20 labeled bills: every clear case right, all 40 quotes found word for word, and the check kept whole in all 20 (results on `/judges`).
@@ -42,7 +43,9 @@ npm run db:push
 npm run dev -- -p 3100        # http://localhost:3100
 ```
 
-[TESTING.md](TESTING.md) explains every variable, the sandbox accounts and the test suites. To host your own copy, [`render.yaml`](render.yaml) creates the web service and its database on Render:
+[TESTING.md](TESTING.md) explains every variable, the sandbox accounts and the test suites. `npm run checks:local` runs the same 22 outside checks as the nightly Render Workflow against your local copy.
+
+To host your own copy, [`render.yaml`](render.yaml) creates the web service, its database, the `giftwise-checks` Render Workflow and the nightly cron job on Render. Give the web service and the cron job a Render API key (`RENDER_API_KEY`) so they can start the workflow:
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/usv240/giftwise)
 
@@ -50,13 +53,15 @@ npm run dev -- -p 3100        # http://localhost:3100
 
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine, routing and the SSA report | `npm test` | 56 of 56 |
-| API end to end | `npm run e2e:api` | 78 of 78 |
+| Rules engine, routing, the SSA report and the checks workflow | `npm test` | 59 of 59 |
+| API end to end | `npm run e2e:api` | 84 of 84 |
 | Browser end to end | `npm run e2e:ui` | 56 of 56 |
 | Accessibility, 19 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 76 of 76 page views |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 of 5 |
 | Failure cases against the PayPal sandbox | `/judges` | 8 of 8 |
+| Outside checks, as the nightly Render Workflow runs them | `npm run checks:local` | 22 of 22 |
+| 60 ledger appends at once keep the hash chain whole | `npm run test:ledger-race` | Chain verifies |
 
 Set `BASE_URL` to run the end-to-end suites against a deployed copy.
 

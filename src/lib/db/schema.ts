@@ -132,3 +132,18 @@ export const apiRequests = pgTable("api_requests", {
   ms: integer("ms").notNull(),
   at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** One run of the outside checks: every failure case, the judges' path and the public API, run by Render Workflows (or locally). */
+export const checkRuns = pgTable("check_runs", {
+  id: serial("id").primaryKey(),
+  /** render-workflow | local */
+  source: text("source").notNull(),
+  /** The Render Workflows task run id of the parent run, when it ran there. */
+  runId: text("run_id").notNull().default(""),
+  appUrl: text("app_url").notNull(),
+  passed: integer("passed").notNull(),
+  total: integer("total").notNull(),
+  results: jsonb("results").notNull().default([]),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+  finishedAt: timestamp("finished_at", { withTimezone: true }).notNull().defaultNow(),
+});

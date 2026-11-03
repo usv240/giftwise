@@ -110,9 +110,9 @@
   },
   "stack.render": {
     "title": "Render",
-    "what": "Hosts the site and its Postgres database.",
-    "why": "Reliable hosting keeps the demo live through judging.",
-    "technical": "A Render web service and a managed Postgres database, both defined in render.yaml. Tables are created by a pre-deploy command on every release."
+    "what": "Hosts the site and its Postgres database, and checks the live demo from outside every night.",
+    "why": "A demo that is checked every night keeps working through judging, and any failure is found before a judge finds it.",
+    "technical": "render.yaml defines the web service, managed Postgres, the giftwise-checks Render Workflow (one task per check, run in parallel with retries) and a nightly cron job that starts it with the Render SDK's workflows.startTask. Tables are created by a pre-deploy command on every release."
   },
   "stack.apimatic": {
     "title": "APIMatic",
@@ -527,5 +527,15 @@
     "what": "Call Social Security, use the TTY line, or visit or write any Social Security office. The call script lists exactly what to say.",
     "why": "The script is written from the gifts, so nothing is left out and nothing extra is said.",
     "technical": "Phone numbers and wording are quoted from SSA pages and 20 CFR 416.708, 416.714 and 416.724, stored word for word in content/reporting.json."
+  },
+  "judges.nightly": {
+    "title": "Checked every night",
+    "what": "Every night a Render Workflow checks the hosted demo from outside: each page a judge opens, each public API promise, and each failure case against the PayPal sandbox.",
+    "why": "A demo that is checked every night stays working through judging. If something breaks, the run says what and where before anyone else finds it.",
+    "technical": "workflows/src/main.ts: nightlyCheck fans out one Render Workflows task per check (runCase, checkPage, checkApi) with ctx.run, each with 2 retries (5 s, then 10 s), and files the run with POST /api/checks using a shared CHECKS_SECRET. A Render cron job starts it nightly with the Render SDK's workflows.startTask; Run the checks now does the same from POST /api/checks/start.",
+    "sponsor": [
+      "Render",
+      "PayPal"
+    ]
   }
 }

@@ -5,6 +5,8 @@ import results from "../../../content/test-results.json";
 import { Info } from "@/components/Info";
 import { CaseRunner } from "@/components/judges/CaseRunner";
 import { EvalResults } from "@/components/judges/EvalResults";
+import { NightlyChecks } from "@/components/judges/NightlyChecks";
+import { Suspense } from "react";
 import "../pages.css";
 import "../developers/dev.css";
 import "./judges.css";
@@ -77,6 +79,19 @@ export default function JudgesPage() {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section id="nightly" className="page-section" aria-labelledby="nightly-h">
+        <div className="title-row">
+          <h2 id="nightly-h">Checked every night, from outside</h2>
+          <Info id="judges.nightly" label="" />
+        </div>
+        <p className="page-prose jp-intro">
+          A Render Workflow opens every page on the path above, calls the public API, and runs each failure case against the PayPal sandbox. Each check is its own task on its own instance, retried if PayPal&rsquo;s sandbox hiccups, and the results land here.
+        </p>
+        <Suspense fallback={<p className="page-loading">Loading the latest run…</p>}>
+          <NightlyChecks />
+        </Suspense>
       </section>
 
       <section id="failure-cases" className="page-section" aria-labelledby="cases-h">

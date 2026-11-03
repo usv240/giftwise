@@ -4,19 +4,19 @@
   "suites": [
     {
       "id": "unit",
-      "name": "Rules engine, routing and the SSA report",
+      "name": "Rules engine, routing, the SSA report and the checks workflow",
       "command": "npm test",
-      "passed": 56,
-      "total": 56,
-      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, and the AG Studio to Claude translation"
+      "passed": 59,
+      "total": 59,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, the checks workflow's fan-out and retries, and the AG Studio to Claude translation"
     },
     {
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 78,
-      "total": 78,
-      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the monthly SSA report and its CSV, the MCP server, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
+      "passed": 84,
+      "total": 84,
+      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the monthly SSA report and its CSV, the MCP server, the outside checks and their shared secret, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",
@@ -49,6 +49,14 @@
       "passed": 5,
       "total": 5,
       "what": "The agent calls start_gift_checkout, the sandbox buyer approves the PayPal link, and Giftwise captures on return and shows the receipt"
+    },
+    {
+      "id": "outside",
+      "name": "Outside checks, as Render Workflows runs them",
+      "command": "npm run checks:local",
+      "passed": 22,
+      "total": 22,
+      "what": "Every failure case against the PayPal sandbox, every page on the judges' path and six public API promises, all at once, the same list the nightly Render Workflow runs"
     },
     {
       "id": "cases",

@@ -48,6 +48,16 @@ Each payment in the order names its own payee, and PayPal captures each one sepa
 | Riverside Mobility Repair, Eastgate College Bookstore, Northside Physical Therapy | `sb-viaij53657116@business.example.com` |
 | Maya's ABLE account | `sb-ros8g53657188@business.example.com` |
 
+## Checked every night, on Render Workflows
+
+On `/judges`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 22 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and six public API promises (status, ledger, the SSA report, the MCP tools, the OpenAPI address and PayPal's return link).
+
+1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
+2. In about a minute the run files its results and the panel refreshes with the new time and count. Set **View** to Technical to see what each check found.
+3. `/status` shows the same run under **Outside checks**.
+
+A run can start every 10 minutes. The nightly run starts from a Render cron job at 09:00 UTC.
+
 ## Failure cases, live
 
 On `/judges`, under **Failure cases**, press **Run all eight checks**. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer.
@@ -143,8 +153,8 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing and the SSA report | `npm test` | 56 passed |
-| API end to end | `npm run e2e:api` | 78 passed |
+| Rules engine, routing, the SSA report and the checks workflow | `npm test` | 59 passed |
+| API end to end | `npm run e2e:api` | 84 passed |
 | Browser end to end | `npm run e2e:ui` | 56 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 76 page views pass |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |

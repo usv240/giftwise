@@ -278,6 +278,14 @@ const RUNS: Record<CaseId, () => Promise<Run>> = {
     }),
 };
 
+/** One failure case on its own, so Render Workflows can run each case as a separate task with its own retries. */
+export async function runScenario(id: string): Promise<ScenarioResult | null> {
+  const s = CASES.find((c) => c.id === id);
+  if (!s) return null;
+  const r = await RUNS[s.id]();
+  return { id: s.id, title: s.title, expected: s.expected, ...r };
+}
+
 export async function runScenarios() {
   const out: ScenarioResult[] = [];
   for (const s of CASES) {

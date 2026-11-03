@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { aiAvailable } from "./ai/claude";
+import { latestRun } from "./checks";
 import { db, dbConfigured } from "./db";
 import { accessToken, paypalConfigured } from "./paypal/client";
 
@@ -22,6 +23,8 @@ export async function runChecks(): Promise<Check[]> {
     paypalConfigured() ? timed(async () => (await accessToken()) && "Sandbox token issued") : Promise.resolve(null),
     dbConfigured() ? timed(async () => (await db().execute(sql`select 1`)) && "Query ok") : Promise.resolve(null),
   ]);
+  const run = database?.ok ? await latestRun().catch(() => null) : null;
+  const age = run ? (run.ageMinutes < 60 ? `${run.ageMinutes} min ago` : `${Math.round(run.ageMinutes / 60)} h ago`) : "";
   return [
     { id: "paypal", name: "PayPal sandbox", mode: pp?.ok ? "live" : "not_connected", detail: pp ? pp.detail : "Credentials not set", ms: pp?.ms },
     { id: "claude", name: "Claude Opus 5.5", mode: aiAvailable() ? "live" : "fallback", detail: aiAvailable() ? "API key set; bill and fundraiser reading are live" : "Ready-made examples show saved results" },
@@ -32,5 +35,11 @@ export async function runChecks(): Promise<Check[]> {
       detail: process.env.PAYPAL_WEBHOOK_ID?.trim() ? "Every event is signature-checked with PayPal before use" : "Webhook ID not set; payments are captured on the server either way",
     },
     { id: "database", name: "Postgres", mode: database?.ok ? "live" : "not_connected", detail: database ? database.detail : "DATABASE_URL not set", ms: database?.ms },
+    {
+      id: "checks",
+      name: "Outside checks",
+      mode: run ? "live" : "not_connected",
+      detail: run ? `${run.passed} of ${run.total} passed ${age}, ${run.source === "render-workflow" ? "on Render Workflows" : "run locally"}` : "No run filed yet; the nightly Render Workflow fills this in",
+    },
   ];
 }

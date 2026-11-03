@@ -197,6 +197,24 @@ r = await fetch(B + "/g/maya/report?month=2026-10");
 const rpHtml = await r.text();
 ok("report page renders the verdict and the PayPal proof column", r.status === 200 && rpHtml.includes("Nothing here counts as income.") && rpHtml.includes("For your records"));
 
+// The outside checks: only the workflow, holding CHECKS_SECRET, may run single cases or file results
+r = await fetch(B + "/api/checks/case/list");
+j = await r.json();
+ok("checks: the workflow can list the eight failure cases", r.status === 200 && j.data?.length === 8, `${j.data?.length}`);
+r = await post("/api/checks/case/declined", {});
+ok("checks: running a case without the secret -> 401 (or 503 if the server has none)", r.status === 401 || r.status === 503, `${r.status}`);
+r = await post("/api/checks", { source: "local" }, { "Content-Type": "application/json", Authorization: "Bearer not-the-secret" });
+ok("checks: filing a run with the wrong secret -> 401 (or 503 if the server has none)", r.status === 401 || r.status === 503, `${r.status}`);
+if (process.env.CHECKS_SECRET && /localhost|127\.0\.0\.1/.test(B)) {
+  r = await post("/api/checks", { source: "local", appUrl: B, startedAt: "not a date", results: [] }, { "Content-Type": "application/json", Authorization: `Bearer ${process.env.CHECKS_SECRET}` });
+  ok("checks: a malformed run with the right secret -> 400 with details", r.status === 400 && (await r.json()).error?.code === "invalid_request");
+}
+r = await fetch(B + "/api/checks/latest");
+j = await r.json();
+ok("checks: the latest run is public, with a pass count", r.status === 200 && (j.data?.run === null || typeof j.data?.run?.passed === "number"), j.data?.run ? `${j.data.run.passed}/${j.data.run.total} ${j.data.run.source}` : "no run yet");
+r = await post("/api/checks/start", {});
+ok("checks: starting a run needs Render Workflows (503 here) or is rate limited (429)", [200, 429, 503].includes(r.status), `${r.status}`);
+
 // The MCP server, called with an API key the way an agent would: initialize, list tools, call one, and answer bad input as a tool error
 const mcp = (method, params, id = 1) => post("/api/mcp", { jsonrpc: "2.0", id, method, params }, keyed);
 r = await mcp("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "e2e", version: "1" } });

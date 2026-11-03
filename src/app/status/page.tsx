@@ -17,7 +17,7 @@ async function Rows() {
       {checks.map((c) => (
         <li key={c.id} className="status-row">
           <span className="status-name">
-            {c.name} <Info id={`stack.${c.id === "database" ? "render" : c.id === "webhooks" ? "paypal" : c.id}`} label="" />
+            {c.name} <Info id={`stack.${c.id === "database" ? "render" : c.id === "webhooks" ? "paypal" : c.id === "checks" ? "render" : c.id}`} label="" />
           </span>
           <span className="status-detail">{c.detail}</span>
           <span className="status-mode" data-mode={c.mode}>

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { asc, desc } from "drizzle-orm";
+import { asc, desc, sql } from "drizzle-orm";
 import { db, schema } from "./db";
 
 const GENESIS = "0".repeat(64);
@@ -17,15 +17,25 @@ export function hashEvent(prevHash: string, e: { at: string; actor: string; acti
   return createHash("sha256").update(prevHash + canonical(e)).digest("hex");
 }
 
-/** Append one event to the hash-chained ledger. Detail never holds raw personal data. */
+/** Any fixed number works; every append takes this one lock. */
+const LEDGER_LOCK = 4_147_201;
+
+/**
+ * Append one event to the hash-chained ledger. Detail never holds raw personal data.
+ * Appends take a transaction-scoped advisory lock, so two at once (a webhook arriving while the return route
+ * captures, or checks running in parallel) cannot both chain from the same entry. Without it, 25 parallel
+ * appends broke the chain; scripts/ledger-race.ts checks this.
+ */
 export async function audit(actor: "person" | "agent" | "system" | "webhook", action: string, ref: string, detail: Record<string, unknown> = {}) {
-  const d = db();
-  const [last] = await d.select({ hash: schema.auditEvents.hash }).from(schema.auditEvents).orderBy(desc(schema.auditEvents.id)).limit(1);
-  const prevHash = last?.hash ?? GENESIS;
-  const at = new Date();
-  const hash = hashEvent(prevHash, { at: at.toISOString(), actor, action, ref, detail });
-  await d.insert(schema.auditEvents).values({ at, actor, action, ref, detail, prevHash, hash });
-  return hash;
+  return db().transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(${LEDGER_LOCK})`);
+    const [last] = await tx.select({ hash: schema.auditEvents.hash }).from(schema.auditEvents).orderBy(desc(schema.auditEvents.id)).limit(1);
+    const prevHash = last?.hash ?? GENESIS;
+    const at = new Date();
+    const hash = hashEvent(prevHash, { at: at.toISOString(), actor, action, ref, detail });
+    await tx.insert(schema.auditEvents).values({ at, actor, action, ref, detail, prevHash, hash });
+    return hash;
+  });
 }
 
 type LedgerRow = typeof schema.auditEvents.$inferSelect;

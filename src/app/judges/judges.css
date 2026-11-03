@@ -202,3 +202,99 @@
   display: flex;
   align-items: center;
 }
+
+/* The nightly outside checks, filed by Render Workflows. */
+.nc {
+  margin-top: 16px;
+  max-width: 68rem;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: clamp(20px, 2.5vw, 32px);
+}
+.nc-verdict {
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.nc-verdict[data-all] .tabular {
+  color: var(--positive);
+}
+.nc-meta {
+  margin-top: 8px;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.nc-bar {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+.nc-note {
+  font-size: 15px;
+  max-width: 60ch;
+  overflow-wrap: anywhere;
+}
+.nc-note[data-tone="attention"] {
+  color: var(--attention);
+}
+.nc > .nc-note {
+  margin-top: 18px;
+}
+.nc-empty {
+  margin-top: 12px;
+}
+.nc-groups {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px 32px;
+}
+@media (max-width: 1000px) {
+  .nc-groups {
+    grid-template-columns: 1fr;
+  }
+}
+.nc-group h3 {
+  font-size: 16px;
+  font-weight: 500;
+}
+.nc-group ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.nc-group li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: 15px;
+}
+.nc-state {
+  font-weight: 500;
+  color: var(--attention);
+}
+.nc-group li[data-ok] .nc-state {
+  color: var(--positive);
+}
+.nc-ms {
+  font-size: 14px;
+}
+.nc-detail {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.nc .tech-only {
+  display: none;
+}
+:root[data-mode="technical"] .nc .tech-only {
+  display: block;
+}
