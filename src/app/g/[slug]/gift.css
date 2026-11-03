@@ -42,6 +42,9 @@
 .gift-empty {
   margin-top: 2rem;
 }
+.gift-real {
+  margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+}
 
 /* One need: what, where the money goes, the rule, then the PayPal button. */
 .need {

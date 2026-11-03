@@ -6,6 +6,7 @@ import { Info } from "@/components/Info";
 import { GiveAny } from "@/components/gift/GiveAny";
 import { NeedCard, type NeedView } from "@/components/gift/NeedCard";
 import { ResetSample } from "@/components/gift/ResetSample";
+import { RealWorld } from "@/components/RealWorld";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
@@ -90,6 +91,9 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
             {views.map((v) => (
               <NeedCard key={v.id} need={v} name={household.name} />
             ))}
+          </div>
+          <div className="gift-real">
+            <RealWorld />
           </div>
         </div>
         <aside className="gift-aside" aria-labelledby="month-h">

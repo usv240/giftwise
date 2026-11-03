@@ -37,7 +37,14 @@ const CRITERIA = [
       ["/dashboard", "Maya's year"],
     ],
   },
-  { name: "Potential impact", where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). Gifts given as cash can lower the check. Every answer cites the regulation or SSA's operating manual.`, links: [["/learn", "The rules, explained"]] },
+  {
+    name: "Potential impact",
+    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). Gifts given as cash can lower the check. Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
+    links: [
+      ["/learn", "The rules, explained"],
+      ["/about#real", "How this works for real"],
+    ],
+  },
   {
     name: "Innovation",
     where:

@@ -155,3 +155,8 @@
   font-size: 15px;
   max-width: 80ch;
 }
+
+/* About: the real-world questions read at the width of the gift page's column. */
+#real {
+  max-width: 52rem;
+}

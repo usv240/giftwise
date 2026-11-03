@@ -1,0 +1,41 @@
+{
+  "about": "What changes when Giftwise leaves the PayPal sandbox. Every answer cites PayPal's own documents, the IRS, SSA or the ABLE plans' own pages; read on 2026-11-03.",
+  "intro": "This demo runs in PayPal's sandbox. Here is what changes when real money moves, and the documents each answer comes from.",
+  "items": [
+    {
+      "id": "shop-paypal",
+      "q": "Does every shop need a PayPal account?",
+      "a": "Yes, a PayPal business account, because PayPal pays the shop directly and Giftwise never holds the money. In this demo the shops are PayPal sandbox accounts. For real, Giftwise would send each new shop a PayPal sign-up link. The shop signs up, or links the business account it already has, in PayPal's own flow, and PayPal hands back the shop's merchant ID. Every order then names that merchant ID as the payee, so a gift can only go to a shop that finished PayPal's sign-up.",
+      "tech": "Partner Referrals API: POST /v2/customer/partner-referrals returns an action_url for the shop, and PayPal's return URL carries merchantIdInPayPal. Orders v2 then sets purchase_units[].payee.merchant_id in place of the sandbox email_address. A platform takes live payments once PayPal approves it.",
+      "sources": ["paypal-seller-onboarding", "paypal-pay-another-account", "paypal-multiparty"]
+    },
+    {
+      "id": "shop-no-paypal",
+      "q": "What if the shop does not take PayPal?",
+      "a": "Two routes still keep the check whole. If the person has an ABLE account and the need is a disability expense, which covers housing, education, transportation, health, assistive technology and more, the gift goes to the ABLE account and the person pays the shop from it. When an organization pays with PayPal Payouts, a shop without PayPal gets an email to claim the money. If nobody claims it within 30 days, PayPal returns it to the organization, not to the person, so it never becomes the person's income.",
+      "tech": "R-ABLE-01 routes the gift to the ABLE account (POMS SI 01130.740). Qualified disability expenses: IRC 529A(e)(5), listed in IRS Tax Tip 2022-112. Payouts: an item to an unregistered recipient stays UNCLAIMED and returns to the sender after 30 days.",
+      "sources": ["irs-able-qde", "poms-si-01130-740", "paypal-payouts-processing"]
+    },
+    {
+      "id": "able-deposit",
+      "q": "How does money get into an ABLE account?",
+      "a": "Through the ABLE plan's own gift page. Anyone can give to an ABLE account. ABLEnow and IAble give each account owner a Ugift code to share; STABLE, CalABLE and ABLE United give each account its own gift link. In this demo the ABLE account is a PayPal sandbox account, so one checkout covers everything. For real, Giftwise would work out the ABLE amount the same way and send the giver to the plan's gift page for that part, while the shops are still paid through PayPal.",
+      "tech": "Ugift: the giver enters the code at UgiftABLE.com, then pays by electronic funds transfer or check. ABLEnow and ABLE United both list $20,000 a year from all sources for 2026, the limit the rules engine already flags (R-ABLE-01).",
+      "sources": ["ugift-iable", "ablenow-contributions", "stable-gifting", "able-united-gifting", "poms-si-01130-740"]
+    },
+    {
+      "id": "able-timing",
+      "q": "When can an ABLE gift be spent?",
+      "a": "Some plans wait before a gift can be taken out: STABLE and CalABLE hold gifts made through a gift page for 10 business days. So rent or utility help sent through an ABLE account works best about two weeks before the bill is due. Money taken out for housing should be paid out in the same month; kept into the next month, it counts toward the $2,000 savings limit.",
+      "tech": "STABLE and CalABLE gifting pages: gift contributions made through an online gifting page \"will not be available for withdrawal for 10 business days.\" R-ABLE-02: POMS SI 01130.740 counts a housing distribution kept into the month after it is received as a resource.",
+      "sources": ["stable-gifting", "calable-gifting", "poms-si-01130-740", "poms-si-01110-003"]
+    },
+    {
+      "id": "fees",
+      "q": "Who pays the fees?",
+      "a": "The giver pays the gift amount and nothing more: PayPal charges US buyers no fee when no currency conversion is involved, and Ugift is free to use. The shop pays PayPal's usual fee for receiving a payment, as it would for any PayPal sale. This demo adds nothing on top. A platform on PayPal's partner program can add its own fee to each order, which the shop sees as partner commissions, so Giftwise could cover its costs without charging the giver or the person on SSI.",
+      "tech": "Partner fees are set per purchase unit in purchase_units[].payment_instruction.platform_fees on the Orders v2 create call. PayPal does not support platform fees for first-party integrations, so this needs the partner onboarding above.",
+      "sources": ["paypal-consumer-fees", "paypal-business-fees", "ugift-iable", "paypal-multiparty"]
+    }
+  ]
+}

@@ -4,11 +4,11 @@
   "suites": [
     {
       "id": "unit",
-      "name": "Rules engine, routing, the SSA report and the checks workflow",
+      "name": "Rules engine, routing, the SSA report, the checks workflow and the cited answers",
       "command": "npm test",
-      "passed": 59,
-      "total": 59,
-      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, the checks workflow's fan-out and retries, and the AG Studio to Claude translation"
+      "passed": 61,
+      "total": 61,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, the checks workflow's fan-out and retries,, the AG Studio to Claude translation, and a known source behind every real-world answer"
     },
     {
       "id": "api",
@@ -22,9 +22,9 @@
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 56,
-      "total": 56,
-      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page, keyboard use, and the developer flow"
+      "passed": 57,
+      "total": 57,
+      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page and its real-world answers, keyboard use, and the developer flow"
     },
     {
       "id": "a11y",

@@ -153,9 +153,9 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, the SSA report and the checks workflow | `npm test` | 59 passed |
+| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 61 passed |
 | API end to end | `npm run e2e:api` | 84 passed |
-| Browser end to end | `npm run e2e:ui` | 56 passed |
+| Browser end to end | `npm run e2e:ui` | 57 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 76 page views pass |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |

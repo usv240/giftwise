@@ -360,6 +360,12 @@
     "why": "Anyone can try the full payment safely. Use the sandbox buyer login from TESTING.md in the project repository.",
     "technical": "api-m.sandbox.paypal.com and the sandbox JavaScript SDK at www.sandbox.paypal.com/web-sdk/v6/core."
   },
+  "real.world": {
+    "title": "How this works for real",
+    "what": "What changes outside the sandbox: how a shop gets paid, how a gift reaches an ABLE account, and who pays the fees.",
+    "why": "PayPal pays every recipient directly, so each one has to be a PayPal business account or an ABLE plan's own gift page.",
+    "technical": "Answers in content/real-world.json. Each cites PayPal's developer docs, the IRS, SSA's operating manual or the ABLE plan's own page."
+  },
   "page.status": {
     "title": "About this page",
     "what": "A live check of every service Giftwise uses: PayPal, Claude, the database and each sponsor tool.",

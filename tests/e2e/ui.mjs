@@ -153,6 +153,10 @@ await page.goto(B + "/g/maya", { waitUntil: "networkidle" });
 await page.waitForTimeout(3500);
 const visibleButtons = await page.$$eval("paypal-button", (els) => els.filter((e) => !e.hasAttribute("hidden")).length);
 ok("Gift page renders a live PayPal button per open need", visibleButtons >= 1, `${visibleButtons}`);
+const realQs = page.locator(".rw-item");
+await realQs.first().locator("summary").click();
+const realFirst = await realQs.first().innerText();
+ok("How this works for real: five questions, each opens with its sources", (await realQs.count()) === 5 && /business account/.test(realFirst) && (await realQs.first().locator(".rw-src a").count()) >= 2, realFirst.slice(0, 80));
 
 // 9. Header links: which pages are missing
 const hrefs = [...new Set(await page.$$eval("header a, footer a", (as) => as.map((a) => a.getAttribute("href")).filter((h) => h && h.startsWith("/"))))];

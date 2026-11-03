@@ -3,6 +3,7 @@ import Link from "next/link";
 import credits from "../../../public/images/credits.json";
 import videoCredits from "../../../public/media/credits.json";
 import { Info } from "@/components/Info";
+import { RealWorld } from "@/components/RealWorld";
 import "../pages.css";
 
 export const metadata: Metadata = { title: "About", description: "What Giftwise is, what it is not, how it handles data, and credits." };
@@ -39,6 +40,10 @@ export default function AboutPage() {
           <li>The household on the sample pages, Maya, and the shops are fictional.</li>
         </ul>
       </section>
+
+      <div id="real" className="page-section">
+        <RealWorld headingId="real-about-h" />
+      </div>
 
       <section className="page-section page-prose" aria-labelledby="data-h">
         <h2 id="data-h">Your data</h2>

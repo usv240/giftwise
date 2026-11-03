@@ -33,5 +33,17 @@
   "cfr-416-714": { "title": "20 CFR 416.714: when reports are due", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.714", "publisher": "eCFR" },
   "cfr-416-724": { "title": "20 CFR 416.724: amounts of penalty deductions", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.724", "publisher": "eCFR" },
   "ssa-ssi-reporting": { "title": "SSA: Understanding SSI, Reporting Responsibilities", "url": "https://www.ssa.gov/ssi/text-report-ussi.htm", "publisher": "Social Security Administration" },
-  "ssa-spotlight-rights": { "title": "SSA: Spotlight on Rights and Responsibilities (2026 edition)", "url": "https://www.ssa.gov/ssi/spotlights/spot-rights-responsibilities.htm", "publisher": "Social Security Administration" }
+  "ssa-spotlight-rights": { "title": "SSA: Spotlight on Rights and Responsibilities (2026 edition)", "url": "https://www.ssa.gov/ssi/spotlights/spot-rights-responsibilities.htm", "publisher": "Social Security Administration" },
+  "paypal-pay-another-account": { "title": "PayPal Developer: Pay another account (the payee object)", "url": "https://developer.paypal.com/docs/checkout/standard/customize/pay-another-account/", "publisher": "PayPal" },
+  "paypal-seller-onboarding": { "title": "PayPal Developer: Onboard sellers before payment (Partner Referrals API)", "url": "https://developer.paypal.com/docs/multiparty/seller-onboarding/before-payment/", "publisher": "PayPal" },
+  "paypal-multiparty": { "title": "PayPal Developer: Multiparty platforms, including partner fees", "url": "https://developer.paypal.com/docs/multiparty/", "publisher": "PayPal" },
+  "paypal-payouts-processing": { "title": "PayPal Developer: Payouts payment processing (unclaimed payouts)", "url": "https://developer.paypal.com/docs/payouts/standard/reference/payment-processing/", "publisher": "PayPal" },
+  "paypal-consumer-fees": { "title": "PayPal: Consumer fees (buying in the US)", "url": "https://www.paypal.com/us/digital-wallet/paypal-consumer-fees", "publisher": "PayPal" },
+  "paypal-business-fees": { "title": "PayPal: Merchant fees (receiving payments)", "url": "https://www.paypal.com/us/business/paypal-business-fees", "publisher": "PayPal" },
+  "irs-able-qde": { "title": "IRS Tax Tip 2022-112: what ABLE accounts can pay for", "url": "https://www.irs.gov/newsroom/able-accounts-can-help-people-with-disabilities-pay-for-disability-related-expenses", "publisher": "Internal Revenue Service" },
+  "ugift-iable": { "title": "IAble: Give a gift with a Ugift code", "url": "https://www.iable.gov/resources/give-a-gift", "publisher": "Iowa Treasurer, IAble" },
+  "ablenow-contributions": { "title": "ABLEnow: Contributions", "url": "https://www.ablenow.com/saving-investments/contributions/", "publisher": "ABLEnow" },
+  "stable-gifting": { "title": "STABLE: Gifting", "url": "https://stableaccount.com/benefits/gifting", "publisher": "STABLE Account, Ohio Treasurer" },
+  "calable-gifting": { "title": "CalABLE: Gifting", "url": "https://calable.ca.gov/how-it-works/gifting", "publisher": "CalABLE" },
+  "able-united-gifting": { "title": "ABLE United: Gifting", "url": "https://www.ableunited.com/usage/gifting", "publisher": "ABLE United" }
 }
