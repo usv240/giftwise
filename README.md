@@ -4,6 +4,7 @@ Benefit-safe giving for people on SSI. Family and friends give through PayPal, a
 
 - **Live demo:** [giftwise-405i.onrender.com](https://giftwise-405i.onrender.com) (PayPal sandbox, no Giftwise login needed)
 - **For judges:** start at [`/judges`](https://giftwise-405i.onrender.com/judges). The sandbox buyer login and step-by-step checks are in [TESTING.md](TESTING.md).
+- **Demo video (2:21):** [youtu.be/1JLuiRZkkUI](https://youtu.be/1JLuiRZkkUI)
 
 ## The problem in one number
 
