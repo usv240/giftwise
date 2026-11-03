@@ -33,7 +33,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={clash.variable} data-theme="light" data-text="standard" data-labels="on" data-mode="plain" suppressHydrationWarning>
+    <html lang="en" className={clash.variable} data-theme="light" data-text="standard" data-labels="off" data-mode="plain" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: PREFS_SCRIPT }} />
       </head>

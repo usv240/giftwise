@@ -157,7 +157,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 68 passed |
+| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 69 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 12 of 13 match SSA (Claude alone 9 of 13) |
 | API end to end | `npm run e2e:api` | 84 passed |
 | Browser end to end | `npm run e2e:ui` | 58 passed |

@@ -16,11 +16,55 @@ const TOOL_WORDS: Record<string, string> = {
   paypal_get_order: "Reads the order from PayPal itself, not from Giftwise",
 };
 
+/** A recorded run hides the one-time PayPal link and receipt address; say what they were instead of showing brackets. */
+const tidy = (t: string) =>
+  t
+    .replace(/\[PayPal approval link\]/g, "(her PayPal approval link; a live run makes a fresh one)")
+    .replace(/\/r\/\[receipt\]/g, "her receipt page")
+    .replace(/"\[order id\]"/g, '"(order id)"');
+
+type PayPalRecord = { source?: string; status?: string; purchase_units?: { for?: string; amount?: string; paid_to_paypal_account?: string }[] };
+const STATUS_WORDS: Record<string, string> = {
+  PAYER_ACTION_REQUIRED: "Waiting for June to approve it in PayPal",
+  APPROVED: "Approved by June, not yet captured",
+  COMPLETED: "Paid",
+  CREATED: "Created",
+};
+
+/** The order as PayPal reports it, as a small card instead of raw JSON. */
+function PayPalOrderCard({ text }: { text: string }) {
+  let o: PayPalRecord | null = null;
+  try {
+    o = JSON.parse(text) as PayPalRecord;
+  } catch {
+    o = null;
+  }
+  if (!o?.status) return <p className="ag-result-text">{tidy(text)}</p>;
+  const viaMcp = (o.source ?? "").startsWith("PayPal MCP server");
+  return (
+    <div className="ag-record">
+      <p className="ag-record-k">PayPal&rsquo;s own record</p>
+      <p>{STATUS_WORDS[o.status] ?? o.status}</p>
+      <ul>
+        {(o.purchase_units ?? []).map((u, i) => (
+          <li key={i}>
+            <span className="tabular">${u.amount}</span> for {u.for}
+            {u.paid_to_paypal_account && <span className="muted">, paid to PayPal account {u.paid_to_paypal_account}</span>}
+          </li>
+        ))}
+      </ul>
+      <p className="muted ag-record-src">
+        {viaMcp ? "Read with get_order on PayPal's hosted MCP server." : "Read from PayPal's Orders API. PayPal's hosted MCP server was asked first and could not run get_order this time."}
+      </p>
+    </div>
+  );
+}
+
 /** Plain text with **bold** and bare links, the way the assistant writes it. Nothing is rendered as HTML. */
 function Rich({ text }: { text: string }) {
   return (
     <>
-      {text
+      {tidy(text)
         .replace(/\p{Extended_Pictographic}️?/gu, "")
         .split(/\n+/)
         .filter((line) => line.trim())
@@ -103,7 +147,7 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
             );
           return (
             <li key={i} className="ag-step ag-result" data-error={s.isError ? "" : undefined}>
-              <p className="ag-result-text">{s.text}</p>
+              {s.tool === "paypal_get_order" && !s.isError ? <PayPalOrderCard text={s.text} /> : <p className="ag-result-text">{tidy(s.text)}</p>}
             </li>
           );
         })}

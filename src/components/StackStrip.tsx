@@ -23,12 +23,9 @@ export function StackStrip() {
         Built with{" "}
         {STACK.map((t, i) => (
           <Fragment key={t.id}>
-            <span className="stack-item">
-              <Link href={`/stack#${t.id}`} className="text-link">
-                {t.name}
-              </Link>
-              <Info id={`stack.${t.id}`} label="" />
-            </span>
+            <Link href={`/stack#${t.id}`} className="text-link stack-item">
+              {t.name}
+            </Link>
             {i < STACK.length - 2 ? ", " : i === STACK.length - 2 ? " and " : "."}
           </Fragment>
         ))}{" "}

@@ -46,6 +46,13 @@ services:
         sync: false
       - key: PAYPAL_VENDOR_EMAIL
         sync: false
+      # Optional: one sandbox business account per sample shop. Unset ones use PAYPAL_VENDOR_EMAIL.
+      - key: PAYPAL_VENDOR_EMAIL_RIVERSIDE
+        sync: false
+      - key: PAYPAL_VENDOR_EMAIL_EASTGATE
+        sync: false
+      - key: PAYPAL_VENDOR_EMAIL_NORTHSIDE
+        sync: false
       - key: PAYPAL_ABLE_EMAIL
         sync: false
       - key: PAYPAL_WEBHOOK_ID

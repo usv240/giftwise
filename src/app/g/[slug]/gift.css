@@ -225,9 +225,10 @@
   text-underline-offset: 0.2em;
   cursor: pointer;
 }
+/* One link per line, so each reads on its own and is an easy target. */
 .gift-latest {
-  display: inline-block;
-  margin-top: 12px;
+  display: table;
+  margin-top: 10px;
   font-size: 15px;
 }
 .need-progress {

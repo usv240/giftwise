@@ -9,6 +9,14 @@ Benefit-safe giving for people on SSI. Family and friends give through PayPal, a
 
 About 7.3 million people receive SSI (September 2026). SSI counts cash gifts as income. Give Maya $1,000 in cash and, two months later, her $994 check drops to $74. Pay the shop for something she needs and the same $1,000 leaves her check at $994. Giftwise does that routing for every gift, with the rule and its source shown each time ([20 CFR 416.1121](https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1121), [POMS SI 00830.520](https://secure.ssa.gov/poms.nsf/lnx/0500830520)).
 
+## See it
+
+| Give any amount: one PayPal checkout pays five recipients | The same October gifts, as cash: the report she would have needed |
+|---|---|
+| ![Maya's gift page: $1,500 split across four needs and her ABLE account; as cash $0, with Giftwise $994](docs/img/2-give-any-amount.png) | ![Maya's October report as cash: 5 gifts to tell Social Security about, $538 counted, December check $456](docs/img/4-report-as-cash.png) |
+| **Her benefit calendar: move a cash gift five days and a different check drops** | **Checked against Social Security's own worked examples** |
+| ![Bryntum calendar of October in the as-cash view, with the move of Aunt June's $150 and the checks it changed](docs/img/5-benefit-calendar.png) | ![12 of 13 match Social Security's own answers; Claude alone 9 of 13](docs/img/6-ssa-examples.png) |
+
 ## How it works
 
 1. **A page of needs.** A family member lists what the person needs and who sells it, or makes the page from a fundraiser link. The sample is Maya's page at `/g/maya`.
@@ -32,7 +40,7 @@ The demo runs in PayPal's sandbox. Here is what changes when real money moves. T
 - **Checked every night, from outside, on Render Workflows:** `workflows/` is a Render Workflow that fans out one task per check, in parallel with retries: each failure case against the PayPal sandbox, each page on the judges' path, and each public API promise (22 in all). A Render cron job starts it nightly; **Run the checks now** on `/judges` starts it on demand, and the results show there and on `/status`. Running the checks in parallel also surfaced a real race in the audit ledger (two appends at once could fork the hash chain); appends now take a Postgres advisory lock, and `npm run test:ledger-race` fires 60 at once to prove it.
 - **Eight failure cases, run live** on `/judges`: declined card, double click, unapproved payment, a browser changing the amount or payee, a gift that would lower her check, an AI reviewer that gets the rule wrong, an edited ledger entry, and refunds.
 - **Claude (`claude-opus-5-5`):** reads bills, quotes and fundraiser pages into structured data. The rules engine, not the model, decides where the money goes.
-- **Two reviewers, two rulebooks:** when a bill might be a housing cost, one Claude reviewer reads only the regulations and the Federal Register, the other only SSA's operating manual. Each must quote its rulebook word for word and a program checks every quote. Giftwise takes a reading only when both checked answers agree; otherwise it uses the route that keeps the check whole under either reading. Measured on 20 labeled bills: every clear case right, all 40 quotes found word for word, and the check kept whole in all 20 (results on `/judges`).
+- **Two reviewers, two rulebooks:** when a bill might be a housing cost, one Claude reviewer reads only the regulations and the Federal Register, the other only SSA's operating manual. Each must quote its rulebook word for word and a program checks every quote. Giftwise takes a reading only when both checked answers agree; otherwise it uses the route that keeps the check whole under either reading. Measured on 20 labeled bills: every clear case right, all 40 quotes found word for word, and the check kept whole in all 20. What the second reviewer is for, measured on the same bills: if one reviewer is wrong, trusting it alone keeps her check whole on 10 of 20; with both reviewers and the referee, 20 of 20 (results on `/judges`).
 - **Checked against Social Security's own examples:** 13 worked examples from 7 sections of SSA's operating manual, each with SSA's answer quoted word for word. The rules engine matches 12. Claude alone, with no rulebook, matches 9: it misses the $60 quarterly exclusion three times. The first run found a real gap (gifted event tickets count as income, and Giftwise had treated every item as personal use), now fixed; the one open miss, a prepaid bill that SSA spreads over the months it covers, is shown on `/judges`. `npm run eval:ssa` reruns it.
 - **Fundraiser to gift page:** paste a fundraiser link and Giftwise makes a live gift page where every stated use is paid straight to the shop or the ABLE account, with the pronouns the organizer chooses.
 - **The report to Social Security:** people on SSI must tell SSA about changes in income, including help from family, within 10 days after the month ends (20 CFR 416.714). `/g/maya/report` writes that report from the gifts: which ones to tell SSA about, the check each month decides, a call script, and for every other gift the rule that says it is not income and the PayPal capture or payout that proves where the money went. Press **As cash** to see the report the same gifts would have needed. Also as CSV, at `GET /api/v1/ssa-report`, and as an MCP tool.
@@ -65,7 +73,7 @@ To host your own copy, [`render.yaml`](render.yaml) creates the web service, its
 
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 68 of 68 |
+| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 69 of 69 |
 | Social Security's own worked examples (rules engine, and Claude alone as the baseline) | `npm run eval:ssa` | 12 of 13 (Claude alone 9 of 13) |
 | API end to end | `npm run e2e:api` | 84 of 84 |
 | Browser end to end | `npm run e2e:ui` | 58 of 58 |

@@ -113,12 +113,14 @@ export function GiftChecker() {
           </p>
         )}
         <p className="checker-note">{result.explanation.plain}</p>
-        <p className="checker-mark">
-          <span className="mark-chip tabular">
-            Counted in {inc}, paid in {pay}
-          </span>
-          <Info id="gift-checker.rma" label="" />
-        </p>
+        {result.countedAmount > 0 && (
+          <p className="checker-mark">
+            <span className="mark-chip tabular">
+              Counted in {inc}, paid in {pay}
+            </span>
+            <Info id="gift-checker.rma" label="" />
+          </p>
+        )}
       </div>
 
       <div className="checker-foot">

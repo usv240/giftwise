@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-11-03T15:52:11.870Z",
+  "recorded_at": "2026-11-03T19:34:35.791Z",
   "model": "claude-opus-5-5",
   "tools": [
     "check_gift",
@@ -10,7 +10,7 @@
     "start_gift_checkout",
     "paypal_get_order"
   ],
-  "ms": 17714,
+  "ms": 15211,
   "steps": [
     {
       "kind": "ask",
@@ -26,7 +26,7 @@
     {
       "kind": "result",
       "tool": "get_gift_page",
-      "text": "Gift page for Maya (/g/maya). Open needs: Wheelchair repair: $420 still needed, paid to Riverside Mobility Repair; Laptop for college: $649 still needed, paid to Eastgate College Bookstore; Electric bill, November: $138 still needed, paid to Maya's ABLE account; Therapy co-pay: $90 still needed, paid to Northside Physical Therapy. Any amount can also go to her ABLE account.",
+      "text": "Gift page for Maya (/g/maya). Open needs: Wheelchair repair: $420 still needed, paid to Riverside Mobility Repair; Laptop for college: $649 still needed, paid to Eastgate College Bookstore; Electric bill, this month: $138 still needed, paid to Maya's ABLE account; Therapy co-pay: $90 still needed, paid to Northside Physical Therapy. Any amount can also go to her ABLE account.",
       "isError": false
     },
     {
@@ -60,7 +60,7 @@
     },
     {
       "kind": "say",
-      "text": "June, I'd hold off on sending cash. Social Security counts a cash gift as income. After $80 in exclusions, $220 of your $300 would count, and her January SSI check would drop from $994 to $774. So the gift would cost her $220.\n\nInstead, I suggest putting the full $300 toward her wheelchair repair. Giftwise would pay Riverside Mobility Repair directly, and her check would stay at $994. The repair still needs $420, so this is a big help. Other options on her page: the laptop for college, a therapy co-pay ($90), or her ABLE account.\n\nWould you like me to set up the $300 payment to the wheelchair repair? Once you say yes, I'll send you a PayPal link to approve. Nothing is paid until you approve it yourself."
+      "text": "June, I'd hold off on sending cash. That's a kind gift, but SSI would count it against Maya's check.\n\n**If you send $300 cash:** Social Security counts $220 of it as income, after $80 that doesn't count. Her monthly check for January would go from $994 to $774, so she'd lose $220. None of that money goes to Social Security; she just gets a smaller check.\n\n**What I'd suggest:** Maya's Giftwise page lists a wheelchair repair that still needs $420. Giftwise would send your full $300 straight to Riverside Mobility Repair for it. A payment made directly to a shop for something that isn't housing doesn't count against her, so her January check stays at $994.\n\nOther needs on her page include a laptop for college, a therapy co-pay and her ABLE account (a savings account for people with disabilities). The wheelchair repair is where Giftwise sends your $300.\n\nWould you like me to set this up? If you say yes, I'll make a PayPal checkout and send you the link. Nothing is charged until you approve it in PayPal yourself."
     },
     {
       "kind": "ask",
@@ -95,7 +95,7 @@
     },
     {
       "kind": "say",
-      "text": "Your gift is ready for you to approve, June. If you sent cash, her January check would drop from $994 to $774. Paid this way, it stays at $994.\n\nPayPal's own record shows this order will pay $300 for Maya's wheelchair repair, and it's waiting for your approval.\n\nOpen this link and approve it in PayPal:\n[PayPal approval link]\n\nNothing has been paid yet. Once you approve, your receipt will be here:\n/r/[receipt]\n\nThis version of Giftwise runs on PayPal's test system, so no real money will move.\n\nWhat a lovely birthday gift."
+      "text": "June, your $300 gift for Maya is ready for you to approve. PayPal's own record shows one payment of $300 for Maya's wheelchair repair, and it's waiting for you to approve it.\n\nApprove it here: [PayPal approval link]\n\nThis is a PayPal test version, so no real money will move, even after you approve.\n\nIf you'd sent the $300 as cash, Maya's check for January would have gone from $994 to $774. Paid straight to the repair shop, it stays at $994.\n\nAfter you approve, your receipt will be here: /r/[receipt]\n\nWhat a lovely birthday gift for Maya."
     }
   ]
 }

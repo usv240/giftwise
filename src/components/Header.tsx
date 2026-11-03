@@ -29,7 +29,7 @@ export function Header() {
       </nav>
       <div className="header-actions">
         <ViewMenu />
-        <Link href="/app" className="btn btn-primary header-cta">
+        <Link href="/try#fundraiser" className="btn btn-primary header-cta">
           Start a gift page
         </Link>
         <button type="button" className="btn btn-quiet menu-btn" aria-expanded={menu} aria-controls="mobile-menu" onClick={() => setMenu((m) => !m)}>
@@ -44,7 +44,7 @@ export function Header() {
                 {l.label}
               </Link>
             ))}
-            <Link href="/app" className="btn btn-primary" onClick={() => setMenu(false)}>
+            <Link href="/try#fundraiser" className="btn btn-primary" onClick={() => setMenu(false)}>
               Start a gift page
             </Link>
           </nav>

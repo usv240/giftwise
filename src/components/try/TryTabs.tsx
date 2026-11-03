@@ -1,7 +1,7 @@
 "use client";
 
 import Papa from "papaparse";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Info } from "../Info";
 import { ResultCard } from "../ResultCard";
 import { MakeGiftPage } from "./MakeGiftPage";
@@ -404,7 +404,7 @@ function FundraiserResult({ data, url }: { data: FundraiserData; url: string }) 
         </ul>
         {prefs.mode === "technical" && (
           <p className="result-tech">
-            Page read with {data.page.read_via === "kernel" ? "a KERNEL cloud browser" : "a direct fetch"}; uses extracted by Claude; routes from the rules engine.
+            Page read with {data.page.read_via === "kernel" ? "a KERNEL cloud browser" : data.page.read_via === "bundled" ? "the copy this site ships" : "a direct fetch"}; uses extracted by Claude; routes from the rules engine.
             {data.page.live_view_url ? ` Live view: ${data.page.live_view_url}` : ""}
           </p>
         )}
@@ -421,8 +421,21 @@ const TABS = [
   { id: "fundraiser", label: "A fundraiser page", info: "try.fundraiser" },
 ] as const;
 
+type TabId = (typeof TABS)[number]["id"];
+/** The open tab lives in the address (#fundraiser), so a link can open a tab and the back button keeps it. */
+const subscribeHash = (cb: () => void) => {
+  window.addEventListener("hashchange", cb);
+  return () => window.removeEventListener("hashchange", cb);
+};
+const readHash = () => window.location.hash.slice(1);
+
 export function TryTabs() {
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("describe");
+  const hash = useSyncExternalStore(subscribeHash, readHash, () => "");
+  const tab: TabId = TABS.some((t) => t.id === hash) ? (hash as TabId) : "describe";
+  const setTab = (id: TabId) => {
+    window.history.replaceState(null, "", `#${id}`);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
   return (
     <div className="try-tabs">
       <div className="tabbar">

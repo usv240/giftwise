@@ -241,7 +241,10 @@ export function buildReport(o: { name: string; profile: Profile; gifts: ReportGi
     const what = [...new Set(housingToAble.map((l) => l.need.replace(/,.*$/, "").toLowerCase()))].join(" and the ");
     todo.push({
       id: "able-housing",
-      text: `Pay the ${what} from the ABLE account before ${monthName(month)} ends. Money taken out for housing and spent in the same month is not income; money left in the account after that counts toward savings.`,
+      text:
+        monthOf(today) <= month
+          ? `Pay the ${what} from the ABLE account before ${monthName(month)} ends. Money taken out for housing and spent in the same month is not income; money left in the account after that counts toward savings.`
+          : `Check that the ${what} was paid from the ABLE account during ${monthName(month)}. Money taken out for housing and spent in the same month is not income; money kept into the next month counts toward savings.`,
       ruleId: "R-ABLE-02",
     });
   }

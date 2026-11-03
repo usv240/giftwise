@@ -1,6 +1,6 @@
 import Kernel from "@onkernel/sdk";
 
-export type PageRead = { text: string; title: string; via: "kernel" | "fetch"; liveViewUrl?: string; sessionId?: string };
+export type PageRead = { text: string; title: string; via: "kernel" | "fetch" | "bundled"; liveViewUrl?: string; sessionId?: string };
 
 function stripHtml(html: string) {
   return html
@@ -23,6 +23,21 @@ export function safePublicUrl(raw: string): URL | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * The sample fundraiser this site ships (public/samples/*.html), read from disk instead of over the network, so the
+ * sample works the same on any host and the server never has to fetch its own address.
+ */
+export async function readBundledSample(pathname: string): Promise<PageRead | null> {
+  const m = /^\/samples\/([a-z0-9-]+\.html)$/.exec(pathname);
+  if (!m) return null;
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const html = await readFile(join(process.cwd(), "public", "samples", m[1]), "utf8").catch(() => null);
+  if (html === null) return null;
+  const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() ?? "";
+  return { text: stripHtml(html).slice(0, 60000), title, via: "bundled" };
 }
 
 /**

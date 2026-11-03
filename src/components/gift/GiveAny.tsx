@@ -7,7 +7,7 @@ import { Info } from "../Info";
 import { usePrefs } from "../prefs";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { routeGift, type OpenNeed, type RoutedLine } from "@/lib/routing";
-import { DEFAULT_PROFILE, pronounWords, usd, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, monthName, pronounWords, usd, type Profile } from "@/lib/rules";
 
 /**
  * "Give any amount": the donor types a number; the rules engine routes it across the open needs and the ABLE account,
@@ -49,6 +49,9 @@ export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE }: 
         <p className="give-actions">
           <Link className="text-link" href={`/r/${receipt.orderId}`}>
             See the receipt
+          </Link>
+          <Link className="text-link" href={`/g/${slug}/report?month=${date.slice(0, 7)}`}>
+            See it on {name}&rsquo;s {monthName(date.slice(0, 7))} report
           </Link>
           <button type="button" className="give-again" onClick={() => setReceipt(null)}>
             Give again

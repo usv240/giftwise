@@ -3,6 +3,37 @@ import { aiAvailable } from "./ai/claude";
 import { latestRun } from "./checks";
 import { db, dbConfigured } from "./db";
 import { accessToken, paypalConfigured } from "./paypal/client";
+import { PayPalMcp } from "./agent/paypal-mcp";
+import pkg from "../../package.json";
+
+/** Versions as the project pins them; "npm:@bryntum/calendar-trial@7.3.7" reads as 7.3.7. */
+const pinned = (name: string) => String((pkg.dependencies as Record<string, string>)[name] ?? "").replace(/^.*@/, "").replace(/^[~^]/, "");
+
+/** PayPal's hosted MCP server: connect, list its tools and try get_order once. Cached for ten minutes. */
+let mcpCache: { at: number; ok: boolean; detail: string } | null = null;
+async function paypalMcp() {
+  if (mcpCache && Date.now() - mcpCache.at < 10 * 60_000) return mcpCache;
+  let ok = false;
+  let detail: string;
+  let mcp: PayPalMcp | null = null;
+  try {
+    mcp = await PayPalMcp.connect(6000);
+    const tools = await mcp.tools();
+    const r = await mcp.call("get_order", { id: "0000000000000000X" });
+    const text = r.content.map((x) => x.text ?? "").join("");
+    const setupError = /PAYPAL_API_SETUP_ERROR/.test(text);
+    ok = !setupError;
+    detail = setupError
+      ? `Connected, ${tools.length} tools listed; tool calls return PAYPAL_API_SETUP_ERROR, so the assistant reads PayPal's Orders API instead`
+      : `Connected, ${tools.length} tools listed; get_order answers`;
+  } catch (e) {
+    detail = `Not reachable (${(e as Error).message.slice(0, 60)}); the assistant reads PayPal's Orders API instead`;
+  } finally {
+    mcp?.close();
+  }
+  mcpCache = { at: Date.now(), ok, detail };
+  return mcpCache;
+}
 
 export type Mode = "live" | "fallback" | "not_connected";
 export type Check = { id: string; name: string; mode: Mode; detail: string; ms?: number };
@@ -18,11 +49,14 @@ async function timed(fn: () => Promise<string>): Promise<{ ok: boolean; detail: 
 }
 
 /** Live checks for every integration, with the fallback each one uses when it is not reachable. */
-export async function runChecks(): Promise<Check[]> {
-  const [pp, database] = await Promise.all([
+/** probeMcp: also connect to PayPal's hosted MCP server (the Status page). Render's health check leaves it off to stay fast. */
+export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {}): Promise<Check[]> {
+  const [pp, database, mcp] = await Promise.all([
     paypalConfigured() ? timed(async () => (await accessToken()) && "Sandbox token issued") : Promise.resolve(null),
     dbConfigured() ? timed(async () => (await db().execute(sql`select 1`)) && "Query ok") : Promise.resolve(null),
+    paypalConfigured() && probeMcp ? paypalMcp() : Promise.resolve(mcpCache),
   ]);
+  const agKey = Boolean(process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY?.trim());
   const run = database?.ok ? await latestRun().catch(() => null) : null;
   const age = run ? (run.ageMinutes < 60 ? `${run.ageMinutes} min ago` : `${Math.round(run.ageMinutes / 60)} h ago`) : "";
   return [
@@ -34,6 +68,20 @@ export async function runChecks(): Promise<Check[]> {
       mode: process.env.PAYPAL_WEBHOOK_ID?.trim() ? "live" : "not_connected",
       detail: process.env.PAYPAL_WEBHOOK_ID?.trim() ? "Every event is signature-checked with PayPal before use" : "Webhook ID not set; payments are captured on the server either way",
     },
+    {
+      id: "paypal-mcp",
+      name: "PayPal MCP server",
+      mode: mcp?.ok ? "live" : "fallback",
+      detail: mcp ? mcp.detail : paypalConfigured() ? "Checked on the Status page" : "PayPal credentials not set",
+    },
+    { id: "apimatic", name: "PayPal Server SDK (APIMatic)", mode: "live", detail: `@paypal/paypal-server-sdk ${pinned("@paypal/paypal-server-sdk")} creates, reads and captures orders` },
+    {
+      id: "ag-studio",
+      name: "AG Studio",
+      mode: agKey ? "live" : "fallback",
+      detail: agKey ? `ag-studio-react ${pinned("ag-studio-react")}, licensed` : `ag-studio-react ${pinned("ag-studio-react")} on the trial; it shows a licence notice until a key is set`,
+    },
+    { id: "bryntum", name: "Bryntum Calendar", mode: "live", detail: `@bryntum/calendar ${pinned("@bryntum/calendar")}, the hackathon trial, which shows a trial watermark` },
     { id: "database", name: "Postgres", mode: database?.ok ? "live" : "not_connected", detail: database ? database.detail : "DATABASE_URL not set", ms: database?.ms },
     {
       id: "checks",

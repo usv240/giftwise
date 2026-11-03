@@ -68,7 +68,7 @@ const PAYPAL_APIS: { api: string; call: string; job: string; file: string }[] = 
   { api: "Balances", call: "GET /v1/reporting/balances", job: "Shows the fund's PayPal balance before it sends a batch.", file: "src/lib/paypal/reporting.ts" },
   { api: "Webhooks", call: "POST /v1/notifications/verify-webhook-signature", job: "Captures a payment if the giver never comes back, after checking PayPal's signature.", file: "src/app/api/paypal/webhook/route.ts" },
   { api: "Negative testing", call: "PayPal-Mock-Response header", job: "Makes the sandbox decline on purpose, for the failure cases.", file: "src/lib/paypal/capture.ts" },
-  { api: "PayPal MCP server", call: "mcp.sandbox.paypal.com/sse, tool get_order", job: "The assistant on /agents reads the order from PayPal itself. It falls back to the Orders API while PayPal's server cannot run the call.", file: "src/lib/agent/paypal-mcp.ts" },
+  { api: "PayPal MCP server", call: "mcp.sandbox.paypal.com/sse, tool get_order", job: "Asked first when the assistant on /agents reads an order back. In our tests every tool call there returns PAYPAL_API_SETUP_ERROR, so the Orders API answers, and the page says which one did.", file: "src/lib/agent/paypal-mcp.ts" },
 ];
 
 export default function StackPage() {

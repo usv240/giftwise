@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** The caregiver workspace is in progress; until then, start from the sample gift page. */
+/** Old address for starting a gift page: the fundraiser tab on Try it makes one. */
 export default function AppPage() {
-  redirect("/g/maya");
+  redirect("/try#fundraiser");
 }

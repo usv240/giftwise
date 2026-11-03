@@ -13,14 +13,14 @@
   align-self: center;
 }
 .hero-title {
-  font-size: var(--step-lead);
-  line-height: 1.15;
+  font-size: clamp(2rem, 1.3rem + 1.9vw, 3rem);
+  line-height: 1.05;
   font-weight: 500;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.025em;
 }
 .hero-sub {
-  margin-top: 1rem;
-  max-width: 34ch;
+  margin-top: 1.25rem;
+  max-width: 38ch;
 }
 .hero-actions {
   margin-top: 1.75rem;
@@ -561,7 +561,8 @@
 .bars {
   margin-top: auto;
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 8px;
   align-items: end;
   height: 58vh;
@@ -635,6 +636,7 @@
   }
   .bars {
     margin-top: 2rem;
+    grid-auto-flow: row;
     grid-template-columns: 1fr;
     height: auto;
     min-height: 0;

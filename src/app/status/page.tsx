@@ -11,13 +11,13 @@ const LABEL = { live: "Live", fallback: "Fallback", not_connected: "Not connecte
 
 async function Rows() {
   await connection();
-  const checks = await runChecks();
+  const checks = await runChecks({ probeMcp: true });
   return (
     <ul className="status-list">
       {checks.map((c) => (
         <li key={c.id} className="status-row">
           <span className="status-name">
-            {c.name} <Info id={`stack.${c.id === "database" ? "render" : c.id === "webhooks" ? "paypal" : c.id === "checks" ? "render" : c.id}`} label="" />
+            {c.name} <Info id={`stack.${({ database: "render", webhooks: "paypal", checks: "render", "paypal-mcp": "paypal_apis" } as Record<string, string>)[c.id] ?? c.id}`} label="" />
           </span>
           <span className="status-detail">{c.detail}</span>
           <span className="status-mode" data-mode={c.mode}>

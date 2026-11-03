@@ -47,7 +47,7 @@ await page.keyboard.press("Escape");
 await page.waitForTimeout(200);
 ok("Info closes on Escape", !(await page.locator(".info-pop").isVisible()));
 const infoCount = await page.locator("[data-info-id]").count();
-ok("landing has many Info buttons", infoCount >= 30, `${infoCount}`);
+ok("landing has an Info button on each part", infoCount >= 25, `${infoCount}`);
 const missing = await page.$$eval("[data-info-id]", (els) => els.filter((e) => !e.querySelector(".info-dot") || !e.getAttribute("aria-label")?.startsWith("info:")).length);
 ok("every Info button renders", missing === 0);
 

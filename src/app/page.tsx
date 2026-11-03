@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import facts from "../../content/facts.json";
+import sampleYear from "../../content/sample-year.json";
 import sources from "../../content/sources.json";
 import { GiftChecker } from "@/components/GiftChecker";
 import { Info } from "@/components/Info";
@@ -51,13 +52,16 @@ const RESEARCH_LABEL: Record<string, string> = {
 };
 
 // Sample household: help delivered each month through Giftwise (all routed benefit-safe).
-const HELP = [65, 215, 503, 1069, 150, 938, 65, 289, 649, 203, 65, 418].map((v, i) => ({
-  m: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i],
-  v,
+/** Help delivered each month in the sample year, summed from content/sample-year.json (the same gifts as the dashboard and the report). */
+const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const HELP = [...new Set(sampleYear.gifts.map((g) => g.date.slice(0, 7)))].sort().map((month) => ({
+  m: MONTH_ABBR[Number(month.slice(5, 7)) - 1],
+  v: sampleYear.gifts.filter((g) => g.date.startsWith(month)).reduce((s, g) => s + g.amount, 0),
 }));
+const HELP_SPAN = `${["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][MONTH_ABBR.indexOf(HELP[0].m)]} to ${["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][MONTH_ABBR.indexOf(HELP[HELP.length - 1].m)]} 2026`;
 const HELP_TOTAL = HELP.reduce((s, h) => s + h.v, 0);
 const HELP_MAX = HELP.reduce((mi, h, i, arr) => (h.v > arr[mi].v ? i : mi), 0);
-const PRINTED = [HELP_MAX, 5, 8];
+const PRINTED = [...new Set([HELP_MAX, 0, HELP.length - 1])];
 
 export default function Home() {
   return (
@@ -73,14 +77,14 @@ export default function Home() {
             <Info id="page.home" />
           </div>
           <p className="hero-sub">
-            Giftwise checks every gift against Social Security&rsquo;s rules and pays the shop directly through PayPal. Free to try, no sign-up.
+            For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules and pays the shop directly through PayPal. Claude reads the bills and fundraiser pages; the rules do the math.
           </p>
           <div className="hero-actions">
             <Link href="/app" className="btn btn-primary">
               Start a gift page
             </Link>
             <Link href="/judges" className="text-link">
-              Take the 2-minute tour
+              The five-minute path for judges
             </Link>
           </div>
           <p className="hero-note muted">
@@ -208,7 +212,7 @@ export default function Home() {
             <Info id="stats.example" />
           </div>
           <p className="stats-sub">
-            Sample household: {usd(HELP_TOTAL)} of help delivered through Giftwise in 2026. Her check stayed $994 every month.
+            Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {new Set(sampleYear.gifts.map((g) => g.giver)).size} people, every gift through Giftwise. Her check stayed $994 every month.
           </p>
         </div>
         <div className="bars" data-ui role="list" aria-label="Help delivered each month in the sample year">

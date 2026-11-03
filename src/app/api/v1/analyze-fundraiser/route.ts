@@ -4,7 +4,7 @@ import { AnalyzeFundraiserRequest } from "@/lib/api/schemas";
 import { AiRefusedError, aiAvailable } from "@/lib/ai/claude";
 import { readFundraiser } from "@/lib/ai/tasks";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Category } from "@/lib/rules";
-import { readPage, safePublicUrl } from "@/lib/sponsors/kernel";
+import { readBundledSample, readPage, safePublicUrl } from "@/lib/sponsors/kernel";
 import { publicOrigin } from "@/lib/origin";
 
 const SHELTER: Category[] = ["rent", "mortgage", "property_tax", "utility"];
@@ -14,13 +14,24 @@ async function handle(req: Request) {
   const started = Date.now();
   const parsed = AnalyzeFundraiserRequest.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail("invalid_request", "Send JSON with a url field.", 400);
-  const url = safePublicUrl(parsed.data.url.startsWith("/") ? new URL(parsed.data.url, publicOrigin(req)).toString() : parsed.data.url);
+  // The sample this site ships, whether it arrives as "/samples/x.html" or as this site's full address for it.
+  const own = (() => {
+    try {
+      const u = new URL(parsed.data.url, publicOrigin(req));
+      const origins = [publicOrigin(req), new URL(req.url).origin];
+      return origins.includes(u.origin) ? u.pathname : null;
+    } catch {
+      return null;
+    }
+  })();
+  const bundled = own?.startsWith("/samples/") ? await readBundledSample(own) : null;
+  const url = bundled ? new URL(parsed.data.url, publicOrigin(req)) : safePublicUrl(parsed.data.url.startsWith("/") ? new URL(parsed.data.url, publicOrigin(req)).toString() : parsed.data.url);
   if (!url) return fail("invalid_request", "Use a public web address that starts with http or https.", 400);
   if (!aiAvailable()) {
     return fail("upstream_unavailable", "Reading fundraiser pages needs the AI service, which is not connected on this server yet. Open the Accessible van fundraiser example to see the full result.", 503);
   }
   try {
-    const page = await readPage(url);
+    const page = bundled ?? (await readPage(url));
     if (page.text.length < 40) return fail("invalid_request", "That page did not have readable text. Check the link and try again.", 422);
     const { data, model } = await readFundraiser(page.text, url.toString());
     const total = data.raised_amount ?? data.goal_amount ?? data.uses.reduce((s, u) => s + (u.amount ?? 0), 0);

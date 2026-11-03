@@ -7,6 +7,7 @@ import { GiveAny } from "@/components/gift/GiveAny";
 import { NeedCard, type NeedView } from "@/components/gift/NeedCard";
 import { ResetSample } from "@/components/gift/ResetSample";
 import { RealWorld } from "@/components/RealWorld";
+import { SandboxLogin } from "@/components/SandboxLogin";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
@@ -159,7 +160,8 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
               <p className="gift-sandbox-title">Paying in the sandbox</p>
               <Info id="gift.sandbox" label="" />
             </div>
-            <p>No real money moves. Pay with the PayPal sandbox buyer login listed in the project&rsquo;s TESTING.md.</p>
+            <p>No real money moves. In the PayPal window, log in with this sandbox buyer:</p>
+            <SandboxLogin compact />
             {household.isSample && <ResetSample slug={slug} />}
           </div>
         </aside>

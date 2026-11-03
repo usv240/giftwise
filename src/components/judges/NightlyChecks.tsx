@@ -58,7 +58,7 @@ export async function NightlyChecks() {
                   <li key={r.id} data-ok={r.ok ? "" : undefined}>
                     <span className="nc-state">{r.ok ? "Passed" : "Needs a look"}</span>
                     <span className="nc-title">{r.title}</span>
-                    <span className="nc-ms tabular muted">{r.ms >= 1000 ? `${(r.ms / 1000).toFixed(1)} s` : `${r.ms} ms`}</span>
+                    <span className="nc-ms tabular muted tech-only">{r.ms >= 1000 ? `${(r.ms / 1000).toFixed(1)} s` : `${r.ms} ms`}</span>
                     <span className="nc-detail tech-only">{r.detail}</span>
                   </li>
                 ))}

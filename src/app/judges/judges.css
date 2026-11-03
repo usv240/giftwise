@@ -475,3 +475,55 @@
 :root[data-mode="technical"] .sx .tech-only {
   display: block;
 }
+
+/* Path step heading with its time, and the list for judges with more time. */
+.jp-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+.jp-time {
+  font-size: 14px;
+}
+.jp-login {
+  margin-top: 12px;
+  max-width: 68rem;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 18px 22px;
+  display: grid;
+  gap: 4px;
+}
+.jp-login-k {
+  font-weight: 500;
+}
+.jp-more-h {
+  margin-top: 2rem;
+  font-size: 18px;
+  font-weight: 500;
+}
+.jp-more {
+  margin: 10px 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 8px;
+  max-width: 72ch;
+}
+
+/* The one-wrong-reviewer stress test, under the evaluation table. */
+.ev-stress {
+  display: grid;
+  gap: 8px;
+  max-width: 52rem;
+}
+.ev-stress-h {
+  font-size: 18px;
+  font-weight: 500;
+}
+.ev .tech-only {
+  display: none;
+}
+:root[data-mode="technical"] .ev .tech-only {
+  display: block;
+}

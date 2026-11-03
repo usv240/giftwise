@@ -6,9 +6,9 @@
       "id": "unit",
       "name": "Rules engine, routing, the SSA report, the checks workflow and the cited answers",
       "command": "npm test",
-      "passed": 68,
-      "total": 68,
-      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee, the monthly report to Social Security, the checks workflow's fan-out and retries,, the AG Studio to Claude translation, a known source behind every real-world answer, and Social Security's own worked examples, and the benefit calendar's checks and due dates"
+      "passed": 69,
+      "total": 69,
+      "what": "Every rule row, the 2026 values, the $60 quarterly exclusion, shelter, ABLE, gift routing, pronouns, the reviewers’ referee and what it does when one reviewer is wrong, the monthly report to Social Security, the checks workflow's fan-out and retries, the AG Studio to Claude translation, a known source behind every real-world answer, Social Security's own worked examples, and the benefit calendar's checks and due dates"
     },
     {
       "id": "api",

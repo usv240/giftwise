@@ -21,11 +21,12 @@ describe("monthly report to Social Security", () => {
     expect(r.script).toEqual([]);
   });
 
-  it("the electric bill sent to her ABLE account comes with a reminder to pay it from there this month", () => {
-    const r = buildReport({ ...maya, month: "2026-10" });
-    const todo = r.todo.find((t) => t.id === "able-housing");
-    expect(todo?.ruleId).toBe("R-ABLE-02");
-    expect(todo?.text).toMatch(/^Pay the electric bill from the ABLE account before October ends/);
+  it("the electric bill sent to her ABLE account comes with a reminder: pay it this month, or once the month is over, check it was paid", () => {
+    const during = buildReport({ ...maya, month: "2026-10", today: "2026-10-20" }).todo.find((t) => t.id === "able-housing");
+    expect(during?.ruleId).toBe("R-ABLE-02");
+    expect(during?.text).toMatch(/^Pay the electric bill from the ABLE account before October ends/);
+    const after = buildReport({ ...maya, month: "2026-10" }).todo.find((t) => t.id === "able-housing");
+    expect(after?.text).toMatch(/^Check that the electric bill was paid from the ABLE account during October/);
   });
 
   it("the same October as cash: every gift is one to tell SSA, and the check drops by what counts", () => {

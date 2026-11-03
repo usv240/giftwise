@@ -246,7 +246,7 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
 
         {r.todo.length > 0 && (
           <section className="rp-part" aria-labelledby="rp-todo">
-            <h3 id="rp-todo">Before {monthName(r.month)} ends</h3>
+            <h3 id="rp-todo">{r.due.state === "in_progress" ? `Before ${monthName(r.month)} ends` : `To check for ${monthName(r.month)}`}</h3>
             <Checklist storeKey={`giftwise.report.${slug}.${r.month}.${view}`} items={r.todo} />
           </section>
         )}

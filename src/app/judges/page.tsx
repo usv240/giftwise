@@ -7,6 +7,7 @@ import { CaseRunner } from "@/components/judges/CaseRunner";
 import { EvalResults } from "@/components/judges/EvalResults";
 import { NightlyChecks } from "@/components/judges/NightlyChecks";
 import { SsaExamples } from "@/components/judges/SsaExamples";
+import { SandboxLogin } from "@/components/SandboxLogin";
 import { Suspense } from "react";
 import "../pages.css";
 import "../developers/dev.css";
@@ -14,17 +15,23 @@ import "./judges.css";
 
 export const metadata: Metadata = { title: "For judges", description: "The five-minute path through Giftwise, every failure case run live, and the test results." };
 
+/** The five-minute path: five steps, about a minute each, in the order the story runs. */
 const PATH = [
-  { href: "/", label: "Home", look: "The problem in one number: $1,000 given as cash leaves Maya a $74 check two months later. Paying the shop for what she needs keeps all $994." },
-  { href: "/g/maya", label: "Maya's gift page", look: "Type $1,500 in Give any amount. Giftwise splits it across her needs and her ABLE account, and one PayPal checkout pays five recipients directly." },
-  { href: "/g/maya", label: "Pay in the sandbox", look: "Use the sandbox buyer login in TESTING.md. When it completes, open the receipt." },
-  { href: "/g/maya/report", label: "Her report to Social Security", look: "SSI asks for changes in income by the 10th of the next month. Giftwise writes Maya's report from the gifts, with the PayPal record behind every line. Press As cash to see the report she would otherwise have to file, and the call script that comes with it." },
-  { href: "/try", label: "Try it", look: "Read the sample electric bill with Claude, or check any gift. Switch View to Technical to see rule ids and API details." },
-  { href: "/agents", label: "An AI agent asks first", look: "A Claude assistant uses the Giftwise MCP server to check a gift, plan it, and start a PayPal checkout the giver approves. Run it live." },
-  { href: "/organizations", label: "A fund pays many families", look: "Send a grant as one PayPal Payouts batch. Each item goes straight to a shop or ABLE account, and Transaction Search confirms it in PayPal's report." },
-  { href: "/dashboard", label: "Maya's year", look: "An AG Studio dashboard of every gift and her check each month, compared with cash. Press a giver: the Giftwise widget reruns the rules engine on just their gifts." },
-  { href: "#failure-cases", label: "Failure cases", look: "Run all eight checks below. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer." },
-  { href: "/status", label: "Status and stack", look: "Every service and sponsor tool, and whether it is live or using its fallback right now." },
+  { href: "/", label: "The problem in one number", time: "20 s", look: "In the Gift Checker, $1,000 sent as cash leaves Maya a $74 check two months later. Press Pay the shop: she keeps all $994." },
+  { href: "/g/maya", label: "Give, and pay in the sandbox", time: "90 s", look: "Type $1,500 in Give any amount. The rules split it across her needs and her ABLE account, and one PayPal checkout pays all five recipients. Log in with the sandbox buyer below, then open the receipt." },
+  { href: "/g/maya/report?month=2026-10", label: "Her report to Social Security", time: "40 s", look: "SSI asks for changes in income by the 10th. October's report says nothing counts, with the rule behind every gift. Press As cash: the same gifts would have counted $538 and cut her check to $456." },
+  { href: "/agents", label: "An AI assistant asks first", time: "40 s", look: "A Claude assistant with no SSI knowledge calls the Giftwise MCP server, talks June out of sending cash, starts a checkout only she can approve, and reads the order back from PayPal." },
+  { href: "/g/maya/calendar?month=2026-10", label: "Her benefit calendar", time: "40 s", look: "Press As cash and drag Aunt June's $150 from October 28 to November 2. A different check drops: SSI counts income by calendar month." },
+];
+
+/** Everything else, for a judge with more time. */
+const MORE = [
+  { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
+  { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: "12 of 13 match SSA's answers; Claude alone, 9 of 13." },
+  { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
+  { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
+  { href: "#failure-cases", label: "Eight failure cases", look: "Declined card, double click, a browser changing the amount, refunds and more, run live." },
+  { href: "/stack#paypal-apis", label: "Every PayPal API it calls", look: "13 PayPal APIs and tools, each with its job and file." },
 ];
 
 const CRITERIA = [
@@ -80,14 +87,35 @@ export default function JudgesPage() {
                 {i + 1}
               </span>
               <div>
-                <Link className="jp-link" href={p.href}>
-                  {p.label}
-                </Link>
+                <p className="jp-head">
+                  <Link className="jp-link" href={p.href}>
+                    {p.label}
+                  </Link>
+                  <span className="jp-time tabular muted">{p.time}</span>
+                </p>
                 <p>{p.look}</p>
               </div>
             </li>
           ))}
         </ol>
+        <div className="jp-login" data-ui>
+          <p className="jp-login-k">Sandbox buyer login, for step 2</p>
+          <p className="muted">A PayPal sandbox test account. It works only in PayPal&rsquo;s sandbox checkout window, and no real money moves.</p>
+          <Suspense fallback={null}>
+            <SandboxLogin />
+          </Suspense>
+        </div>
+        <h3 className="jp-more-h">If you have more time</h3>
+        <ul className="jp-more">
+          {MORE.map((m) => (
+            <li key={m.label}>
+              <Link className="text-link" href={m.href}>
+                {m.label}
+              </Link>
+              <span className="muted"> {m.look}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section id="nightly" className="page-section" aria-labelledby="nightly-h">

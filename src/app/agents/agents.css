@@ -95,3 +95,23 @@
     margin-left: 8px;
   }
 }
+/* PayPal's record of the order, read back by the assistant. */
+.ag-record {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 15px;
+  display: grid;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+.ag-record-k {
+  font-weight: 500;
+}
+.ag-record ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.ag-record-src {
+  font-size: 13px;
+}

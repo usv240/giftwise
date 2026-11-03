@@ -16,12 +16,12 @@ export const metadata: Metadata = {
   description: "Every gift on the day it arrived, each report to Social Security on its due date, and the check each month pays. Move a gift and the rules run again.",
 };
 
-async function CalendarPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+async function CalendarPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ month?: string }> }) {
+  const [{ slug }, q] = await Promise.all([params, searchParams]);
   const s = await giftSubject(slug);
   if (!s) notFound();
   const w = pronounWords(s.profile.pronoun);
-  const month = currentReportMonth(today(), [...new Set(s.gifts.map((g) => monthOf(g.date)))]);
+  const month = /^d{4}-(0[1-9]|1[0-2])$/.test(q.month ?? "") ? q.month! : currentReportMonth(today(), [...new Set(s.gifts.map((g) => monthOf(g.date)))]);
   const gifts = s.gifts.map((g) => ({ id: g.id, date: g.date, amount: g.amount, delivery: g.delivery, category: g.category, giver: g.giver, need: g.need, paidTo: g.paidTo, recurring: g.recurring }));
   return (
     <>
@@ -50,11 +50,11 @@ async function CalendarPage({ params }: { params: Promise<{ slug: string }> }) {
   );
 }
 
-export default function Page({ params }: { params: Promise<{ slug: string }> }) {
+export default function Page({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ month?: string }> }) {
   return (
     <div className="page frame">
       <Suspense fallback={<p className="page-loading">Loading the calendar&hellip;</p>}>
-        <CalendarPage params={params} />
+        <CalendarPage params={params} searchParams={searchParams} />
       </Suspense>
     </div>
   );

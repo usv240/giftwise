@@ -53,3 +53,13 @@
   font-size: 14px;
   margin-top: 6px;
 }
+.fd-phone {
+  display: none;
+  margin-top: 0.5rem;
+  font-size: var(--step-small);
+}
+@media (max-width: 700px) {
+  .fd-phone {
+    display: block;
+  }
+}

@@ -26,6 +26,7 @@ async function Dashboard() {
           Give to Maya
         </Link>
       </p>
+      <p className="fd-phone muted">This dashboard is laid out for a laptop or larger. On a phone, her report and benefit calendar show the same gifts in one column.</p>
       <FamilyDashboard gifts={gifts} months={months} />
     </>
   );

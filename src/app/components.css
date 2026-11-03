@@ -227,3 +227,32 @@
 .rw h2.rw-title {
   margin-bottom: 0;
 }
+
+/* The sandbox buyer login, set out so it can be read and copied. */
+.sbl {
+  margin: 8px 0 0;
+  display: grid;
+  gap: 6px;
+}
+.sbl > div {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+.sbl[data-compact] > div {
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+.sbl dt {
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+.sbl dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.sbl code {
+  font-size: 15px;
+  user-select: all;
+}

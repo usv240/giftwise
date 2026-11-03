@@ -1,4 +1,5 @@
 import results from "../../../content/eval-results.json";
+import { stressTest } from "@/lib/review/stress";
 
 type Row = {
   id: string;
@@ -20,6 +21,50 @@ const SETUP = [
 ] as const;
 const WORD: Record<string, string> = { shelter: "Housing", not_shelter: "Not housing", unclear: "Not settled", unsure: "Not settled", contested: "Rulebooks differ" };
 const ROUTE: Record<string, string> = { vendor: "Pay the business", able: "ABLE account" };
+
+/** If one reviewer is wrong: the same 20 bills with one reviewer's recorded answer flipped. Computed from the recorded run, no AI call. */
+function StressTable() {
+  const t = stressTest();
+  return (
+    <div className="ev-stress">
+      <h3 className="ev-stress-h">When one reviewer is wrong</h3>
+      <p className="muted">
+        For each bill, one reviewer&rsquo;s recorded answer is flipped, quoted from its own rulebook or with a quote that is not in it. How often does her check stay whole?
+      </p>
+      <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Check kept whole when one reviewer is wrong">
+        <table className="doc-table">
+          <thead>
+            <tr>
+              <th scope="col">Setup</th>
+              <th scope="col">Check kept whole</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Trust the wrong reviewer alone</td>
+              <td className="tabular">
+                {t.aloneWhole} of {t.bills}
+              </td>
+            </tr>
+            <tr>
+              <td>Both reviewers and the referee, the wrong one quoting its rulebook</td>
+              <td className="tabular">
+                {t.refereeRealQuoteWhole} of {t.bills}
+              </td>
+            </tr>
+            <tr>
+              <td>Both reviewers and the referee, the wrong one inventing a quote</td>
+              <td className="tabular">
+                {t.refereeInventedQuoteWhole} of {t.bills}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="muted tech-only">src/lib/review/stress.ts: reviews rebuilt from content/eval-results.json, each answer scored with referee() and routeForDecision() against the bill&rsquo;s label.</p>
+    </div>
+  );
+}
 
 /** The measured evaluation of the two reviewers on 20 labeled bills. Every number comes from content/eval-results.json. */
 export function EvalResults() {
@@ -62,10 +107,8 @@ export function EvalResults() {
           </tbody>
         </table>
       </div>
-      <p className="page-prose">
-        On this small set the rules are clear, and one reviewer alone did as well as two. The referee earns its place when a reviewer is wrong: the failure case above gives one a quote that is not in its
-        rulebook, and the check stays whole.
-      </p>
+      <p className="page-prose">On this set the rules are clear, and one reviewer alone did as well as two. The second reviewer and the referee are there for the day one of them is wrong, so we measured that too.</p>
+      <StressTable />
       <details className="ev-cases">
         <summary>Every bill and both answers</summary>
         <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Every bill in the evaluation">
