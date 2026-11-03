@@ -6,6 +6,7 @@ import { Info } from "@/components/Info";
 import { CaseRunner } from "@/components/judges/CaseRunner";
 import { EvalResults } from "@/components/judges/EvalResults";
 import { NightlyChecks } from "@/components/judges/NightlyChecks";
+import { SsaExamples } from "@/components/judges/SsaExamples";
 import { Suspense } from "react";
 import "../pages.css";
 import "../developers/dev.css";
@@ -116,6 +117,18 @@ export default function JudgesPage() {
           <Info id="judges.eval" label="" />
         </div>
         <EvalResults />
+      </section>
+
+      <section id="ssa-examples" className="page-section" aria-labelledby="ssa-ex-h">
+        <div className="title-row">
+          <h2 id="ssa-ex-h">Checked against Social Security&rsquo;s own examples</h2>
+          <Info id="judges.ssa_examples" label="" />
+        </div>
+        <p className="page-prose jp-intro">
+          The 20 bills above were labeled by us. These cases come from Social Security&rsquo;s operating manual, with SSA&rsquo;s own answers. Both the rules engine and Claude with no rulebook
+          answered them.
+        </p>
+        <SsaExamples />
       </section>
 
       <section className="page-section" aria-labelledby="crit-h">

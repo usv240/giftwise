@@ -34,6 +34,8 @@
   "cfr-416-724": { "title": "20 CFR 416.724: amounts of penalty deductions", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.724", "publisher": "eCFR" },
   "ssa-ssi-reporting": { "title": "SSA: Understanding SSI, Reporting Responsibilities", "url": "https://www.ssa.gov/ssi/text-report-ussi.htm", "publisher": "Social Security Administration" },
   "ssa-spotlight-rights": { "title": "SSA: Spotlight on Rights and Responsibilities (2026 edition)", "url": "https://www.ssa.gov/ssi/spotlights/spot-rights-responsibilities.htm", "publisher": "Social Security Administration" },
+  "poms-si-00835-465": { "title": "POMS SI 00835.465: Household costs (shelter items)", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835465", "publisher": "Social Security Administration" },
+  "poms-si-00830-522": { "title": "POMS SI 00830.522: Gift cards and gift certificates", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830522", "publisher": "Social Security Administration" },
   "paypal-pay-another-account": { "title": "PayPal Developer: Pay another account (the payee object)", "url": "https://developer.paypal.com/docs/checkout/standard/customize/pay-another-account/", "publisher": "PayPal" },
   "paypal-seller-onboarding": { "title": "PayPal Developer: Onboard sellers before payment (Partner Referrals API)", "url": "https://developer.paypal.com/docs/multiparty/seller-onboarding/before-payment/", "publisher": "PayPal" },
   "paypal-multiparty": { "title": "PayPal Developer: Multiparty platforms, including partner fees", "url": "https://developer.paypal.com/docs/multiparty/", "publisher": "PayPal" },

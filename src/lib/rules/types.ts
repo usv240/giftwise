@@ -14,6 +14,7 @@ export type Category =
   | "clothing"
   | "transport"
   | "personal"
+  | "event"
   | "other";
 
 export const SHELTER_CATEGORIES: readonly Category[] = ["rent", "mortgage", "property_tax", "utility"];
@@ -49,7 +50,8 @@ export interface Gift {
   label?: string;
 }
 
-export type TreatmentKind = "unearned_cash" | "ism_shelter" | "excluded" | "not_possible";
+/** unearned_in_kind: an item or service she receives that is not food, shelter or something for personal use, counted at its value. */
+export type TreatmentKind = "unearned_cash" | "unearned_in_kind" | "ism_shelter" | "excluded" | "not_possible";
 
 export interface Treatment {
   kind: TreatmentKind;
@@ -64,6 +66,8 @@ export interface Treatment {
 export interface MonthTrace {
   month: string;
   cashIncome: number;
+  /** Things she receives that count at their value, such as event tickets (R-ITEM-02). */
+  inKindIncome: number;
   shelterPaidByOthers: number;
   ismValue: number;
   vtrApplied: boolean;

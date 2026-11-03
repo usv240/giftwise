@@ -19,6 +19,7 @@ const CATEGORIES: { value: Category; label: string }[] = [
   { value: "transport", label: "Transport" },
   { value: "food", label: "Food" },
   { value: "personal", label: "Personal item" },
+  { value: "event", label: "Event tickets" },
   { value: "utility", label: "Utilities (power, gas, water)" },
   { value: "rent", label: "Rent" },
   { value: "mortgage", label: "Mortgage" },

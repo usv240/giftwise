@@ -3,7 +3,7 @@ import { z } from "zod";
 export const DeliverySchema = z.enum(["cash", "vendor", "item", "able"]).describe("How the gift reaches her: cash to her, paid to a vendor, the item itself, or her ABLE account.");
 
 export const CategorySchema = z
-  .enum(["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "other"])
+  .enum(["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "event", "other"])
   .describe("What the money is for. Rent, mortgage, property tax and utilities are housing (shelter).");
 
 export const GiftSchema = z.object({

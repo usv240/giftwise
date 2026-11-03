@@ -60,6 +60,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
   clothing: "clothing",
   transport: "transport",
   personal: "personal items",
+  event: "event tickets",
   other: "this need",
 };
 
@@ -78,6 +79,9 @@ export function classify(gift: Gift, profile: Profile): Treatment {
       ambiguous: overLimit,
       ambiguityReason: overLimit ? "This would pass the $20,000 yearly ABLE contribution limit." : undefined,
     };
+  }
+  if (category === "event" && (delivery === "item" || delivery === "vendor")) {
+    return { kind: "unearned_in_kind", ruleIds: ["R-ITEM-02", "R-GIE-01", "R-RMA-01"], infrequentEligible: !gift.recurring, ambiguous: false };
   }
   if (delivery === "item") {
     if (isShelter(category)) {
@@ -122,6 +126,7 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
   const couple = profile.couple;
   let cashIncome = 0;
   let cashInfrequent = 0;
+  let inKind = 0;
   let shelterPaid = 0;
   let shelterInfrequent = true;
 
@@ -130,6 +135,9 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
     const t = classify(g, profile);
     if (t.kind === "unearned_cash") {
       cashIncome += g.amount;
+      if (t.infrequentEligible) cashInfrequent += g.amount;
+    } else if (t.kind === "unearned_in_kind") {
+      inKind += g.amount;
       if (t.infrequentEligible) cashInfrequent += g.amount;
     } else if (t.kind === "ism_shelter") {
       shelterPaid += g.amount;
@@ -144,7 +152,7 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
   const infrequentBase = cashInfrequent + (ismValue > 0 && shelterInfrequent ? ismValue : 0);
   const infrequentExcluded = Math.min(allowanceLeft, infrequentBase);
 
-  const unearnedBeforeGie = Math.max(0, cashIncome + ismValue + profile.otherUnearnedMonthly - infrequentExcluded);
+  const unearnedBeforeGie = Math.max(0, cashIncome + inKind + ismValue + profile.otherUnearnedMonthly - infrequentExcluded);
   const generalExcludedFromUnearned = Math.min(P.generalIncomeExclusion, unearnedBeforeGie);
   const gieLeft = P.generalIncomeExclusion - generalExcludedFromUnearned;
   const generalExcludedFromEarned = Math.min(gieLeft, profile.earnedMonthly);
@@ -157,6 +165,7 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
   return {
     month,
     cashIncome: round2(cashIncome),
+    inKindIncome: round2(inKind),
     shelterPaidByOthers: round2(shelterPaid),
     ismValue: round2(ismValue),
     vtrApplied,
@@ -180,7 +189,7 @@ function routesFor(gift: Gift, profile: Profile) {
     if (t.kind === "not_possible") {
       return { delivery, check: 0, possible: false, reason: t.note };
     }
-    if (delivery === "item" && !["equipment", "personal", "clothing", "medical", "education", "other", "phone", "internet", "transport"].includes(gift.category)) {
+    if (delivery === "item" && !["equipment", "personal", "clothing", "medical", "education", "other", "phone", "internet", "transport", "event"].includes(gift.category)) {
       return { delivery, check: 0, possible: false, reason: "no_item_for_category" };
     }
     if (delivery === "vendor" && gift.category === "other") {
@@ -295,6 +304,10 @@ function explain(
     plain = `Cash counts as income. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
     if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
     if (overLimit) plain += ` Kept as cash, ${w.poss} savings would be ${usd(resourcesNextFirst)} on the 1st, over the limit.`;
+  } else if (t.kind === "unearned_in_kind") {
+    const excl = round2(trace.infrequentExcluded + trace.generalExcludedFromUnearned);
+    plain = `Tickets ${w.subj} receives count as income at their value, even when bought straight from the box office. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
+    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
   } else if (t.kind === "ism_shelter") {
     plain = trace.vtrApplied
       ? `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple))}, to ${usd(trace.check)}.`
@@ -316,7 +329,7 @@ function explain(
   const rules = t.ruleIds.map((id) => `${id} (${RULES[id]?.name})`).join("; ");
   const technical =
     `Rules ${rules}. Income month ${trace.month}, payment month ${trace.paymentMonth} (retrospective monthly accounting, lag ${P.rmaLagMonths}). ` +
-    `Cash ${usd(trace.cashIncome)}; shelter paid by others ${usd(trace.shelterPaidByOthers)}; ISM value ${usd(trace.ismValue)}${trace.vtrApplied ? " (VTR)" : ""}; ` +
+    `Cash ${usd(trace.cashIncome)}; in kind ${usd(trace.inKindIncome)}; shelter paid by others ${usd(trace.shelterPaidByOthers)}; ISM value ${usd(trace.ismValue)}${trace.vtrApplied ? " (VTR)" : ""}; ` +
     `infrequent exclusion ${usd(trace.infrequentExcluded)}; general exclusion ${usd(trace.generalExcludedFromUnearned)}; countable ${usd(trace.countableIncome)}; ` +
     `FBR ${usd(fbr(profile.couple))} gives ${usd(trace.check)}. Best route: ${best} (${usd(bestCheck)}).`;
 

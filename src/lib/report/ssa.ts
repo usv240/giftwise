@@ -115,6 +115,7 @@ const CATEGORY_WORDS: Record<Category, string> = {
   clothing: "clothing",
   transport: "transport",
   personal: "personal items",
+  event: "event tickets",
   other: "savings",
 };
 
@@ -148,6 +149,9 @@ function describe(g: Gift & { giver: string; paidTo: string; need: string }, kin
       return { what: "Cash for school costs", why: RULES["R-EDU-01"].plain, say: `On ${day(g.date)}, ${g.giver} gave me ${usd(g.amount)} in cash for school costs. I have the receipts.` };
     }
     return { what: "Cash gift", why: RULES["R-CASH-01"].plain, say: `On ${day(g.date)}, ${g.giver} gave me ${usd(g.amount)} in cash.` };
+  }
+  if (kind === "unearned_in_kind") {
+    return { what: `${words[0].toUpperCase()}${words.slice(1)} from ${g.giver}`, why: RULES["R-ITEM-02"].plain, say: `On ${day(g.date)}, ${g.giver} gave me ${words} worth ${usd(g.amount)}.` };
   }
   if (kind === "ism_shelter") {
     return {
@@ -187,7 +191,7 @@ export function buildReport(o: { name: string; profile: Profile; gifts: ReportGi
     .map((g) => {
       const t = classify(g, profile);
       const d = describe(g, t.kind, t.ruleIds, name, w.poss);
-      const section: ReportLine["section"] = g.delivery === "cash" || t.kind === "ism_shelter" || t.kind === "not_possible" ? "tell" : "records";
+      const section: ReportLine["section"] = g.delivery === "cash" || t.kind === "ism_shelter" || t.kind === "unearned_in_kind" || t.kind === "not_possible" ? "tell" : "records";
       return {
         id: g.id,
         date: g.date,

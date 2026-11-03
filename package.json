@@ -19,7 +19,8 @@
     "e2e:routed": "tsx --env-file=.env.local scripts/routed-gift-e2e.ts",
     "e2e:agent": "node --env-file-if-exists=.env.local tests/e2e/agent-checkout.mjs",
     "test:ledger-race": "tsx --env-file=.env.local scripts/ledger-race.ts 60",
-    "checks:local": "cd workflows && tsx --env-file=../.env.local src/local.ts"
+    "checks:local": "cd workflows && tsx --env-file=../.env.local src/local.ts",
+    "eval:ssa": "tsx --env-file=.env.local scripts/run-ssa-examples.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

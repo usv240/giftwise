@@ -474,6 +474,12 @@
     "why": "A claim about AI should come with a measurement. These numbers come from one recorded run, not from a description.",
     "technical": "scripts/run-eval.ts over content/eval/bills.json; results in content/eval-results.json. Accuracy counts only the 18 clear cases; the check is scored under the true reading, and for the two contested cases under both readings."
   },
+  "judges.ssa_examples": {
+    "title": "Social Security's own examples",
+    "what": "Worked examples from Social Security's operating manual, each with SSA's answer, run through Giftwise and through Claude with no rulebook.",
+    "why": "Our own labeled bills show the code does what we meant. SSA's examples show whether it agrees with SSA.",
+    "technical": "content/eval/ssa-examples.json (passages cut verbatim from the POMS pages), scored by scripts/run-ssa-examples.ts into content/eval/ssa-examples-results.json. A value matches within $1."
+  },
   "page.dashboard": {
     "title": "About this page",
     "what": "A dashboard of every gift to Maya this year: who gave, what it paid for, how it reached her, and her SSI check each month.",

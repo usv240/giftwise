@@ -55,6 +55,12 @@ export const RULES: Record<string, RuleRow> = {
     plain: "A gift of an item for personal or household use, such as a laptop or a chair, is not counted as income.",
     sourceKeys: ["cfr-416-1103-g", "poms-si-01130-430"],
   },
+  "R-ITEM-02": {
+    id: "R-ITEM-02",
+    name: "Tickets and other things that are not for personal use",
+    plain: "Tickets to a game, show or event that she receives count as income at their value, even when someone buys them straight from the box office.",
+    sourceKeys: ["poms-si-00830-520", "poms-si-00810-410"],
+  },
   "R-EDU-01": {
     id: "R-EDU-01",
     name: "Gifts used for education",

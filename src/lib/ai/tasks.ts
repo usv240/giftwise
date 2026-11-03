@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { asData, structured } from "./claude";
 
-const CATEGORIES = ["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "other"] as const;
+const CATEGORIES = ["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "event", "other"] as const;
 
 export const BillSchema = z.object({
   vendor_name: z.string().describe("Business that issued the bill or quote."),

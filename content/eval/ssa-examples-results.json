@@ -1,0 +1,494 @@
+{
+  "ran_at": "2026-11-03T15:33:45.602Z",
+  "rules_version": "2026.1",
+  "model": "claude-opus-5-5",
+  "claude_ran_at": "2026-11-03T15:33:45.605Z",
+  "tolerance_usd": 1,
+  "summary": {
+    "cases": 13,
+    "engine_matches": 12,
+    "claude_matches": 9,
+    "claude_answered": 13,
+    "out_of_scope_groups": 11
+  },
+  "cases": [
+    {
+      "id": "phone-bill",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-VEND-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A third party paying a phone bill directly to the vendor is neither cash nor shelter, since telephone service is not a shelter expense. It is not income and not in-kind support and maintenance, so Joshua keeps the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "groceries-paid",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-FOOD-01",
+          "R-VEND-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Since September 30, 2024, SSA no longer counts food as in-kind support and maintenance, so the daughter's $250 payment to the grocer for her mother's food is not income. Mrs. Harper's federal SSI stays at the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "groceries-credit",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-FOOD-01",
+          "R-VEND-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "The child's $100 went directly to the grocer, not to Shawn, so it is in-kind help rather than cash. Since September 30, 2024, SSA no longer counts food in in-kind support and maintenance, so paying a grocery bill is not income and Shawn keeps the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "property-tax-prepaid",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-07",
+            "measure": "ism_value",
+            "value": 66.67,
+            "got": 0
+          },
+          {
+            "month": "2026-12",
+            "measure": "ism_value",
+            "value": 66.67,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": false
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-07",
+            "measure": "ism_value",
+            "value": 66.67,
+            "got": 0
+          },
+          {
+            "month": "2026-12",
+            "measure": "ism_value",
+            "value": 66.67,
+            "got": 0
+          }
+        ],
+        "reason": "Property tax is a shelter expense, so a third party paying it is in-kind support counted in the month it is paid (June), capped at the $351.33 presumed maximum value. That is too large for the infrequent-income exclusion, so after the $20 general exclusion Kelly's June SSI is $662.67, and July and December carry no in-kind support.",
+        "match": false
+      }
+    },
+    {
+      "id": "utilities-free",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "ism_value",
+            "value": 90,
+            "got": 90
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "ism_value",
+            "value": 90,
+            "got": 90
+          }
+        ],
+        "reason": "Water and electricity are shelter costs, so Bill paying them is in-kind support counted at its actual value of $90 (under the $351.33 cap); after the $20 general exclusion, $70 is counted, giving $924. The free land rent is also in-kind support, but no value was given for it, so it isn't included here; if it were valued, the combined total would be capped at $351.33 and the SSI amount would be lower.",
+        "match": true
+      }
+    },
+    {
+      "id": "electric-vtr",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "ism_value",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-06",
+            "measure": "ssi_amount",
+            "value": 662.67,
+            "got": 662.67
+          }
+        ],
+        "rules": [
+          "R-SHEL-VTR"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "ism_value",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-06",
+            "measure": "ssi_amount",
+            "value": 662.67,
+            "got": 662.67
+          }
+        ],
+        "reason": "Rosa lives in her friend's household and pays nothing toward shelter costs, so the one-third reduction ($331.33) already applies; under that rule no other in-kind support is counted, so the parent's payment of the electric bill adds nothing. Her June 2026 SSI is $994 − $331.33 = $662.67.",
+        "match": true
+      }
+    },
+    {
+      "id": "birthday-cash",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-01",
+            "measure": "after_infrequent",
+            "value": 40,
+            "got": 40
+          },
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 25,
+            "got": 25
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-01",
+            "measure": "after_infrequent",
+            "value": 40,
+            "got": 100
+          },
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 25,
+            "got": 25
+          }
+        ],
+        "reason": "Both payments are unearned income received in the same calendar quarter (January–March), and together they total $125, which is over the $60 quarterly limit, so the infrequent or irregular income exclusion does not apply to either. After the $20 general exclusion, $80 counts in January and $5 counts in March, reducing her $994 benefit to $914 and $989.",
+        "match": false
+      }
+    },
+    {
+      "id": "interest-and-tickets",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-08",
+            "measure": "after_infrequent",
+            "value": 90,
+            "got": 90
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-GIE-01",
+          "R-RMA-01",
+          "R-ITEM-02"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 50
+          },
+          {
+            "month": "2026-08",
+            "measure": "after_infrequent",
+            "value": 90,
+            "got": 100
+          }
+        ],
+        "reason": "The $50 interest (but not the repaid principal) and the $100 tickets are unearned income. Because both come from the same friend in the same quarter (Q3), they are not infrequent, so the $60-per-quarter exclusion does not apply. Only the $20 general exclusion reduces them, leaving $30 countable in July and $80 in August.",
+        "match": false
+      }
+    },
+    {
+      "id": "jewelry",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-02",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-02",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A non-food, non-shelter item that would be an excluded resource if kept is not income. A necklace Lena wears every day is an excluded personal effect, since it is not held for its value or as an investment, so her full $994 is unchanged.",
+        "match": true
+      }
+    },
+    {
+      "id": "car",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A non-cash item that would be an excluded resource if kept is not income (20 CFR 416.1103(g)). One car used for transportation is excluded regardless of value, so the gifted car is not income and Omar's SSI stays at $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "cash-gift",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 140,
+            "got": 140
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 140,
+            "got": 200
+          }
+        ],
+        "reason": "The infrequent or irregular income exclusion covers unearned income only if the quarter's total is $60 or less. Because the $200 gift exceeds that limit, none of it is excluded, so the full $200 counts. After the $20 general exclusion, $180 is countable, which reduces SSI to $994 − $180 = $814.",
+        "match": false
+      }
+    },
+    {
+      "id": "cash-for-tuition",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-08",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-EDU-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-08",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "SSI does not count a gift as income when it is used or set aside to pay tuition, fees, or other necessary educational expenses. Theo spent the full $1,500 on community college tuition and fees that month, so it is excluded and his SSI stays at the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "scholarship-and-grant",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-EDU-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "SSI excludes grants, scholarships, fellowships and gifts that are used or set aside to pay tuition, fees or other necessary educational expenses. The $1,500 spent on tuition and fees and the $500 kept for next term's tuition are therefore both excluded, none of the $2,000 counts as income, and Mia receives the full $994.",
+        "match": true
+      }
+    }
+  ],
+  "ms": 36670
+}

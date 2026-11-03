@@ -298,3 +298,180 @@
 :root[data-mode="technical"] .nc .tech-only {
   display: block;
 }
+
+/* Social Security's own examples: the score, what the run found, then each example. */
+.sx {
+  margin-top: 16px;
+  max-width: 68rem;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: clamp(20px, 2.5vw, 32px);
+}
+.sx-score {
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.sx-score .tabular {
+  color: var(--positive);
+}
+.sx-vs {
+  margin-top: 12px;
+  max-width: 62ch;
+}
+.sx-meta {
+  margin-top: 8px;
+  font-size: 15px;
+  max-width: 68ch;
+}
+.sx-findings {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 800px) {
+  .sx-findings {
+    grid-template-columns: 1fr;
+  }
+}
+.sx-finding {
+  background: var(--surface-2);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-size: 15px;
+}
+.sx-finding p + p {
+  margin-top: 6px;
+}
+.sx-finding-k {
+  font-weight: 500;
+  color: var(--positive);
+}
+.sx-finding[data-open] .sx-finding-k {
+  color: var(--attention);
+}
+.sx-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.sx-case {
+  border-bottom: 1px solid var(--surface-2);
+}
+.sx-case summary {
+  cursor: pointer;
+  list-style: none;
+  min-height: 48px;
+  padding: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 20px;
+}
+.sx-case summary::-webkit-details-marker {
+  display: none;
+}
+.sx-case summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.sx-title {
+  font-weight: 500;
+}
+.sx-sides {
+  display: flex;
+  gap: 18px;
+  font-size: 15px;
+}
+.sx-who {
+  color: var(--muted);
+  font-size: 14px;
+}
+.sx-verdict {
+  font-weight: 500;
+  color: var(--attention);
+}
+.sx-verdict[data-ok] {
+  color: var(--positive);
+}
+.sx-body {
+  padding: 4px 0 18px;
+  display: grid;
+  gap: 10px;
+  max-width: 72ch;
+  font-size: 15px;
+}
+.sx-quote {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--surface-2);
+  background: var(--bg);
+  border-radius: 0 6px 6px 0;
+}
+.sx-quote footer {
+  margin-top: 6px;
+  font-size: 14px;
+}
+.sx-answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+}
+@media (max-width: 700px) {
+  .sx-answers {
+    grid-template-columns: 1fr;
+  }
+}
+.sx-figures {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+.sx-figures li {
+  color: var(--attention);
+}
+.sx-figures li[data-ok] {
+  color: var(--ink);
+}
+.sx-reason,
+.sx-rules {
+  margin-top: 6px;
+  font-size: 14px;
+}
+.sx-note {
+  font-size: 14px;
+}
+.sx-out {
+  margin-top: 18px;
+  font-size: 15px;
+}
+.sx-out summary {
+  cursor: pointer;
+  color: var(--accent);
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+.sx-out ul {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 6px;
+  max-width: 72ch;
+}
+.sx-cmd {
+  margin-top: 12px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.sx .tech-only {
+  display: none;
+}
+:root[data-mode="technical"] .sx .tech-only {
+  display: block;
+}

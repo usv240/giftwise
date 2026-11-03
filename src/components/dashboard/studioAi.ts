@@ -9,7 +9,7 @@ const PROMPT_STARTERS: AgAiPromptStarter[] = [
 ];
 
 const DELIVERIES = ["cash", "vendor", "item", "able"] as const satisfies readonly Delivery[];
-const CATEGORIES = ["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "other"] as const satisfies readonly Category[];
+const CATEGORIES = ["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "event", "other"] as const satisfies readonly Category[];
 
 /**
  * AG Studio's Studio Agent Framework, run on Claude: Studio's five built-in agents keep their own instructions and tools,
