@@ -1,22 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+
+const readStore = (key: string) => {
+  try {
+    return localStorage.getItem(key) ?? "{}";
+  } catch {
+    return "{}";
+  }
+};
 
 /** The month's to-do list as real checkboxes. Ticks are remembered in this browser only, per month and view. */
 export function Checklist({ storeKey, items }: { storeKey: string; items: { id: string; text: string; ruleId?: string }[] }) {
-  const [done, setDone] = useState<Record<string, boolean>>({});
-  useEffect(() => {
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const own = `giftwise-store:${storeKey}`;
+      window.addEventListener("storage", onChange);
+      window.addEventListener(own, onChange);
+      return () => {
+        window.removeEventListener("storage", onChange);
+        window.removeEventListener(own, onChange);
+      };
+    },
+    [storeKey],
+  );
+  // The server and the first paint see nothing ticked; the browser's saved ticks follow without a hydration mismatch.
+  const raw = useSyncExternalStore(subscribe, () => readStore(storeKey), () => "{}");
+  // Ticks made this visit, so the boxes still work when storage is blocked.
+  const [local, setLocal] = useState<Record<string, boolean>>({});
+  const done = useMemo(() => {
     try {
-      setDone(JSON.parse(localStorage.getItem(storeKey) ?? "{}"));
+      return { ...(JSON.parse(raw) as Record<string, boolean>), ...local };
     } catch {
-      setDone({});
+      return local;
     }
-  }, [storeKey]);
+  }, [raw, local]);
   const toggle = (id: string, on: boolean) => {
     const next = { ...done, [id]: on };
-    setDone(next);
+    setLocal(next);
     try {
       localStorage.setItem(storeKey, JSON.stringify(next));
+      window.dispatchEvent(new Event(`giftwise-store:${storeKey}`));
     } catch {
       // Storage can be blocked; the box still ticks for this visit.
     }
