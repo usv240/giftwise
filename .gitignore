@@ -42,3 +42,6 @@ next-env.d.ts
 !.env.example
 .taste-skill/
 /workflows/node_modules
+
+# Bryntum Calendar UMD, copied from node_modules by scripts/vendor-bryntum.mjs
+/public/bryntum/

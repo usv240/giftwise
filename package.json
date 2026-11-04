@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/build.mjs",
+    "postinstall": "node scripts/vendor-bryntum.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
