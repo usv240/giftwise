@@ -25,13 +25,13 @@ All four are on [`/judges`](https://giftwise-405i.onrender.com/judges), case by 
 
 | Give any amount: one PayPal checkout pays five recipients | The same October gifts, as cash: the report she would have needed |
 |---|---|
-| ![Maya's gift page: $1,500 split across four needs and her ABLE account; as cash $0, with Giftwise $994](docs/img/2-give-any-amount.png) | ![Maya's October report as cash: 5 gifts to tell Social Security about, $538 counted, December check $456](docs/img/4-report-as-cash.png) |
+| ![Maya's gift page: $1,500 shown as one bar split across four needs and her ABLE account; her January check as cash $0, with Giftwise $1,029](docs/img/2-give-any-amount.png) | ![Maya's October report as cash: 5 gifts to tell Social Security about, $538 counted, December check $456](docs/img/4-report-as-cash.png) |
 | **Her benefit calendar: move a cash gift five days and a different check drops** | **Checked against Social Security's own worked examples** |
 | ![Bryntum calendar of October in the as-cash view, with the move of Aunt June's $150 and the checks it changed](docs/img/5-benefit-calendar.png) | ![Social Security's own worked examples: the rules engine against Claude with no rulebook](docs/img/6-ssa-examples.png) |
 | **Her own copy, in Easy Read and Spanish** | **Give every month: the rules route it again, and say why** |
 | ![Maya's October report in Spanish Easy Read: no call needed, her December check stays $994, each gift in one sentence with a picture](docs/img/8-easy-read-spanish.png) | ![A monthly gift of $300: November paid the wheelchair repair; December finished it with $120 and sent $180 to the laptop, with the reason for each change](docs/img/10-monthly.png) |
 | **The results, first thing on the judges' page** | **Real SSI cases from federal courts** |
-| ![40 of 40 SSA worked examples; 14 of 14 federal court cases; 0 of 59 wrong routes accepted](docs/img/7-results.png) | ![14 of 14 federal court cases reach SSA's and the court's outcome; the gap the run found, now fixed](docs/img/9-field-cases.png) |
+| ![40 of 40 SSA worked examples; 14 of 14 federal court cases; 0 of 59 wrong routes accepted; 100,000 random gifts keep every promise](docs/img/7-results.png) | ![14 of 14 federal court cases reach SSA's and the court's outcome, and the meals rule the cases added](docs/img/9-field-cases.png) |
 
 ## How it works
 
