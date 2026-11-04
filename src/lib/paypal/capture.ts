@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { audit } from "../audit";
 import { db, schema } from "../db";
 import { paypalRest } from "./client";
@@ -34,12 +34,20 @@ export async function captureAndRecord(orderId: string, opts: { mock?: "INSTRUME
   if (rows.length === 0) return { kind: "not_found" };
   if (rows.every((r) => r.status === "captured")) return { kind: "already", captures: lines(rows) };
 
-  // Same request id on retries: a double click or a network retry can never capture twice.
-  const res = await paypalRest<PayPalOrder>(`/v2/checkout/orders/${orderId}/capture`, {
-    method: "POST",
-    requestId: `capture-${orderId}`,
-    headers: { Prefer: "return=representation", ...(opts.mock ? { "PayPal-Mock-Response": JSON.stringify({ mock_application_codes: opts.mock }) } : {}) },
-  });
+  // Same request id on retries: a double click or a network retry can never capture twice. A second capture that
+  // arrives while the first is still in flight gets a 500 from PayPal's sandbox; a 5xx is safe to retry with the same
+  // PayPal-Request-Id, and the retry gets the first capture's answer.
+  const capture = () =>
+    paypalRest<PayPalOrder>(`/v2/checkout/orders/${orderId}/capture`, {
+      method: "POST",
+      requestId: `capture-${orderId}`,
+      headers: { Prefer: "return=representation", ...(opts.mock ? { "PayPal-Mock-Response": JSON.stringify({ mock_application_codes: opts.mock }) } : {}) },
+    });
+  let res = await capture();
+  for (let attempt = 1; res.status >= 500 && attempt <= 3; attempt++) {
+    await new Promise((r) => setTimeout(r, 700 * attempt));
+    res = await capture();
+  }
   const body = res.body;
   if (res.status >= 400 || body.status !== "COMPLETED") {
     const issue = body.details?.[0]?.issue ?? body.name ?? body.status ?? "PAYPAL_ERROR";
@@ -47,10 +55,11 @@ export async function captureAndRecord(orderId: string, opts: { mock?: "INSTRUME
     if (issue === "ORDER_ALREADY_CAPTURED") return syncFromPayPal(orderId, actor);
     const info = { issue, debugId: res.debugId ?? body.debug_id ?? null, status: res.status >= 400 ? res.status : 502 };
     const declined = issue === "INSTRUMENT_DECLINED";
+    // A failed attempt never overwrites a capture another call already recorded.
     await d
       .update(schema.payments)
       .set({ status: declined ? "declined" : "failed", debugId: info.debugId })
-      .where(eq(schema.payments.orderId, orderId));
+      .where(and(eq(schema.payments.orderId, orderId), ne(schema.payments.status, "captured")));
     await audit(actor, declined ? "paypal.payment.declined" : "paypal.capture.failed", `order:${orderId}`, { issue });
     return { kind: declined ? "declined" : "failed", plain: PLAIN[issue] ?? "PayPal could not complete this step. Please try again.", ...info };
   }
@@ -72,29 +81,53 @@ export async function syncFromPayPal(orderId: string, actor: Actor = "webhook"):
   return record(orderId, rows, res.body, actor);
 }
 
+/**
+ * Record each purchase unit's capture once. Two captures of one order can run at the same moment (a double click, or a
+ * webhook and the return page); PayPal answers both, because they share a PayPal-Request-Id. Only the call that moves a
+ * row from not captured to captured counts it toward the need, so the money is never counted twice, and both calls
+ * return the captures as recorded. A repeated answer can leave out the captures, so then PayPal's own copy is read.
+ */
 async function record(orderId: string, rows: PaymentRow[], body: PayPalOrder, actor: Actor): Promise<CaptureOutcome> {
   const d = db();
   const g = body.payer?.name;
   const payer = g ? [g.given_name, g.surname].filter(Boolean).join(" ") : null;
   const now = new Date();
-  const captures: CaptureLine[] = [];
-  for (const pu of body.purchase_units ?? []) {
-    const row = rows.find((r) => r.referenceId === pu.reference_id) ?? (rows.length === 1 ? rows[0] : undefined);
-    const cap = pu.payments?.captures?.[0];
-    if (!row || !cap || row.status === "captured") continue;
-    await d.update(schema.payments).set({ status: "captured", captureId: cap.id ?? null, payerName: payer, capturedAt: now }).where(eq(schema.payments.id, row.id));
-    if (row.needId) {
-      await d
-        .update(schema.needs)
-        .set({
-          funded: sql`${schema.needs.funded} + ${row.amount}`,
-          status: sql`case when ${schema.needs.funded} + ${row.amount} >= ${schema.needs.amount} then 'paid' else 'partial' end`,
-        })
-        .where(eq(schema.needs.id, row.needId));
+  const flippedHere: CaptureLine[] = [];
+  const apply = async (order: PayPalOrder) => {
+    for (const pu of order.purchase_units ?? []) {
+      const row = rows.find((r) => r.referenceId === pu.reference_id) ?? (rows.length === 1 ? rows[0] : undefined);
+      const cap = pu.payments?.captures?.[0];
+      if (!row || !cap) continue;
+      const flipped = await d
+        .update(schema.payments)
+        .set({ status: "captured", captureId: cap.id ?? null, payerName: payer, capturedAt: now })
+        .where(and(eq(schema.payments.id, row.id), ne(schema.payments.status, "captured")))
+        .returning({ id: schema.payments.id });
+      if (!flipped.length) continue;
+      if (row.needId) {
+        await d
+          .update(schema.needs)
+          .set({
+            funded: sql`${schema.needs.funded} + ${row.amount}`,
+            status: sql`case when ${schema.needs.funded} + ${row.amount} >= ${schema.needs.amount} then 'paid' else 'partial' end`,
+          })
+          .where(eq(schema.needs.id, row.needId));
+      }
+      flippedHere.push({ reference_id: row.referenceId, capture_id: cap.id ?? null, amount: cap.amount?.value ?? null, payee: row.payeeName });
     }
-    captures.push({ reference_id: row.referenceId, capture_id: cap.id ?? null, amount: cap.amount?.value ?? null, payee: row.payeeName });
+  };
+  await apply(body);
+  let after = await d.select().from(schema.payments).where(eq(schema.payments.orderId, orderId));
+  if (after.some((r) => r.status !== "captured") && !(body.purchase_units ?? []).some((pu) => pu.payments?.captures?.length)) {
+    const full = await paypalRest<PayPalOrder>(`/v2/checkout/orders/${orderId}`, { method: "GET" });
+    if (full.body.status === "COMPLETED") {
+      await apply(full.body);
+      after = await d.select().from(schema.payments).where(eq(schema.payments.orderId, orderId));
+    }
   }
-  await audit(actor, "paypal.order.captured", `order:${orderId}`, { captures: captures.map((c) => ({ ref: c.reference_id, capture: c.capture_id, amount: c.amount })) });
+  const captures = lines(after.filter((r) => r.status === "captured"));
+  // The ledger gets one entry per capture, from whichever call recorded it.
+  if (flippedHere.length) await audit(actor, "paypal.order.captured", `order:${orderId}`, { captures: flippedHere.map((c) => ({ ref: c.reference_id, capture: c.capture_id, amount: c.amount })) });
   return { kind: "captured", captures, payerFirstName: g?.given_name ?? null, status: body.status ?? "COMPLETED" };
 }
 
