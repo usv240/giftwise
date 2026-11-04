@@ -19,17 +19,7 @@
   line-height: 1.45;
 }
 
-.er-label {
-  display: inline-block;
-  padding: 2px 12px;
-  border-radius: 999px;
-  background: var(--tint-blue);
-  color: var(--tint-blue-ink);
-  font-size: 16px;
-  font-weight: 500;
-}
 .er-title {
-  margin-top: 14px;
   font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
   line-height: 1.05;
   letter-spacing: -0.025em;
@@ -64,7 +54,7 @@
 .er-lines {
   margin-top: 16px;
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* A picture column, then the words. A line without a picture keeps the column, so the sentences stay aligned. */
@@ -74,10 +64,22 @@
   gap: 16px;
   align-items: start;
 }
+/* The picture hangs from the first line without setting the row's height, so the line that continues the same
+   idea sits close under it and the space between ideas stays larger than the space within one. */
 .er-pic-cell {
   display: flex;
   justify-content: center;
+  height: 0;
   padding-top: 2px;
+}
+.er-line:not([data-pic]):not(:first-child) {
+  margin-top: -12px;
+}
+.er-answer .er-line:not([data-pic]):not(:first-child) {
+  margin-top: -10px;
+}
+.er-nowrap {
+  white-space: nowrap;
 }
 .er-pic {
   width: 44px;
@@ -148,4 +150,14 @@
 
 .er-whatif {
   margin-top: 18px;
+}
+
+.er-listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.er-listen[aria-pressed="true"] {
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
 }

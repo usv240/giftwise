@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
 import { EasyPicture } from "@/components/report/EasyPicture";
+import { ListenButton } from "@/components/report/ListenButton";
 import { CopyScript, PrintButton } from "@/components/report/ReportActions";
 import { today } from "@/lib/api/envelope";
 import { giftSubject } from "@/lib/report/data";
@@ -21,12 +22,27 @@ export const metadata: Metadata = {
 
 type Search = { month?: string; lang?: string; view?: string };
 
+/** Phone numbers stay on one line, so a reader never meets half a number at the end of a line. */
+function Words({ text }: { text: string }) {
+  return text.split(/(\d-\d{3}-\d{3}-\d{4})/).map((part, i) =>
+    i % 2 ? (
+      <span key={i} className="er-nowrap">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
 function Line({ l }: { l: EasyLine }) {
   return (
     <li className="er-line" data-pic={l.picture ? "" : undefined}>
       <span className="er-pic-cell">{l.picture && <EasyPicture name={l.picture} />}</span>
       <span className="er-words">
-        <span className="er-text">{l.text}</span>
+        <span className="er-text">
+          <Words text={l.text} />
+        </span>
         {l.note && <span className="er-note">{l.note}</span>}
       </span>
     </li>
@@ -44,6 +60,14 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
   const month = q.month && /^\d{4}-(0[1-9]|1[0-2])$/.test(q.month) ? q.month : currentReportMonth(now, months);
   const r = buildReport({ name: subject.name, profile: subject.profile, gifts: subject.gifts, month, today: now, view });
   const e = easyRead(r, lang);
+  // What Listen reads: the page in reading order, one idea per utterance; the footer stays on the page.
+  const spoken = [
+    e.title,
+    ...(e.whatIf ? [e.whatIf] : []),
+    ...e.answer.map((l) => l.text),
+    ...e.sections.flatMap((x) => [x.title, ...x.lines.map((l) => l.text)]),
+    ...(e.script.length ? [e.ui.say, ...e.script] : []),
+  ];
   const qs = (o: Record<string, string | undefined>) => {
     const p = new URLSearchParams(Object.entries({ month, view: view === "cash" ? "cash" : undefined, ...o }).filter((x): x is [string, string] => Boolean(x[1])));
     return `?${p.toString()}`;
@@ -59,6 +83,7 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
         <p className="lede">{e.ui.lede}</p>
       </header>
       <nav className="rp-bar er-bar" aria-label={e.ui.nav}>
+        <ListenButton lines={spoken} lang={lang} labels={{ listen: e.ui.listen, stop: e.ui.stop }} />
         <Link className="btn btn-quiet" href={`/g/${slug}/report/easy${qs({ lang: lang === "en" ? "es" : undefined })}`} hrefLang={lang === "en" ? "es" : "en"}>
           {e.ui.other}
         </Link>
@@ -73,7 +98,6 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
 
       <article className="er-sheet" aria-labelledby="er-title" data-status={r.status}>
         <header className="er-head">
-          <p className="er-label">{e.label}</p>
           <h2 id="er-title" className="er-title">
             {e.title}
           </h2>
@@ -106,7 +130,9 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
             </h3>
             <ol className="er-script">
               {e.script.map((s) => (
-                <li key={s}>{s}</li>
+                <li key={s}>
+                  <Words text={s} />
+                </li>
               ))}
             </ol>
             <CopyScript lines={e.script} label={e.ui.copy} copied={e.ui.copied} failed={e.ui.failed} />

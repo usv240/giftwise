@@ -26,7 +26,7 @@ export type EasyRead = {
   script: string[];
   footer: string[];
   /** Words for the page's own controls, so the whole page reads in one language. */
-  ui: Record<"full" | "other" | "remind" | "print" | "say" | "copy" | "copied" | "failed" | "back" | "nav" | "heading" | "lede" | "answerLabel", string>;
+  ui: Record<"full" | "other" | "remind" | "print" | "say" | "copy" | "copied" | "failed" | "back" | "nav" | "heading" | "lede" | "answerLabel" | "listen" | "stop", string>;
 };
 
 const LOCALE: Record<EasyLang, string> = { en: "en-US", es: "es-US" };
@@ -195,8 +195,8 @@ export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
       ? ["Giftwise wrote this from the gifts made through it.", "It is about gifts only. It is not legal advice.", "Giftwise never talks to Social Security for you."]
       : ["Giftwise escribió esto con los regalos hechos por Giftwise.", "Solo habla de regalos. No es consejo legal.", "Giftwise nunca habla con el Seguro Social por usted."],
     ui: en
-      ? { full: "The full report", other: "En español", remind: "Remind me by the 10th", print: "Print", say: "What to say on the call", copy: "Copy what to say", copied: "Copied", failed: "Select the words to copy them", back: "Back to the gift page", nav: "Report options", heading: "Easy Read report", lede: "The same report, written for the person who gets SSI: one idea per line, a picture beside each.", answerLabel: "The answer" }
-      : { full: "El reporte completo (en inglés)", other: "In English", remind: "Recordarme antes del día 10", print: "Imprimir", say: "Qué decir en la llamada", copy: "Copiar qué decir", copied: "Copiado", failed: "Seleccione el texto para copiarlo", back: "Volver a la página de regalos", nav: "Opciones del reporte", heading: "Reporte en lectura fácil", lede: "El mismo reporte, escrito para la persona que recibe SSI: una idea por línea, con un dibujo al lado.", answerLabel: "La respuesta" },
+      ? { full: "The full report", other: "En español", remind: "Remind me by the 10th", print: "Print", say: "What to say on the call", copy: "Copy what to say", copied: "Copied", failed: "Select the words to copy them", back: "Back to the gift page", nav: "Report options", heading: "Easy Read report", lede: "The same report, written for the person who gets SSI: one idea per line, a picture beside each.", answerLabel: "The answer", listen: "Listen", stop: "Stop" }
+      : { full: "El reporte completo (en inglés)", other: "In English", remind: "Recordarme antes del día 10", print: "Imprimir", say: "Qué decir en la llamada", copy: "Copiar qué decir", copied: "Copiado", failed: "Seleccione el texto para copiarlo", back: "Volver a la página de regalos", nav: "Opciones del reporte", heading: "Reporte en lectura fácil", lede: "El mismo reporte, escrito para la persona que recibe SSI: una idea por línea, con un dibujo al lado.", answerLabel: "La respuesta", listen: "Escuchar", stop: "Parar" },
   };
 }
 
