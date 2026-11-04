@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { AiUnavailableError, MODEL, claude } from "@/lib/ai/claude";
 import { paypalRest } from "@/lib/paypal/client";
-import { PayPalMcp } from "./paypal-mcp";
+import { connectPayPalMcp, type PayPalMcpClient } from "./paypal-mcp";
 
 /**
  * An outside AI assistant that knows nothing about SSI, connected to Giftwise only through its public MCP server.
@@ -70,13 +70,14 @@ const summarize = (o: PayPalOrder, source: string) =>
  * Ask PayPal's hosted MCP server first (its get_order tool). When that server cannot run the call, read the same order
  * from PayPal's Orders API and say so. Either way the answer is PayPal's record, not Giftwise's.
  */
-async function readPayPalOrder(id: string, session: { mcp?: PayPalMcp | null }) {
+async function readPayPalOrder(id: string, session: { mcp?: PayPalMcpClient | null }) {
   let mcpNote = "";
   try {
-    session.mcp ??= await PayPalMcp.connect();
+    session.mcp ??= await connectPayPalMcp();
     const r = await session.mcp.call("get_order", { id });
     const parsed = JSON.parse(r.content.map((x) => x.text ?? "").join("")) as PayPalOrder & { ok?: boolean; code?: string };
-    if (!r.isError && parsed.ok !== false && parsed.id) return { text: summarize(parsed, "PayPal MCP server, get_order"), isError: false };
+    const where = session.mcp.via === "local" ? `PayPal's MCP server (@paypal/mcp ${session.mcp.version}), get_order` : "PayPal's hosted MCP server, get_order";
+    if (!r.isError && parsed.ok !== false && parsed.id) return { text: summarize(parsed, where), isError: false };
     mcpNote = parsed.code ?? "an error";
   } catch (e) {
     session.mcp = null;
@@ -84,7 +85,7 @@ async function readPayPalOrder(id: string, session: { mcp?: PayPalMcp | null }) 
   }
   const res = await paypalRest<PayPalOrder>(`/v2/checkout/orders/${encodeURIComponent(id)}`, { method: "GET" });
   if (res.status !== 200) return { text: `PayPal could not find order ${id} (HTTP ${res.status}).`, isError: true };
-  return { text: summarize(res.body, `PayPal's own record, read from the PayPal Orders API (GET /v2/checkout/orders/{id}) because PayPal's hosted MCP server could not run get_order (${mcpNote}).`), isError: false };
+  return { text: summarize(res.body, `PayPal's own record, read from the PayPal Orders API (GET /v2/checkout/orders/{id}) because PayPal's MCP server could not run get_order (${mcpNote}).`), isError: false };
 }
 
 export async function runAgentDemo(origin: string, asks = DEMO_ASKS) {
@@ -94,7 +95,7 @@ export async function runAgentDemo(origin: string, asks = DEMO_ASKS) {
   await mcp.rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "june-assistant", version: "1" } });
   const listed = (await mcp.rpc("tools/list")).tools as { name: string; description: string; inputSchema: Anthropic.Tool.InputSchema }[];
   const tools: Anthropic.Tool[] = [...listed.map((t) => ({ name: t.name, description: t.description, input_schema: t.inputSchema })), PAYPAL_ORDER_TOOL];
-  const paypal: { mcp?: PayPalMcp | null } = {};
+  const paypal: { mcp?: PayPalMcpClient | null } = {};
 
   const steps: Step[] = [];
   const messages: Anthropic.MessageParam[] = [];
@@ -109,7 +110,7 @@ export async function runAgentDemo(origin: string, asks = DEMO_ASKS) {
 }
 
 /** One user turn: call tools over MCP until the assistant answers. */
-async function converse(c: Anthropic, tools: Anthropic.Tool[], messages: Anthropic.MessageParam[], steps: Step[], mcp: McpClient, paypal: { mcp?: PayPalMcp | null }) {
+async function converse(c: Anthropic, tools: Anthropic.Tool[], messages: Anthropic.MessageParam[], steps: Step[], mcp: McpClient, paypal: { mcp?: PayPalMcpClient | null }) {
   for (let turn = 0; turn < 8; turn++) {
     const res = await c.messages.create({ model: MODEL, max_tokens: 8000, system: SYSTEM, tools, messages, thinking: { type: "adaptive" } });
     for (const b of res.content) if (b.type === "text" && b.text.trim()) steps.push({ kind: "say", text: b.text.trim() });

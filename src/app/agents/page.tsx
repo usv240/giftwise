@@ -33,7 +33,7 @@ export default function AgentsPage() {
           <h2 id="demo-h">An assistant that asks first</h2>
           <Info id="agents.demo" label="" />
         </div>
-        <p className="page-prose">A Claude assistant that knows nothing about SSI, connected to Giftwise only through the MCP server below. After it starts the checkout, it reads the order from PayPal itself, so June hears what PayPal says it will pay, not only what Giftwise says. It asks PayPal&rsquo;s hosted MCP server first (its get_order tool) and reads PayPal&rsquo;s Orders API when that server cannot run the call.</p>
+        <p className="page-prose">A Claude assistant that knows nothing about SSI, connected to Giftwise only through the MCP server below. After it starts the checkout, it reads the order from PayPal itself, so June hears what PayPal says it will pay, not only what Giftwise says. It asks PayPal&rsquo;s own MCP server first (its get_order tool, from PayPal&rsquo;s @paypal/mcp package, which Giftwise runs) and reads PayPal&rsquo;s Orders API when that server cannot run the call.</p>
         <AgentDemo recorded={recorded as AgentRun} />
       </section>
 
@@ -45,8 +45,21 @@ export default function AgentsPage() {
         <p className="page-prose">
           Streamable HTTP at <code>{url}</code>. No key needed in the sandbox.
         </p>
+        <p className="ag-k">Claude on the web or Claude Desktop</p>
+        <p className="page-prose">
+          Settings, then Connectors, then Add custom connector. Name it Giftwise and paste <code>{url}</code>.
+        </p>
         <p className="ag-k">Claude Code</p>
         <pre className="dev-pre tabular" tabIndex={0} aria-label="Command to add Giftwise to Claude Code">{`claude mcp add --transport http giftwise ${url}`}</pre>
+        <p className="ag-k">Cursor</p>
+        <p className="page-prose">
+          <a className="btn btn-quiet" href={`cursor://anysphere.cursor-deeplink/mcp/install?name=giftwise&config=${Buffer.from(JSON.stringify({ url })).toString("base64")}`}>
+            Add to Cursor
+          </a>{" "}
+          Cursor shows the server and its address before anything is added.
+        </p>
+        <p className="ag-k">VS Code</p>
+        <pre className="dev-pre tabular" tabIndex={0} aria-label="Command to add Giftwise to VS Code">{`code --add-mcp '${JSON.stringify({ name: "giftwise", type: "http", url })}'`}</pre>
         <p className="ag-k">Other MCP clients</p>
         <pre className="dev-pre tabular" tabIndex={0} aria-label="MCP client configuration">{JSON.stringify({ mcpServers: { giftwise: { type: "http", url } } }, null, 2)}</pre>
       </section>

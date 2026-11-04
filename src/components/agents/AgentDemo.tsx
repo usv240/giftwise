@@ -40,7 +40,9 @@ function PayPalOrderCard({ text }: { text: string }) {
     o = null;
   }
   if (!o?.status) return <p className="ag-result-text">{tidy(text)}</p>;
-  const viaMcp = (o.source ?? "").startsWith("PayPal MCP server");
+  const src = o.source ?? "";
+  const viaMcp = /MCP server.*get_order/.test(src) && !src.startsWith("PayPal's own record");
+  const local = src.includes("@paypal/mcp");
   return (
     <div className="ag-record">
       <p className="ag-record-k">PayPal&rsquo;s own record</p>
@@ -54,7 +56,11 @@ function PayPalOrderCard({ text }: { text: string }) {
         ))}
       </ul>
       <p className="muted ag-record-src">
-        {viaMcp ? "Read with get_order on PayPal's hosted MCP server." : "Read from PayPal's Orders API. PayPal's hosted MCP server was asked first and could not run get_order this time."}
+        {viaMcp
+          ? local
+            ? "Read with get_order on PayPal's own MCP server, the @paypal/mcp package, which Giftwise runs."
+            : "Read with get_order on PayPal's hosted MCP server."
+          : "Read from PayPal's Orders API. PayPal's MCP server was asked first and could not run get_order this time."}
       </p>
     </div>
   );

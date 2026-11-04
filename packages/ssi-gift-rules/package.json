@@ -1,0 +1,30 @@
+{
+  "name": "ssi-gift-rules",
+  "version": "0.1.0",
+  "description": "How the US Supplemental Security Income (SSI) program counts a gift: cash, a bill paid for someone, an item, or a deposit to an ABLE account. Every answer cites 20 CFR 416 and SSA's operating manual (POMS). Checked against SSA's own worked examples.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/types/src/lib/rules/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/src/lib/rules/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./examples/ssa-examples.json": "./examples/ssa-examples.json"
+  },
+  "files": ["dist", "examples", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": ["ssi", "supplemental-security-income", "social-security", "benefits", "able-account", "in-kind-support", "poms", "gifts", "disability"],
+  "repository": { "type": "git", "url": "git+https://github.com/usv240/giftwise.git", "directory": "packages/ssi-gift-rules" },
+  "homepage": "https://github.com/usv240/giftwise/tree/main/packages/ssi-gift-rules#readme",
+  "bugs": "https://github.com/usv240/giftwise/issues"
+}

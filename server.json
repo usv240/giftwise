@@ -1,0 +1,9 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.usv240/giftwise",
+  "title": "Giftwise",
+  "description": "Benefit-safe giving for people on SSI: check a gift, plan it, and pay the shop through PayPal.",
+  "version": "1.0.0",
+  "repository": { "url": "https://github.com/usv240/giftwise", "source": "github" },
+  "remotes": [{ "type": "streamable-http", "url": "https://giftwise-405i.onrender.com/api/mcp" }]
+}

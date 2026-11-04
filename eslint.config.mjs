@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "workflows/node_modules/**",
+    "packages/*/dist/**",
+    "public/bryntum/**",
   ]),
 ]);
 

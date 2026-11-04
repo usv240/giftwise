@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "node_modules",
-    "workflows/node_modules"
+    "workflows/node_modules",
+    "packages/*/dist"
   ]
 }

@@ -3,29 +3,31 @@ import { aiAvailable } from "./ai/claude";
 import { latestRun } from "./checks";
 import { db, dbConfigured } from "./db";
 import { accessToken, paypalConfigured } from "./paypal/client";
-import { PayPalMcp } from "./agent/paypal-mcp";
+import { connectPayPalMcp, type PayPalMcpClient } from "./agent/paypal-mcp";
 import pkg from "../../package.json";
 
 /** Versions as the project pins them; "npm:@bryntum/calendar-trial@7.3.7" reads as 7.3.7. */
 const pinned = (name: string) => String((pkg.dependencies as Record<string, string>)[name] ?? "").replace(/^.*@/, "").replace(/^[~^]/, "");
 
-/** PayPal's hosted MCP server: connect, list its tools and try get_order once. Cached for ten minutes. */
+/** PayPal's MCP server (its @paypal/mcp package, run locally, else the hosted one): connect, list its tools and try get_order once. Cached for ten minutes. */
 let mcpCache: { at: number; ok: boolean; detail: string } | null = null;
 async function paypalMcp() {
   if (mcpCache && Date.now() - mcpCache.at < 10 * 60_000) return mcpCache;
   let ok = false;
   let detail: string;
-  let mcp: PayPalMcp | null = null;
+  let mcp: PayPalMcpClient | null = null;
   try {
-    mcp = await PayPalMcp.connect(6000);
+    mcp = await connectPayPalMcp(12_000);
     const tools = await mcp.tools();
     const r = await mcp.call("get_order", { id: "0000000000000000X" });
     const text = r.content.map((x) => x.text ?? "").join("");
+    // A made-up order id: PayPal answering "not found" proves the call reached PayPal's Orders API.
     const setupError = /PAYPAL_API_SETUP_ERROR/.test(text);
+    const where = mcp.via === "local" ? `PayPal's @paypal/mcp ${mcp.version}, run by Giftwise` : "PayPal's hosted server";
     ok = !setupError;
     detail = setupError
-      ? `Connected, ${tools.length} tools listed; tool calls return PAYPAL_API_SETUP_ERROR, so the assistant reads PayPal's Orders API instead`
-      : `Connected, ${tools.length} tools listed; get_order answers`;
+      ? `${where}: ${tools.length} tools listed; tool calls return PAYPAL_API_SETUP_ERROR, so the assistant reads PayPal's Orders API instead`
+      : `${where}: ${tools.length} tools listed; get_order reaches PayPal`;
   } catch (e) {
     detail = `Not reachable (${(e as Error).message.slice(0, 60)}); the assistant reads PayPal's Orders API instead`;
   } finally {
