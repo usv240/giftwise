@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import facts from "../../../content/facts.json";
 import results from "../../../content/test-results.json";
+import billResults from "../../../content/eval-results.json";
+import fieldResults from "../../../content/eval/field-cases-results.json";
+import ssaResults from "../../../content/eval/ssa-examples-results.json";
 import { Info } from "@/components/Info";
 import { CaseRunner } from "@/components/judges/CaseRunner";
 import { EvalResults } from "@/components/judges/EvalResults";
+import { FieldCases } from "@/components/judges/FieldCases";
 import { NightlyChecks } from "@/components/judges/NightlyChecks";
+import { Results } from "@/components/judges/Results";
 import { SsaExamples } from "@/components/judges/SsaExamples";
 import { SandboxLogin } from "@/components/SandboxLogin";
 import { Suspense } from "react";
@@ -15,11 +20,12 @@ import "./judges.css";
 
 export const metadata: Metadata = { title: "For judges", description: "The five-minute path through Giftwise, every failure case run live, and the test results." };
 
-/** The five-minute path: five steps, about a minute each, in the order the story runs. */
+/** The five-minute path: six steps, under a minute and a half each, in the order the story runs. */
 const PATH = [
   { href: "/", label: "The problem in one number", time: "20 s", look: "In the Gift Checker, $1,000 sent as cash leaves Maya a $74 check two months later. Press Pay the shop: she keeps all $994." },
   { href: "/g/maya", label: "Give, and pay in the sandbox", time: "90 s", look: "Type $1,500 in Give any amount. The rules split it across her needs and her ABLE account, and one PayPal checkout pays all five recipients. Log in with the sandbox buyer below, then open the receipt." },
   { href: "/g/maya/report?month=2026-10", label: "Her report to Social Security", time: "40 s", look: "SSI asks for changes in income by the 10th. October's report says nothing counts, with the rule behind every gift. Press As cash: the same gifts would have counted $538 and cut her check to $456." },
+  { href: "/g/maya/report/easy?month=2026-10", label: "Her own copy, in Easy Read", time: "20 s", look: "The same report written to Maya: the answer first, then one idea per line with a picture beside each. Press En español, and Remind me by the 10th for a calendar reminder." },
   { href: "/agents", label: "An AI assistant asks first", time: "40 s", look: "A Claude assistant with no SSI knowledge calls the Giftwise MCP server, talks June out of sending cash, starts a checkout only she can approve, and reads the order back from PayPal." },
   { href: "/g/maya/calendar?month=2026-10", label: "Her benefit calendar", time: "40 s", look: "Press As cash and drag Aunt June's $150 from October 28 to November 2. A different check drops: SSI counts income by calendar month." },
 ];
@@ -27,7 +33,9 @@ const PATH = [
 /** Everything else, for a judge with more time. */
 const MORE = [
   { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
-  { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: "12 of 13 match SSA's answers; Claude alone, 9 of 13." },
+  { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answers; Claude alone, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
+  { href: "#field-cases", label: "Real cases from federal courts", look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did, and the run found a real gap, now fixed.` },
+  { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
   { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
   { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
   { href: "#failure-cases", label: "Eight failure cases", look: "Declined card, double click, a browser changing the amount, refunds and more, run live." },
@@ -77,6 +85,7 @@ export default function JudgesPage() {
         </div>
         <p className="lede">The five-minute path through Giftwise, every failure case run live against PayPal, and the test results.</p>
       </header>
+      <Results />
 
       <section className="page-section" aria-labelledby="path-h">
         <h2 id="path-h">The five-minute path</h2>
@@ -154,10 +163,21 @@ export default function JudgesPage() {
           <Info id="judges.ssa_examples" label="" />
         </div>
         <p className="page-prose jp-intro">
-          The 20 bills above were labeled by us. These cases come from Social Security&rsquo;s operating manual, with SSA&rsquo;s own answers. Both the rules engine and Claude with no rulebook
+          The {billResults.summary.referee.all_cases} bills above were labeled by us from the rule text. These cases come from Social Security&rsquo;s operating manual, with SSA&rsquo;s own answers. Both the rules engine and Claude with no rulebook
           answered them.
         </p>
         <SsaExamples />
+      </section>
+
+      <section id="field-cases" className="page-section" aria-labelledby="field-h">
+        <div className="title-row">
+          <h2 id="field-h">Real cases, from federal courts</h2>
+          <Info id="judges.field_cases" label="" />
+        </div>
+        <p className="page-prose jp-intro">
+          The examples above are SSA&rsquo;s teaching cases. These are real people&rsquo;s cases: help from family that SSA counted, appealed to a federal court. Giftwise did not write them.
+        </p>
+        <FieldCases />
       </section>
 
       <section className="page-section" aria-labelledby="crit-h">

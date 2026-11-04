@@ -1,4 +1,5 @@
 import bills from "../../../content/eval/bills.json";
+import hard from "../../../content/eval/bills-hard.json";
 import results from "../../../content/eval-results.json";
 import { DEFAULT_PROFILE, SHELTER_CATEGORIES, evaluateGift, type Category, type Gift } from "@/lib/rules";
 import { PASSAGES, referee, routeForDecision, type Answer, type AuthorityId, type Decision, type Review } from "./referee";
@@ -11,13 +12,14 @@ import { PASSAGES, referee, routeForDecision, type Answer, type AuthorityId, typ
  * Pure and deterministic: it reuses the recorded run, so it calls no AI.
  */
 type Truth = "shelter" | "not_shelter" | "contested";
-type Case = { id: string; truth: Truth; regs: { answer: string; passage: string }; poms: { answer: string; passage: string } };
+type Case = { id: string; set?: string; category?: string; truth: Truth; regs: { answer: string; passage: string }; poms: { answer: string; passage: string } };
 type BillCase = { id: string; category: string };
 
 const CASES = (results as unknown as { cases: Case[] }).cases;
 const AMOUNT = (results as unknown as { amount: number }).amount;
 
-const categoryOf = (id: string): Category => ((bills as { cases: BillCase[] }).cases.find((b) => b.id === id)?.category ?? "other") as Category;
+const BILLS: Record<string, BillCase[]> = { first: (bills as { cases: BillCase[] }).cases, hard: (hard as { cases: BillCase[] }).cases };
+const categoryOf = (c: Case): Category => (c.category ?? BILLS[c.set ?? "first"]?.find((b) => b.id === c.id)?.category ?? "other") as Category;
 
 /** A review whose quote is the first 80 characters of a real passage, so it passes the word-for-word check. */
 function honest(authority: AuthorityId, answer: Answer, passageId: string): Review {
@@ -40,7 +42,7 @@ export type StressRow = { id: string; truth: Truth; aloneWhole: boolean; referee
 export function stressTest() {
   const rows: StressRow[] = [];
   for (const c of CASES) {
-    const gift: Gift = { id: c.id, date: "2026-04-10", amount: AMOUNT, delivery: "vendor", category: categoryOf(c.id) };
+    const gift: Gift = { id: c.id, date: "2026-04-10", amount: AMOUNT, delivery: "vendor", category: categoryOf(c) };
     const full = evaluateGift({ ...gift, delivery: "able" }, DEFAULT_PROFILE).checkBaseline;
     // The honest reviewer gives the true answer; for a contested bill it keeps its recorded answer.
     const trueAnswer = (c.truth === "contested" ? c.poms.answer : c.truth) as Answer;

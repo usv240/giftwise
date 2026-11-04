@@ -472,7 +472,7 @@
     "title": "An assistant that asks first",
     "what": "A Claude assistant answering a real question from June, Maya’s aunt. It has no knowledge of SSI rules beyond what the Giftwise tools return.",
     "why": "It shows the whole path: what cash would do, the safer way, a PayPal checkout June approves herself, and PayPal’s own record of what that order pays.",
-    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Giftwise tools are discovered with tools/list and called with tools/call over HTTP to /api/mcp. paypal_get_order asks PayPal’s hosted MCP server (mcp.sandbox.paypal.com, SSE transport, get_order) and reads GET /v2/checkout/orders/{id} when that server cannot run the call."
+    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Giftwise tools are discovered with tools/list and called with tools/call over HTTP to /api/mcp. paypal_get_order asks PayPal’s own MCP server: the @paypal/mcp package (PayPal Agent Toolkit), which Giftwise runs as a child process over stdio with a sandbox access token. PayPal’s hosted server (mcp.sandbox.paypal.com, SSE) is the second choice; its tool calls currently fail on PayPal’s side (github.com/paypal/AI-Toolkit/issues/34). GET /v2/checkout/orders/{id} answers when neither can."
   },
   "agents.connect": {
     "title": "Connect your agent",
@@ -482,9 +482,9 @@
   },
   "judges.eval": {
     "title": "The two reviewers, measured",
-    "what": "Twenty bills paid by someone else, each labeled from the rule text, run through both reviewers. The table shows how often each setup was right and whether the check stayed whole.",
+    "what": "59 bills paid by someone else, each labeled from the rule text, run through Claude with no rulebook, each reviewer alone, and the two reviewers with the referee. The table shows how often each was right, and how often it accepted a route that would lower the check.",
     "why": "A claim about AI should come with a measurement. These numbers come from one recorded run, not from a description.",
-    "technical": "scripts/run-eval.ts over content/eval/bills.json; results in content/eval-results.json. Accuracy counts only the 18 clear cases; the check is scored under the true reading, and for the two contested cases under both readings."
+    "technical": "scripts/run-eval.ts over content/eval/bills.json (20) and content/eval/bills-hard.json (39); results in content/eval-results.json. Accuracy counts only the 52 clear bills; a wrong route is one that lowers the check under the true reading, and for the 7 contested bills under either reading. --rescore re-scores the recorded answers without API calls."
   },
   "judges.ssa_examples": {
     "title": "Social Security's own examples",
@@ -567,5 +567,29 @@
       "Render",
       "PayPal"
     ]
+  },
+  "page.report.easy": {
+    "title": "Easy Read report",
+    "what": "The month's report written for the person who gets SSI, in English or Spanish: the answer first, then each gift in one short sentence with a picture beside it, what to do, and what to say on the call.",
+    "why": "The full report is written for a family member or counselor. The person on SSI is the one who must report, and about 851,000 people on SSI under 65 have an intellectual disability (SSA, December 2024). Social Security serves Spanish speakers on its main line (press 7).",
+    "technical": "easyRead() in src/lib/report/easy.ts writes every sentence from the same buildReport() data as the full report, with no model involved, following ASAN's Easy Read guide (one idea per line, about 10 to 15 words). A unit test holds every sentence to 15 words or fewer in both languages. /g/{slug}/report/reminder serves an .ics file: the due date with an alert three days before, and a monthly look on the 5th. Also at /api/v1/ssa-report?format=easy&lang=es."
+  },
+  "page.monthly": {
+    "title": "Your monthly gift",
+    "what": "The same amount every month. Each month Giftwise routes it again for that month's needs, shows what changed and why, and you approve that month in PayPal.",
+    "why": "Help like rent or the electric bill comes back every month, while one-time needs get paid off. Routing each month again keeps every dollar going where it does not lower the check.",
+    "technical": "src/lib/monthly.ts. needsForMonth() reopens recurring needs with what they received for that month and drops paid one-time needs; routeGift() routes the amount; diffPlans() writes what changed. The order route runs the rules again when you approve, and creates one Orders v2 order with a purchase unit and payee per recipient. Each month is written to the audit ledger (monthly.planned)."
+  },
+  "monthly.why": {
+    "title": "Why not charge automatically",
+    "what": "Each month you approve the payment in PayPal yourself.",
+    "why": "Giftwise never holds the money. An automatic charge would have to pay Giftwise first and pass it on.",
+    "technical": "Tested in PayPal's sandbox on 2026-11-04: a PayPal wallet saved with Vault (store_in_vault ON_SUCCESS) on a multi-payee order works, but a later order with payment_source.paypal.vault_id and a third-party payee returns 422 BILLING_AGREEMENT_NOT_FOUND, and several third-party purchase units return VALIDATION_ERROR. A vaulted charge succeeds only when the platform is the payee. Signed in to PayPal, a giver approves a new multi-payee order in two clicks."
+  },
+  "judges.field_cases": {
+    "title": "Real cases, from federal courts",
+    "what": "SSI cases where SSA counted help from family or friends and a federal court reviewed the decision. Giftwise ran each one through its rules engine and compared the outcome with what SSA and the court held.",
+    "why": "A benchmark Giftwise wrote proves the code does what was intended. Real decisions show the rules are right about the world, and what the same help would have kept if it had been routed differently.",
+    "technical": "content/eval/field-cases.json holds 36 cases from GovInfo's USCOURTS collection (public domain, 17 U.S.C. 105), 14 scored. scripts/run-field-cases.ts runs each through planMonths() at 2026 rates and re-runs the help as Giftwise would route it (vendor, or ABLE only where the opinion shows disability before 46). Results in content/eval/field-cases-results.json. GoFundMe and Givebutter campaign pages were not used: their terms rule out automated reading."
   }
 }

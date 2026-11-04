@@ -24,6 +24,7 @@ export const ProfileSchema = z
   .object({
     couple: z.boolean().default(false),
     livesInAnothersHousehold: z.boolean().default(false),
+    householdProvidesAllMeals: z.boolean().optional(),
     otherUnearnedMonthly: z.number().min(0).max(100000).default(0),
     earnedMonthly: z.number().min(0).max(100000).default(0),
     ableEligible: z.boolean().default(true),

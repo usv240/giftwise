@@ -16,7 +16,7 @@ export const RULES: Record<string, RuleRow> = {
   "R-INFREQ-01": {
     id: "R-INFREQ-01",
     name: "Infrequent or irregular income exclusion",
-    plain: "The first $60 a quarter of one-off unearned income is not counted.",
+    plain: "The first $60 a quarter of one-off unearned income is not counted. It applies in the order income arrives, and to housing help before the monthly cap.",
     sourceKeys: ["poms-si-00810-410"],
   },
   "R-GIE-01": {
@@ -37,11 +37,17 @@ export const RULES: Record<string, RuleRow> = {
     plain: "Rent, mortgage, property tax and utilities paid by someone else count as in-kind support, up to a monthly cap.",
     sourceKeys: ["cfr-416-1130", "poms-si-00835-020", "poms-si-00835-350", "poms-si-00835-360", "poms-si-00835-901"],
   },
+  "R-SHEL-02": {
+    id: "R-SHEL-02",
+    name: "Housing bills paid ahead",
+    plain: "When someone pays a housing bill that covers later months, the share for each later month counts in that month; the share for months up to the payment counts when it is paid.",
+    sourceKeys: ["poms-si-00835-360"],
+  },
   "R-SHEL-VTR": {
     id: "R-SHEL-VTR",
     name: "Living in another person's household",
-    plain: "When the person lives in someone else's home all month without paying a share of housing, a fixed one-third reduction applies instead.",
-    sourceKeys: ["poms-si-00835-200", "poms-si-00835-901"],
+    plain: "When the person lives in someone else's home all month, gets shelter there without paying a share, and the household provides all meals, a fixed one-third reduction applies instead.",
+    sourceKeys: ["cfr-416-1131", "poms-si-00835-200", "poms-si-00835-901"],
   },
   "R-FOOD-01": {
     id: "R-FOOD-01",

@@ -1,56 +1,296 @@
 {
-  "ran_at": "2026-11-02T19:10:05.372Z",
+  "ran_at": "2026-11-04T04:11:59.087Z",
+  "rescored_at": "2026-11-04T04:25:44.425Z",
   "model": "claude-opus-5-5",
   "amount": 150,
-  "quotes_checked": 40,
-  "quotes_total": 40,
+  "quotes_checked": 118,
+  "quotes_total": 118,
   "summary": {
+    "baseline": {
+      "clear_cases": 52,
+      "correct": 47,
+      "wrong": 3,
+      "abstained": 2,
+      "all_cases": 59,
+      "check_kept_whole": 56,
+      "wrong_routes_accepted": 3,
+      "wrong_route_ids": [
+        "second-mortgage",
+        "utility-deposit",
+        "bottled-water"
+      ]
+    },
     "regs": {
-      "clear_cases": 18,
-      "correct": 18,
-      "wrong": 0,
-      "abstained": 0,
-      "all_cases": 20,
-      "check_kept_whole": 20
+      "clear_cases": 52,
+      "correct": 44,
+      "wrong": 1,
+      "abstained": 7,
+      "all_cases": 59,
+      "check_kept_whole": 58,
+      "wrong_routes_accepted": 1,
+      "wrong_route_ids": [
+        "home-insurance"
+      ]
     },
     "poms": {
-      "clear_cases": 18,
-      "correct": 18,
+      "clear_cases": 52,
+      "correct": 51,
       "wrong": 0,
-      "abstained": 0,
-      "all_cases": 20,
-      "check_kept_whole": 20
+      "abstained": 1,
+      "all_cases": 59,
+      "check_kept_whole": 59,
+      "wrong_routes_accepted": 0,
+      "wrong_route_ids": []
     },
     "referee": {
-      "clear_cases": 18,
-      "correct": 18,
+      "clear_cases": 52,
+      "correct": 43,
       "wrong": 0,
-      "abstained": 0,
-      "all_cases": 20,
-      "check_kept_whole": 20
+      "abstained": 9,
+      "all_cases": 59,
+      "check_kept_whole": 59,
+      "wrong_routes_accepted": 0,
+      "wrong_route_ids": []
     }
   },
+  "sets": {
+    "first": {
+      "label": "First 20 bills",
+      "bills": 20,
+      "summary": {
+        "baseline": {
+          "clear_cases": 18,
+          "correct": 18,
+          "wrong": 0,
+          "abstained": 0,
+          "all_cases": 20,
+          "check_kept_whole": 20,
+          "wrong_routes_accepted": 0,
+          "wrong_route_ids": []
+        },
+        "regs": {
+          "clear_cases": 18,
+          "correct": 18,
+          "wrong": 0,
+          "abstained": 0,
+          "all_cases": 20,
+          "check_kept_whole": 19,
+          "wrong_routes_accepted": 1,
+          "wrong_route_ids": [
+            "home-insurance"
+          ]
+        },
+        "poms": {
+          "clear_cases": 18,
+          "correct": 18,
+          "wrong": 0,
+          "abstained": 0,
+          "all_cases": 20,
+          "check_kept_whole": 20,
+          "wrong_routes_accepted": 0,
+          "wrong_route_ids": []
+        },
+        "referee": {
+          "clear_cases": 18,
+          "correct": 18,
+          "wrong": 0,
+          "abstained": 0,
+          "all_cases": 20,
+          "check_kept_whole": 20,
+          "wrong_routes_accepted": 0,
+          "wrong_route_ids": []
+        }
+      },
+      "negative_control": {
+        "bills": 20,
+        "clear_bills": 18,
+        "contested_bills": 2,
+        "wrong_routes_accepted": {
+          "baseline": 0,
+          "regs": 1,
+          "poms": 0,
+          "referee": 0
+        },
+        "wrong_routes_on_clear_bills": {
+          "baseline": 0,
+          "regs": 0,
+          "poms": 0,
+          "referee": 0
+        },
+        "wrong_routes_on_contested_bills": {
+          "baseline": 0,
+          "regs": 1,
+          "poms": 0,
+          "referee": 0
+        },
+        "disagreements_total": 2,
+        "disagreements_sent_to_safe_route": 2,
+        "disagreement_kinds": {
+          "opposite_answers": 1,
+          "one_reviewer_unsettled": 0,
+          "both_reviewers_unsettled": 1,
+          "quote_set_aside": 0
+        },
+        "quotes_checked": 40,
+        "quotes_total": 40
+      }
+    },
+    "hard": {
+      "label": "Harder bills, near the line",
+      "bills": 39,
+      "summary": {
+        "baseline": {
+          "clear_cases": 34,
+          "correct": 29,
+          "wrong": 3,
+          "abstained": 2,
+          "all_cases": 39,
+          "check_kept_whole": 36,
+          "wrong_routes_accepted": 3,
+          "wrong_route_ids": [
+            "second-mortgage",
+            "utility-deposit",
+            "bottled-water"
+          ]
+        },
+        "regs": {
+          "clear_cases": 34,
+          "correct": 26,
+          "wrong": 1,
+          "abstained": 7,
+          "all_cases": 39,
+          "check_kept_whole": 39,
+          "wrong_routes_accepted": 0,
+          "wrong_route_ids": []
+        },
+        "poms": {
+          "clear_cases": 34,
+          "correct": 33,
+          "wrong": 0,
+          "abstained": 1,
+          "all_cases": 39,
+          "check_kept_whole": 39,
+          "wrong_routes_accepted": 0,
+          "wrong_route_ids": []
+        },
+        "referee": {
+          "clear_cases": 34,
+          "correct": 25,
+          "wrong": 0,
+          "abstained": 9,
+          "all_cases": 39,
+          "check_kept_whole": 39,
+          "wrong_routes_accepted": 0,
+          "wrong_route_ids": []
+        }
+      },
+      "negative_control": {
+        "bills": 39,
+        "clear_bills": 34,
+        "contested_bills": 5,
+        "wrong_routes_accepted": {
+          "baseline": 3,
+          "regs": 0,
+          "poms": 0,
+          "referee": 0
+        },
+        "wrong_routes_on_clear_bills": {
+          "baseline": 1,
+          "regs": 0,
+          "poms": 0,
+          "referee": 0
+        },
+        "wrong_routes_on_contested_bills": {
+          "baseline": 2,
+          "regs": 0,
+          "poms": 0,
+          "referee": 0
+        },
+        "disagreements_total": 14,
+        "disagreements_sent_to_safe_route": 14,
+        "disagreement_kinds": {
+          "opposite_answers": 1,
+          "one_reviewer_unsettled": 8,
+          "both_reviewers_unsettled": 5,
+          "quote_set_aside": 0
+        },
+        "quotes_checked": 78,
+        "quotes_total": 78
+      }
+    }
+  },
+  "negative_control": {
+    "bills": 59,
+    "clear_bills": 52,
+    "contested_bills": 7,
+    "wrong_routes_accepted": {
+      "baseline": 3,
+      "regs": 1,
+      "poms": 0,
+      "referee": 0
+    },
+    "wrong_routes_on_clear_bills": {
+      "baseline": 1,
+      "regs": 0,
+      "poms": 0,
+      "referee": 0
+    },
+    "wrong_routes_on_contested_bills": {
+      "baseline": 2,
+      "regs": 1,
+      "poms": 0,
+      "referee": 0
+    },
+    "disagreements_total": 16,
+    "disagreements_sent_to_safe_route": 16,
+    "disagreement_kinds": {
+      "opposite_answers": 2,
+      "one_reviewer_unsettled": 8,
+      "both_reviewers_unsettled": 6,
+      "quote_set_aside": 0
+    },
+    "quotes_checked": 118,
+    "quotes_total": 118
+  },
+  "api_calls": 177,
   "cases": [
     {
       "id": "electric",
+      "set": "first",
       "description": "Northside Electric Co-op. Monthly bill for residential electric service at her apartment.",
+      "category": "utility",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists electricity.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Electricity is a shelter utility under SSI rules; a relative paying the co-op directly counts as in-kind support. ABLE-funded payment of housing expenses isn't counted."
+      },
       "regs": {
         "answer": "shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Electricity is listed as shelter, so if someone else pays her electric bill directly, it counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. Electricity for her home is on the regulation's list of shelter items, so someone else paying it counts as in-kind support."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Electricity for her home is on the manual's list of shelter costs, so someone else paying it counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. Electricity for her home is listed as a shelter item, so someone else paying the co-op directly counts as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -76,24 +316,41 @@
     },
     {
       "id": "gas",
+      "set": "first",
       "description": "Metro Gas Company. Natural gas service for heating and cooking at her home.",
+      "category": "utility",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists gas.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Gas for heating and cooking is a utility, so it is a shelter cost. Paid by a relative, it counts as in-kind support. Paying from her ABLE account avoids that."
+      },
       "regs": {
         "answer": "shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Gas service for the home is listed as shelter, so someone else paying it counts as in-kind support."
+        "reason": "Shelter. Gas service for her home is on the regulation's list of shelter costs, so someone else paying it counts as in-kind support."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Gas service for the home is on the manual's list of shelter costs, so someone else paying it counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. Gas service for her home is on the manual's list of shelter costs, so someone else paying it counts as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -119,24 +376,41 @@
     },
     {
       "id": "propane",
+      "set": "first",
       "description": "Lakeside Propane. Delivery of 100 gallons of propane for heating her home.",
+      "category": "utility",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists heating fuel.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Propane for heating counts as a heating-fuel shelter cost. A relative paying it directly is in-kind support that cuts her SSI; ABLE housing distributions don't count."
+      },
       "regs": {
         "answer": "shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Propane used to heat her home is heating fuel, which the rules list as shelter."
+        "reason": "Yes, this is a shelter cost. Propane delivered to heat her home is heating fuel, which the rules list as shelter when someone else pays for it."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Propane delivered to heat her home is heating fuel, which the manual lists as a shelter cost."
+        "reason": "Yes, this is a shelter cost. Propane used to heat her home is heating fuel, which the manual lists as a shelter cost."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -162,24 +436,41 @@
     },
     {
       "id": "water",
+      "set": "first",
       "description": "City of Brookfield Utilities. Quarterly residential water and sewer service.",
+      "category": "utility",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists water and sewerage.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Water and sewer are SSI shelter costs. A relative paying the city directly counts as in-kind support and would reduce her check; ABLE funds avoid this."
+      },
       "regs": {
         "answer": "shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Shelter. Water and sewer service are named in the rules as shelter costs, so someone else paying this bill counts as in-kind support."
+        "reason": "Shelter. Water and sewer service are listed by name as shelter costs, so someone else paying this bill counts as in-kind support."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Water and sewer service are both on the manual's list of shelter items, so someone else paying it counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. Water and sewer service are both named as shelter items, so someone else paying this bill counts as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -205,24 +496,41 @@
     },
     {
       "id": "garbage",
+      "set": "first",
       "description": "Valley Waste Services. Curbside garbage pickup at her home, monthly.",
+      "category": "utility",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists garbage collection services.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Garbage removal is an SSI shelter cost, so a relative paying the vendor directly counts as in-kind support. Funding her ABLE account lets her pay it herself."
+      },
       "regs": {
         "answer": "shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. The rules list garbage collection as shelter, so when someone else pays this bill it counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. Garbage collection is named in the rules as shelter, so someone else paying it counts as in-kind support."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Garbage pickup at her home is on the manual's list of shelter items, so a third party paying it counts as in-kind support."
+        "reason": "Shelter cost. Garbage pickup at her home is on the manual's list of shelter costs, so when someone else pays it, it counts as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -248,24 +556,41 @@
     },
     {
       "id": "rent",
+      "set": "first",
       "description": "Maple Court Apartments. December rent for her apartment, unit 4B.",
+      "category": "rent",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists rent.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Rent is a shelter cost. A relative paying the landlord directly counts as in-kind support and maintenance and reduces SSI. ABLE funds she uses for housing do not."
+      },
       "regs": {
         "answer": "shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "We calculate in-kind support and maintenance considering any shelter that is given to you or that you receive because someone else pays for it. Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Rent is listed as shelter, so paying her apartment rent for her counts as in-kind support."
+        "reason": "Shelter. This bill is rent for her apartment, and rent that someone else pays for her counts as housing support under the rules."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. Rent is listed as shelter, so if someone else pays it to the landlord, it counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. Rent for her apartment is listed as a shelter cost, so someone else paying it counts as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -291,24 +616,41 @@
     },
     {
       "id": "mortgage",
+      "set": "first",
       "description": "First Home Mortgage. Monthly mortgage payment on the house she owns.",
+      "category": "mortgage",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists mortgage payments.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Mortgage payments are shelter costs; a relative paying the lender directly counts as ISM and reduces SSI. ABLE funds she uses for housing aren't counted."
+      },
       "regs": {
         "answer": "shelter",
-        "passage": "cfr-416-1103-g-examples",
-        "cite": "20 CFR 416.1103(g) (Examples)",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. When someone else pays her mortgage directly to the lender, the rules treat it as in-kind support for housing."
+        "reason": "Yes, this is a shelter cost. When someone else pays her mortgage directly to the lender, it counts as in-kind support for housing."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. A mortgage payment on the home she lives in counts as shelter, so someone else paying it counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. A mortgage payment on the home she owns is listed as a shelter cost, so someone else paying it counts as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -334,24 +676,41 @@
     },
     {
       "id": "property-tax",
+      "set": "first",
       "description": "Brookfield County Treasurer. Real property tax installment on her home.",
+      "category": "property_tax",
       "truth": "shelter",
       "basis": "20 CFR 416.1130(b)(1) lists real property taxes.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Property taxes are an SSI shelter cost. If a relative pays them directly, it counts as in-kind support and cuts her check. Paying from her ABLE account avoids that."
+      },
       "regs": {
         "answer": "shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Yes, this is a shelter cost. The rules list real property taxes as shelter, so someone else paying her home's property tax counts as in-kind support."
+        "reason": "Yes, this is a shelter cost. Property taxes on her home are listed as shelter, so someone else paying them counts as in-kind support."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
         "reason": "Yes, this is a shelter cost. Real property taxes on her home are listed as a shelter item, so someone else paying them counts as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "shelter",
           "route": "able",
@@ -377,24 +736,41 @@
     },
     {
       "id": "phone",
+      "set": "first",
       "description": "Horizon Wireless. Monthly cell phone plan in her name.",
+      "category": "phone",
       "truth": "not_shelter",
       "basis": "POMS SI 00815.400B.2: a sister paying the phone bill does not result in income.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Phone service isn't a shelter cost under SSI rules, so a relative paying Horizon Wireless directly isn't in-kind support and maintenance and won't reduce her check."
+      },
       "regs": {
         "answer": "not_shelter",
         "passage": "fr-2024-06464-shelter-only",
         "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
         "quote_checked": true,
-        "reason": "Not a shelter cost. A cell phone plan isn't on the list of housing costs, so someone else paying it shouldn't count as shelter support."
+        "reason": "Not a shelter cost. A cell phone plan isn't on the list of housing costs, so someone else paying it doesn't count as shelter support."
       },
       "poms": {
         "answer": "not_shelter",
         "passage": "poms-si-00815-400-example-phone",
         "cite": "POMS SI 00815.400B.2",
+        "quote": "Neither the payment to the phone company nor the telephone service received as a result of the payment is income because it is not food or shelter.",
         "quote_checked": true,
-        "reason": "Not shelter. Phone service isn't food or shelter, so another person paying her cell phone bill doesn't count as in-kind support."
+        "reason": "Not a shelter cost. A phone bill isn't food or shelter, so a relative paying it directly to the phone company doesn't count as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -420,24 +796,41 @@
     },
     {
       "id": "internet",
+      "set": "first",
       "description": "FastNet. Home internet service, monthly.",
+      "category": "internet",
       "truth": "not_shelter",
       "basis": "Not in the shelter list of 20 CFR 416.1130(b)(1); POMS SI 00835.465D.1 says its list of household costs is the only one used.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Internet isn't a shelter cost under SSI rules. A relative paying FastNet directly isn't income or in-kind support, so her check stays whole."
+      },
       "regs": {
         "answer": "not_shelter",
         "passage": "fr-2024-06464-shelter-only",
         "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Home internet isn't on the list of housing costs that count, so someone else paying it doesn't count as housing support."
+        "reason": "Not a shelter cost. Home internet isn't on the regulation's list of housing expenses, which covers rent, mortgage, property taxes, heating fuel, gas, electricity, water, sewer and garbage."
       },
       "poms": {
         "answer": "not_shelter",
         "passage": "poms-si-00835-465-household-costs-list",
         "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Home internet is not on the manual's closed list of housing costs, so a family member paying it doesn't count as in-kind support."
+        "reason": "Not a shelter cost. Home internet isn't on the manual's closed list of household costs, so a family member paying it directly shouldn't count as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -463,24 +856,41 @@
     },
     {
       "id": "cable",
+      "set": "first",
       "description": "CableVision. Cable television package, monthly.",
+      "category": "other",
       "truth": "not_shelter",
       "basis": "Not in the shelter list of 20 CFR 416.1130(b)(1) or POMS SI 00835.020B.36.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI shelter costs cover rent, mortgage, taxes, and utilities like heat, electricity, water, sewer, and garbage. Cable TV isn't one, so paying the vendor directly won't reduce her check."
+      },
       "regs": {
         "answer": "not_shelter",
-        "passage": "fr-2024-06464-shelter-only",
-        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Cable TV isn't on the list of housing costs that count, so someone else paying it shouldn't count as in-kind support."
+        "reason": "Not a shelter cost. Cable TV isn't on the regulation's list of shelter expenses, so someone else paying it doesn't count as housing support."
       },
       "poms": {
         "answer": "not_shelter",
         "passage": "poms-si-00835-465-household-costs-list",
         "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Cable TV is not on the manual's closed list of housing costs, so a relative paying it directly does not count as in-kind support."
+        "reason": "Not a shelter cost. Cable TV isn't on the manual's list of housing costs, so a family member paying it directly doesn't count as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -506,24 +916,41 @@
     },
     {
       "id": "groceries",
+      "set": "first",
       "description": "FreshMart. Weekly groceries delivered to her apartment.",
+      "category": "food",
       "truth": "not_shelter",
       "basis": "89 FR 21199: food is no longer counted as in-kind support from September 30, 2024.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Since September 30, 2024, SSA no longer counts food as in-kind support and maintenance. Paying FreshMart directly won't reduce her SSI check."
+      },
       "regs": {
         "answer": "not_shelter",
-        "passage": "cfr-416-1121-h-ism",
-        "cite": "20 CFR 416.1121(h)",
+        "passage": "cfr-416-1102",
+        "cite": "20 CFR 416.1102",
+        "quote": "In-kind income is not cash but is something else that you can use to meet your needs for food or shelter. Exception: Food is not included in the calculations of in-kind support and maintenance, which is a type of unearned income that we have special rules for valuing (see §§ 416.1130 through 416.1148).",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Groceries are food, and food no longer counts as in-kind support. Only housing costs like rent, mortgage, and utilities do."
+        "reason": "Not shelter. Groceries are food, and food no longer counts toward in-kind support and maintenance under these rules."
       },
       "poms": {
         "answer": "not_shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
         "quote_checked": true,
-        "reason": "Not a shelter cost: groceries are food, not housing. When someone else pays the grocer, it still counts as in-kind support in the form of food."
+        "reason": "Not a shelter cost. Groceries are food, not housing. The passages do still treat food paid for by someone else as in-kind support, a separate category."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -549,24 +976,41 @@
     },
     {
       "id": "therapy",
+      "set": "first",
       "description": "Northside Physical Therapy. Co-pay for a weekly therapy session.",
+      "category": "medical",
       "truth": "not_shelter",
       "basis": "Not a shelter item; not in 20 CFR 416.1130(b)(1).",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Medical co-pays aren't food or shelter, so a relative paying the provider directly isn't in-kind support and maintenance and won't reduce her SSI."
+      },
       "regs": {
         "answer": "not_shelter",
-        "passage": "cfr-416-1130-shelter",
-        "cite": "20 CFR 416.1130(b)(1)",
+        "passage": "cfr-416-1103-a-medical",
+        "cite": "20 CFR 416.1103(a)",
+        "quote": "Medical care and services are not income if they are any of the following:\n(1) Given to you free of charge or paid for directly to the provider by someone else;",
         "quote_checked": true,
-        "reason": "Not a shelter cost. A physical therapy co-pay is a medical bill, and it isn't on the list of housing costs that count as shelter."
+        "reason": "Not shelter. A therapy co-pay is medical care, and when someone else pays the provider directly, it isn't counted as income."
       },
       "poms": {
         "answer": "not_shelter",
-        "passage": "poms-si-00835-465-household-costs-list",
-        "cite": "POMS SI 00835.465D.1",
+        "passage": "poms-si-00815-400-policy",
+        "cite": "POMS SI 00815.400A",
+        "quote": "Payment of an individual's bills (including supplementary medical insurance under title XVIII or other medical insurance premiums) by a third party directly to the supplier is not income. However, anything received in kind as a result of the payment is income if it is food or shelter.",
         "quote_checked": true,
-        "reason": "Not a shelter cost. A physical therapy co-pay is a medical bill, not one of the housing costs on the manual's list, so someone else paying it isn't in-kind support."
+        "reason": "Not a shelter cost. A physical therapy co-pay is a medical bill, not housing or food, so someone else paying it directly isn't counted as support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -592,24 +1036,41 @@
     },
     {
       "id": "wheelchair",
+      "set": "first",
       "description": "Riverside Mobility Repair. New push rims and a brake adjustment for her wheelchair.",
+      "category": "equipment",
       "truth": "not_shelter",
       "basis": "Not a shelter item; not in 20 CFR 416.1130(b)(1).",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Wheelchair repair isn't food or shelter, so a relative paying the business directly isn't in-kind support and maintenance and won't reduce her SSI."
+      },
       "regs": {
         "answer": "not_shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Not shelter. A wheelchair repair isn't housing, and it isn't on the regulation's list of shelter costs, so someone else paying it doesn't count as in-kind support."
+        "reason": "Not a shelter cost. A wheelchair repair isn't rent, a mortgage, property tax, or a utility, so paying it doesn't count as housing support."
       },
       "poms": {
         "answer": "not_shelter",
-        "passage": "poms-si-00835-465-household-costs-list",
-        "cite": "POMS SI 00835.465D.1",
+        "passage": "poms-si-00815-400-policy",
+        "cite": "POMS SI 00815.400A",
+        "quote": "Payment of an individual's bills (including supplementary medical insurance under title XVIII or other medical insurance premiums) by a third party directly to the supplier is not income. However, anything received in kind as a result of the payment is income if it is food or shelter.",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Wheelchair repair is not rent, mortgage, property taxes, or a utility, so it is not on the manual's list of shelter costs."
+        "reason": "Not shelter. A wheelchair repair isn't housing or food, so someone else paying the repair shop directly doesn't count as support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -635,24 +1096,41 @@
     },
     {
       "id": "tuition",
+      "set": "first",
       "description": "Eastgate Community College. Spring semester tuition.",
+      "category": "education",
       "truth": "not_shelter",
       "basis": "Not a shelter item; not in 20 CFR 416.1130(b)(1).",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Tuition isn't food or shelter, so a relative paying the college directly isn't in-kind support and maintenance and won't reduce her SSI check."
+      },
       "regs": {
         "answer": "not_shelter",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Not a shelter cost. College tuition isn't housing, so a family member paying it directly to the college doesn't count as housing help under these rules."
+        "reason": "Not shelter. Tuition isn't a housing cost, so it isn't on the list of shelter expenses that count as in-kind support."
       },
       "poms": {
         "answer": "not_shelter",
-        "passage": "poms-si-00835-020-shelter",
-        "cite": "POMS SI 00835.020B.36",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
         "quote_checked": true,
-        "reason": "Not a shelter cost. College tuition isn't on the manual's list of housing costs, so someone else paying it directly to the college isn't counted as housing support."
+        "reason": "Not shelter. Tuition is not on the list of housing costs. A family member paying it directly to the college does not count as shelter support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -678,24 +1156,41 @@
     },
     {
       "id": "car-insurance",
+      "set": "first",
       "description": "SafeDrive Auto Insurance. Six-month premium for her car.",
+      "category": "transport",
       "truth": "not_shelter",
       "basis": "Not a shelter item; POMS SI 00835.465D.3 counts only property insurance required by a mortgage holder.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Auto insurance isn't food or shelter, so a relative paying the insurer directly isn't in-kind support and maintenance and won't reduce her SSI check."
+      },
       "regs": {
         "answer": "not_shelter",
-        "passage": "fr-2024-06464-shelter-only",
-        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Car insurance is not on the list of housing costs, so someone else paying it does not count as housing support."
+        "reason": "Not shelter. Car insurance isn't on the regulation's list of housing costs, so someone else paying it doesn't count as housing support."
       },
       "poms": {
         "answer": "not_shelter",
         "passage": "poms-si-00835-465-household-costs-list",
         "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
         "quote_checked": true,
-        "reason": "Not shelter. Car insurance isn't on the list of housing costs, so a relative paying it directly doesn't count as in-kind support."
+        "reason": "Not shelter. Car insurance is not one of the housing costs the manual lists, so someone else paying it does not count as in-kind support."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -721,24 +1216,41 @@
     },
     {
       "id": "renters-insurance",
+      "set": "first",
       "description": "HomeShield. Monthly renters insurance premium for her apartment.",
+      "category": "other",
       "truth": "not_shelter",
       "basis": "POMS SI 00835.465D.3 counts only property insurance required by a mortgage holder; renters insurance is not.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI shelter costs are rent, mortgage, property taxes, and utilities. Renters insurance isn't one, so paying HomeShield directly isn't in-kind support and won't reduce her check."
+      },
       "regs": {
         "answer": "not_shelter",
         "passage": "fr-2024-06464-shelter-only",
         "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
         "quote_checked": true,
-        "reason": "Not shelter. Renters insurance is not on the regulations' list of shelter costs, so someone else paying it should not count as housing support."
+        "reason": "Not a shelter cost. Renters insurance is not on the list of shelter expenses, so a family member paying it directly should not count as housing support."
       },
       "poms": {
         "answer": "not_shelter",
         "passage": "poms-si-00835-465-insurance",
         "cite": "POMS SI 00835.465D.3",
+        "quote": "Only property insurance required by the mortgage holder in order to receive the mortgage is considered a household cost. Insurance (property, fire, theft, etc.) held at the owner's or renter's option is not a household cost.",
         "quote_checked": true,
-        "reason": "Not a shelter cost. Renters insurance is chosen by the renter, and only insurance a mortgage lender requires counts as a housing cost."
+        "reason": "Not a shelter cost. Renters insurance is optional coverage, and the manual says only insurance a mortgage lender requires counts as a housing cost."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -764,24 +1276,41 @@
     },
     {
       "id": "storage",
+      "set": "first",
       "description": "SafeKeep Self Storage. Monthly rent for a storage unit holding her furniture.",
+      "category": "other",
       "truth": "not_shelter",
       "basis": "POMS SI 00835.020B.36: shelter is living quarters; a storage unit is not.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI shelter costs cover her residence (rent, mortgage, taxes, utilities). A storage unit isn't her home, so a direct third-party payment isn't ISM."
+      },
       "regs": {
         "answer": "not_shelter",
         "passage": "cfr-416-1103-g-examples",
         "cite": "20 CFR 416.1103(g) (Examples)",
+        "quote": "On the other hand, if your brother pays a lawn service to mow your grass, the payment is not income to you because the mowing cannot be used to meet your needs for food or shelter.",
         "quote_checked": true,
-        "reason": "Not shelter. A storage unit holds her furniture, not her. Like the lawn-service example, someone paying it does not give her housing."
+        "reason": "Likely not a shelter cost. A storage unit holds her belongings, not her, so paying it doesn't give her a place to live. This is a judgment call, not stated outright."
       },
       "poms": {
         "answer": "not_shelter",
         "passage": "poms-si-00835-020-shelter",
         "cite": "POMS SI 00835.020B.36",
+        "quote": "Shelter is living quarters for an individual in the individual's permanent LA.",
         "quote_checked": true,
-        "reason": "Not shelter. A storage unit holds her furniture but is not where she lives. Only housing costs for her living quarters count as shelter."
+        "reason": "Not shelter. A storage unit for furniture isn't where she lives, and the manual defines shelter as living quarters. The word \"rent\" on the bill doesn't change that."
       },
+      "agreed": true,
       "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
         "regs": {
           "decision": "not_shelter",
           "route": "vendor",
@@ -807,29 +1336,46 @@
     },
     {
       "id": "home-insurance",
+      "set": "first",
       "description": "Brookfield Mutual. Homeowners insurance premium on her house, required by her mortgage lender.",
+      "category": "utility",
       "truth": "contested",
       "basis": "POMS SI 00835.020B.36 and SI 00835.465D.3 count property insurance required by a mortgage holder; the shelter list in 20 CFR 416.1130(b)(1) does not include insurance.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "SSI counts lender-required property insurance as a shelter cost. A relative paying it directly creates in-kind support. ABLE housing distributions don't reduce SSI."
+      },
       "regs": {
-        "answer": "unclear",
-        "passage": "cfr-416-1130-shelter",
-        "cite": "20 CFR 416.1130(b)(1)",
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
         "quote_checked": true,
-        "reason": "Unclear. Homeowners insurance is not on the shelter list, but the lender requires it, and these passages don't say whether that makes it part of the mortgage payment."
+        "reason": "Not a shelter cost. Homeowners insurance is not on the regulation's list of shelter expenses, even though her lender requires it."
       },
       "poms": {
         "answer": "shelter",
         "passage": "poms-si-00835-465-insurance",
         "cite": "POMS SI 00835.465D.3",
+        "quote": "Only property insurance required by the mortgage holder in order to receive the mortgage is considered a household cost. Insurance (property, fire, theft, etc.) held at the owner's or renter's option is not a household cost.",
         "quote_checked": true,
-        "reason": "Yes, it's a shelter cost. Her mortgage lender requires this homeowners insurance, and that kind of insurance counts as a housing cost when someone else pays it."
+        "reason": "Yes, this counts as shelter. Homeowners insurance that her mortgage lender requires is a housing cost, so someone else paying it counts as in-kind support."
       },
+      "agreed": false,
       "outcome": {
-        "regs": {
-          "decision": "unsure",
+        "baseline": {
+          "decision": "shelter",
           "route": "able",
           "check": 994,
           "safe": true,
+          "correct": null
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 924,
+          "safe": false,
           "correct": null
         },
         "poms": {
@@ -850,24 +1396,2381 @@
     },
     {
       "id": "bundle",
+      "set": "first",
       "description": "SuperLink. One bill for residential electric service and home internet together.",
+      "category": "utility",
       "truth": "contested",
       "basis": "Electricity is shelter and internet is not, so a single payment for both is mixed.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Electricity is a shelter cost; internet isn't, but a direct payment would count the electric portion as in-kind support. ABLE housing distributions avoid reducing her SSI."
+      },
       "regs": {
         "answer": "unclear",
         "passage": "cfr-416-1130-shelter",
         "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
         "quote_checked": true,
-        "reason": "Unclear. The electricity part is a shelter cost, but home internet is not on the shelter list. The rules don't say how to treat one bill that combines both."
+        "reason": "Unclear. The electricity part is a shelter cost, but internet is not on the shelter list, and our rules don't say how to treat one bill that combines both."
       },
       "poms": {
         "answer": "unclear",
         "passage": "poms-si-00835-465-household-costs-list",
         "cite": "POMS SI 00835.465D.1",
+        "quote": "However, condominium fees may include charges which are household costs (e.g., garbage removal). To the extent that such charges are identifiable, use them in the computation of inside and outside ISM.",
         "quote_checked": true,
-        "reason": "Unclear. The electric part counts as shelter, but the internet part does not. The bill doesn't show how much each part costs, and the manual doesn't address bundled bills like this."
+        "reason": "Partly. The electricity counts as shelter and the internet does not, but this bill doesn't show how much of the $150 is for each."
       },
+      "agreed": false,
       "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "poms": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        }
+      }
+    },
+    {
+      "id": "firewood",
+      "set": "hard",
+      "description": "Pine Ridge Firewood. One cord of seasoned hardwood delivered for the wood stove that is the only heat in her house.",
+      "category": "utility",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) and POMS SI 00835.465D.1 both list heating fuel; firewood burned to heat her home is heating fuel.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Heating fuel, including firewood for her only heat source, is a shelter cost. A relative paying the vendor counts as in-kind support; paying through ABLE avoids the reduction."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Shelter. Firewood burned in the stove that is her home's only heat is heating fuel, and heating fuel is listed as a shelter cost."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Shelter. The firewood is her home's only heat, so it is heating fuel, which the manual lists as a shelter cost."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "hotel-paid-later",
+      "set": "hard",
+      "description": "Riverside Inn. Invoice for four nights' lodging in March, while a burst pipe was repaired in her apartment. She booked the room on credit; her son is paying the invoice in April.",
+      "category": "rent",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1103(g) examples: a hotel bill a son pays later is in-kind income for shelter, counted in the month he pays. POMS SI 00835.360B.1: shelter obtained on her own credit and later paid as a gift counts in the month of payment.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Temporary lodging replacing her home counts as a shelter cost. If her son paid the inn directly, that would be in-kind support and maintenance and reduce her SSI."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1103-g-examples",
+        "cite": "20 CFR 416.1103(g) (Examples)",
+        "quote": "Similarly, if you book a hotel room on credit and your son later pays the bill, the payment to the hotel is not income to you, but the payment of the bill is in-kind income for shelter to you.",
+        "quote_checked": true,
+        "reason": "Shelter. When a son pays a hotel bill she booked on credit, the rules treat that payment as in-kind support for shelter, even if he pays it a month later."
+      },
+      "poms": {
+        "answer": "unclear",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "Shelter is living quarters for an individual in the individual's permanent LA.",
+        "quote_checked": true,
+        "reason": "Unclear. A short hotel stay during repairs isn't her permanent home, and my passages don't say whether temporary lodging like this counts as rent or shelter."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "back-rent",
+      "set": "hard",
+      "description": "Maple Court Apartments. Past-due rent for October that she still owes; her sister is paying it in December.",
+      "category": "rent",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists rent. POMS SI 00835.360B.1: shelter obtained on her own credit and later paid by a third party as a gift is income in the month of the payment.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Back rent is a shelter cost; a third party paying it counts as in-kind support when paid. An ABLE housing distribution spent that same month avoids reducing her check."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "We calculate in-kind support and maintenance considering any shelter that is given to you or that you receive because someone else pays for it. Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Shelter. Rent is a housing cost, and when her sister pays it, it counts as in-kind support, even though it is past due."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Rent is listed as shelter, even when it is past due and someone else pays it later."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "mobile-home-loan",
+      "set": "hard",
+      "description": "Countryside Home Finance. Monthly payment on the loan for the mobile home she owns and lives in.",
+      "category": "mortgage",
+      "truth": "shelter",
+      "basis": "POMS SI 00835.465D.2: payments on a mobile home are also considered mortgage payments. 20 CFR 416.1130(b)(1) lists mortgage payments.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "A loan payment on the mobile home she lives in counts as a mortgage-type shelter cost. Paid by a relative, it becomes ISM and reduces SSI. Routing through ABLE avoids this."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Likely shelter. This is the monthly loan payment on the home she lives in, which works like a mortgage payment, and the rules list mortgage payments as shelter."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-465-mortgages",
+        "cite": "POMS SI 00835.465D.2",
+        "quote": "In general, all mortgages (including second mortgages) are household costs regardless of the reason for an additional mortgage. Payments on a mobile home are also considered mortgage payments.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Loan payments on a mobile home she lives in count as mortgage payments, which are housing costs."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "second-mortgage",
+      "set": "hard",
+      "description": "Lakeshore Credit Union. Monthly payment on the home equity loan (second mortgage) on her house, which she took out to pay medical bills.",
+      "category": "mortgage",
+      "truth": "shelter",
+      "basis": "POMS SI 00835.465D.2: all mortgages, including second mortgages, are household costs regardless of the reason for the additional mortgage. 20 CFR 416.1130(b)(1) lists mortgage payments.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI treats home equity loan payments as shelter only when the loan bought or improved the home. This one paid medical bills, so direct payment shouldn't reduce her check."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. The rules list mortgage payments as shelter, but they don't say whether a home equity loan taken out to pay medical bills counts as one."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-465-mortgages",
+        "cite": "POMS SI 00835.465D.2",
+        "quote": "In general, all mortgages (including second mortgages) are household costs regardless of the reason for an additional mortgage.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. A second mortgage on her home counts as a housing cost, even though she took it out to pay medical bills."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 924,
+          "safe": false,
+          "correct": false
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "room-and-board",
+      "set": "hard",
+      "description": "Hillside Boarding House. Monthly charge for her furnished room, with breakfast and dinner included.",
+      "category": "rent",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists room. The meals do not count (89 FR 21199 removed food from September 30, 2024), but the room does.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Room rent is a shelter cost; a relative paying it directly counts as in-kind support and cuts SSI. ABLE-paid housing is a qualified expense and isn't counted."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "We calculate in-kind support and maintenance considering any shelter that is given to you or that you receive because someone else pays for it. Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Shelter. Paying for her room counts as housing support. The included meals are food, which isn't counted, but our passages don't say how to split a combined charge."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Yes, mostly. The room charge is rent, which is a shelter cost. The included meals are food rather than shelter, though food paid by others also counts."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "rent-to-mother",
+      "set": "hard",
+      "description": "Rent for her unit in the duplex her mother owns, under their written lease. Her brother pays it to their mother.",
+      "category": "rent",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) and POMS SI 00835.465D.1 list rent. Rent paid to a relative landlord is still rent.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Rent is a shelter cost. If her brother pays it, it counts as in-kind support and cuts her SSI. Deposited into ABLE and paid by her, it does not."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "We calculate in-kind support and maintenance considering any shelter that is given to you or that you receive because someone else pays for it. Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Rent is listed as shelter, and her brother is paying it for her, so it counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Rent is listed as a shelter item, and her brother pays it directly to the landlord, who is their mother."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "rent-plus-parking",
+      "set": "hard",
+      "description": "Maple Court Apartments. December invoice: apartment rent $110, reserved parking space $40.",
+      "category": "rent",
+      "truth": "shelter",
+      "basis": "Mixed bill. The $110 rent is shelter under 20 CFR 416.1130(b)(1); the parking space is not on either list. POMS SI 00835.465D.1 counts identifiable household-cost charges inside a larger bill, so paying this invoice gives her in-kind support for the rent.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "The $110 rent is a shelter cost, so a relative paying it directly would count as in-kind support and reduce her SSI. Routing through ABLE lets her pay it herself."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "We calculate in-kind support and maintenance considering any shelter that is given to you or that you receive because someone else pays for it. Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Shelter, for the $110 rent. The $40 parking space is not on the rule's shelter list, so treat it separately and have it reviewed."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "The $110 rent is a shelter cost. The $40 parking space is not on the list of housing costs, so it should not count."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "electric-and-fiber",
+      "set": "hard",
+      "description": "Cedar Falls Municipal Utilities. Monthly statement: residential electric service $110, fiber internet $40.",
+      "category": "utility",
+      "truth": "shelter",
+      "basis": "Mixed, itemized bill. Electricity is on both lists (20 CFR 416.1130(b)(1), POMS SI 00835.465D.1); internet is on neither. The $110 electric charge is identifiable, so it counts.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Electricity ($110) is a shelter cost; a relative paying it directly would count as ISM. Internet ($40) isn't shelter and could be paid to the vendor directly."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Yes, partly. The $110 electric charge is a shelter cost. The $40 internet charge is not on the shelter list, so it should be treated separately."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Partly. The $110 electric charge is a shelter cost. The $40 internet charge is not, because internet is not on the list of shelter items."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "condo-itemized",
+      "set": "hard",
+      "description": "Harbor View Condominium Association. Monthly fee: water and sewer $70, trash removal $30, grounds upkeep $50.",
+      "category": "utility",
+      "truth": "shelter",
+      "basis": "POMS SI 00835.465D.1 note: condominium fees are not household costs in themselves, but identifiable charges for household costs such as garbage removal are used. Water, sewer and garbage are on both lists.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Water, sewer, and trash ($100) are shelter costs; a relative paying them directly is in-kind support that cuts her SSI. Route through ABLE; she pays it herself."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear: this bill is part shelter, part not. Water, sewer and trash ($100) are shelter costs. Grounds upkeep ($50) is not. The passages don't say how to treat a combined fee."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "NOTE: Condominium fees in themselves are not household costs. However, condominium fees may include charges which are household costs (e.g., garbage removal).",
+        "quote_checked": true,
+        "reason": "Partly shelter. The water, sewer and trash charges on this condo bill count as shelter costs. The grounds upkeep charge does not."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "trailer-space-with-water",
+      "set": "hard",
+      "description": "Sunny Acres Mobile Home Park. Monthly statement for her space: lot fee $40, water and sewer $110.",
+      "category": "utility",
+      "truth": "shelter",
+      "basis": "POMS SI 00835.465D.4: the part of a trailer space fee that is for water, sewer and so on is a household cost. 20 CFR 416.1130(b)(1) lists water and sewerage.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Mobile home lot rent and water/sewer are shelter costs. A relative paying the park directly is in-kind support that lowers SSI; ABLE-funded housing payments don't."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Water and sewer are listed as shelter, and the lot fee is rent for the space her home sits on."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-465-land",
+        "cite": "POMS SI 00835.465D.4",
+        "quote": "A trailer space rental fee which is for space alone is not a household operating expense for purposes of determining inside ISM, nor is it outside ISM if someone outside the household pays the fee. However, if the fee is not for use of land alone, that part of the fee which is for water, sewer, etc., is part of the household costs for purposes of determining inside and outside ISM.",
+        "quote_checked": true,
+        "reason": "Partly shelter. The $110 for water and sewer counts as shelter if someone else pays it. The $40 lot fee is for land only and does not count."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "solar-ppa",
+      "set": "hard",
+      "description": "BrightSky Solar. Monthly bill for 900 kWh of electricity from the rooftop panels on her home, under a power purchase agreement.",
+      "category": "utility",
+      "truth": "shelter",
+      "basis": "The bill charges for electricity used in her home, which 20 CFR 416.1130(b)(1) and POMS SI 00835.465D.1 both list.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Electricity is a shelter utility even when bought under a solar PPA. Direct payment counts as in-kind support and maintenance. Routing it through her ABLE account avoids that."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. The bill charges for 900 kWh of electricity used at her home, and the rules list electricity as shelter."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Shelter. This bill charges her for the electricity her home uses, and electricity is on the manual's list of shelter costs, even when it comes from rooftop solar."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "escrow-shortage",
+      "set": "hard",
+      "description": "First Home Mortgage. Escrow shortage payment on her mortgage account, to cover this year's property tax increase.",
+      "category": "mortgage",
+      "truth": "shelter",
+      "basis": "The escrow pays her real property taxes as part of the mortgage; 20 CFR 416.1130(b)(1) lists both mortgage payments and real property taxes.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Property taxes paid through mortgage escrow are a shelter cost. A relative paying directly counts as in-kind support and would reduce her SSI check. An ABLE housing distribution avoids this."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Shelter. This payment goes to her mortgage account to cover property taxes, and both mortgage payments and real property taxes count as shelter costs."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. The payment goes through the mortgage account to cover property taxes, and both mortgage payments and property taxes count as shelter."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "property-tax-prepaid-year",
+      "set": "hard",
+      "description": "Brookfield County Treasurer. Full 2027 real property tax on her home, paid in advance.",
+      "category": "property_tax",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) lists real property taxes. POMS SI 00835.360D.2: a prepaid property tax bill is in-kind support in the months it covers.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Real property tax is a shelter cost, so a relative paying it directly counts as in-kind support. Routing through ABLE lets her pay it herself without reducing SSI."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Property tax on her home is listed by name as a shelter expense, so someone else paying it counts as in-kind support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Real property tax on her home counts as shelter when someone else pays it, even when it is paid ahead of time."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "hauled-water",
+      "set": "hard",
+      "description": "Valley Water Hauling. 2,000 gallons of water delivered to the cistern that supplies her house.",
+      "category": "utility",
+      "truth": "shelter",
+      "basis": "20 CFR 416.1130(b)(1) and POMS SI 00835.465D.1 list water. Hauled water is her home's water supply.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Water is an SSI shelter cost, so a relative paying it directly counts as in-kind support. ABLE funds she spends on housing don't reduce her check."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Shelter. The rules list water as a housing cost, and this water supplies her home, so someone else paying it counts as shelter support."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Water for her home is on the manual's list of shelter items, so someone else paying the hauler counts as in-kind support."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "past-due-electric",
+      "set": "hard",
+      "description": "Northside Electric Co-op. Past-due electric charges of $120 and a $30 reconnection fee, to restore service at her apartment.",
+      "category": "utility",
+      "truth": "shelter",
+      "basis": "Electricity is on both lists. POMS SI 00835.360B.1: shelter used on credit and later paid as a gift counts in the month of payment. The $120 for electricity is most of the bill.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Electricity, including past-due charges and reconnection fees, is a shelter cost. A direct relative payment would be in-kind support and reduce SSI. ABLE housing distributions don't."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Yes, this is a shelter cost. Electricity is listed as shelter, and paying an overdue utility bill still counts. The $30 reconnection fee isn't named directly, so treat that part with some care."
+      },
+      "poms": {
+        "answer": "shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Yes, the $120 of electric charges is a shelter cost. The passages don't say whether the $30 reconnection fee counts, so that part is uncertain."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "lot-rent-only",
+      "set": "hard",
+      "description": "Sunny Acres Mobile Home Park. Monthly rent for the lot where her mobile home sits; the fee is for the space only.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.465D.4: a trailer space rental fee which is for space alone is not outside ISM if someone outside the household pays it.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Mobile home lot rent is a housing cost. If a relative pays the park directly, it counts as in-kind support and lowers SSI; ABLE distributions for housing don't."
+      },
+      "regs": {
+        "answer": "shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Shelter. Lot rent is rent she must pay to keep her home where she lives, and the rules list rent as a shelter cost."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-land",
+        "cite": "POMS SI 00835.465D.4",
+        "quote": "A trailer space rental fee which is for space alone is not a household operating expense for purposes of determining inside ISM, nor is it outside ISM if someone outside the household pays the fee.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A lot rent that covers only the space under a mobile home doesn't count when someone else pays it."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "regs": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "vacant-lot-tax",
+      "set": "hard",
+      "description": "Brookfield County Treasurer. Real property tax on the vacant lot she owns across the road from her house.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.465D.4: third party vendor payments of real property tax on land alone do not cause ISM in the form of shelter.",
+      "baseline": {
+        "answer": "unclear",
+        "route": "able",
+        "reason": "SSA counts roads as not separating land from the home plot, so this lot's tax may be a shelter cost. Paying through ABLE protects her check either way."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. Property taxes are listed as shelter, but this lot isn't her home, and our passages don't say whether tax on non-home land still counts."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-land",
+        "cite": "POMS SI 00835.465D.4",
+        "quote": "Similarly, third party vendor payments of real property tax, rent or mortgage on land alone do not cause an individual to receive ISM in the form of shelter.",
+        "quote_checked": true,
+        "reason": "Not shelter. This tax is on a vacant lot, not her home, and the manual says paying property tax on land alone doesn't count as shelter support."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "extra-principal",
+      "set": "hard",
+      "description": "First Home Mortgage. Extra payment toward the principal of her mortgage, on top of this month's required payment, which she has already made.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.465D.2: when extra mortgage payments are made to reduce the principal, only the required mortgage amount is a household cost.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "Mortgage payments, including principal, are shelter costs. A relative paying the lender could count as in-kind support. Paying from her ABLE account avoids that."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. Mortgage payments count as shelter, but these rules don't say whether an optional extra principal payment counts once the required monthly payment is already made."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-mortgages",
+        "cite": "POMS SI 00835.465D.2",
+        "quote": "When extra mortgage payments are made, (i.e., prepayments to reduce the principle owed), only the required mortgage amount is a household cost.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Only the required monthly mortgage payment counts, and she has already paid it. An extra payment toward principal does not count."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "business-meter",
+      "set": "hard",
+      "description": "Northside Electric Co-op. Commercial-rate bill for the separately metered workshop behind her house, where she runs a pottery business.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.471A: business expenses are not household costs. POMS SI 00835.020B.36: shelter is living quarters.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Electricity for a separately metered commercial workshop is a business expense, not household shelter. Third-party vendor payment for non-shelter items isn't counted income."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. Electricity is listed as shelter, but this bill powers her pottery business workshop. The passages don't say whether business-use electricity counts."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-471-business",
+        "cite": "POMS SI 00835.471A",
+        "quote": "Business or agricultural expenses are not household costs for ISM determinations.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. This electric bill is for her pottery business workshop, and business expenses don't count as household shelter costs."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "condo-dues",
+      "set": "hard",
+      "description": "Harbor View Condominium Association. Monthly association dues for the building and grounds.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.465D.1 note: condominium fees in themselves are not household costs. Dues are not on the list in 20 CFR 416.1130(b)(1).",
+      "baseline": {
+        "answer": "unclear",
+        "route": "able",
+        "reason": "Condo dues count as shelter only for portions covering utilities like water, sewer, or garbage. The breakdown is unknown, so the ABLE route avoids any possible SSI reduction."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. The shelter list doesn't mention condo association dues, and the bill doesn't say whether the dues cover listed items like water or garbage."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "NOTE: Condominium fees in themselves are not household costs. However, condominium fees may include charges which are household costs (e.g., garbage removal).",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Condo dues by themselves don't count. If the association itemizes water, sewer, garbage or similar charges, those parts would count."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "hoa-dues",
+      "set": "hard",
+      "description": "Oak Meadows Homeowners Association. Quarterly dues for common-area landscaping, the pool and the clubhouse.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "Not on the shelter list in 20 CFR 416.1130(b)(1) or the household-cost list in POMS SI 00835.465D.1, which says its 10 items are the only ones used.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "HOA dues for landscaping, pool and clubhouse aren't SSI shelter items like rent, mortgage, taxes or utilities, so a direct vendor payment isn't counted as income."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. These HOA dues pay for landscaping, a pool and a clubhouse, which are not on the regulation's list of shelter costs."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "Condominium fees in themselves are not household costs.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. These dues pay for landscaping, a pool and a clubhouse, and none of those are on the manual's short list of housing costs."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "optional-home-insurance",
+      "set": "hard",
+      "description": "Brookfield Mutual. Homeowners insurance premium on the house she owns outright; she has no mortgage.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.465D.3: insurance held at the owner's option is not a household cost. Insurance is not on the list in 20 CFR 416.1130(b)(1).",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI counts property insurance as shelter only when a mortgage lender requires it. She owns the house outright, so direct payment isn't ISM."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Homeowners insurance isn't on the list of shelter expenses, so a relative paying it directly shouldn't count as housing support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-insurance",
+        "cite": "POMS SI 00835.465D.3",
+        "quote": "Only property insurance required by the mortgage holder in order to receive the mortgage is considered a household cost. Insurance (property, fire, theft, etc.) held at the owner's or renter's option is not a household cost.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. She has no mortgage, so this homeowners insurance is optional, and optional insurance doesn't count as a housing cost."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "furnace-installment",
+      "set": "hard",
+      "description": "Metro Gas Company. Monthly installment on the new furnace her daughter bought for her home through the gas company; this payment has no gas usage charges.",
+      "category": "equipment",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00835.310E.1: a furnace bought from the utility company and paid in monthly installments on a utility bill is not income.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "A furnace installment is equipment or home-improvement financing, not a listed shelter cost like gas usage, rent, or mortgage. A direct vendor payment isn't ISM."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. This is a payment for buying a furnace, with no gas usage charge, and furnace purchases are not on the list of shelter costs."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-310-example-furnace",
+        "cite": "POMS SI 00835.310E.1",
+        "quote": "Amber bought the furnace from the local utility company and paid for it in monthly installments on a utility bill. The utility company confirmed that William cannot return the furnace for cash since Amber made the purchase and it was purchased on credit.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A furnace installment on a gas bill pays for an item, not gas use. The manual's matching example treats a furnace gift like this as not income."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "water-heater-repair",
+      "set": "hard",
+      "description": "Ace Plumbing. Repair of the leaking water heater at her house.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "Repairs are not on the shelter list in 20 CFR 416.1130(b)(1) or the household-cost list in POMS SI 00835.465D.1, which says its 10 items are the only ones used.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI shelter costs cover rent, mortgage, property taxes, utilities, water, sewer and garbage. Home repairs are excluded, so paying Ace Plumbing directly won't reduce her check."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A plumbing repair is not on the closed list of shelter expenses, so someone else paying it directly to the plumber shouldn't count as in-kind support."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A plumbing repair isn't on the manual's closed list of household costs, so a relative paying it directly shouldn't count as in-kind support."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "water-softener",
+      "set": "hard",
+      "description": "AquaPure. Monthly rental of the water softener installed in her home.",
+      "category": "equipment",
+      "truth": "not_shelter",
+      "basis": "Equipment rental, not water service. Not on the list in 20 CFR 416.1130(b)(1) or POMS SI 00835.465D.1.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "A water softener rental is equipment, not a water utility or other SSI shelter cost. A relative paying AquaPure directly should not reduce her SSI check."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. The rules count water as shelter, but this bill rents a softening device, and nothing in the passages says whether equipment like that counts."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Renting a water softener is equipment rental, not the water service itself, and it isn't on the manual's closed list of housing costs."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "co-op-phone",
+      "set": "hard",
+      "description": "Tri-County Electric Cooperative, telecom division. Monthly home phone service. No electric service is billed on this statement.",
+      "category": "phone",
+      "truth": "not_shelter",
+      "basis": "POMS SI 00815.400B.2: a phone bill paid by someone else is not income, because it is not food or shelter.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Telephone service isn't a shelter cost under SSI rules, even when billed by an electric cooperative. Paying the business directly isn't counted as income, so her check stays whole."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Home phone service isn't on the list of shelter expenses, and this bill has no electric charges, even though it comes from an electric co-op."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00815-400-example-phone",
+        "cite": "POMS SI 00815.400B.2",
+        "quote": "Neither the payment to the phone company nor the telephone service received as a result of the payment is income because it is not food or shelter.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. This is phone service, even though an electric cooperative sends the bill, and phone service is not food or shelter."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "city-fiber",
+      "set": "hard",
+      "description": "Brookfield Fiber Utility, owned by the city. Monthly fiber internet service at her home.",
+      "category": "internet",
+      "truth": "not_shelter",
+      "basis": "Internet is not on the list in 20 CFR 416.1130(b)(1) or POMS SI 00835.465D.1, even when a city utility provides it.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI shelter costs cover rent, mortgage, property taxes, heat, electricity, water, sewer and garbage. Internet is excluded even from a city-owned utility, so direct payment is safe."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "fr-2024-06464-shelter-only",
+        "cite": "89 FR 21199 (Mar. 27, 2024), Supplementary Information, Background",
+        "quote": "Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services).",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Internet service is not on the list of housing costs that count, even though a city-owned utility provides it."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not shelter. Internet service isn't on the manual's closed list of housing costs, even when a city-owned utility provides it, so someone else paying it isn't in-kind support."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "lawn-service",
+      "set": "hard",
+      "description": "GreenCut Lawn Care. Monthly mowing at her house.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "20 CFR 416.1103(g) examples: a brother paying a lawn service is not income, because the mowing cannot be used to meet needs for food or shelter.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Lawn mowing isn't an SSI shelter cost like rent, mortgage, property taxes, or utilities. A relative paying GreenCut directly isn't counted as income, so her check stays whole."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1103-g-examples",
+        "cite": "20 CFR 416.1103(g) (Examples)",
+        "quote": "On the other hand, if your brother pays a lawn service to mow your grass, the payment is not income to you because the mowing cannot be used to meet your needs for food or shelter. Therefore, the payment for the lawn service is not in-kind income as defined in § 416.1102.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. The regulation says lawn mowing paid by someone else doesn't count as income because it doesn't meet food or shelter needs."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Lawn mowing isn't on the manual's closed list of housing costs, so a family member paying GreenCut directly isn't counted as in-kind support."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "snow-plowing",
+      "set": "hard",
+      "description": "Northland Plowing. Seasonal contract to plow her driveway.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "Like the lawn service in 20 CFR 416.1103(g), plowing cannot be used as food or shelter, and it is not on either list.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI shelter costs are limited to rent, mortgage, property taxes, heating fuel, gas, electricity, water, sewer, and garbage. Snow plowing isn't one, so paying the vendor directly is fine."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1103-g-examples",
+        "cite": "20 CFR 416.1103(g) (Examples)",
+        "quote": "On the other hand, if your brother pays a lawn service to mow your grass, the payment is not income to you because the mowing cannot be used to meet your needs for food or shelter.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Plowing a driveway is property upkeep, like the lawn-mowing example, and isn't on the list of housing costs."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Driveway snow plowing isn't on the manual's closed list of ten household costs, so paying it directly doesn't count as in-kind support."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "moving-truck",
+      "set": "hard",
+      "description": "U-Move. One-day rental of a 15-foot moving truck for her move to a new apartment.",
+      "category": "transport",
+      "truth": "not_shelter",
+      "basis": "Not on the shelter list in 20 CFR 416.1130(b)(1) or POMS SI 00835.465D.1.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "A moving truck rental isn't rent, mortgage, property tax, or a utility. A relative paying it directly isn't in-kind support and maintenance, so her SSI stays whole."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A moving truck rental is a moving service, not rent, a mortgage, or a utility, so it isn't on the shelter list."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A moving truck rental isn't on the manual's closed list of housing costs, which covers things like rent, mortgage, utilities and property taxes."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "gasoline",
+      "set": "hard",
+      "description": "QuickFuel. Gasoline for her car.",
+      "category": "transport",
+      "truth": "not_shelter",
+      "basis": "The gas on the shelter lists is a household cost (POMS SI 00835.465D.1); shelter is living quarters (POMS SI 00835.020B.36). Fuel for a car is neither.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Gasoline isn't food or shelter, so a third party paying the vendor directly isn't in-kind support and maintenance and doesn't reduce her SSI check."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Not shelter. Gasoline for her car is a transportation cost, not a housing cost like rent, utilities, or heating fuel."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-020-shelter",
+        "cite": "POMS SI 00835.020B.36",
+        "quote": "Shelter is living quarters for an individual in the individual's permanent LA. In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+        "quote_checked": true,
+        "reason": "Not shelter. Gasoline for a car is a transportation cost. It is not part of the home, so a relative paying it would not count as shelter support."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "space-heater",
+      "set": "hard",
+      "description": "HomeGoods Hardware. Electric space heater for her bedroom.",
+      "category": "equipment",
+      "truth": "not_shelter",
+      "basis": "An item for her home, not heating fuel. 20 CFR 416.1103(j): an item that would be an excluded resource is not income; it is not on either shelter list.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "A space heater is a household item, not rent or a utility. A relative paying the store directly for it isn't in-kind support and maintenance, so her SSI stays whole."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Not shelter. A space heater is a household item you buy once, not rent, a mortgage, property tax, heating fuel, or a utility service on the shelter list."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. A space heater is equipment you buy, not one of the ten listed housing bills such as rent, mortgage, heating fuel, or electricity."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "weatherization",
+      "set": "hard",
+      "description": "Comfort Home Insulation. Attic insulation and two storm windows installed at her house.",
+      "category": "other",
+      "truth": "not_shelter",
+      "basis": "20 CFR 416.1103(i): weatherization assistance (insulation, storm doors and windows) is not income.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "SSI shelter costs cover rent, mortgage, property taxes, and utilities. Insulation and storm windows are home improvements, so paying the vendor directly won't reduce her check."
+      },
+      "regs": {
+        "answer": "not_shelter",
+        "passage": "cfr-416-1103-i-weatherization",
+        "cite": "20 CFR 416.1103(i)",
+        "quote": "Weatherization assistance (Examples: Insulation, storm doors and windows) is not income.",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Insulation and storm windows are weatherization assistance, which the rules say is not income."
+      },
+      "poms": {
+        "answer": "not_shelter",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Not a shelter cost. Insulation and storm window installation are home improvements, not one of the ten listed housing costs like rent, mortgage, taxes or utilities."
+      },
+      "agreed": true,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "regs": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "poms": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        },
+        "referee": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 994,
+          "safe": true,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "septic-pumping",
+      "set": "hard",
+      "description": "Clearwater Septic. Pumping of the septic tank at her house, which is not on a sewer system.",
+      "category": "utility",
+      "truth": "contested",
+      "basis": "Both lists name sewer service (20 CFR 416.1130(b)(1), POMS SI 00835.465D.1), but neither says whether pumping a private septic tank is sewer service.",
+      "baseline": {
+        "answer": "unclear",
+        "route": "able",
+        "reason": "SSI counts sewer service as shelter, but septic pumping could be treated as sewer or as non-shelter maintenance. Routing through ABLE avoids any possible ISM reduction."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. The rules list \"sewerage\" as a shelter cost, but they don't say whether pumping a private septic tank counts. The house isn't on a sewer system."
+      },
+      "poms": {
+        "answer": "unclear",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Unclear. The rules name \"sewer\" as a shelter cost, but none of these passages say whether pumping a private septic tank counts as sewer service."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "poms": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        }
+      }
+    },
+    {
+      "id": "utility-deposit",
+      "set": "hard",
+      "description": "Northside Electric Co-op. Refundable security deposit required to open electric service at her new apartment.",
+      "category": "utility",
+      "truth": "contested",
+      "basis": "Electricity is on both lists, but neither rulebook says whether a refundable deposit to start service is a payment for electricity.",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "A refundable utility security deposit isn't a monthly shelter expense, so a relative paying the co-op directly isn't in-kind support and maintenance and won't reduce her SSI."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. Electricity counts as shelter, but this is a refundable deposit, not a charge for power used, and the passages don't say how deposits are treated."
+      },
+      "poms": {
+        "answer": "unclear",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Unclear. Electricity counts as shelter, but this is a refundable deposit, not payment for power used. The passages don't say how deposits are treated."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 924,
+          "safe": false,
+          "correct": null
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "poms": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        }
+      }
+    },
+    {
+      "id": "bottled-water",
+      "set": "hard",
+      "description": "Crystal Springs. Monthly delivery of five-gallon drinking water jugs to her apartment.",
+      "category": "utility",
+      "truth": "contested",
+      "basis": "Water is on both lists, but neither says whether delivered drinking water is the home's water service or food, which stopped counting on September 30, 2024 (89 FR 21199).",
+      "baseline": {
+        "answer": "not_shelter",
+        "route": "vendor",
+        "reason": "Bottled drinking water delivery is a food or household item, not a water utility. Since September 2024 food no longer counts as in-kind support, so direct payment is safe."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. The rules list \"water\" as a shelter cost, but they don't say whether delivered drinking-water jugs count as that, or as food, which is excluded."
+      },
+      "poms": {
+        "answer": "unclear",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Unclear. The manual lists \"water\" as a housing cost but never says whether delivered drinking-water jugs count as that utility, as food, or as neither."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "not_shelter",
+          "route": "vendor",
+          "check": 924,
+          "safe": false,
+          "correct": null
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "poms": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        }
+      }
+    },
+    {
+      "id": "solar-lease",
+      "set": "hard",
+      "description": "SunShare Leasing. Fixed monthly lease payment for the solar panels on her roof, which supply her home's electricity.",
+      "category": "utility",
+      "truth": "contested",
+      "basis": "Electricity is on both lists, but a lease payment for the equipment that produces it is not; neither rulebook settles it.",
+      "baseline": {
+        "answer": "unclear",
+        "route": "able",
+        "reason": "A solar lease is equipment rent, yet it supplies her electricity, a listed shelter cost. SSA treatment is uncertain, so routing through ABLE avoids a possible ISM reduction."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. Electricity counts as shelter, but this bill is a lease on solar equipment, and the rules we have don't say whether that counts."
+      },
+      "poms": {
+        "answer": "unclear",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "When computing household operating expenses for inside ISM or the CMV of household costs for outside ISM, the following 10 items are the only ones used in the applicable computations:",
+        "quote_checked": true,
+        "reason": "Unclear. Electricity counts as a shelter cost, but this is a fixed lease on solar equipment, and the manual passages don't say whether such a lease counts as electricity."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "regs": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "poms": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
+        "referee": {
+          "decision": "unsure",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        }
+      }
+    },
+    {
+      "id": "condo-fee-unitemized",
+      "set": "hard",
+      "description": "Harbor View Condominium Association. Monthly fee covering heat, water and trash for her unit along with building upkeep; the statement does not break out the amounts.",
+      "category": "utility",
+      "truth": "contested",
+      "basis": "POMS SI 00835.465D.1 counts household costs inside a condominium fee only to the extent they are identifiable; here they are named but not identified, so the text does not settle how much counts.",
+      "baseline": {
+        "answer": "shelter",
+        "route": "able",
+        "reason": "The fee covers heat, water and trash, which are SSI shelter items. A relative paying it directly would be in-kind support, so ABLE funds keep her check whole."
+      },
+      "regs": {
+        "answer": "unclear",
+        "passage": "cfr-416-1130-shelter",
+        "cite": "20 CFR 416.1130(b)(1)",
+        "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+        "quote_checked": true,
+        "reason": "Unclear. Heat, water and trash count as shelter, but building upkeep is not on the list, and the bill doesn't separate the amounts. The rules don't say how to split it."
+      },
+      "poms": {
+        "answer": "unclear",
+        "passage": "poms-si-00835-465-household-costs-list",
+        "cite": "POMS SI 00835.465D.1",
+        "quote": "NOTE: Condominium fees in themselves are not household costs. However, condominium fees may include charges which are household costs (e.g., garbage removal). To the extent that such charges are identifiable, use them in the computation of inside and outside ISM.",
+        "quote_checked": true,
+        "reason": "Unclear. A condo fee alone isn't a shelter cost, but its heat, water and trash parts are. This statement doesn't show those amounts, so the split can't be settled."
+      },
+      "agreed": false,
+      "outcome": {
+        "baseline": {
+          "decision": "shelter",
+          "route": "able",
+          "check": 994,
+          "safe": true,
+          "correct": null
+        },
         "regs": {
           "decision": "unsure",
           "route": "able",
@@ -892,5 +3795,5 @@
       }
     }
   ],
-  "ms": 39682
+  "ms": 172768
 }

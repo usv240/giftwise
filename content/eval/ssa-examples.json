@@ -1,5 +1,5 @@
 {
-  "about": "Worked examples from the Social Security operating manual (POMS) sections Giftwise cites, each about a gift or similar help to one person. Every passage is SSA's own text. Dates are moved to 2026 so 2026 amounts apply; the facts are SSA's. Expected answers are SSA's, except two food examples written before the 2024 rule that stopped counting food, which are marked. Examples Giftwise does not model are listed with the reason, not scored.",
+  "about": "Worked examples from the Social Security operating manual (POMS) and the SSI regulations (20 CFR Part 416) that Giftwise cites, each about a gift or similar help to one person. Every passage is SSA's own text. Dates are moved to 2026 so 2026 amounts apply; the facts are SSA's, and where SSA's example gives no amount, an amount is supplied that does not change SSA's answer. Expected answers are SSA's, except three food examples written before the 2024 rule that stopped counting food, which are marked. Examples Giftwise does not model are listed with the reason, not scored.",
   "fetched": "2026-11-03",
   "measures": {
     "after_infrequent": "Income from the gift in that month after the $60 infrequent or irregular income exclusion, before the $20 general exclusion.",
@@ -14,8 +14,13 @@
     },
     {
       "id": "prepaid",
-      "found": "When a relative prepays a bill that covers future months, SSA charges in-kind support in each month the bill covers. Giftwise counts it only in the month it was paid, so it matches June but not July to December.",
-      "fixed": null
+      "found": "When a relative prepays a bill that covers future months, SSA charges in-kind support in each month the bill covers. Giftwise counted it only in the month it was paid, so it matched June but not July to December.",
+      "fixed": "A housing bill can now carry the months it covers. The share for months up to the payment counts when it is paid, and each later month's share counts in that month (rule R-SHEL-02). This example and a new one, next month's rent paid early, now match."
+    },
+    {
+      "id": "exclusion-order",
+      "found": "Two of the new examples (POMS SI 00810.410 L.3) did not match. SSA applies the $60 one-off exclusion in the order income arrives, and to housing help at its actual value before the monthly cap. Giftwise applied it after the cap, so for a one-off housing payment above the cap it counted $60 less than SSA and showed a check $60 too high.",
+      "fixed": "Giftwise now applies the exclusion in order of receipt and before the cap (rule R-INFREQ-01). Both orders in SSA's example match, with a unit test for each."
     }
   ],
   "cases": [
@@ -136,7 +141,11 @@
           "amount": 800,
           "delivery": "vendor",
           "category": "property_tax",
-          "giver": "relative"
+          "giver": "relative",
+          "covers": {
+            "from": "2026-01",
+            "to": "2026-12"
+          }
         }
       ],
       "expected": {
@@ -159,7 +168,8 @@
           }
         ]
       },
-      "ssa_answer": "In-kind support of $400 in June (six months of the bill), capped at the 2026 limit of $351.33, then $66.67 in each month from July to December."
+      "ssa_answer": "In-kind support of $400 in June (six months of the bill), capped at the 2026 limit of $351.33, then $66.67 in each month from July to December.",
+      "input_note": "The tax payment is entered with the months it covers, January to December 2026."
     },
     {
       "id": "utilities-free",
@@ -476,6 +486,973 @@
         ]
       },
       "ssa_answer": "None. All $2,000 is excluded because it is, or will be, used for tuition, fees or other necessary educational expenses."
+    },
+    {
+      "id": "mortgage-then-cash",
+      "title": "A sister pays the mortgage, then a friend gives birthday cash",
+      "cite": "POMS SI 00810.410",
+      "source": "poms-si-00810-410",
+      "part": "L.3",
+      "passage": "Situation: A claimant files for SSI in September 2023. In that month, the claimant receives a birthday gift of $25 cash from a friend on September 15. Also on September 2, the claimant's sister, who lives elsewhere, pays the claimant's $500 mortgage payment directly to the mortgage company “just to help my sibling out this month.” Analysis: Both sources of income are infrequent and irregular. However, since the $500 payment was received first, the $60 exclusion reduces the amount to $440. This $440 is subject to the $324.66 PMV (2023 rate), so in September, we count ISM of $324.66 and cash of $25.",
+      "situation": "Dana receives SSI and lives alone in a home she owns, with no other income. On September 2, 2026 her sister, who lives elsewhere, pays Dana's $500 mortgage payment directly to the mortgage company, just to help that month. On September 15, 2026 a friend gives Dana $25 in cash for her birthday.",
+      "question": "In September 2026, how much in-kind support is charged, and how much of the mortgage payment and the cash counts after the infrequent or irregular income exclusion?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-09-02",
+          "amount": 500,
+          "delivery": "vendor",
+          "category": "mortgage",
+          "giver": "sister"
+        },
+        {
+          "id": "g2",
+          "date": "2026-09-15",
+          "amount": 25,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "friend"
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "ism_value",
+            "value": 351.33
+          },
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 376.33
+          }
+        ]
+      },
+      "ssa_answer": "The $500 came first, so the $60 exclusion takes it to $440, which is still over the cap. The cap is charged ($324.66 in 2023, $351.33 in 2026) and the $25 cash counts in full."
+    },
+    {
+      "id": "cash-then-mortgage",
+      "title": "The same two gifts, with the cash first",
+      "cite": "POMS SI 00810.410",
+      "source": "poms-si-00810-410",
+      "part": "L.3 (note)",
+      "passage": "NOTE: If the cash birthday gift had been received first, the $25 would have been excluded as infrequent or irregular income and the $500 mortgage payment would have been reduced to $465 by the remaining $35 of the infrequent or irregular income exclusion. The $465 remaining mortgage payment would then be subject to the $324.66 PMV.",
+      "situation": "Dana receives SSI and lives alone in a home she owns, with no other income. On September 2, 2026 a friend gives Dana $25 in cash for her birthday. On September 15, 2026 her sister, who lives elsewhere, pays Dana's $500 mortgage payment directly to the mortgage company.",
+      "question": "In September 2026, how much of the cash and the mortgage payment counts after the infrequent or irregular income exclusion?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-09-02",
+          "amount": 25,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "friend"
+        },
+        {
+          "id": "g2",
+          "date": "2026-09-15",
+          "amount": 500,
+          "delivery": "vendor",
+          "category": "mortgage",
+          "giver": "sister"
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "ism_value",
+            "value": 351.33
+          },
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 351.33
+          }
+        ]
+      },
+      "ssa_answer": "The $25 cash came first and is excluded. The other $35 of the exclusion takes the $500 to $465, still over the cap, so the cap is charged ($351.33 in 2026)."
+    },
+    {
+      "id": "bank-adjustment",
+      "title": "A bank's one-time adjustment on top of regular interest",
+      "cite": "POMS SI 00810.410",
+      "source": "poms-si-00810-410",
+      "part": "F.3",
+      "passage": "An individual has a savings account that pays interest of $15 in the second month of each quarter. The interest has been routinely excluded as infrequent as the individual has no other infrequent or irregular income. In 2023, without any advance notice to depositors, the bank changes its accounting system. As a result, in June the individual receives a $2.03 one-time payment in addition to their regular $15 interest payment in May. The bank does not intend to interrupt its usual quarterly interest schedule, so the CR correctly views the one-time payment in June as being from a separate source than the regular quarterly payments; i.e., it is a bank adjustment. Therefore, the regular $15 payment is still excludable as infrequent while the unexpected $2.03 payment is irregular. The total is within the $20 limit in the month of receipt and is excludable.",
+      "situation": "Ruth receives SSI and lives alone with no other income. Her savings account pays $15 interest in the second month of each quarter. In May 2026 she gets her regular $15. In June 2026, after the bank changes its accounting system without notice, it also pays her a one-time $2.03 adjustment.",
+      "question": "How much of the May interest and the June adjustment counts as income, after the infrequent or irregular income exclusion?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-05-31",
+          "amount": 15,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "savings account interest"
+        },
+        {
+          "id": "g2",
+          "date": "2026-06-30",
+          "amount": 2.03,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "bank adjustment"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0
+          },
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Neither counts. The quarterly interest is infrequent and the unexpected adjustment is irregular, and both fit within the exclusion.",
+      "input_note": "Interest is not a gift, so each payment is entered as income from its own source, which is how SSA evaluates them."
+    },
+    {
+      "id": "furnace",
+      "title": "A daughter buys a furnace on the utility bill",
+      "cite": "POMS SI 00835.310",
+      "source": "poms-si-00835-310",
+      "part": "E.1",
+      "passage": "William's adult child Amber purchased a furnace for William's home when the old furnace stopped working. Amber bought the furnace from the local utility company and paid for it in monthly installments on a utility bill. The utility company confirmed that William cannot return the furnace for cash since Amber made the purchase and it was purchased on credit. Therefore, the gift of the furnace is not income to William.",
+      "situation": "William receives SSI and lives alone in his own home. In January 2026 his furnace stops working, and his adult daughter Amber buys him a new $3,600 furnace from the local utility company, paying for it in monthly installments on a utility bill. William cannot return the furnace for cash.",
+      "question": "Does the furnace count as income to William?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-01-20",
+          "amount": 3600,
+          "delivery": "item",
+          "category": "equipment",
+          "giver": "daughter"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-01",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income. The furnace was bought on credit and cannot be returned for cash."
+    },
+    {
+      "id": "mobile-home",
+      "title": "A brother buys a mobile home and pays the loan",
+      "cite": "POMS SI 00835.310",
+      "source": "poms-si-00835-310",
+      "part": "E.2",
+      "passage": "Victoria is an aged beneficiary living in an apartment. The landlord raises the rent. Victoria's sibling, Alfred, decides to buy Victoria a mobile home to live in so that Victoria can move from the apartment. Alfred puts the mobile home in both their names. Alfred makes a down payment of $4,000 in April 2011, and loan payments of $400 each month thereafter. Victoria moves into the mobile home in April, and lives there alone. The sibling's down payment of $4,000 in April is ISM to Victoria. Alfred's loan payment of $400 beginning in May is a shelter payment and is outside ISM. Since the actual value of each source of ISM exceeds the PMV, we charge the PMV for April 2011 and continuing. For more information on ISM to one person, see SI 00835.400A. For more information on ISM from outside household, see SI 00835.350.",
+      "situation": "Victoria receives SSI and lives alone with no other income. Her brother Alfred buys a mobile home for her, in both their names. He makes a $4,000 down payment in April 2026, and she moves in that month. From May 2026 he makes the $400 loan payment each month.",
+      "question": "How much in-kind support is charged in April and in May 2026?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-04-10",
+          "amount": 4000,
+          "delivery": "vendor",
+          "category": "mortgage",
+          "giver": "brother"
+        },
+        {
+          "id": "g2",
+          "date": "2026-05-10",
+          "amount": 400,
+          "delivery": "vendor",
+          "category": "mortgage",
+          "giver": "brother",
+          "recurring": true
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 351.33
+          },
+          {
+            "month": "2026-05",
+            "measure": "ism_value",
+            "value": 351.33
+          }
+        ]
+      },
+      "ssa_answer": "Both the down payment and the loan payments are in-kind support for shelter. Each is over the cap, so the cap is charged ($351.33 in 2026) in April and every month after.",
+      "input_note": "The down payment and the loan payments are both entered as payments for her home, since payments on a mobile home count as mortgage payments (POMS SI 00835.465D.2)."
+    },
+    {
+      "id": "daughter-mortgage",
+      "title": "A daughter pays the mortgage every month",
+      "cite": "20 CFR 416.1103(g)",
+      "source": "cfr-416-1103-g",
+      "part": "Examples",
+      "passage": "Examples: If your daughter uses her own money to pay your mortgage payment directly to the mortgage lender, the payment itself is not your income because you do not receive it. However, because of your daughter's payment, the transaction provides you with shelter; the mortgage payment is in-kind income for shelter to you.",
+      "situation": "Helen receives SSI and lives alone in a house she owns, with no other income. Every month in 2026 her daughter uses her own money to pay Helen's $620 mortgage payment directly to the lender. Consider March 2026.",
+      "question": "How much in-kind support is charged in March 2026, and what is Helen's SSI amount for that month?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-03-01",
+          "amount": 620,
+          "delivery": "vendor",
+          "category": "mortgage",
+          "giver": "daughter",
+          "recurring": true
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 351.33
+          },
+          {
+            "month": "2026-03",
+            "measure": "ssi_amount",
+            "value": 662.67
+          }
+        ]
+      },
+      "ssa_answer": "The payment itself is not income, but the shelter it provides is in-kind income. Under the presumed value rule it is capped at $351.33 in 2026, so after the $20 general exclusion her SSI is $662.67."
+    },
+    {
+      "id": "hotel-bill-later",
+      "title": "A son pays a hotel bill the month after the stay",
+      "cite": "20 CFR 416.1103(g)",
+      "source": "cfr-416-1103-g",
+      "part": "Examples",
+      "passage": "Similarly, if you book a hotel room on credit and your son later pays the bill, the payment to the hotel is not income to you, but the payment of the bill is in-kind income for shelter to you. In this example, if your son pays for the hotel bill in a month after the month of the hotel stay, we will count the in-kind income to you in the month in which he pays the bill.",
+      "situation": "Grace receives SSI and lives alone with no other income. In March 2026 she books a hotel room on credit for three nights, costing $240. In April 2026 her son pays the hotel bill.",
+      "question": "In which month is in-kind support charged, and how much, for March and April 2026?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-04-08",
+          "amount": 240,
+          "delivery": "vendor",
+          "category": "rent",
+          "giver": "son"
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 0
+          },
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 240
+          }
+        ]
+      },
+      "ssa_answer": "In-kind income for shelter of $240, counted in April, the month her son pays, not in March."
+    },
+    {
+      "id": "lawn-service",
+      "title": "A brother pays for lawn mowing",
+      "cite": "20 CFR 416.1103(g)",
+      "source": "cfr-416-1103-g",
+      "part": "Examples",
+      "passage": "On the other hand, if your brother pays a lawn service to mow your grass, the payment is not income to you because the mowing cannot be used to meet your needs for food or shelter. Therefore, the payment for the lawn service is not in-kind income as defined in § 416.1102.",
+      "situation": "Leo receives SSI and lives alone in his own house. In June 2026 his brother pays a lawn service $120 to mow Leo's grass.",
+      "question": "Does the $120 count as income to Leo?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-06-12",
+          "amount": 120,
+          "delivery": "vendor",
+          "category": "other",
+          "giver": "brother"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: the mowing cannot be used to meet needs for food or shelter."
+    },
+    {
+      "id": "van-collection",
+      "title": "A community buys a specially equipped van",
+      "cite": "20 CFR 416.1103(j)",
+      "source": "cfr-416-1103",
+      "part": "Example 1",
+      "passage": "Example 1: A community takes up a collection to buy you a specially equipped van, which is your only vehicle. The value of this gift is not income because the van does not provide you with food or shelter and will become an excluded nonliquid resource under § 416.1218 in the month following the month of receipt.",
+      "situation": "Sam receives SSI, lives alone and uses a wheelchair. In October 2026 his community takes up a collection and buys him a $38,000 specially equipped van, which is his only vehicle.",
+      "question": "Does the van count as income to Sam?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-10-05",
+          "amount": 38000,
+          "delivery": "item",
+          "category": "transport",
+          "giver": "community collection"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: the van does not provide food or shelter and becomes an excluded resource the next month."
+    },
+    {
+      "id": "car-from-brother",
+      "title": "A brother gives a new car",
+      "cite": "POMS SI 00815.550",
+      "source": "poms-si-00815-550",
+      "part": "C.3",
+      "passage": "Stan Kowalski, an SSI recipient, receives a new car valued at $6,000 from their brother. Since a portion of the value of the car ($4,500) will become an excluded nonliquid resource in the next month, the value of the car is not income to Stan. NOTE: This example reflects the automobile resource exclusion policy in effect through March 2005 (See SI 01130.200C for the automobile exclusion policy beginning April 2005).",
+      "situation": "Stan receives SSI and lives alone. He does not own a car. In March 2026 his brother gives him a new car valued at $6,000.",
+      "question": "Does the car count as income to Stan?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-03-14",
+          "amount": 6000,
+          "delivery": "item",
+          "category": "transport",
+          "giver": "brother"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income, because the car becomes an excluded resource the next month.",
+      "updated": {
+        "source": "poms-si-00815-550",
+        "note": "SSA notes that this example reflects the car rule in effect through March 2005, when only part of the car's value was excluded. Since April 2005 one car is excluded whatever its value, so the answer is the same."
+      }
+    },
+    {
+      "id": "title-iv-grants",
+      "title": "Federal student aid, partly set aside",
+      "cite": "POMS SI 00830.455",
+      "source": "poms-si-00830-455",
+      "part": "E.3",
+      "passage": "In September 2004, an SSI beneficiary receives $2,000 in grants and scholarships that are under Title IV of HEA. The SSI beneficiary uses $1,000 for tuition and fees and another $300 for books. The remaining $700 is set aside for unspecified reasons. The claims representative determines the $2,000 is excluded from income beginning September 2004 and the remaining $700 is excluded from resources. Educational assistance under Title IV of HEA or BIA is excluded from income and resources. Any interest or dividends earned on the $700 are also excluded from income.",
+      "situation": "Nina receives SSI, lives alone and attends college. In September 2026 she receives $2,000 in grants and scholarships under Title IV of the Higher Education Act. She uses $1,000 for tuition and fees and $300 for books, and sets the remaining $700 aside for no particular purpose.",
+      "question": "How much of the $2,000 counts as income to Nina in September 2026?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-09-03",
+          "amount": 2000,
+          "delivery": "cash",
+          "category": "education",
+          "giver": "federal student aid"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "None. Educational assistance under Title IV of the Higher Education Act is excluded from income, and the $700 set aside is excluded from resources."
+    },
+    {
+      "id": "loan-without-repayment",
+      "title": "A monthly \"loan\" with no duty to repay",
+      "cite": "POMS SI 01120.220",
+      "source": "poms-si-01120-220",
+      "part": "D.3",
+      "passage": "EXAMPLE: An applicant applies for SSI in June 2011. They have no income and allege that their adult child provided them $200 cash per month as a loan. The applicant states that they would like to use their SSI benefits if approved to pay back the loan. When contacted, the adult child of the applicant states that although they would like the applicant to repay them, the applicant does not have to repay the loan. The CR determines that a bona fide loan does not exist because there is no obligation to repay.",
+      "situation": "Ray receives SSI, lives alone and has no other income. Every month in 2026 his adult child gives him $200 in cash and calls it a loan. Ray would like to repay it from his SSI, but his child says he does not have to. Consider July 2026.",
+      "question": "Does the $200 count as income to Ray in July 2026, and what is his SSI amount for that month?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-07-01",
+          "amount": 200,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "adult child",
+          "recurring": true
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 200
+          },
+          {
+            "month": "2026-07",
+            "measure": "ssi_amount",
+            "value": 814
+          }
+        ]
+      },
+      "ssa_answer": "There is no obligation to repay, so it is not a bona fide loan and the cash is income when received (SI 01120.220C.1.b). It comes every month, so the one-off exclusion does not apply; after the $20 general exclusion his SSI is $814."
+    },
+    {
+      "id": "domestic-plane-ticket",
+      "title": "A plane ticket for a trip within the United States",
+      "cite": "POMS SI 00830.521",
+      "source": "poms-si-00830-521",
+      "part": "B.1",
+      "passage": "The value of a ticket for domestic travel received by an individual, or their spouse, or parent whose income is subject to deeming is excluded from income if: • The ticket is received as a gift; and • The ticket is not converted to cash (e.g., cashed in, sold, etc.).",
+      "situation": "Ivy receives SSI and lives alone. In November 2026 her sister gives her a $420 round-trip plane ticket from Chicago to Phoenix to visit family. Ivy uses the ticket.",
+      "question": "Does the ticket count as income to Ivy?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-11-10",
+          "amount": 420,
+          "delivery": "item",
+          "category": "transport",
+          "giver": "sister"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-11",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: a gift of a ticket for travel within the United States is excluded as long as it is not converted to cash."
+    },
+    {
+      "id": "one-time-electric",
+      "title": "An aunt pays one electric bill",
+      "cite": "POMS SI 00810.410",
+      "source": "poms-si-00810-410",
+      "part": "A.6",
+      "passage": "Generally, this exclusion applies to any type of unearned income. This exclusion also applies to in-kind support and maintenance (ISM) as described in SI 00835.000 and payments received for completing research surveys.",
+      "situation": "Rita receives SSI and lives alone with no other income. In May 2026 her aunt, who has not helped before and does not help again that year, pays Rita's $90 electric bill directly to the utility.",
+      "question": "How much in-kind support is charged in May 2026, and how much counts after the infrequent or irregular income exclusion?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-05-14",
+          "amount": 90,
+          "delivery": "vendor",
+          "category": "utility",
+          "giver": "aunt"
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "ism_value",
+            "value": 90
+          },
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 30
+          }
+        ]
+      },
+      "ssa_answer": "In-kind support of $90. The infrequent or irregular income exclusion also applies to in-kind support, so $60 is excluded and $30 counts, before the $20 general exclusion."
+    },
+    {
+      "id": "part-of-rent",
+      "title": "A father pays part of the rent each month",
+      "cite": "POMS SI 00835.300",
+      "source": "poms-si-00835-300",
+      "part": "C.3",
+      "passage": "The PMV is the maximum amount of ISM that we can charge. We do not charge the PMV if an SSI claimant shows that: • the current market value (CMV) of any food, or shelter received, minus any payment the claimant makes for them, is less than the PMV; or • the actual amount someone else pays for the claimant's food or shelter is less than the PMV. The amount of ISM counted is the amount of the PMV described in SI 00835.300C.2. or the actual value, if the claimant rebuts the PMV and we establish a lower value. We explain the rebuttal rule procedures in SI 00835.320.",
+      "situation": "Omar receives SSI, lives alone in an apartment with $700 monthly rent and has no other income. Every month in 2026 his father pays $200 of the rent directly to the landlord and Omar pays the rest, and Omar shows SSA the receipts. Consider August 2026.",
+      "question": "How much in-kind support is charged in August 2026, and what is Omar's SSI amount for that month?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-08-01",
+          "amount": 200,
+          "delivery": "vendor",
+          "category": "rent",
+          "giver": "father",
+          "recurring": true
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-08",
+            "measure": "ism_value",
+            "value": 200
+          },
+          {
+            "month": "2026-08",
+            "measure": "ssi_amount",
+            "value": 814
+          }
+        ]
+      },
+      "ssa_answer": "In-kind support of $200, the amount his father actually pays, because it is less than the cap. After the $20 general exclusion his SSI is $814."
+    },
+    {
+      "id": "cash-two-quarters",
+      "title": "Cash from one aunt in March and again in April",
+      "cite": "POMS SI 00810.410",
+      "source": "poms-si-00810-410",
+      "part": "A.1",
+      "passage": "Income is considered to be received infrequently if an individual receives it only once during a calendar quarter from a single source and the individual did not receive that type of income in the month immediately preceding that month or in the month immediately subsequent to that month, regardless of whether or not these payments occur in different calendar quarters.",
+      "situation": "Kim receives SSI and lives alone with no other income. Her aunt gives her $50 in cash on March 28, 2026 and another $50 in cash on April 3, 2026, and nothing else that year.",
+      "question": "How much of each $50 gift counts, after the infrequent or irregular income exclusion?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-03-28",
+          "amount": 50,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "aunt"
+        },
+        {
+          "id": "g2",
+          "date": "2026-04-03",
+          "amount": 50,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "aunt"
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 50
+          },
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 50
+          }
+        ]
+      },
+      "ssa_answer": "Neither gift is infrequent: the same aunt gave the same kind of income in the next month, even though it falls in another quarter. Both count in full."
+    },
+    {
+      "id": "two-relatives-same-month",
+      "title": "Birthday cash from two relatives in one month",
+      "cite": "POMS SI 00810.410",
+      "source": "poms-si-00810-410",
+      "part": "C",
+      "passage": "Beginning September 8, 2006, infrequent income is defined as income that an individual receives only once during a calendar quarter from a single source, and which the individual did not receive in the month immediately preceding that month or in the month immediately subsequent to that month, regardless of whether or not those payments occur in different calendar quarters. We exclude the following amount of income which is received either infrequently or irregularly: • The first $30 per calendar quarter of earned income; and • The first $60 per calendar quarter of unearned income.",
+      "situation": "Lou receives SSI and lives alone with no other income. On his birthday, June 9, 2026, his uncle gives him $40 in cash and his godmother gives him $40 in cash. Neither gives him anything else that year.",
+      "question": "How much of the $80 counts, after the infrequent or irregular income exclusion?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-06-09",
+          "amount": 40,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "uncle"
+        },
+        {
+          "id": "g2",
+          "date": "2026-06-09",
+          "amount": 40,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "godmother"
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 20
+          }
+        ]
+      },
+      "ssa_answer": "Both gifts are infrequent, but the exclusion is the first $60 of unearned income in the quarter, not $60 per gift, so $20 counts."
+    },
+    {
+      "id": "able-contribution",
+      "title": "An uncle puts money in her ABLE account",
+      "cite": "POMS SI 01130.740",
+      "source": "poms-si-01130-740",
+      "part": "C.1.b",
+      "passage": "Third party contributions: • are not income to the designated beneficiary; • are contributions made by persons other than the designated beneficiary; • are made with funds that do not otherwise belong, or are not otherwise due, to the designated beneficiary; • are made with the third party’s funds; and • are treated as a completed gift when made by a person other than the designated beneficiary NOTE: “Completed gift” refers to the IRS definition for gift-tax rules, not the definition of a gift in SI 00830.520. For ABLE, we exclude third party contributions, regardless of their status as a gift for SSI purposes.",
+      "situation": "Mae receives SSI, lives alone and has an ABLE account. In May 2026 her uncle deposits $500 of his own money into her ABLE account.",
+      "question": "Does the $500 count as income to Mae?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-05-20",
+          "amount": 500,
+          "delivery": "able",
+          "category": "other",
+          "giver": "uncle"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: a contribution to her ABLE account made by someone else with their own money is not income to her."
+    },
+    {
+      "id": "insurance-premium",
+      "title": "A son pays a dental insurance premium every month",
+      "cite": "POMS SI 00815.400",
+      "source": "poms-si-00815-400",
+      "part": "A",
+      "passage": "Payment of an individual's bills (including supplementary medical insurance under title XVIII or other medical insurance premiums) by a third party directly to the supplier is not income. However, anything received in kind as a result of the payment is income if it is food or shelter.",
+      "situation": "Ben receives SSI and lives alone with no other income. Every month in 2026 his son pays Ben's $95 dental and vision insurance premium directly to the insurance company. Consider February 2026.",
+      "question": "Does the $95 count as income to Ben in February 2026?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-02-05",
+          "amount": 95,
+          "delivery": "vendor",
+          "category": "medical",
+          "giver": "son",
+          "recurring": true
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-02",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: medical insurance premiums paid by a third party directly to the insurer are not income."
+    },
+    {
+      "id": "dentist-paid",
+      "title": "A sister pays the dentist",
+      "cite": "20 CFR 416.1103(a)",
+      "source": "cfr-416-1103",
+      "part": "(a)(1)",
+      "passage": "(a) Medical care and services. Medical care and services are not income if they are any of the following: (1) Given to you free of charge or paid for directly to the provider by someone else;",
+      "situation": "Ava receives SSI and lives alone. In July 2026 her sister pays a dentist $1,200 directly for Ava's crown.",
+      "question": "Does the $1,200 count as income to Ava?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-07-20",
+          "amount": 1200,
+          "delivery": "vendor",
+          "category": "medical",
+          "giver": "sister"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: medical care paid for directly to the provider by someone else is not income."
+    },
+    {
+      "id": "weatherization",
+      "title": "A nephew pays for insulation and storm windows",
+      "cite": "20 CFR 416.1103(i)",
+      "source": "cfr-416-1103",
+      "part": "(i)",
+      "passage": "(i) Weatherization assistance. Weatherization assistance (Examples: Insulation, storm doors and windows) is not income.",
+      "situation": "Hank receives SSI and lives alone in his own house. In October 2026 his nephew pays a contractor $1,800 to add attic insulation and install storm windows.",
+      "question": "Does the $1,800 count as income to Hank?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-10-12",
+          "amount": 1800,
+          "delivery": "vendor",
+          "category": "other",
+          "giver": "nephew"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: weatherization assistance, such as insulation and storm doors and windows, is not income."
+    },
+    {
+      "id": "rent-over-cap",
+      "title": "A son pays the whole rent every month",
+      "cite": "POMS SI 00835.300",
+      "source": "poms-si-00835-300",
+      "part": "C.2",
+      "passage": "2. Amount of PMV The amount of the PMV is equal to: a. Eligibility determinations One-third the Federal benefit rate (FBR) (in effect for the month in which ISM is received) for a claimant or an eligible couple, plus $20. b. Payment computations when ISM received in the budget month One-third the FBR (in effect for the month of payment computation) for an individual or an eligible couple, plus $20. Prior to January 01, 1995, we based the amount of the PMV used for payment computations on the amount of the FBR in effect for the budget month, rather than for the computation month. For a change in PMV computation policy effective January 1995, see SI 02005.001E.4. The PMV yields equal supplemental security insurance (SSI) payments for a claimant who is subject to the PMV, and a claimant who is subject to the VTR, if neither has other countable income.",
+      "situation": "Ellen receives SSI and lives alone in an apartment, with no other income. Every month in 2026 her son pays her $900 rent directly to the landlord. Consider October 2026.",
+      "question": "How much in-kind support is charged in October 2026, and what is Ellen's SSI amount for that month?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-10-01",
+          "amount": 900,
+          "delivery": "vendor",
+          "category": "rent",
+          "giver": "son",
+          "recurring": true
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "ism_value",
+            "value": 351.33
+          },
+          {
+            "month": "2026-10",
+            "measure": "ssi_amount",
+            "value": 662.67
+          }
+        ]
+      },
+      "ssa_answer": "In-kind support capped at the presumed maximum value, one-third of the $994 federal rate plus $20, or $351.33. After the $20 general exclusion her SSI is $662.67, the same as under the one-third reduction."
+    },
+    {
+      "id": "prepaid-next-rent",
+      "title": "A sister pays next month's rent early",
+      "cite": "POMS SI 00835.360",
+      "source": "poms-si-00835-360",
+      "part": "B",
+      "passage": "In-kind support and maintenance (ISM) from a TPVP is unearned income when an applicant or claimant first has use of the item. For more information on ISM, refer to SI 00835.310B. 1. Exception for TPVP as a gift ISM resulting from a TPVP is income in the month of the payment, rather than when an applicant or claimant first has use of the ISM, if: • the applicant or claimant obtains food or shelter using their own credit; and • a third party later makes a vendor payment for the items as a gift.",
+      "situation": "Jo receives SSI and lives alone in an apartment, with no other income. On March 25, 2026 her sister pays Jo's $300 April rent directly to the landlord, as a gift. Nobody else pays any of Jo's rent in 2026.",
+      "question": "How much in-kind support is charged in March and in April 2026?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-03-25",
+          "amount": 300,
+          "delivery": "vendor",
+          "category": "rent",
+          "giver": "sister",
+          "covers": {
+            "from": "2026-04",
+            "to": "2026-04"
+          }
+        }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 0
+          },
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 300
+          }
+        ]
+      },
+      "ssa_answer": "In-kind support counts when she first has use of the shelter, which is April. The exception for a gift that pays for shelter she already obtained on her own credit does not apply, because April's rent was paid ahead.",
+      "input_note": "The payment is entered with the month it covers, April 2026."
+    },
+    {
+      "id": "television",
+      "title": "Her children give her a television",
+      "cite": "POMS SI 00815.550",
+      "source": "poms-si-00815-550",
+      "part": "A",
+      "passage": "The value of any noncash item (other than an item of food or shelter) is not income if the item would become a partially or totally excluded nonliquid resource if retained into the month after the month of receipt.",
+      "situation": "Rosa receives SSI and lives alone. In December 2026 her children give her a $650 television for her living room.",
+      "question": "Does the television count as income to Rosa?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-12-20",
+          "amount": 650,
+          "delivery": "item",
+          "category": "personal",
+          "giver": "children"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-12",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: a television is a household good, which is excluded from resources whatever its value (SI 01130.430), and a non-cash item that would be an excluded resource is not income."
+    },
+    {
+      "id": "wheelchair",
+      "title": "A brother buys a power wheelchair",
+      "cite": "POMS SI 01130.430",
+      "source": "poms-si-01130-430",
+      "part": "C.2.b",
+      "passage": "Items required because of an individual's physical or mental impairment, such as prosthetic devices or wheelchairs, are also personal effects.",
+      "situation": "Ted receives SSI and lives alone. In April 2026 his brother buys him a $4,500 power wheelchair.",
+      "question": "Does the wheelchair count as income to Ted?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-04-22",
+          "amount": 4500,
+          "delivery": "item",
+          "category": "equipment",
+          "giver": "brother"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: a wheelchair is a personal effect, excluded from resources, and a non-cash gift that would be an excluded resource is not income (SI 00815.550)."
+    },
+    {
+      "id": "clothing",
+      "title": "A grandmother buys clothes",
+      "cite": "POMS SI 00835.400",
+      "source": "poms-si-00835-400",
+      "part": "B.1",
+      "passage": "NOTE: Clothing received before March 9, 2005 is counted as ISM. Clothing received on or after March 9, 2005 is not counted as ISM.",
+      "situation": "Lucy receives SSI and lives alone. In September 2026 her grandmother buys her $240 of clothes for the fall.",
+      "question": "Do the clothes count as income to Lucy?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-09-12",
+          "amount": 240,
+          "delivery": "item",
+          "category": "clothing",
+          "giver": "grandmother"
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "Not income: clothing has not counted as in-kind support since March 9, 2005."
+    },
+    {
+      "id": "meals-at-relative",
+      "title": "Sunday dinners at a daughter's home",
+      "cite": "POMS SI 00835.400",
+      "source": "poms-si-00835-400",
+      "part": "B.2.a",
+      "passage": "The individual receives ISM in the form of food outside a household setting such as a gift of meals at a relative's home.",
+      "situation": "Earl receives SSI and lives alone. Every Sunday in 2026 he eats dinner at his daughter's home, and she never asks him to pay. Consider November 2026, when the dinners are worth about $120.",
+      "question": "Do the dinners count as income to Earl in November 2026?",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2026-11-29",
+          "amount": 120,
+          "delivery": "item",
+          "category": "food",
+          "giver": "daughter",
+          "recurring": true
+        }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-11",
+            "measure": "after_infrequent",
+            "value": 0
+          }
+        ]
+      },
+      "ssa_answer": "When written: in-kind support in the form of food. Since September 30, 2024: not income.",
+      "updated": {
+        "source": "fr-89-21199",
+        "note": "SSA wrote this when food counted as in-kind support. A 2024 rule removed food from in-kind support, so since September 30, 2024 it is not income."
+      }
     }
   ],
   "out_of_scope": [
@@ -485,7 +1462,7 @@
       "why": "Giftwise does not ask whether the person already owns a car."
     },
     {
-      "cite": "POMS SI 00830.520 C.3, SI 00815.550 C.2",
+      "cite": "POMS SI 00830.520 C.3, SI 00815.550 C.2, SI 00835.310 E.3, SI 00835.400 F (Example 2), 20 CFR 416.1103(j) (Example 2)",
       "what": "A gift of the house she lives in",
       "why": "Giftwise does not handle gifts of real property."
     },
@@ -533,6 +1510,51 @@
       "cite": "POMS SI 00815.550 C.1",
       "what": "A van given to a child's parents",
       "why": "Deeming parents' income to a child is not modeled."
+    },
+    {
+      "cite": "POMS SI 00830.521 B.2, B.3",
+      "what": "A travel ticket cashed in, or a refundable ticket for travel abroad",
+      "why": "Giftwise does not ask whether a ticket can be refunded or where the trip goes."
+    },
+    {
+      "cite": "POMS SI 01120.220 D.5 (2 examples), E.7",
+      "what": "Loans from family that must be repaid",
+      "why": "A bona fide loan is not a gift, and Giftwise handles gifts."
+    },
+    {
+      "cite": "POMS SI 00830.605 E (4 examples)",
+      "what": "Help that a State certifies as home energy or support and maintenance assistance",
+      "why": "These are about charities and utilities certified by a State, not gifts from family."
+    },
+    {
+      "cite": "20 CFR 416.1103(b) (Example)",
+      "what": "Cash from a private social services agency to pay a homemaker",
+      "why": "Giftwise handles gifts from people, not payments from programs."
+    },
+    {
+      "cite": "POMS SI 00810.410 F.2, F.4, F.5, L.4, L.5",
+      "what": "Support from households and institutions, wages from several jobs, and support from an absent parent",
+      "why": "Giftwise models gifts to one person, not household or institutional support, wages or child support."
+    },
+    {
+      "cite": "POMS SI 00830.455 E.1.b, E.1.c, E.1.d, E.2",
+      "what": "School money kept past nine months, spent on something else, or received under the rules before June 2004",
+      "why": "Giftwise does not follow how an education gift is spent in later months, and the older rules no longer apply."
+    },
+    {
+      "cite": "POMS SI 00835.400 F (Example 1)",
+      "what": "A child away at school whose parents' income is deemed",
+      "why": "Deeming parents' income to a child is not modeled."
+    },
+    {
+      "cite": "POMS SI 00835.471 C",
+      "what": "A gas bill for a home that also houses a business",
+      "why": "Giftwise does not split a bill between home and business use."
+    },
+    {
+      "cite": "20 CFR 416.1130(a) (Example)",
+      "what": "The one-third reduction in a cost-of-living month",
+      "why": "Giftwise uses 2026 amounts only."
     }
   ]
 }

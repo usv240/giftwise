@@ -527,3 +527,53 @@
 :root[data-mode="technical"] .ev .tech-only {
   display: block;
 }
+
+/* The results, above the fold: three figures, each linking to the section that shows it in full. */
+.jr {
+  list-style: none;
+  margin: clamp(1.75rem, 1.25rem + 1.5vw, 2.75rem) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 68rem;
+}
+@media (max-width: 860px) {
+  .jr {
+    grid-template-columns: 1fr;
+  }
+}
+.jr-link {
+  display: grid;
+  gap: 6px;
+  height: 100%;
+  padding: clamp(18px, 1rem + 0.8vw, 26px);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.jr-link:active {
+  transform: scale(0.985);
+}
+.jr-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.jr-fig {
+  font-size: clamp(2.5rem, 1.8rem + 2.4vw, 3.75rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--positive);
+}
+.jr-what {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.jr-base {
+  font-size: 15px;
+  color: var(--muted);
+}

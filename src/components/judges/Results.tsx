@@ -1,0 +1,52 @@
+import bills from "../../../content/eval-results.json";
+import field from "../../../content/eval/field-cases-results.json";
+import ssa from "../../../content/eval/ssa-examples-results.json";
+import { usd } from "@/lib/rules";
+
+/**
+ * The results, above the fold: a benchmark from Social Security's own text, a run on real cases Giftwise did not
+ * write, and what it refused. Every figure is read from the result files the sections below show in full.
+ */
+export function Results() {
+  const ex = ssa.summary;
+  const fc = field.summary;
+  const b = bills.summary;
+  const bills_n = b.referee.all_cases;
+  return (
+    <ul className="jr" aria-label="Results">
+      <li className="jr-item">
+        <a className="jr-link" href="#ssa-examples">
+          <span className="jr-fig tabular">
+            {ex.engine_matches} of {ex.cases}
+          </span>
+          <span className="jr-what">of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer.</span>
+          <span className="jr-base">
+            Claude with no rulebook: <span className="tabular">{ex.claude_matches} of {ex.claude_answered}</span>.
+          </span>
+        </a>
+      </li>
+      <li className="jr-item">
+        <a className="jr-link" href="#field-cases">
+          <span className="jr-fig tabular">
+            {fc.agreed} of {fc.scored}
+          </span>
+          <span className="jr-what">real SSI cases from federal courts reach the outcome SSA and the court did.</span>
+          <span className="jr-base">
+            Routed through Giftwise, the same help keeps <span className="tabular">{usd(fc.dollars.as_shown_in_the_opinions.kept_per_month_2026)}</span> a month.
+          </span>
+        </a>
+      </li>
+      <li className="jr-item">
+        <a className="jr-link" href="#evaluation">
+          <span className="jr-fig tabular">
+            {b.referee.wrong_routes_accepted} of {bills_n}
+          </span>
+          <span className="jr-what">bills where Giftwise accepted a route that lowers her check.</span>
+          <span className="jr-base">
+            Claude with no rulebook accepted <span className="tabular">{b.baseline.wrong_routes_accepted}</span>.
+          </span>
+        </a>
+      </li>
+    </ul>
+  );
+}

@@ -46,9 +46,11 @@ describe("hero numbers", () => {
     expect(r.checkWithBestRoute).toBe(994);
   });
 
-  it("R-SHEL-01 with R-INFREQ-01: a one-off rent payment also gets the $60 exclusion", () => {
-    const r = evaluateGift(g({ delivery: "vendor", category: "rent", amount: 800 }), base);
-    expect(r.checkAfter).toBe(722.67);
+  it("R-SHEL-01 with R-INFREQ-01: a one-off rent payment gets the $60 exclusion before the cap (POMS SI 00810.410L.3)", () => {
+    // $800 less $60 is $740, still above the $351.33 cap, so the full cap counts: 994 - (351.33 - 20).
+    expect(evaluateGift(g({ delivery: "vendor", category: "rent", amount: 800 }), base).checkAfter).toBe(662.67);
+    // Below the cap the exclusion still lowers what counts: $150 less $60 is $90, then the $20 general exclusion.
+    expect(evaluateGift(g({ delivery: "vendor", category: "rent", amount: 150 }), base).checkAfter).toBe(924);
   });
 
   it("R-ABLE-01, R-ABLE-02: rent money sent to ABLE keeps $994", () => {
@@ -117,6 +119,14 @@ describe("edge cases", () => {
     expect(r.ruleIds).toContain("R-SHEL-VTR");
   });
 
+  it("R-SHEL-VTR needs the household to provide all meals; buying her own food means the presumed maximum value rule (20 CFR 416.1131(a)(3), found by the court-case run)", () => {
+    const r = evaluateGift(g({ delivery: "vendor", category: "rent", amount: 500, recurring: true }), { ...base, livesInAnothersHousehold: true, householdProvidesAllMeals: false });
+    expect(r.ruleIds).not.toContain("R-SHEL-VTR");
+    expect(r.ruleIds).toContain("R-SHEL-01");
+    // $500 of shelter is capped at the presumed maximum value, $351.33, less the $20 general exclusion.
+    expect(r.checkAfter).toBe(662.67);
+  });
+
   it("earned income: $20, then $65, then half of the rest", () => {
     const t = computeMonth("2026-04", [], { ...base, earnedMonthly: 500 });
     expect(t.countableIncome).toBe(207.5);
@@ -161,6 +171,53 @@ describe("month planning", () => {
     const [apr, jun] = plan.months;
     expect(apr.infrequentExcluded).toBe(50);
     expect(jun.infrequentExcluded).toBe(10);
+  });
+});
+
+describe("R-INFREQ-01: order of receipt and the housing cap (POMS SI 00810.410L.3)", () => {
+  const profile = { ...base, savings: 0 };
+  it("a $500 mortgage payment first takes the whole $60, so the $25 cash after it counts in full", () => {
+    const [sep] = planMonths([
+      g({ id: "m", date: "2026-09-02", amount: 500, delivery: "vendor", category: "mortgage", giver: "sister" }),
+      g({ id: "c", date: "2026-09-15", amount: 25, giver: "friend" }),
+    ], profile).months;
+    expect(sep.ismValue).toBe(351.33);
+    expect(sep.infrequentUsed).toBe(60);
+    expect(sep.infrequentExcluded).toBe(0);
+    expect(sep.cashIncome + sep.ismValue - sep.infrequentExcluded).toBe(376.33);
+  });
+  it("with the $25 cash first, it is excluded and $35 is left for the mortgage, which is still over the cap", () => {
+    const [sep] = planMonths([
+      g({ id: "c", date: "2026-09-02", amount: 25, giver: "friend" }),
+      g({ id: "m", date: "2026-09-15", amount: 500, delivery: "vendor", category: "mortgage", giver: "sister" }),
+    ], profile).months;
+    expect(sep.infrequentUsed).toBe(60);
+    expect(sep.cashIncome + sep.ismValue - sep.infrequentExcluded).toBe(351.33);
+  });
+});
+
+describe("R-SHEL-02: housing bills paid ahead (POMS SI 00835.360B, D.2)", () => {
+  const profile = { ...base, savings: 0 };
+  it("an $800 property tax bill for January to December, paid June 30, counts six months in June and $66.67 a month after", () => {
+    const plan = planMonths([g({ date: "2026-06-30", amount: 800, delivery: "vendor", category: "property_tax", covers: { from: "2026-01", to: "2026-12" } })], profile);
+    const at = (m: string) => plan.months.find((x) => x.month === m)!;
+    expect(plan.months.map((m) => m.month)).toEqual(["2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12"]);
+    expect(at("2026-06").shelterPaidByOthers).toBe(400);
+    expect(at("2026-06").ismValue).toBe(351.33);
+    expect(at("2026-07").ismValue).toBe(66.67);
+    expect(at("2026-12").ismValue).toBe(66.67);
+    expect(at("2026-06").infrequentExcluded).toBe(0);
+    expect(evaluateGift(g({ date: "2026-06-30", amount: 800, delivery: "vendor", category: "property_tax", covers: { from: "2026-01", to: "2026-12" } }), profile).ruleIds).toContain("R-SHEL-02");
+  });
+  it("next month's rent paid this month counts next month", () => {
+    const plan = planMonths([g({ date: "2026-03-25", amount: 300, delivery: "vendor", category: "rent", covers: { from: "2026-04", to: "2026-04" } })], profile);
+    expect(plan.months.find((m) => m.month === "2026-03")!.ismValue).toBe(0);
+    expect(plan.months.find((m) => m.month === "2026-04")!.ismValue).toBe(300);
+  });
+  it("a bill with no covered months still counts in the month it is paid", () => {
+    const [m] = planMonths([g({ date: "2026-05-10", amount: 300, delivery: "vendor", category: "rent", recurring: true })], profile).months;
+    expect(m.month).toBe("2026-05");
+    expect(m.ismValue).toBe(300);
   });
 });
 

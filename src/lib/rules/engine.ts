@@ -29,6 +29,9 @@ const isShelter = (c: Category) => SHELTER_CATEGORIES.includes(c);
 /** "2026-04-15" -> "2026-04" */
 export const monthOf = (date: string) => date.slice(0, 7);
 
+/** The one-third reduction's household test: all month in another's household, which also provides all meals (20 CFR 416.1131(a)). */
+export const vtrHousehold = (p: Profile) => p.livesInAnothersHousehold && p.householdProvidesAllMeals !== false;
+
 export function addMonths(month: string, n: number): string {
   const [y, m] = month.split("-").map(Number);
   const d = new Date(Date.UTC(y, m - 1 + n, 1));
@@ -91,10 +94,12 @@ export function classify(gift: Gift, profile: Profile): Treatment {
   }
   if (delivery === "vendor") {
     if (isShelter(category)) {
+      const base = vtrHousehold(profile) ? ["R-SHEL-VTR"] : ["R-SHEL-01", "R-GIE-01"];
       return {
         kind: "ism_shelter",
-        ruleIds: profile.livesInAnothersHousehold ? ["R-SHEL-VTR"] : ["R-SHEL-01", "R-GIE-01"],
-        infrequentEligible: !gift.recurring,
+        ruleIds: gift.covers ? [...base, "R-SHEL-02"] : base,
+        // A prepaid bill that covers later months is received in consecutive months, so it is not infrequent (SI 00810.410A.1).
+        infrequentEligible: !gift.recurring && !coversLaterMonths(gift),
         ambiguous: true,
         ambiguityReason:
           category === "utility"
@@ -118,39 +123,73 @@ export function classify(gift: Gift, profile: Profile): Treatment {
   };
 }
 
+const monthsBetween = (from: string, to: string) => {
+  const [fy, fm] = from.split("-").map(Number);
+  const [ty, tm] = to.split("-").map(Number);
+  return (ty - fy) * 12 + (tm - fm) + 1;
+};
+
+/** True when a housing bill covers months after the month it was paid. */
+export const coversLaterMonths = (g: Gift) => Boolean(g.covers && g.covers.to > monthOf(g.date));
+
+/**
+ * The part of a gift that counts in a month. A housing bill paid for past, current and future months counts its
+ * share for every month up to the payment month in the payment month, and each later month's share in that month
+ * (POMS SI 00835.360B and D.2). Everything else counts in full in the month it is given.
+ */
+export function amountInMonth(g: Gift, month: string): number {
+  const paid = monthOf(g.date);
+  if (!g.covers || g.delivery !== "vendor" || !isShelter(g.category)) return paid === month ? g.amount : 0;
+  const { from, to } = g.covers;
+  const share = g.amount / monthsBetween(from, to);
+  if (month === paid) return monthsBetween(from, paid < to ? paid : to) * share * (paid >= from ? 1 : 0);
+  return month > paid && month >= from && month <= to ? share : 0;
+}
+
 /**
  * Countable income and the resulting check for one income month.
  * quarterAllowanceUsed: infrequent exclusion already used earlier in the same calendar quarter.
+ *
+ * The $60 one-off allowance applies in the order income arrives, and to housing help at its actual value before the
+ * monthly cap (POMS SI 00810.410L.3): a $500 mortgage payment then a $25 cash gift leaves $440 of housing help, capped,
+ * and the $25 counted in full.
  */
 export function computeMonth(month: string, gifts: Gift[], profile: Profile, quarterAllowanceUsed = 0): MonthTrace {
   const couple = profile.couple;
   let cashIncome = 0;
-  let cashInfrequent = 0;
   let inKind = 0;
   let shelterPaid = 0;
-  let shelterInfrequent = true;
+  const items: { date: string; amount: number; shelter: boolean; infrequent: boolean }[] = [];
 
   for (const g of gifts) {
-    if (monthOf(g.date) !== month) continue;
+    const amount = amountInMonth(g, month);
+    if (amount <= 0) continue;
     const t = classify(g, profile);
-    if (t.kind === "unearned_cash") {
-      cashIncome += g.amount;
-      if (t.infrequentEligible) cashInfrequent += g.amount;
-    } else if (t.kind === "unearned_in_kind") {
-      inKind += g.amount;
-      if (t.infrequentEligible) cashInfrequent += g.amount;
-    } else if (t.kind === "ism_shelter") {
-      shelterPaid += g.amount;
-      if (!t.infrequentEligible) shelterInfrequent = false;
-    }
+    if (t.kind === "unearned_cash") cashIncome += amount;
+    else if (t.kind === "unearned_in_kind") inKind += amount;
+    else if (t.kind === "ism_shelter") shelterPaid += amount;
+    else continue;
+    items.push({ date: g.date, amount, shelter: t.kind === "ism_shelter", infrequent: t.infrequentEligible });
   }
 
-  const vtrApplied = profile.livesInAnothersHousehold && shelterPaid > 0;
-  const ismValue = shelterPaid > 0 && !vtrApplied ? Math.min(shelterPaid, pmv(couple)) : 0;
+  const vtrApplied = vtrHousehold(profile) && shelterPaid > 0;
+  const cap = pmv(couple);
+  const ismValue = shelterPaid > 0 && !vtrApplied ? Math.min(shelterPaid, cap) : 0;
 
-  const allowanceLeft = Math.max(0, P.infrequentUnearnedPerQuarter - quarterAllowanceUsed);
-  const infrequentBase = cashInfrequent + (ismValue > 0 && shelterInfrequent ? ismValue : 0);
-  const infrequentExcluded = Math.min(allowanceLeft, infrequentBase);
+  // No exclusion applies to the one-third reduction (SI 00835.200A.6), so housing help under it takes none of the allowance.
+  let allowance = Math.max(0, P.infrequentUnearnedPerQuarter - quarterAllowanceUsed);
+  let otherExcluded = 0;
+  let shelterExcluded = 0;
+  for (const it of [...items].sort((a, b) => a.date.localeCompare(b.date))) {
+    if (!it.infrequent || allowance <= 0 || (it.shelter && vtrApplied)) continue;
+    const x = Math.min(allowance, it.amount);
+    allowance -= x;
+    if (it.shelter) shelterExcluded += x;
+    else otherExcluded += x;
+  }
+  const ismCounted = ismValue > 0 ? Math.min(shelterPaid - shelterExcluded, cap) : 0;
+  const infrequentUsed = otherExcluded + shelterExcluded;
+  const infrequentExcluded = otherExcluded + (ismValue - ismCounted);
 
   const unearnedBeforeGie = Math.max(0, cashIncome + inKind + ismValue + profile.otherUnearnedMonthly - infrequentExcluded);
   const generalExcludedFromUnearned = Math.min(P.generalIncomeExclusion, unearnedBeforeGie);
@@ -170,6 +209,7 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
     ismValue: round2(ismValue),
     vtrApplied,
     infrequentExcluded: round2(infrequentExcluded),
+    infrequentUsed: round2(infrequentUsed),
     generalExcludedFromUnearned: round2(generalExcludedFromUnearned),
     generalExcludedFromEarned: round2(generalExcludedFromEarned),
     earnedCountable: round2(earnedCountable),
@@ -243,7 +283,13 @@ export function evaluateGift(gift: Gift, profile: Profile = DEFAULT_PROFILE): Gi
 
 /** Plan a whole month (or several) of gifts, applying the quarterly exclusion across them in date order. */
 export function planMonths(gifts: Gift[], profile: Profile = DEFAULT_PROFILE) {
-  const months = [...new Set(gifts.map((g) => monthOf(g.date)))].sort();
+  const covered = gifts.flatMap((g) => {
+    if (!coversLaterMonths(g)) return [];
+    const out: string[] = [];
+    for (let m = addMonths(monthOf(g.date), 1); m <= g.covers!.to; m = addMonths(m, 1)) out.push(m);
+    return out;
+  });
+  const months = [...new Set([...gifts.map((g) => monthOf(g.date)), ...covered])].sort();
   const withInfrequency = markInfrequency(gifts);
   const usedByQuarter = new Map<string, number>();
   let savings = profile.savings;
@@ -251,7 +297,7 @@ export function planMonths(gifts: Gift[], profile: Profile = DEFAULT_PROFILE) {
     const q = quarterOf(month);
     const used = usedByQuarter.get(q) ?? 0;
     const trace = computeMonth(month, withInfrequency, { ...profile, savings }, used);
-    usedByQuarter.set(q, used + trace.infrequentExcluded);
+    usedByQuarter.set(q, used + trace.infrequentUsed);
     const cashKept = withInfrequency
       .filter((g) => monthOf(g.date) === month && classify(g, profile).kind === "unearned_cash")
       .reduce((s, g) => s + g.amount, 0);

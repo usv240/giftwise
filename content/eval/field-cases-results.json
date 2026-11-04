@@ -1,0 +1,1289 @@
+{
+  "ran_at": "2026-11-04T04:35:09.856Z",
+  "rules_version": "2026.1",
+  "tolerance_usd": 1,
+  "rates": "Engine amounts are 2026: federal benefit rate $994, presumed maximum value $351.33, one-third reduction $331.33. Dollar figures are what the same help would mean to a person on SSI in 2026.",
+  "source": "United States federal court opinions in the GovInfo USCOURTS collection, published by the U.S. Government Publishing Office (govinfo.gov). Each case links to the opinion PDF on GovInfo.",
+  "summary": {
+    "opinions_downloaded": 285,
+    "opinions_read_closely": 87,
+    "cases": 36,
+    "scored": 14,
+    "not_scored": 22,
+    "agreed": 14,
+    "agreed_on_whether_it_counts": 14,
+    "rule_named_in_opinion": 9,
+    "rule_agreed": 9,
+    "amounts_stated": 3,
+    "amounts_agreed": 3,
+    "dollars": {
+      "cases_computed": 10,
+      "cases_not_computed": [
+        "cousin-deposits",
+        "children-deposit-1500",
+        "mother-checks-friend-rent",
+        "son-home-with-dib"
+      ],
+      "as_shown_in_the_opinions": {
+        "note": "ABLE used only where the opinion shows the disability began before age 46; otherwise only paying the landlord or provider directly.",
+        "cases_where_routing_keeps_money": 4,
+        "kept_per_month_2026": 1656.66,
+        "kept_over_stated_months_2026": 38103.32,
+        "cases_with_stated_months": 2
+      },
+      "if_each_person_is_able_eligible": {
+        "note": "The same cases if each person qualifies for an ABLE account (disability before age 46, the rule from January 1, 2026).",
+        "cases_where_routing_keeps_money": 10,
+        "kept_per_month_2026": 4638.64,
+        "kept_over_stated_months_2026": 128556.81
+      }
+    },
+    "overpayments_stated": {
+      "note": "Overpayments SSA assessed, as stated in the opinions, in that year's dollars.",
+      "scored_total": 16312.2,
+      "scored": [
+        {
+          "id": "cousin-deposits",
+          "amount": 4870,
+          "period": "not stated"
+        },
+        {
+          "id": "children-deposit-1500",
+          "amount": 11442.2,
+          "period": "March 2013 to March 2015"
+        }
+      ]
+    },
+    "misses": [],
+    "not_scored_cases": [
+      {
+        "id": "roommate-rent-split",
+        "reason": "Housing shared between joint tenants and the business-arrangement test are not modeled, the same limit ssa-examples.json lists."
+      },
+      {
+        "id": "father-below-market-rent",
+        "reason": "A rental subsidy (rent below market from a relative) is not modeled, as ssa-examples.json notes."
+      },
+      {
+        "id": "relatives-home-remand",
+        "reason": "Remanded without deciding whether the help counts; the later decision is scored as relatives-home-one-third."
+      },
+      {
+        "id": "mother-back-rent-loan",
+        "reason": "A bona fide loan of in-kind support (POMS SI 00835.482) is not income; Giftwise models gifts and has no loan input."
+      },
+      {
+        "id": "father-money-in-account",
+        "reason": "Not a gift: the question is who owns money held in the person's own name (20 CFR 416.1208)."
+      },
+      {
+        "id": "brother-money-in-trust",
+        "reason": "Not a gift: a claimed trust over money in the person's own name. Trusts are not modeled."
+      },
+      {
+        "id": "community-fundraiser",
+        "reason": "Remanded without deciding; also a child, whose parents' income is deemed to him, which Giftwise does not model."
+      },
+      {
+        "id": "son-pays-utilities-taxes",
+        "reason": "Remanded without deciding whether the help counts."
+      },
+      {
+        "id": "child-household-remand",
+        "reason": "Remanded without deciding; a child whose parents' income is deemed, which Giftwise does not model."
+      },
+      {
+        "id": "child-household-adult-siblings",
+        "reason": "A child living with a parent whose income is deemed; deeming is not modeled."
+      },
+      {
+        "id": "mother-checks-remand",
+        "reason": "Remanded without deciding; the later decision is scored as mother-checks-friend-rent."
+      },
+      {
+        "id": "trust-pays-hoa",
+        "reason": "Payments from a trust; trusts are not modeled."
+      },
+      {
+        "id": "trust-monthly-loan",
+        "reason": "Payments from a trust; trusts are not modeled."
+      },
+      {
+        "id": "family-deposits-remand",
+        "reason": "Remanded without deciding; the source of the deposits is not established."
+      },
+      {
+        "id": "parents-deed-land",
+        "reason": "A gift of real property is not modeled, as ssa-examples.json notes."
+      },
+      {
+        "id": "partner-pays-housing",
+        "reason": "The dispute is spousal deeming, which is not modeled; in-kind support was not decided."
+      },
+      {
+        "id": "partner-support-couple",
+        "reason": "The dispute is spousal deeming; the court declined to reach in-kind support."
+      },
+      {
+        "id": "joint-account-brother",
+        "reason": "Ownership of a joint account is not modeled; the help from friends was not decided."
+      },
+      {
+        "id": "son-below-market-apartments",
+        "reason": "A rental subsidy, which is not modeled; also remanded without deciding."
+      },
+      {
+        "id": "father-support-child-criminal",
+        "reason": "A criminal case about a child with parental deeming; not modeled."
+      },
+      {
+        "id": "former-wife-unpaid-rent",
+        "reason": "Remanded without deciding; unpaid rent and the business-arrangement test are not modeled."
+      },
+      {
+        "id": "co-owner-pays-more",
+        "reason": "Pro rata sharing of household expenses is not modeled, the same limit ssa-examples.json lists."
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "parents-homes-one-third",
+      "title": "Living in his parents' homes: benefit cut by one-third",
+      "citation": "Bowden v. SSA, No. 5:16-cv-00240 (2017-06-05)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-kyed-5_16-cv-00240/pdf/USCOURTS-kyed-5_16-cv-00240-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "ism_vtr",
+        "values": [],
+        "overpayment": null,
+        "held": "Living in his parents' household and receiving food and shelter from them, so the one-third reduction applies."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2014-05",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": true,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Shelter in his parents' homes",
+            "as_given": "vendor",
+            "giftwise": "able"
+          }
+        ],
+        "months": [
+          {
+            "month": "2014-05",
+            "as_given_2026": 662.67,
+            "routed_2026": 994,
+            "kept": 331.33,
+            "months_stated": null
+          }
+        ],
+        "kept_per_month": 331.33,
+        "months_stated": null,
+        "kept_over_stated_months": null,
+        "if_able_eligible": null
+      }
+    },
+    {
+      "id": "relatives-home-one-third",
+      "title": "Four relatives cover her share of food and rent",
+      "citation": "Hassbrock v Astrue, No. 4:08-cv-02606 (2009-07-01)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-txsd-4_08-cv-02606/pdf/USCOURTS-txsd-4_08-cv-02606-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court for August 1996 to December 1999",
+        "court_outcome": "affirmed in part, remanded in part",
+        "counts": true,
+        "basis": "ism_vtr",
+        "values": [],
+        "overpayment": null,
+        "held": "In-kind support from relatives, valued by the one-third reduction; the claimed loan was not bona fide."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "1996-08",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": true,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Relatives cover her $200 share of food and rent in their home",
+            "as_given": "vendor",
+            "giftwise": "able"
+          }
+        ],
+        "months": [
+          {
+            "month": "1996-08",
+            "as_given_2026": 662.67,
+            "routed_2026": 994,
+            "kept": 331.33,
+            "months_stated": 41
+          }
+        ],
+        "kept_per_month": 331.33,
+        "months_stated": 41,
+        "kept_over_stated_months": 13584.53,
+        "if_able_eligible": null
+      }
+    },
+    {
+      "id": "children-home-one-third",
+      "title": "Living with her children without paying toward the household",
+      "citation": "COLLINS v. COLVIN, No. 1:12-cv-01761 (2013-12-30)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-insd-1_12-cv-01761/pdf/USCOURTS-insd-1_12-cv-01761-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "ism_vtr",
+        "values": [],
+        "overpayment": null,
+        "held": "In-kind support from her children, counted as one-third of the federal benefit rate (20 CFR 416.1131); the after-the-fact loan agreement was not enforceable."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2008-04",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": true,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Shelter in her children's home",
+            "as_given": "vendor",
+            "giftwise": "able"
+          }
+        ],
+        "months": [
+          {
+            "month": "2008-04",
+            "as_given_2026": 662.67,
+            "routed_2026": 994,
+            "kept": 331.33,
+            "months_stated": null
+          }
+        ],
+        "kept_per_month": 331.33,
+        "months_stated": null,
+        "kept_over_stated_months": null,
+        "if_able_eligible": null
+      }
+    },
+    {
+      "id": "sons-home-own-food",
+      "title": "Living with her sons and buying her own food",
+      "citation": "Basith v. Astrue, No. 4:07-cv-01222 (2008-06-25)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-txsd-4_07-cv-01222/pdf/USCOURTS-txsd-4_07-cv-01222-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "ism_pmv",
+        "values": [],
+        "overpayment": null,
+        "held": "In-kind support from her sons, valued under the presumed value rule because she bought her own food; no bona fide loan."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_pmv"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "1996-01",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 351.33,
+            "one_third_reduction": false,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": false,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Shelter in her sons' home",
+            "as_given": "vendor",
+            "giftwise": "vendor"
+          }
+        ],
+        "months": [
+          {
+            "month": "1996-01",
+            "as_given_2026": 662.67,
+            "routed_2026": 662.67,
+            "kept": 0,
+            "months_stated": null
+          }
+        ],
+        "kept_per_month": 0,
+        "months_stated": null,
+        "kept_over_stated_months": null,
+        "if_able_eligible": {
+          "routes": [
+            {
+              "gift": "g1",
+              "label": "Shelter in her sons' home",
+              "as_given": "vendor",
+              "giftwise": "able"
+            }
+          ],
+          "months": [
+            {
+              "month": "1996-01",
+              "as_given_2026": 662.67,
+              "routed_2026": 994,
+              "kept": 331.33,
+              "months_stated": null
+            }
+          ],
+          "kept_per_month": 331.33,
+          "months_stated": null,
+          "kept_over_stated_months": null
+        }
+      }
+    },
+    {
+      "id": "parents-home-all-expenses",
+      "title": "Parents pay all the expenses in their home",
+      "citation": "Santillo v. Commissioner of Social Security, No. 1:11-cv-00468 (2012-03-30)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-ohnd-1_11-cv-00468/pdf/USCOURTS-ohnd-1_11-cv-00468-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; magistrate judge recommended affirming",
+        "court_outcome": "recommended affirmed (in-kind support part)",
+        "counts": true,
+        "basis": "ism",
+        "values": [],
+        "overpayment": null,
+        "held": "In-kind support from his parents counts; the claimed oral repayment agreement was not credited. The valuation method is not stated."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2000-07",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": false,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Rent and household expenses paid by his parents",
+            "as_given": "vendor",
+            "giftwise": "vendor"
+          }
+        ],
+        "months": [
+          {
+            "month": "2000-07",
+            "as_given_2026": 662.67,
+            "routed_2026": 662.67,
+            "kept": 0,
+            "months_stated": null
+          }
+        ],
+        "kept_per_month": 0,
+        "months_stated": null,
+        "kept_over_stated_months": null,
+        "if_able_eligible": {
+          "routes": [
+            {
+              "gift": "g1",
+              "label": "Rent and household expenses paid by his parents",
+              "as_given": "vendor",
+              "giftwise": "able"
+            }
+          ],
+          "months": [
+            {
+              "month": "2000-07",
+              "as_given_2026": 662.67,
+              "routed_2026": 994,
+              "kept": 331.33,
+              "months_stated": null
+            }
+          ],
+          "kept_per_month": 331.33,
+          "months_stated": null,
+          "kept_over_stated_months": null
+        }
+      }
+    },
+    {
+      "id": "father-pays-landlord",
+      "title": "A father sends the rent straight to the landlord",
+      "citation": "Handley v. Barnhart, No. 3:05-cv-04683 (2006-07-28)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-cand-3_05-cv-04683/pdf/USCOURTS-cand-3_05-cv-04683-2.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "ism",
+        "values": [],
+        "overpayment": null,
+        "held": "The father's rent and food were in-kind support; no valid loan. The valuation method is not stated."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_pmv"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "1995-04",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 351.33,
+            "one_third_reduction": false,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": false,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Rent paid to the landlord",
+            "as_given": "vendor",
+            "giftwise": "vendor"
+          }
+        ],
+        "months": [
+          {
+            "month": "1995-04",
+            "as_given_2026": 662.67,
+            "routed_2026": 662.67,
+            "kept": 0,
+            "months_stated": 32
+          }
+        ],
+        "kept_per_month": 0,
+        "months_stated": 32,
+        "kept_over_stated_months": 0,
+        "if_able_eligible": {
+          "routes": [
+            {
+              "gift": "g1",
+              "label": "Rent paid to the landlord",
+              "as_given": "vendor",
+              "giftwise": "able"
+            }
+          ],
+          "months": [
+            {
+              "month": "1995-04",
+              "as_given_2026": 662.67,
+              "routed_2026": 994,
+              "kept": 331.33,
+              "months_stated": 32
+            }
+          ],
+          "kept_per_month": 331.33,
+          "months_stated": 32,
+          "kept_over_stated_months": 10602.56
+        }
+      }
+    },
+    {
+      "id": "parents-home-food-shelter",
+      "title": "Food and shelter from her parents while she waited for SSI",
+      "citation": "Midwood v. Commissioner of Social Security, No. 2:24-cv-01668 (2025-05-02)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-caed-2_24-cv-01668/pdf/USCOURTS-caed-2_24-cv-01668-1.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "ism",
+        "values": [],
+        "overpayment": null,
+        "held": "Food and shelter from her parents were in-kind support; an obligation to repay only if SSI arrived is not a loan. The valuation method is not stated."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2016-04",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": false,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Shelter in her parents' home",
+            "as_given": "vendor",
+            "giftwise": "vendor"
+          }
+        ],
+        "months": [
+          {
+            "month": "2016-04",
+            "as_given_2026": 662.67,
+            "routed_2026": 662.67,
+            "kept": 0,
+            "months_stated": 68
+          }
+        ],
+        "kept_per_month": 0,
+        "months_stated": 68,
+        "kept_over_stated_months": 0,
+        "if_able_eligible": {
+          "routes": [
+            {
+              "gift": "g1",
+              "label": "Shelter in her parents' home",
+              "as_given": "vendor",
+              "giftwise": "able"
+            }
+          ],
+          "months": [
+            {
+              "month": "2016-04",
+              "as_given_2026": 662.67,
+              "routed_2026": 994,
+              "kept": 331.33,
+              "months_stated": 68
+            }
+          ],
+          "kept_per_month": 331.33,
+          "months_stated": 68,
+          "kept_over_stated_months": 22530.44
+        }
+      }
+    },
+    {
+      "id": "daughter-pays-rent",
+      "title": "A daughter pays the rent and living costs",
+      "citation": "Massey v. Astrue, No. 4:07-cv-04056 (2008-07-02)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-txsd-4_07-cv-04056/pdf/USCOURTS-txsd-4_07-cv-04056-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "ism_pmv",
+        "values": [],
+        "overpayment": null,
+        "held": "In-kind support from her daughter, reduced under the presumed value rule (the opinion also describes the cut as one-third); no bona fide loan."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_pmv"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2004-01",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 351.33,
+            "one_third_reduction": false,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": false,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Rent paid by her daughter",
+            "as_given": "vendor",
+            "giftwise": "vendor"
+          }
+        ],
+        "months": [
+          {
+            "month": "2004-01",
+            "as_given_2026": 662.67,
+            "routed_2026": 662.67,
+            "kept": 0,
+            "months_stated": 16
+          }
+        ],
+        "kept_per_month": 0,
+        "months_stated": 16,
+        "kept_over_stated_months": 0,
+        "if_able_eligible": {
+          "routes": [
+            {
+              "gift": "g1",
+              "label": "Rent paid by her daughter",
+              "as_given": "vendor",
+              "giftwise": "able"
+            }
+          ],
+          "months": [
+            {
+              "month": "2004-01",
+              "as_given_2026": 662.67,
+              "routed_2026": 994,
+              "kept": 331.33,
+              "months_stated": 16
+            }
+          ],
+          "kept_per_month": 331.33,
+          "months_stated": 16,
+          "kept_over_stated_months": 5301.28
+        }
+      }
+    },
+    {
+      "id": "mother-monthly-cash",
+      "title": "A mother gives $1,200 to $1,500 a month for rent and medical bills",
+      "citation": "Sinclair v. Commissioner Social Security Administration, No. 3:13-cv-01956 (2015-01-07)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-ord-3_13-cv-01956/pdf/USCOURTS-ord-3_13-cv-01956-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "unearned_cash",
+        "values": [
+          {
+            "month": "2006-10",
+            "measure": "after_infrequent",
+            "value": 1200
+          },
+          {
+            "month": "2007-11",
+            "measure": "after_infrequent",
+            "value": 1500
+          }
+        ],
+        "overpayment": null,
+        "held": "The mother's payments were unearned income, so she was not eligible; no bona fide loan."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "unearned_cash",
+          "resources"
+        ],
+        "values": [
+          {
+            "month": "2006-10",
+            "measure": "after_infrequent",
+            "value": 1200,
+            "got": 1200
+          },
+          {
+            "month": "2007-11",
+            "measure": "after_infrequent",
+            "value": 1500,
+            "got": 1500
+          }
+        ],
+        "rule_ids": [
+          "R-CASH-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2006-10",
+            "check_2026": 0,
+            "countable_income": 1180,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 1200,
+            "over_resource_limit": false
+          },
+          {
+            "month": "2007-11",
+            "check_2026": 0,
+            "countable_income": 1480,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 2700,
+            "over_resource_limit": true
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": false,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "About $1,200 a month for rent and medical bills",
+            "as_given": "cash",
+            "giftwise": "vendor"
+          },
+          {
+            "gift": "g2",
+            "label": "About $1,500 a month for rent and medical bills",
+            "as_given": "cash",
+            "giftwise": "vendor"
+          }
+        ],
+        "months": [
+          {
+            "month": "2006-10",
+            "as_given_2026": 0,
+            "routed_2026": 662.67,
+            "kept": 662.67,
+            "months_stated": 13
+          },
+          {
+            "month": "2007-11",
+            "as_given_2026": 0,
+            "routed_2026": 662.67,
+            "kept": 662.67,
+            "months_stated": 24
+          }
+        ],
+        "kept_per_month": 662.67,
+        "months_stated": 37,
+        "kept_over_stated_months": 24518.79,
+        "if_able_eligible": {
+          "routes": [
+            {
+              "gift": "g1",
+              "label": "About $1,200 a month for rent and medical bills",
+              "as_given": "cash",
+              "giftwise": "able"
+            },
+            {
+              "gift": "g2",
+              "label": "About $1,500 a month for rent and medical bills",
+              "as_given": "cash",
+              "giftwise": "able"
+            }
+          ],
+          "months": [
+            {
+              "month": "2006-10",
+              "as_given_2026": 0,
+              "routed_2026": 994,
+              "kept": 994,
+              "months_stated": 13
+            },
+            {
+              "month": "2007-11",
+              "as_given_2026": 0,
+              "routed_2026": 994,
+              "kept": 994,
+              "months_stated": 24
+            }
+          ],
+          "kept_per_month": 994,
+          "months_stated": 37,
+          "kept_over_stated_months": 36778
+        }
+      }
+    },
+    {
+      "id": "former-husband-monthly-money",
+      "title": "A former husband pays housing, utilities and living costs",
+      "citation": "Lee v. Commissioner of Social Security, No. 3:12-cv-00765 (2013-07-18)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-kywd-3_12-cv-00765/pdf/USCOURTS-kywd-3_12-cv-00765-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "unearned_cash",
+        "values": [
+          {
+            "month": "2006-02",
+            "measure": "after_infrequent",
+            "value": 1400
+          }
+        ],
+        "overpayment": null,
+        "held": "The monthly payments were unearned income, not a bona fide loan, so she was not eligible before August 2009."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "unearned_cash"
+        ],
+        "values": [
+          {
+            "month": "2006-02",
+            "measure": "after_infrequent",
+            "value": 1400,
+            "got": 1400
+          }
+        ],
+        "rule_ids": [
+          "R-CASH-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2006-02",
+            "check_2026": 0,
+            "countable_income": 1380,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 1400,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": true,
+        "able_eligible_per_opinion": false,
+        "routes": [
+          {
+            "gift": "g1",
+            "label": "Housing",
+            "as_given": "cash",
+            "giftwise": "cash"
+          },
+          {
+            "gift": "g2",
+            "label": "Daily living expenses",
+            "as_given": "cash",
+            "giftwise": "cash"
+          },
+          {
+            "gift": "g3",
+            "label": "Utilities",
+            "as_given": "cash",
+            "giftwise": "cash"
+          },
+          {
+            "gift": "g4",
+            "label": "Insurance (type not stated)",
+            "as_given": "cash",
+            "giftwise": "cash"
+          }
+        ],
+        "months": [
+          {
+            "month": "2006-02",
+            "as_given_2026": 0,
+            "routed_2026": 0,
+            "kept": 0,
+            "months_stated": 40
+          }
+        ],
+        "kept_per_month": 0,
+        "months_stated": 40,
+        "kept_over_stated_months": 0,
+        "if_able_eligible": {
+          "routes": [
+            {
+              "gift": "g1",
+              "label": "Housing",
+              "as_given": "cash",
+              "giftwise": "able"
+            },
+            {
+              "gift": "g2",
+              "label": "Daily living expenses",
+              "as_given": "cash",
+              "giftwise": "able"
+            },
+            {
+              "gift": "g3",
+              "label": "Utilities",
+              "as_given": "cash",
+              "giftwise": "able"
+            },
+            {
+              "gift": "g4",
+              "label": "Insurance (type not stated)",
+              "as_given": "cash",
+              "giftwise": "able"
+            }
+          ],
+          "months": [
+            {
+              "month": "2006-02",
+              "as_given_2026": 0,
+              "routed_2026": 994,
+              "kept": 994,
+              "months_stated": 40
+            }
+          ],
+          "kept_per_month": 994,
+          "months_stated": 40,
+          "kept_over_stated_months": 39760
+        }
+      }
+    },
+    {
+      "id": "cousin-deposits",
+      "title": "A cousin's deposits push savings over the limit",
+      "citation": "Inguagiato v. Commissioner Social Security Administration, No. 3:08-cv-01444 (2009-12-03)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-ord-3_08-cv-01444/pdf/USCOURTS-ord-3_08-cv-01444-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "resources",
+        "values": [],
+        "overpayment": {
+          "amount": 4870,
+          "period": "not stated"
+        },
+        "held": "The cousin's money was a gift, not a loan, so it counted and put her resources over the $2,000 limit."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "unearned_cash",
+          "resources"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-CASH-01",
+          "R-GIE-01",
+          "R-RMA-01",
+          "R-RES-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2002-01",
+            "check_2026": 0,
+            "countable_income": 9480,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 9500,
+            "over_resource_limit": true
+          },
+          {
+            "month": "2003-01",
+            "check_2026": 0,
+            "countable_income": 10955,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 20475,
+            "over_resource_limit": true
+          },
+          {
+            "month": "2004-01",
+            "check_2026": 0,
+            "countable_income": 5180,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 25675,
+            "over_resource_limit": true
+          }
+        ]
+      },
+      "dollars": {
+        "computed": false,
+        "note": "She also received Social Security disability benefits and some self-employment income in amounts the opinion does not state, so her check cannot be computed. The stated overpayment is reported instead."
+      }
+    },
+    {
+      "id": "children-deposit-1500",
+      "title": "Children deposit $1,500 to meet a bank's minimum balance",
+      "citation": "Social Security case (name withheld in the GovInfo listing), No. 2:18-cv-01046 (2019-08-02)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-caed-2_18-cv-01046/pdf/USCOURTS-caed-2_18-cv-01046-2.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "resources",
+        "values": [],
+        "overpayment": {
+          "amount": 11442.2,
+          "period": "March 2013 to March 2015"
+        },
+        "held": "The deposit was not a loan, so the funds counted as her resources and the overpayment stands."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "unearned_cash",
+          "resources"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-GIE-01",
+          "R-RMA-01",
+          "R-RES-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2013-03",
+            "check_2026": 0,
+            "countable_income": 1420,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 2001,
+            "over_resource_limit": true
+          }
+        ]
+      },
+      "dollars": {
+        "computed": false,
+        "note": "The opinion does not give her balance without the deposit, so the check cannot be computed either way. The stated overpayment is reported instead."
+      }
+    },
+    {
+      "id": "mother-checks-friend-rent",
+      "title": "A mother's checks and a friend paying the rent",
+      "citation": "Hall v. Colvin, No. 1:15-cv-00958 (2016-08-23)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-mdd-1_15-cv-00958/pdf/USCOURTS-mdd-1_15-cv-00958-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "income",
+        "values": [],
+        "overpayment": null,
+        "held": "Neither the mother's checks nor the friend's rent payments were bona fide loans, so both count as income."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "unearned_cash",
+          "resources",
+          "ism_pmv"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-CASH-01",
+          "R-GIE-01",
+          "R-RMA-01",
+          "R-RES-01",
+          "R-SHEL-01"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2002-01",
+            "check_2026": 0,
+            "countable_income": 97980,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 98000,
+            "over_resource_limit": true
+          },
+          {
+            "month": "2003-04",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 351.33,
+            "one_third_reduction": false,
+            "savings_next_first": 98000,
+            "over_resource_limit": true
+          }
+        ]
+      },
+      "dollars": {
+        "computed": false,
+        "note": "Retirement benefits, a trust and undisclosed assets also decided her eligibility, so the check from the gifts alone cannot be isolated."
+      }
+    },
+    {
+      "id": "son-home-with-dib",
+      "title": "A son pays rent, food and utilities",
+      "citation": "Salgado v. Social Security Administration, Commissioner of, No. 6:15-cv-01023 (2016-03-16)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-ksd-6_15-cv-01023/pdf/USCOURTS-ksd-6_15-cv-01023-0.pdf",
+      "determination": {
+        "by": "SSA and the ALJ; affirmed by the court",
+        "court_outcome": "affirmed",
+        "counts": true,
+        "basis": "ism",
+        "values": [],
+        "overpayment": null,
+        "held": "Food and shelter from her son were in-kind support, not a bona fide loan. The valuation method is not stated."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": true,
+        "basis_match": true,
+        "values_match": true,
+        "match": true,
+        "months": [
+          {
+            "month": "2011-10",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": false,
+        "note": "Her Social Security disability benefit amount is not stated, so her SSI check cannot be computed."
+      }
+    }
+  ],
+  "ms": 174
+}

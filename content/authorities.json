@@ -1,6 +1,6 @@
 {
   "about": "Rule passages copied word for word from the published pages, for the two reviewers. Whitespace is collapsed; paragraph breaks are \n. Re-fetch before changing.",
-  "fetched": "2026-11-02",
+  "fetched": "2026-11-03",
   "passages": [
     {
       "id": "cfr-416-1103-g",
@@ -81,6 +81,46 @@
       "url": "https://www.federalregister.gov/documents/2024/03/27/2024-06464/omitting-food-from-in-kind-support-and-maintenance-calculations",
       "section_heading": "Omitting Food From In-Kind Support and Maintenance Calculations (Final rule, 89 FR 21199, Mar. 27, 2024) — SUPPLEMENTARY INFORMATION: Background",
       "text": "Under this final rule, we no longer consider food expenses in our ISM calculations. Instead, we will consider only shelter expenses ( i.e., room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services). We will continue to use the Value of the One-Third Reduction (VTR) rule [8] and the Presumed Maximum Value (PMV) rule in determining the value of ISM to an SSI applicant or recipient.[9]"
+    },
+    {
+      "id": "cfr-416-1102",
+      "authority": "regs",
+      "cite": "20 CFR 416.1102",
+      "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1102",
+      "section_heading": "§ 416.1102 What is income?",
+      "text": "Income is anything that you receive in cash or in-kind that you can use to meet your needs for food or shelter. For purposes of this definition, income may be received actually or constructively. Income is received constructively, unless there are significant restrictions on your ability to receive it, if it is under your control or you can use it despite not actually receiving it. Sometimes income also includes more or less than you actually receive (see §§ 416.1110 and 416.1123(b)). In-kind income is not cash but is something else that you can use to meet your needs for food or shelter. Exception: Food is not included in the calculations of in-kind support and maintenance, which is a type of unearned income that we have special rules for valuing (see §§ 416.1130 through 416.1148)."
+    },
+    {
+      "id": "cfr-416-1103-intro",
+      "authority": "regs",
+      "cite": "20 CFR 416.1103",
+      "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+      "section_heading": "§ 416.1103 What is not income?",
+      "text": "Some things you receive are not income because you cannot use them as food or shelter, or use them to obtain food or shelter. In addition, what you receive from the sale or exchange of your own property is not income; it remains a resource. The following are some items that are not income:"
+    },
+    {
+      "id": "cfr-416-1103-a-medical",
+      "authority": "regs",
+      "cite": "20 CFR 416.1103(a)",
+      "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+      "section_heading": "§ 416.1103 What is not income? — (a) Medical care and services",
+      "text": "(a) Medical care and services. Medical care and services are not income if they are any of the following:\n(1) Given to you free of charge or paid for directly to the provider by someone else;\n(2) Room and board you receive during a medical confinement;\n(3) Assistance provided in cash or in kind (including food or shelter) under a Federal, State, or local government program whose purpose is to provide medical care or medical services (including vocational rehabilitation);\n(4) In-kind assistance (except shelter) provided under a nongovernmental program whose purpose is to provide medical care or medical services;\n(5) Cash provided by any nongovernmental medical care or medical services program or under a health insurance policy (except cash to cover food or shelter) if the cash is either:\n(i) Repayment for program-approved services you have already paid for; or\n(ii) A payment restricted to the future purchase of a program-approved service.\nExample: If you have paid for prescription drugs and get the money back from your health insurance, the money is not income.\n(6) Direct payment of your medical insurance premiums by anyone on your behalf.\n(7) Payments from the Department of Veterans Affairs resulting from unusual medical expenses."
+    },
+    {
+      "id": "cfr-416-1103-i-weatherization",
+      "authority": "regs",
+      "cite": "20 CFR 416.1103(i)",
+      "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+      "section_heading": "§ 416.1103 What is not income? — (i) Weatherization assistance",
+      "text": "(i) Weatherization assistance. Weatherization assistance (Examples: Insulation, storm doors and windows) is not income."
+    },
+    {
+      "id": "cfr-416-1103-j-noncash",
+      "authority": "regs",
+      "cite": "20 CFR 416.1103(j)",
+      "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+      "section_heading": "§ 416.1103 What is not income? — (j) Receipt of certain noncash items",
+      "text": "(j) Receipt of certain noncash items. Any item you receive (except shelter as defined in § 416.1130) which would be an excluded nonliquid resource (as described in subpart L of this part) if you kept it, is not income.\nExample 1: A community takes up a collection to buy you a specially equipped van, which is your only vehicle. The value of this gift is not income because the van does not provide you with food or shelter and will become an excluded nonliquid resource under § 416.1218 in the month following the month of receipt.\nExample 2: You inherit a house which is your principal place of residence. The value of this inheritance is income because the house provides you with shelter and shelter is income. However, we value the house under the rule in § 416.1140."
     },
     {
       "id": "poms-si-00835-020-shelter",
@@ -305,6 +345,54 @@
       "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835465",
       "section_heading": "SI 00835.465 ISM and Households - Household Costs — D.3 When to count insurance",
       "text": "3. When to count insurance\nOnly property insurance required by the mortgage holder in order to receive the mortgage is considered a household cost. Insurance (property, fire, theft, etc.) held at the owner's or renter's option is not a household cost."
+    },
+    {
+      "id": "poms-si-00835-465-outside-ism",
+      "authority": "poms",
+      "cite": "POMS SI 00835.465C",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835465",
+      "section_heading": "SI 00835.465 ISM and Households - Household Costs — C. Policy — CMV of household costs and outside ISM",
+      "text": "C. Policy — CMV of household costs and outside ISM\nWhen a person who is not a household member pays a vendor directly for any of the household's costs or provides the household with food or shelter items for less than the CMV, outside ISM exists.\nIt is necessary to establish the CMV of the food or shelter item provided when determining the value of outside ISM.\nNOTE: The CMV of household costs is usually the vendor charge. When there is no vendor involved, the CMV is whatever the item would sell for on the open market. (See SI 00835.020B.6. for the definition of CMV.)"
+    },
+    {
+      "id": "poms-si-00835-465-mortgages",
+      "authority": "poms",
+      "cite": "POMS SI 00835.465D.2",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835465",
+      "section_heading": "SI 00835.465 ISM and Households - Household Costs — D.2 When to count mortgages",
+      "text": "2. When to count mortgages\nIn general, all mortgages (including second mortgages) are household costs regardless of the reason for an additional mortgage. Payments on a mobile home are also considered mortgage payments. When extra mortgage payments are made, (i.e., prepayments to reduce the principle owed), only the required mortgage amount is a household cost.\nEXCEPTION: The portion of a mortgage that includes repayment on a business expense is not a household cost. For example, if an additional mortgage is taken out to cover the cost of building a barn on an operating farm, the payment on the mortgage for the barn is not a household cost. (See SI 00835.471 for how to distinguish between household and non-household expenses.)"
+    },
+    {
+      "id": "poms-si-00835-465-land",
+      "authority": "poms",
+      "cite": "POMS SI 00835.465D.4",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835465",
+      "section_heading": "SI 00835.465 ISM and Households - Household Costs — D.4 Use of land",
+      "text": "4. Use of land\nThe use of land alone is not a household cost. Thus, if an individual receives land or the use of land without charge, this does not result in outside ISM. Similarly, third party vendor payments of real property tax, rent or mortgage on land alone do not cause an individual to receive ISM in the form of shelter.\nA trailer space rental fee which is for space alone is not a household operating expense for purposes of determining inside ISM, nor is it outside ISM if someone outside the household pays the fee. However, if the fee is not for use of land alone, that part of the fee which is for water, sewer, etc., is part of the household costs for purposes of determining inside and outside ISM.\nEXAMPLE: James Smith, an eligible individual, lives alone in a house trailer they own. The trailer is situated on the property of their sibling, Bill. James pays no rent for the use of the land. Bill provides water and electricity free of charge. The free use of the land results in no ISM to James. However, James is charged with outside ISM based on the CMV of the water and electricity."
+    },
+    {
+      "id": "poms-si-00835-471-business",
+      "authority": "poms",
+      "cite": "POMS SI 00835.471A",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835471",
+      "section_heading": "SI 00835.471 Conversions — Distinguishing Between Household Costs and Non-Household Costs — A. Policy",
+      "text": "A. Policy\nWhen determining household costs for ISM determinations, it may be necessary to distinguish between actual household costs and non-household costs (i.e., costs associated with operating a business or agricultural operation in the home). Business or agricultural expenses are not household costs for ISM determinations."
+    },
+    {
+      "id": "poms-si-00835-310-example-furnace",
+      "authority": "poms",
+      "cite": "POMS SI 00835.310E.1",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835310",
+      "section_heading": "SI 00835.310 Distinguishing Between In-Kind Support and Maintenance (ISM) and Other Unearned In-Kind Income — E.1 In-kind item which is not income",
+      "text": "1. In-kind item which is not income\nWilliam's adult child Amber purchased a furnace for William's home when the old furnace stopped working. Amber bought the furnace from the local utility company and paid for it in monthly installments on a utility bill. The utility company confirmed that William cannot return the furnace for cash since Amber made the purchase and it was purchased on credit. Therefore, the gift of the furnace is not income to William."
+    },
+    {
+      "id": "poms-si-00835-310-example-mobile-home",
+      "authority": "poms",
+      "cite": "POMS SI 00835.310E.2",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835310",
+      "section_heading": "SI 00835.310 Distinguishing Between In-Kind Support and Maintenance (ISM) and Other Unearned In-Kind Income — E.2 ISM in the form of a mobile home",
+      "text": "2. ISM in the form of a mobile home\nVictoria is an aged beneficiary living in an apartment. The landlord raises the rent. Victoria's sibling, Alfred, decides to buy Victoria a mobile home to live in so that Victoria can move from the apartment. Alfred puts the mobile home in both their names. Alfred makes a down payment of $4,000 in April 2011, and loan payments of $400 each month thereafter. Victoria moves into the mobile home in April, and lives there alone. The sibling's down payment of $4,000 in April is ISM to Victoria. Alfred's loan payment of $400 beginning in May is a shelter payment and is outside ISM. Since the actual value of each source of ISM exceeds the PMV, we charge the PMV for April 2011 and continuing. For more information on ISM to one person, see SI 00835.400A. For more information on ISM from outside household, see SI 00835.350."
     }
   ]
 }

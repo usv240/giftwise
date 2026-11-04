@@ -28,6 +28,12 @@ export interface Profile {
   couple: boolean;
   /** Lives all month in another person's household and does not pay a share of shelter costs. */
   livesInAnothersHousehold: boolean;
+  /**
+   * In another person's household, whether the household pays for or provides all of the person's meals. The one-third
+   * reduction applies only then (20 CFR 416.1131(a)(3), as amended in 2024); otherwise shelter help is valued under the
+   * presumed maximum value rule (20 CFR 416.1140). Leave it unset to mean yes.
+   */
+  householdProvidesAllMeals?: boolean;
   otherUnearnedMonthly: number;
   earnedMonthly: number;
   ableEligible: boolean;
@@ -47,6 +53,11 @@ export interface Gift {
   giver?: string;
   /** True when the same giver pays this every month (or more than once a quarter). */
   recurring?: boolean;
+  /**
+   * For a housing bill paid ahead or behind: the months it covers, YYYY-MM to YYYY-MM. The part for months up to the
+   * payment month counts in the payment month; each later month's share counts in that month (R-SHEL-02).
+   */
+  covers?: { from: string; to: string };
   label?: string;
 }
 
@@ -71,7 +82,10 @@ export interface MonthTrace {
   shelterPaidByOthers: number;
   ismValue: number;
   vtrApplied: boolean;
+  /** How much the one-off exclusion actually lowered countable income this month. */
   infrequentExcluded: number;
+  /** How much of the quarter's $60 one-off allowance this month used up, which can be more than it lowered income once the housing cap applies. */
+  infrequentUsed: number;
   generalExcludedFromUnearned: number;
   generalExcludedFromEarned: number;
   earnedCountable: number;

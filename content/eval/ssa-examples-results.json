@@ -1,15 +1,15 @@
 {
-  "ran_at": "2026-11-03T15:33:45.602Z",
+  "ran_at": "2026-11-04T04:36:07.371Z",
   "rules_version": "2026.1",
   "model": "claude-opus-5-5",
-  "claude_ran_at": "2026-11-03T15:33:45.605Z",
+  "claude_ran_at": "2026-11-04T04:23:34.548Z",
   "tolerance_usd": 1,
   "summary": {
-    "cases": 13,
-    "engine_matches": 12,
-    "claude_matches": 9,
-    "claude_answered": 13,
-    "out_of_scope_groups": 11
+    "cases": 40,
+    "engine_matches": 40,
+    "claude_matches": 32,
+    "claude_answered": 40,
+    "out_of_scope_groups": 20
   },
   "cases": [
     {
@@ -39,7 +39,7 @@
             "got": 0
           }
         ],
-        "reason": "A third party paying a phone bill directly to the vendor is neither cash nor shelter, since telephone service is not a shelter expense. It is not income and not in-kind support and maintenance, so Joshua keeps the full $994.",
+        "reason": "Telephone service is not a shelter expense, so it cannot be in-kind support and maintenance. Because his sister paid the phone company directly, the payment is a third-party vendor payment for a non-food, non-shelter item, which is not income. Joshua keeps the full $994.",
         "match": true
       }
     },
@@ -71,7 +71,7 @@
             "got": 0
           }
         ],
-        "reason": "Since September 30, 2024, SSA no longer counts food as in-kind support and maintenance, so the daughter's $250 payment to the grocer for her mother's food is not income. Mrs. Harper's federal SSI stays at the full $994.",
+        "reason": "Since September 30, 2024, SSI no longer counts food in in-kind support and maintenance; only shelter counts. The daughter's $250 payment to the grocer for her mother's food is not income, so Mrs. Harper receives the full $994.",
         "match": true
       }
     },
@@ -103,7 +103,7 @@
             "got": 0
           }
         ],
-        "reason": "The child's $100 went directly to the grocer, not to Shawn, so it is in-kind help rather than cash. Since September 30, 2024, SSA no longer counts food in in-kind support and maintenance, so paying a grocery bill is not income and Shawn keeps the full $994.",
+        "reason": "The child's payment to the grocer is a third-party vendor payment for food, not cash given to Shawn. Since September 30, 2024, food is no longer counted as in-kind support and maintenance, so the $100 is not income and Shawn keeps the full $994.",
         "match": true
       }
     },
@@ -122,20 +122,21 @@
             "month": "2026-07",
             "measure": "ism_value",
             "value": 66.67,
-            "got": 0
+            "got": 66.67
           },
           {
             "month": "2026-12",
             "measure": "ism_value",
             "value": 66.67,
-            "got": 0
+            "got": 66.67
           }
         ],
         "rules": [
           "R-SHEL-01",
-          "R-GIE-01"
+          "R-GIE-01",
+          "R-SHEL-02"
         ],
-        "match": false
+        "match": true
       },
       "claude": {
         "counts": true,
@@ -159,7 +160,7 @@
             "got": 0
           }
         ],
-        "reason": "Property tax is a shelter expense, so a third party paying it is in-kind support counted in the month it is paid (June), capped at the $351.33 presumed maximum value. That is too large for the infrequent-income exclusion, so after the $20 general exclusion Kelly's June SSI is $662.67, and July and December carry no in-kind support.",
+        "reason": "The relative's payment of Kelly's property tax is a shelter cost paid by someone else, so it counts as in-kind support only in June, the month the relative pays it. Its value is capped at the $351.33 presumed maximum and is too large for the infrequent income exclusion. After the $20 general exclusion, $331.33 counts in June (SSI $994 − $331.33 = $662.67), and nothing counts in July or December even though the bill covers the whole year.",
         "match": false
       }
     },
@@ -191,7 +192,7 @@
             "got": 90
           }
         ],
-        "reason": "Water and electricity are shelter costs, so Bill paying them is in-kind support counted at its actual value of $90 (under the $351.33 cap); after the $20 general exclusion, $70 is counted, giving $924. The free land rent is also in-kind support, but no value was given for it, so it isn't included here; if it were valued, the combined total would be capped at $351.33 and the SSI amount would be lower.",
+        "reason": "James lives in his own household, so free electricity and water from Bill are shelter-related in-kind support valued at their actual $90, which is below the $351.33 cap. This is regular monthly support, so the infrequent-income exclusion does not apply, and his SSI is $994 − ($90 − $20) = $924. The rent-free land would also count as in-kind support, but no value is given for it, so it is left out here; if it were included, the total in-kind support would be capped at $351.33.",
         "match": true
       }
     },
@@ -234,7 +235,7 @@
             "got": 662.67
           }
         ],
-        "reason": "Rosa lives in her friend's household and pays nothing toward shelter costs, so the one-third reduction ($331.33) already applies; under that rule no other in-kind support is counted, so the parent's payment of the electric bill adds nothing. Her June 2026 SSI is $994 − $331.33 = $662.67.",
+        "reason": "Rosa lives in her friend's household and gets shelter from the friend without paying her share, so the one-third reduction ($331.33) already applies. When that reduction applies, SSA does not count any other in-kind support, so the parent's payment of the electric bill adds nothing and her SSI is $994 − $331.33 = $662.67.",
         "match": true
       }
     },
@@ -280,7 +281,7 @@
             "got": 25
           }
         ],
-        "reason": "Both payments are unearned income received in the same calendar quarter (January–March), and together they total $125, which is over the $60 quarterly limit, so the infrequent or irregular income exclusion does not apply to either. After the $20 general exclusion, $80 counts in January and $5 counts in March, reducing her $994 benefit to $914 and $989.",
+        "reason": "Both payments are infrequent unearned income received in the same calendar quarter. Together they total $125, which is over the $60 quarterly limit, so neither is excluded; after the $20 general exclusion, countable income is $80 in January and $5 in March.",
         "match": false
       }
     },
@@ -327,7 +328,7 @@
             "got": 100
           }
         ],
-        "reason": "The $50 interest (but not the repaid principal) and the $100 tickets are unearned income. Because both come from the same friend in the same quarter (Q3), they are not infrequent, so the $60-per-quarter exclusion does not apply. Only the $20 general exclusion reduces them, leaving $30 countable in July and $80 in August.",
+        "reason": "Loan interest is unearned income, and the tickets are countable in-kind income (not food or shelter) at their $100 value. Both came from the same friend in the same quarter and total $150, over the $60 quarterly limit, so on my reading none is excluded and only the $20 general exclusion applies; if the rule were read as excluding the first $60, July would count $0 and August $90.",
         "match": false
       }
     },
@@ -358,7 +359,7 @@
             "got": 0
           }
         ],
-        "reason": "A non-food, non-shelter item that would be an excluded resource if kept is not income. A necklace Lena wears every day is an excluded personal effect, since it is not held for its value or as an investment, so her full $994 is unchanged.",
+        "reason": "A noncash item that would be an excluded resource if kept is not income. A necklace Lena wears every day is an excluded personal effect, so the gift adds no income, and she receives the full $994.",
         "match": true
       }
     },
@@ -389,7 +390,7 @@
             "got": 0
           }
         ],
-        "reason": "A non-cash item that would be an excluded resource if kept is not income (20 CFR 416.1103(g)). One car used for transportation is excluded regardless of value, so the gifted car is not income and Omar's SSI stays at $994.",
+        "reason": "A non-cash item that would be an excluded resource if kept is not income (20 CFR 416.1103(g)). One car used for transportation is excluded from resources regardless of its value, so the $8,000 car is neither income nor a countable resource, and Omar's SSI stays at $994.",
         "match": true
       }
     },
@@ -423,7 +424,7 @@
             "got": 200
           }
         ],
-        "reason": "The infrequent or irregular income exclusion covers unearned income only if the quarter's total is $60 or less. Because the $200 gift exceeds that limit, none of it is excluded, so the full $200 counts. After the $20 general exclusion, $180 is countable, which reduces SSI to $994 − $180 = $814.",
+        "reason": "The infrequent or irregular income exclusion covers unearned income only up to $60 a quarter, so the whole $200 counts. After the $20 general exclusion, $180 is countable, which reduces her SSI from $994 to $814.",
         "match": false
       }
     },
@@ -454,7 +455,7 @@
             "got": 0
           }
         ],
-        "reason": "SSI does not count a gift as income when it is used or set aside to pay tuition, fees, or other necessary educational expenses. Theo spent the full $1,500 on community college tuition and fees that month, so it is excluded and his SSI stays at the full $994.",
+        "reason": "SSI excludes any part of a gift that is used or set aside for tuition, fees, or other necessary educational expenses. Theo spent the whole $1,500 on community college tuition and fees, so none of it counts, and he receives the full $994.",
         "match": true
       }
     },
@@ -485,10 +486,1017 @@
             "got": 0
           }
         ],
-        "reason": "SSI excludes grants, scholarships, fellowships and gifts that are used or set aside to pay tuition, fees or other necessary educational expenses. The $1,500 spent on tuition and fees and the $500 kept for next term's tuition are therefore both excluded, none of the $2,000 counts as income, and Mia receives the full $994.",
+        "reason": "SSI excludes grants and scholarships used, or set aside, for tuition, fees and other necessary educational expenses, even when they are not under the Higher Education Act. The $1,500 spent on tuition and the $500 set aside for next term's tuition are both excluded, so none of the $2,000 counts and Mia gets the full $994; the $500 would count as income later only if she spends it on something else, such as room and board.",
+        "match": true
+      }
+    },
+    {
+      "id": "mortgage-then-cash",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 376.33,
+            "got": 376.33
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01",
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-RMA-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 376.33,
+            "got": 25
+          }
+        ],
+        "reason": "The sister's $500 mortgage payment is in-kind shelter support, valued at the $351.33 presumed maximum because Dana lives in her own home rather than in someone else's household. On my reading, the infrequent income exclusion applies only when all such income in the quarter totals $60 or less; here $351.33 plus $25 exceeds that, so nothing is excluded and SSI is $994 − ($376.33 − $20) = $637.67, though if the in-kind support were left out of that test, the $25 would be excluded and SSI would be $662.67.",
+        "match": false
+      }
+    },
+    {
+      "id": "cash-then-mortgage",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 351.33,
+            "got": 351.33
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-GIE-01",
+          "R-RMA-01",
+          "R-SHEL-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 351.33,
+            "got": 376.33
+          }
+        ],
+        "reason": "The sister's $500 mortgage payment is shelter-related in-kind support, valued at the $351.33 presumed maximum value for someone living in her own home. Because her infrequent or irregular unearned income for the quarter ($25 + $351.33) exceeds $60, none of it is excluded, so $376.33 counts; after the $20 general exclusion, $356.33 is countable, giving SSI of $994 − $356.33 = $637.67.",
+        "match": false
+      }
+    },
+    {
+      "id": "bank-adjustment",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Since July 2004, SSI excludes interest and dividends earned on countable resources from income entirely. The regular $15 interest and the bank's $2.03 interest adjustment are therefore not income at all, so the infrequent or irregular income exclusion never comes into play, and Ruth gets the full $994 in both months.",
+        "match": true
+      }
+    },
+    {
+      "id": "furnace",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-01",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-01",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A furnace is not food or a shelter cost such as heating fuel, and it is an excluded resource as part of the home or household goods, so receiving it is not income. Amber's installment payments on the utility bill are for the furnace, not for utility service, so they are not in-kind support and William keeps the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "mobile-home",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-05",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 0
+          },
+          {
+            "month": "2026-05",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          }
+        ],
+        "reason": "A one-time down payment is not a monthly shelter cost, so no in-kind support is charged in April and her SSI stays at $994. From May, Alfred's $400 loan payment pays a shelter cost for her household, so in-kind support is charged at the presumed maximum value of $351.33 (less than $400), reducing her SSI to $642.67.",
+        "match": false
+      }
+    },
+    {
+      "id": "daughter-mortgage",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-03",
+            "measure": "ssi_amount",
+            "value": 662.67,
+            "got": 662.67
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-03",
+            "measure": "ssi_amount",
+            "value": 662.67,
+            "got": 662.67
+          }
+        ],
+        "reason": "A third party paying Helen's mortgage directly is in-kind shelter support. Because she lives in her own household, it is valued at the presumed maximum value of $351.33 (less than the $620 paid). After the $20 general exclusion, $331.33 counts, leaving SSI of $994 - $331.33 = $662.67.",
+        "match": true
+      }
+    },
+    {
+      "id": "hotel-bill-later",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 240,
+            "got": 240
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 240,
+            "got": 240
+          }
+        ],
+        "reason": "When shelter is bought on credit and a third party later pays the bill, the in-kind support is counted in the month the third party pays. That is April, at the actual $240 value, which is below the $351.33 presumed maximum and too large for the $60-a-quarter infrequent exclusion; after the $20 general exclusion, $220 is countable, so April SSI is $994 − $220 = $774, and March is unaffected at $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "lawn-service",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-VEND-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Lawn mowing is not a shelter expense like rent, mortgage, property taxes, or utilities, so it is not in-kind support and maintenance. A third party paying a vendor directly for a non-shelter service is not income, so Leo receives the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "van-collection",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A non-cash item other than food or shelter is not income if it would be an excluded resource when kept into the next month. One automobile used for transportation is excluded regardless of value, so the gifted van is not income and Sam keeps the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "car-from-brother",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A non-cash item, other than shelter, that would be an excluded resource if kept is not income. Because Stan has no other car, the gifted car falls under the one-automobile resource exclusion, so his full $994 SSI payment is unaffected.",
+        "match": true
+      }
+    },
+    {
+      "id": "title-iv-grants",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-EDU-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Student financial assistance under Title IV of the Higher Education Act is fully excluded from SSI income no matter how it is used, so none of the $2,000 counts, including the $700 she set aside. With no other income, Nina gets the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "loan-without-repayment",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 200,
+            "got": 200
+          },
+          {
+            "month": "2026-07",
+            "measure": "ssi_amount",
+            "value": 814,
+            "got": 814
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 200,
+            "got": 200
+          },
+          {
+            "month": "2026-07",
+            "measure": "ssi_amount",
+            "value": 814,
+            "got": 814
+          }
+        ],
+        "reason": "Because Ray's child says he does not have to repay it, there is no enforceable obligation to repay, so the $200 is not a bona fide loan and counts as unearned cash income. It arrives every month, so the infrequent or irregular income exclusion does not apply; after the $20 general exclusion, $180 is countable, giving $994 − $180 = $814.",
+        "match": true
+      }
+    },
+    {
+      "id": "domestic-plane-ticket",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-11",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-11",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A gift of a domestic travel ticket that Ivy uses, rather than cashing in or selling, is not income under SSI rules. It also cannot be used for shelter, so it is not in-kind support, and she keeps the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "one-time-electric",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "ism_value",
+            "value": 90,
+            "got": 90
+          },
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 30,
+            "got": 30
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "ism_value",
+            "value": 90,
+            "got": 90
+          },
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 30,
+            "got": 90
+          }
+        ],
+        "reason": "A third party paying Rita's electric bill is a shelter expense, so it counts as in-kind support. It is valued at its actual $90 under the presumed maximum value rule, since that is below the $351.33 cap. Because $90 is more than the $60 quarterly limit for infrequent or irregular unearned income, none of it is excluded; after the $20 general exclusion, $70 counts, giving $994 - $70 = $924.",
+        "match": false
+      }
+    },
+    {
+      "id": "part-of-rent",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-08",
+            "measure": "ism_value",
+            "value": 200,
+            "got": 200
+          },
+          {
+            "month": "2026-08",
+            "measure": "ssi_amount",
+            "value": 814,
+            "got": 814
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-08",
+            "measure": "ism_value",
+            "value": 200,
+            "got": 200
+          },
+          {
+            "month": "2026-08",
+            "measure": "ssi_amount",
+            "value": 814,
+            "got": 814
+          }
+        ],
+        "reason": "The father's $200 direct payment to the landlord is in-kind shelter support. It is valued at the actual $200 because that is less than the $351.33 presumed maximum; after the $20 general exclusion, $180 counts, so SSI is $994 − $180 = $814.",
+        "match": true
+      }
+    },
+    {
+      "id": "cash-two-quarters",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 50,
+            "got": 50
+          },
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 50,
+            "got": 50
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "after_infrequent",
+            "value": 50,
+            "got": 50
+          },
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 50,
+            "got": 50
+          }
+        ],
+        "reason": "Each gift is the only one from that source in its calendar quarter, but the infrequent or irregular income exclusion only applies when the quarter's total is $20 or less, so each $50 gift counts in full. After the $20 general exclusion, $30 is countable in each month, leaving SSI of $994 − $30 = $964.",
+        "match": true
+      }
+    },
+    {
+      "id": "two-relatives-same-month",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 20,
+            "got": 20
+          }
+        ],
+        "rules": [
+          "R-CASH-01",
+          "R-INFREQ-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-06",
+            "measure": "after_infrequent",
+            "value": 20,
+            "got": 20
+          }
+        ],
+        "reason": "Each $40 cash gift is infrequent because it comes once in the quarter from its source, but the infrequent or irregular exclusion covers at most $60 of unearned income per calendar quarter in total, so $20 of the $80 counts. The $20 general exclusion then removes that $20, leaving countable income of $0 and the full $994 benefit.",
+        "match": true
+      }
+    },
+    {
+      "id": "able-contribution",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ABLE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-05",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Contributions a third party makes to an SSI recipient's ABLE account are not income to the beneficiary, so the uncle's $500 deposit does not count. Mae keeps the full $994 federal benefit rate for May 2026.",
+        "match": true
+      }
+    },
+    {
+      "id": "insurance-premium",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-02",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-VEND-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-02",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A third party paying Ben's dental and vision insurance premium directly to the insurer is a medical expense payment, not income. It is not cash, and it is not shelter, so it is not in-kind support. Ben's February 2026 SSI stays at the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "dentist-paid",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-VEND-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-07",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A third party's direct payment to a provider for medical or dental care is a medical service, not income, and it is not food or shelter, so it is not in-kind support. Ava's SSI stays at the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "weatherization",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-VEND-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "The nephew paid the contractor directly for home improvements (insulation and storm windows). These are not shelter expenses such as mortgage, property taxes, or utilities, so the payment is not in-kind support and maintenance and is not counted as income. Hank keeps the full $994 federal benefit.",
+        "match": true
+      }
+    },
+    {
+      "id": "rent-over-cap",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-10",
+            "measure": "ssi_amount",
+            "value": 662.67,
+            "got": 662.67
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-10",
+            "measure": "ism_value",
+            "value": 351.33,
+            "got": 351.33
+          },
+          {
+            "month": "2026-10",
+            "measure": "ssi_amount",
+            "value": 662.67,
+            "got": 662.67
+          }
+        ],
+        "reason": "Her son's direct payment of her rent is in-kind shelter support. Because Ellen lives in her own household, it is valued at the presumed maximum value of $351.33 (less than the $900 rent), and after the $20 general exclusion her SSI is $994 − $331.33 = $662.67.",
+        "match": true
+      }
+    },
+    {
+      "id": "prepaid-next-rent",
+      "engine": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 300,
+            "got": 300
+          }
+        ],
+        "rules": [
+          "R-SHEL-01",
+          "R-GIE-01",
+          "R-SHEL-02"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": true,
+        "values": [
+          {
+            "month": "2026-03",
+            "measure": "ism_value",
+            "value": 0,
+            "got": 0
+          },
+          {
+            "month": "2026-04",
+            "measure": "ism_value",
+            "value": 300,
+            "got": 300
+          }
+        ],
+        "reason": "The sister's direct payment of Jo's rent is in-kind support, counted for April (the month the rent covers) at its $300 actual value because that is below the $351.33 cap; the infrequent-income exclusion does not apply because $300 exceeds $60, so after the $20 general exclusion $280 is countable and SSI is $994 − $280 = $714. Nothing is charged in March, when the payment was made.",
+        "match": true
+      }
+    },
+    {
+      "id": "television",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-12",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-12",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "A television is a household good, which would be an excluded resource if Rosa kept it. In-kind items that would be excluded resources are not income, and the gift is not shelter, so it adds no in-kind support and her SSI stays at the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "wheelchair",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-04",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Under SSI rules, medical care and services, including durable medical equipment such as a wheelchair given free or paid for by someone else, are not income. The wheelchair is also not food or shelter, so it creates no in-kind support, and Ted keeps the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "clothing",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-09",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Gifts of clothing are not income for SSI, because in-kind support counts only shelter (and food before September 30, 2024), never clothing. Lucy has no other income, so she receives the full $994.",
+        "match": true
+      }
+    },
+    {
+      "id": "meals-at-relative",
+      "engine": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-11",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "rules": [
+          "R-ITEM-01"
+        ],
+        "match": true
+      },
+      "claude": {
+        "counts": false,
+        "values": [
+          {
+            "month": "2026-11",
+            "measure": "after_infrequent",
+            "value": 0,
+            "got": 0
+          }
+        ],
+        "reason": "Since September 30, 2024, SSI no longer counts food as in-kind support and maintenance, so the free Sunday dinners at his daughter's home are not income. Earl lives alone with no other income, so he receives the full $994 federal benefit.",
         "match": true
       }
     }
   ],
-  "ms": 36670
+  "ms": 60
 }

@@ -12,6 +12,28 @@ const S = results.summary;
 const MONTH = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 const month = (m: string) => MONTH.format(new Date(`${m}-15T12:00:00Z`));
 const MEASURE: Record<string, string> = { after_infrequent: "counted", ism_value: "housing support", ssi_amount: "SSI amount" };
+const off = (v: Value) => v.got === null || Math.abs(v.got - v.value) > results.tolerance_usd;
+const CITES = [...new Set(data.cases.map((c) => c.cite))];
+const POMS_SECTIONS = CITES.filter((c) => c.startsWith("POMS")).length;
+const CFR_SECTIONS = new Set(CITES.filter((c) => c.startsWith("20 CFR")).map((c) => c.replace(/\(.*$/, ""))).size;
+
+/** Where Claude alone differed from SSA, counted from the recorded run. */
+function claudeMisses() {
+  const missed = (results.cases as Row[]).filter((r) => r.claude && !r.claude.match);
+  const by = (m: string) => missed.filter((r) => r.claude!.values.some((v) => v.measure === m && off(v))).length;
+  const parts = [
+    [by("after_infrequent"), "what counts after the $60 one-off exclusion"],
+    [by("ism_value"), "how much housing support is charged"],
+    [by("ssi_amount"), "the SSI amount"],
+  ].filter(([k]) => Number(k) > 0) as [number, string][];
+  const yesNo = missed.filter((r) => r.claude!.values.every((v) => !off(v))).length;
+  if (yesNo) parts.push([yesNo, "whether it counts at all"]);
+  if (!missed.length) return "It matched every example.";
+  const said = parts.map(([k, t]) => `${t} in ${k}`);
+  const list = said.length > 1 ? `${said.slice(0, -1).join(", ")} and ${said[said.length - 1]}` : said[0];
+  const overlap = parts.reduce((a, [k]) => a + k, 0) > missed.length ? " (some examples missed on more than one)" : "";
+  return `It differed from SSA on ${list}${overlap}. Giftwise does that arithmetic in code.`;
+}
 
 function Verdict({ side }: { side: Side | null }) {
   if (!side) return <span className="muted">Not run</span>;
@@ -52,11 +74,12 @@ export function SsaExamples() {
         <strong className="tabular">
           {S.claude_matches} of {S.claude_answered}
         </strong>
-        . It missed the $60 quarterly exclusion for one-time gifts three times. Giftwise does that arithmetic in code.
+        . {claudeMisses()}
       </p>
       <p className="sx-meta muted">
-        {S.cases} worked examples from {new Set(data.cases.map((c) => c.cite)).size} sections of SSA&rsquo;s operating manual, each about a gift or similar help to one person. The facts and answers are
-        SSA&rsquo;s, with dates moved to 2026 so 2026 amounts apply. Examples Giftwise does not model are listed at the end with the reason. Run {ran}; Claude is {results.model}.
+        {S.cases} worked examples from {POMS_SECTIONS} sections of SSA&rsquo;s operating manual and {CFR_SECTIONS} {CFR_SECTIONS === 1 ? "section" : "sections"} of its regulations, each about a gift or similar help to one person. The facts and
+        answers are SSA&rsquo;s, with dates moved to 2026 so 2026 amounts apply; where SSA gives no amount, one is supplied that does not change SSA&rsquo;s answer. Examples Giftwise does not model are
+        listed at the end with the reason. Run {ran}; Claude is {results.model}.
       </p>
 
       <div className="sx-findings">

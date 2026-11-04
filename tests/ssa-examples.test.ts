@@ -23,9 +23,10 @@ describe("Social Security's own worked examples", () => {
       return got !== null && Math.abs(got - v.value) <= 1;
     });
 
-  it("the engine matches every example except the one prepaid bill it does not spread over the months it covers", () => {
+  it("the engine matches every scored example, including prepaid bills spread over the months they cover", () => {
     const misses = data.cases.filter((c) => !agrees(c)).map((c) => c.id);
-    expect(misses).toEqual(["property-tax-prepaid"]);
+    expect(misses).toEqual([]);
+    expect(data.cases.length).toBeGreaterThanOrEqual(40);
   });
 
   it("every example cites a known source and quotes SSA's text", () => {
