@@ -14,22 +14,33 @@ import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
 import { pageOrigin } from "@/lib/origin";
 import QRCode from "qrcode";
-import { DEFAULT_PROFILE, evaluateGift, monthName, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, evaluateGift, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { asLang, giftText, monthIn, sampleIn } from "@/lib/i18n/gift";
+import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "./gift.css";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+type Search = { lang?: string };
+
+export async function generateMetadata({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Search> }): Promise<Metadata> {
+  const [{ slug }, q] = await Promise.all([params, searchParams]);
+  const lang = asLang(q.lang);
   const data = dbConfigured() ? await getHousehold(slug) : null;
-  const name = data?.household.name ?? "someone";
+  const name = data?.household.name ?? (lang === "es" ? "alguien" : "someone");
   return {
-    title: `Help ${name}`,
-    description: `Every gift on this page is paid straight to the shop through PayPal, so ${name}'s SSI check stays the same.`,
+    title: giftText(lang).help(name),
+    description:
+      lang === "es"
+        ? `Cada regalo de esta página se paga directamente a la tienda por PayPal, así el cheque de SSI de ${name} no cambia.`
+        : `Every gift on this page is paid straight to the shop through PayPal, so ${name}'s SSI check stays the same.`,
     robots: data && !data.household.isSample ? { index: false } : undefined,
   };
 }
 
-async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+async function GiftPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Search> }) {
+  const [{ slug }, q] = await Promise.all([params, searchParams]);
+  const lang = asLang(q.lang);
+  const t = giftText(lang);
+  const es = lang === "es" ? "?lang=es" : "";
   if (!dbConfigured()) {
     return <p className="gift-empty">The sample page needs its database. See the README to start it.</p>;
   }
@@ -38,8 +49,9 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
   const { household, needs, payments } = data;
   const profile: Profile = { ...DEFAULT_PROFILE, ...(household.profile as Partial<Profile>) };
   const w = pronounWords(profile.pronoun);
+  const own = (s: string) => sampleIn(lang, s, household.isSample);
   const cash = evaluateGift({ id: "cash", date: today(), amount: 300, delivery: "cash", category: "other" }, profile);
-  const shareUrl = `${await pageOrigin()}/g/${slug}`;
+  const shareUrl = `${await pageOrigin()}/g/${slug}${es}`;
   const qrSvg = await QRCode.toString(shareUrl, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#21232e", light: "#ffffff" } });
   // Payments are newest first, so the first row per need is the latest one.
   const paidByNeed = new Map<number, (typeof payments)[number]>();
@@ -52,14 +64,14 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
     const p = paidByNeed.get(n.id);
     return {
       id: n.id,
-      title: n.title,
-      detail: n.detail,
+      title: own(n.title),
+      detail: own(n.detail),
       amount: Number(n.amount),
       funded: Number(n.funded),
       payeeName: n.payeeName,
       route: n.route,
       status: n.status,
-      rulePlain: r.explanation.plain,
+      rulePlain: lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain,
       ruleIds: r.ruleIds,
       checkAfter: r.checkAfter,
       paidBy: p?.payerName?.split(" ")[0] ?? null,
@@ -75,105 +87,115 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
 
   return (
     <>
-      <header className="gift-head">
+      <header className="gift-head" lang={lang}>
         <div className="title-row">
-          <h1 className="gift-title">Help {household.name}</h1>
+          <h1 className="gift-title">{t.help(household.name)}</h1>
           <Info id="page.gift" />
+          <Link className="gift-lang" href={`/g/${slug}${t.langSwitch.lang === "es" ? "?lang=es" : ""}`} hrefLang={t.langSwitch.lang} lang={t.langSwitch.lang}>
+            {t.langSwitch.label}
+          </Link>
         </div>
-        <p className="gift-note">{household.note}</p>
-        <p className="gift-sample muted">
-          {household.isSample
-            ? "Sample household for the demo. Names and shops are fictional."
-            : "Made from a fundraiser page, in the PayPal sandbox. Figures use the federal SSI amount for the month each check is paid ($994 in 2026, $1,029 from January 2027) and assume no other income. In the sandbox, every shop is paid through one test business account."}
-        </p>
+        <p className="gift-note">{own(household.note)}</p>
+        <p className="gift-sample muted">{household.isSample ? t.sampleNote : t.madeNote}</p>
       </header>
-      <div className="gift-layout">
+      <div className="gift-layout" lang={lang}>
         <div className="gift-needs">
           <div className="title-row">
-            <h2 className="gift-h2">What {household.name} needs</h2>
+            <h2 className="gift-h2">{t.needsH(household.name)}</h2>
             <Info id="gift.needs" />
           </div>
           <div className="gift-list">
             {views.map((v) => (
-              <NeedCard key={v.id} need={v} name={household.name} />
+              <NeedCard key={v.id} need={v} name={household.name} lang={lang} />
             ))}
           </div>
-          <div className="gift-real">
+          <div className="gift-real" lang="en">
+            {lang === "es" && (
+              <p className="gift-real-note muted" lang="es">
+                {t.realWorldNote}
+              </p>
+            )}
             <RealWorld />
           </div>
         </div>
         <aside className="gift-aside" aria-labelledby="month-h">
-          <GiveAny slug={slug} name={household.name} needs={openNeeds(needs)} date={today()} profile={profile} />
+          <GiveAny slug={slug} name={household.name} needs={openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }))} date={today()} profile={profile} lang={lang} />
           <div className="gift-month" data-ui>
             <div className="title-row">
               <h2 id="month-h" className="gift-month-title">
-                {household.name}&rsquo;s month
+                {t.monthH(household.name)}
               </h2>
               <Info id="gift.month" label="" />
             </div>
             <p className="gift-k">
-              SSI check, {monthName(cash.paymentMonth)} {cash.paymentMonth.slice(0, 4)}
+              {t.checkMonth(monthIn(lang, cash.paymentMonth), cash.paymentMonth.slice(0, 4))}
             </p>
             <p className="gift-check tabular">{usd(cash.checkBaseline)}</p>
             <dl className="gift-facts">
               <div>
-                <dt>Given so far</dt>
+                <dt>{t.givenSoFar}</dt>
                 <dd className="tabular">{usd(paidTotal)}</dd>
               </div>
               <div>
-                <dt>Still needed</dt>
+                <dt>{t.stillNeeded}</dt>
                 <dd className="tabular">{usd(openTotal)}</dd>
               </div>
               {saved > 0 && (
                 <div>
-                  <dt>Saved in {w.poss} ABLE account</dt>
+                  <dt>{t.savedAble(w)}</dt>
                   <dd className="tabular">{usd(saved)}</dd>
                 </div>
               )}
               <div>
-                <dt>Counted as income</dt>
+                <dt>{t.counted}</dt>
                 <dd className="tabular">$0</dd>
               </div>
             </dl>
             {latest && (
-              <Link className="text-link gift-latest" href={`/r/${latest}`}>
-                See the latest receipt
+              <Link className="text-link gift-latest" href={`/r/${latest}${es}`}>
+                {t.latestReceipt}
+              </Link>
+            )}
+            {lang === "es" && (
+              <Link className="text-link gift-latest" href={`/g/${slug}/report/easy?lang=es`}>
+                {t.easyLink(household.name)}
               </Link>
             )}
             <Link className="text-link gift-latest" href={`/g/${slug}/report`}>
-              {household.name}&rsquo;s report to Social Security
+              {t.reportLink(household.name)}
             </Link>
-            <Link className="text-link gift-latest" href={`/g/${slug}/report/easy`}>
-              The same report in Easy Read, for {household.name}
-            </Link>
+            {lang === "en" && (
+              <Link className="text-link gift-latest" href={`/g/${slug}/report/easy`}>
+                {t.easyLink(household.name)}
+              </Link>
+            )}
             <Link className="text-link gift-latest" href={`/g/${slug}/calendar`}>
-              {household.name}&rsquo;s benefit calendar
+              {t.calendarLink(household.name)}
             </Link>
             {household.isSample && (
               <Link className="text-link gift-latest" href="/dashboard">
-                See {household.name}&rsquo;s year
+                {t.yearLink(household.name)}
               </Link>
             )}
           </div>
-          <ShareGift url={shareUrl} title={`Help ${household.name}`} text={`Help ${household.name}: every gift is paid straight to the shop through PayPal, so ${w.poss} SSI check stays whole.`} qrSvg={qrSvg} />
+          <ShareGift url={shareUrl} title={t.help(household.name)} text={t.shareMessage(household.name, w)} qrSvg={qrSvg} lang={lang} />
           <details className="gift-cash">
-            <summary>Prefer to give cash?</summary>
+            <summary>{t.cashQ}</summary>
             <p>
-              Cash counts as {w.poss} income. A $300 cash gift would lower {w.poss} check to {usd(cash.checkAfter)}. Paying for one of these needs instead keeps {w.poss} full{" "}
-              {usd(cash.checkBaseline)}.{" "}
+              {t.cashText(w, usd(cash.checkAfter), usd(cash.checkBaseline))}{" "}
               <Link className="text-link" href="/try">
-                Check any gift
+                {t.checkAny}
               </Link>
             </p>
           </details>
           <div className="gift-sandbox">
             <div className="title-row">
-              <p className="gift-sandbox-title">Paying in the sandbox</p>
+              <p className="gift-sandbox-title">{t.sandboxTitle}</p>
               <Info id="gift.sandbox" label="" />
             </div>
-            <p>No real money moves. In the PayPal window, log in with this sandbox buyer:</p>
-            <SandboxLogin compact />
-            {household.isSample && <ResetSample slug={slug} />}
+            <p>{t.sandboxText}</p>
+            <SandboxLogin compact lang={lang} />
+            {household.isSample && <ResetSample slug={slug} lang={lang} />}
           </div>
         </aside>
       </div>
@@ -182,11 +204,11 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
 }
 
 // The slug is runtime data, so the whole page, header included, is read inside Suspense.
-export default function Page({ params }: { params: Promise<{ slug: string }> }) {
+export default function Page({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Search> }) {
   return (
     <div className="gift frame">
       <Suspense fallback={<p className="gift-empty">Loading the gift page…</p>}>
-        <GiftPage params={params} />
+        <GiftPage params={params} searchParams={searchParams} />
       </Suspense>
     </div>
   );

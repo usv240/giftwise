@@ -36,7 +36,7 @@ const monthIn = (lang: EasyLang, month: string) => (lang === "en" ? monthName(mo
 const monthYearIn = (lang: EasyLang, month: string) => `${monthIn(lang, month)}${lang === "es" ? " de " : " "}${month.slice(0, 4)}`;
 const lowerFirst = (s: string) => (/^[A-Z][a-z]/.test(s) ? s[0].toLowerCase() + s.slice(1) : s);
 
-const CATEGORY_ES: Record<Category, string> = {
+export const CATEGORY_ES: Record<Category, string> = {
   medical: "atención médica",
   equipment: "equipo",
   phone: "la factura del teléfono",

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PayPalPay, requestOrder } from "./PayPalPay";
+import { giftText, type Lang } from "@/lib/i18n/gift";
 
 /** Approve one month of a monthly gift in PayPal. The server routes the month again before it creates the order. */
 export function PayMonth({ token, month }: { token: string; month: string }) {
@@ -46,7 +47,8 @@ export function PlanNext({ token, label }: { token: string; label: string }) {
 }
 
 /** After a gift, offer to give the same amount every month. */
-export function StartMonthly({ slug, amount, orderId, giverName }: { slug: string; amount: number; orderId: string; giverName: string | null }) {
+export function StartMonthly({ slug, amount, orderId, giverName, lang = "en" }: { slug: string; amount: number; orderId: string; giverName: string | null; lang?: Lang }) {
+  const t = giftText(lang);
   const router = useRouter();
   const [state, setState] = useState<"idle" | "working" | "error">("idle");
   const [note, setNote] = useState("");
@@ -57,19 +59,19 @@ export function StartMonthly({ slug, amount, orderId, giverName }: { slug: strin
       const j = (await r.json()) as { data?: { url: string }; error?: { message?: string } };
       if (!j.data) {
         setState("error");
-        setNote(j.error?.message ?? "Could not start the monthly gift.");
+        setNote(j.error?.message ?? t.monthlyFailed);
         return;
       }
       router.push(j.data.url);
     } catch {
       setState("error");
-      setNote("Could not reach the server. Try again.");
+      setNote(t.noServer);
     }
   };
   return (
     <span className="mo-start">
       <button type="button" className="give-again" onClick={go} disabled={state === "working"}>
-        {state === "working" ? "Setting it up…" : "Give this every month"}
+        {state === "working" ? t.monthlyWorking : t.monthly}
       </button>
       {note && (
         <span className="mo-note" role="status" data-tone="attention">

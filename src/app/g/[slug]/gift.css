@@ -506,3 +506,18 @@
     transition: none;
   }
 }
+/* The language switch sits at the end of the title row. */
+.gift-lang {
+  margin-left: auto;
+  align-self: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  padding: 6px 0;
+}
+.gift-real-note {
+  font-size: 15px;
+  margin-bottom: 8px;
+}

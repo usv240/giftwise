@@ -7,28 +7,22 @@ import sources from "../../../../content/sources.json";
 import { Info } from "@/components/Info";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { db, dbConfigured, schema } from "@/lib/db";
-import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthName, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { asLang, monthIn, payeeIn, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
+import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "../../pages.css";
 import "./receipt.css";
 
 export const metadata: Metadata = { title: "Receipt", description: "Where a Giftwise gift went, the rule that kept the SSI check whole, and a live check against PayPal." };
 
 const SRC = sources as Record<string, { title: string; url: string; publisher?: string }>;
-const ACTION: Record<string, string> = {
-  "paypal.order.created": "PayPal order created",
-  "paypal.routed_order.created": "PayPal order created, split by the rules",
-  "paypal.order.captured": "Payment completed by PayPal",
-  "paypal.webhook.checkout.order.approved": "PayPal reported the giver's approval (webhook)",
-  "paypal.webhook.payment.capture.completed": "PayPal confirmed a payment (webhook)",
-  "paypal.webhook.payment.capture.refunded": "PayPal reported a refund (webhook)",
-  "paypal.webhook.payment.capture.reversed": "PayPal reported a reversal (webhook)",
-  "paypal.webhook.payment.capture.denied": "PayPal reported a declined payment (webhook)",
-};
-const ROUTE: Record<string, string> = { vendor: "Paid straight to the shop", able: "Paid to the ABLE account" };
-const when = (d: Date) => d.toLocaleString("en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" });
+const when = (d: Date, lang: Lang = "en") => d.toLocaleString(lang === "es" ? "es-US" : "en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" });
+type Search = { lang?: string };
 
-async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
-  const { orderId } = await params;
+async function Receipt({ params, searchParams }: { params: Promise<{ orderId: string }>; searchParams: Promise<Search> }) {
+  const [{ orderId }, q] = await Promise.all([params, searchParams]);
+  const lang = asLang(q.lang);
+  const t = receiptText(lang);
   if (!/^[A-Z0-9]{10,24}$/.test(orderId)) notFound();
   if (!dbConfigured()) return <p className="page-loading">The receipt needs its database. See the README to start it.</p>;
   const d = db();
@@ -44,7 +38,7 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
     .orderBy(asc(schema.auditEvents.id));
 
   const name = household?.name ?? "the person";
-  const hers = household?.name ? `${household.name}’s` : "the person’s";
+  const hers = t.possessive(household?.name);
   const profile: Profile = { ...DEFAULT_PROFILE, ...((household?.profile ?? {}) as Partial<Profile>) };
   const date = rows[0].createdAt.toISOString().slice(0, 10);
   const lines = rows.map((r) => {
@@ -53,7 +47,7 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
       { id: r.referenceId, date, amount: Number(r.amount), delivery: r.route as Delivery, category: (need?.category ?? "other") as Category, recurring: need?.recurring },
       profile,
     );
-    return { row: r, title: need?.title ?? `Savings in ${hers} ABLE account`, check };
+    return { row: r, title: need ? sampleIn(lang, need.title, household?.isSample ?? false) : t.savingsIn(hers), check };
   });
   const captured = rows.every((r) => r.status === "captured");
   const total = rows.reduce((s, r) => s + Number(r.amount), 0);
@@ -67,48 +61,52 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
   const payer = rows.find((r) => r.payerName)?.payerName?.split(" ")[0];
 
   return (
-    <>
+    <div lang={lang}>
+      <header className="page-head">
+        <div className="title-row">
+          <h1 className="page-title">{t.title}</h1>
+          <Info id="gift.receipt" />
+        </div>
+        <p className="lede">{t.lede}</p>
+      </header>
       <section className="rc-summary" data-ui aria-labelledby="rc-total">
         <div>
-          <p className="rc-k">{captured ? "Given" : "Started, not yet completed"}</p>
+          <p className="rc-k">{captured ? t.given : t.started}</p>
           <p id="rc-total" className="rc-total tabular">
             {usd(total)}
           </p>
-          <p className="rc-sub">
-            {payer ? `From ${payer}, ` : ""}
-            {rows.length === 1 ? "to one recipient" : `split across ${rows.length} recipients`} in one PayPal payment on {when(rows[0].createdAt)}.
-          </p>
+          <p className="rc-sub">{t.sub(payer, rows.length, when(rows[0].createdAt, lang))}</p>
         </div>
         <dl className="rc-facts">
           <div>
-            <dt>Counted as {hers} income</dt>
+            <dt>{t.countedAs(hers)}</dt>
             <dd className="tabular">$0</dd>
           </div>
           <div>
-            <dt>{hers} SSI check after this gift</dt>
+            <dt>{t.checkAfter(hers)}</dt>
             <dd className="tabular" data-kept="">
               {usd(checkAfter)}
             </dd>
           </div>
           <div>
-            <dt>Sent to {hers} bank or to Giftwise</dt>
+            <dt>{t.sentTo(hers)}</dt>
             <dd className="tabular">$0</dd>
           </div>
         </dl>
       </section>
 
       <section className="page-section" aria-labelledby="rc-where">
-        <h2 id="rc-where">Where every dollar went</h2>
+        <h2 id="rc-where">{t.where}</h2>
         <ul className="rc-lines">
           {lines.map(({ row, title }) => (
             <li key={row.id} className="rc-line">
               <div>
-                <p className="rc-payee">{row.payeeName}</p>
+                <p className="rc-payee">{payeeIn(lang, row.payeeName)}</p>
                 <p className="rc-for">
-                  {title}. {ROUTE[row.route] ?? row.route}.
+                  {title}. {row.route === "able" ? t.routeAble : row.route === "vendor" ? t.routeVendor : row.route}.
                 </p>
                 <p className="rc-ids tabular">
-                  {row.captureId ? `PayPal capture ${row.captureId}` : `PayPal order ${row.orderId}, ${row.status}`}
+                  {row.captureId ? t.capture(row.captureId) : t.order(row.orderId, row.status)}
                 </p>
               </div>
               <p className="rc-amount tabular">{usd(Number(row.amount))}</p>
@@ -118,8 +116,18 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
       </section>
 
       <section className="page-section" aria-labelledby="rc-why">
-        <h2 id="rc-why">Why {hers} check stays the same</h2>
-        <ul className="rc-rules">
+        <h2 id="rc-why">{t.why(hers)}</h2>
+        {lang === "es" && (
+          <ul className="rc-rules">
+            {lines.map(({ row, check }) => (
+              <li key={row.id}>
+                <p className="rc-rule-name">{payeeIn(lang, row.payeeName)}</p>
+                <p>{ruleSentenceEs(check, profile.couple)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <ul className="rc-rules" hidden={lang === "es"}>
           {ruleIds.map((id) => {
             const rule = RULES[id];
             if (!rule) return null;
@@ -133,7 +141,7 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
             );
           })}
         </ul>
-        <p className="rc-sources-k">Sources</p>
+        <p className="rc-sources-k">{t.sources}</p>
         <ul className="rc-sources">
           {sourcesFor(ruleIds).map((k) => (
             <li key={k}>
@@ -143,59 +151,52 @@ async function Receipt({ params }: { params: Promise<{ orderId: string }> }) {
             </li>
           ))}
         </ul>
-        <p className="rc-version muted">Rules version {RULES_VERSION}. Checked by the Giftwise rules engine before PayPal created the order.</p>
+        <p className="rc-version muted">{t.version(RULES_VERSION)}</p>
       </section>
 
       <section className="page-section" aria-labelledby="rc-check">
         <div className="title-row">
-          <h2 id="rc-check">Check it yourself</h2>
+          <h2 id="rc-check">{t.checkIt}</h2>
           <Info id="gift.receipt" label="" />
         </div>
-        <ReceiptChecks orderId={orderId} />
+        <ReceiptChecks orderId={orderId} lang={lang} />
         <ol className="rc-events">
           {events.map((e) => (
             <li key={e.id}>
               <span>
-                {ACTION[e.action] ?? e.action}
-                {e.actor === "agent" ? ", started by an AI agent for the giver to approve" : ""}
+                {t.events[e.action] ?? e.action}
+                {e.actor === "agent" ? t.byAgent : ""}
               </span>
-              <span className="muted">{when(e.at)}</span>
+              <span className="muted">{when(e.at, lang)}</span>
               <span className="rc-hash tabular" title={e.hash}>
                 {e.hash.slice(0, 16)}
               </span>
             </li>
           ))}
         </ol>
-        <p className="rc-hash-note muted">Each line is one entry in the Giftwise ledger. Every entry&rsquo;s fingerprint includes the one before it, so no past entry can change without the check above failing.</p>
+        <p className="rc-hash-note muted">{t.hashNote}</p>
       </section>
 
       {household && (
         <p className="page-section rc-next">
-          <Link className="text-link" href={`/g/${household.slug}/report?month=${monthOf(date)}`}>
-            See this gift on {hers} {monthName(monthOf(date))} report to Social Security
+          <Link className="text-link" href={lang === "es" ? `/g/${household.slug}/report/easy?month=${monthOf(date)}&lang=es` : `/g/${household.slug}/report?month=${monthOf(date)}`}>
+            {t.onReport(hers, monthIn(lang, monthOf(date)))}
           </Link>
-          <Link className="text-link" href={`/g/${household.slug}`}>
-            Back to {name}&rsquo;s page
+          <Link className="text-link" href={`/g/${household.slug}${lang === "es" ? "?lang=es" : ""}`}>
+            {t.back(name)}
           </Link>
         </p>
       )}
-    </>
+    </div>
   );
 }
 
-// The header is the static shell; the order id is runtime data, so it is read inside Suspense.
-export default function Page({ params }: { params: Promise<{ orderId: string }> }) {
+// The order id and language are runtime data, so the whole receipt, header included, is read inside Suspense.
+export default function Page({ params, searchParams }: { params: Promise<{ orderId: string }>; searchParams: Promise<Search> }) {
   return (
     <div className="page frame receipt">
-      <header className="page-head">
-        <div className="title-row">
-          <h1 className="page-title">Receipt</h1>
-          <Info id="gift.receipt" />
-        </div>
-        <p className="lede">A public record of one gift: who was paid, how much, and the rule that kept the SSI check whole. Anyone with this link can check it against PayPal.</p>
-      </header>
       <Suspense fallback={<p className="page-loading">Loading the receipt…</p>}>
-        <Receipt params={params} />
+        <Receipt params={params} searchParams={searchParams} />
       </Suspense>
     </div>
   );

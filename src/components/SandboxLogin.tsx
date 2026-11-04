@@ -1,8 +1,10 @@
 import { connection } from "next/server";
 import { sandboxBuyerLogin } from "@/lib/sandbox-login";
+import { giftText, type Lang } from "@/lib/i18n/gift";
 
 /** The sandbox buyer login, shown where a judge needs it: next to the PayPal buttons and on the judges' path. */
-export async function SandboxLogin({ compact }: { compact?: boolean }) {
+export async function SandboxLogin({ compact, lang = "en" }: { compact?: boolean; lang?: Lang }) {
+  const t = giftText(lang);
   await connection();
   const login = await sandboxBuyerLogin();
   if (!login) {
@@ -19,13 +21,13 @@ export async function SandboxLogin({ compact }: { compact?: boolean }) {
   return (
     <dl className="sbl" data-compact={compact ? "" : undefined}>
       <div>
-        <dt>Sandbox email</dt>
+        <dt>{t.sandboxEmail}</dt>
         <dd>
           <code>{login.email}</code>
         </dd>
       </div>
       <div>
-        <dt>Password</dt>
+        <dt>{t.password}</dt>
         <dd>
           <code>{login.password}</code>
         </dd>

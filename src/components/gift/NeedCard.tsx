@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Info } from "../Info";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { usd } from "@/lib/rules";
+import { giftText, payeeInline, type Lang } from "@/lib/i18n/gift";
 
 export type NeedView = {
   id: number;
@@ -24,7 +25,8 @@ export type NeedView = {
   captureId: string | null;
 };
 
-export function NeedCard({ need, name }: { need: NeedView; name: string }) {
+export function NeedCard({ need, name, lang = "en" }: { need: NeedView; name: string; lang?: Lang }) {
+  const t = giftText(lang);
   const router = useRouter();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   const paid = need.status === "paid" || receipt;
@@ -40,7 +42,7 @@ export function NeedCard({ need, name }: { need: NeedView; name: string }) {
         <p className="need-detail">{need.detail}</p>
         <p className="need-route">
           <span>
-            Paid straight to <strong>{need.payeeName}</strong>
+            {t.paidStraightTo} <strong>{payeeInline(lang, need.payeeName)}</strong>
           </span>
           <Info id={need.route === "able" ? "gift.route.able" : "gift.route.vendor"} label="" />
         </p>
@@ -50,23 +52,24 @@ export function NeedCard({ need, name }: { need: NeedView; name: string }) {
         <p className="need-amount tabular">{usd(need.amount)}</p>
         {need.funded > 0 && !paid && (
           <p className="need-progress tabular">
-            {usd(need.funded)} given, {usd(remaining)} to go
+            {t.givenToGo(usd(need.funded), usd(remaining))}
           </p>
         )}
         {paid ? (
           <div className="need-receipt" role="status">
-            <p className="need-paid">Paid{who ? ` by ${who}` : ""}</p>
+            <p className="need-paid">{t.paidBy(who)}</p>
             <p className="need-receipt-line">
-              Paid to {need.payeeName}. {name} keeps {usd(need.checkAfter)} this month.
+              {t.paidLine(payeeInline(lang, need.payeeName), name, usd(need.checkAfter))}
             </p>
             {orderId && (
-              <Link className="text-link need-receipt-link" href={`/r/${orderId}`}>
-                See the receipt
+              <Link className="text-link need-receipt-link" href={`/r/${orderId}${lang === "es" ? "?lang=es" : ""}`}>
+                {t.seeReceipt}
               </Link>
             )}
           </div>
         ) : (
           <PayPalPay
+            lang={lang}
             createOrder={() => requestOrder("/api/paypal/orders", { needId: need.id })}
             onPaid={(r) => {
               setReceipt(r);

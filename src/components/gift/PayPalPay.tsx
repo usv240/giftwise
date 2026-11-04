@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { giftText, type Lang } from "@/lib/i18n/gift";
 
 /* Minimal typings for the PayPal JavaScript SDK v6 surface we use. */
 type Session = { start: (opts: { presentationMode: "auto" | "popup" | "modal" | "redirect" }, order: Promise<{ orderId: string }>) => Promise<void> };
@@ -15,7 +16,7 @@ type SdkInstance = {
 };
 declare global {
   interface Window {
-    paypal?: { createInstance: (o: { clientId: string; components: string[]; pageType?: string }) => Promise<SdkInstance> };
+    paypal?: { createInstance: (o: { clientId: string; components: string[]; pageType?: string; locale?: string }) => Promise<SdkInstance> };
   }
 }
 declare module "react" {
@@ -28,10 +29,12 @@ declare module "react" {
 }
 
 const SDK_SRC = "https://www.sandbox.paypal.com/web-sdk/v6/core";
-let instancePromise: Promise<{ sdk: SdkInstance; eligible: boolean }> | null = null;
+/** One SDK instance per language: PayPal draws its button and checkout in the page's language. */
+const instances = new Map<Lang, Promise<{ sdk: SdkInstance; eligible: boolean }>>();
+let scriptPromise: Promise<void> | null = null;
 
-function loadSdk(clientId: string) {
-  instancePromise ??= new Promise<void>((resolve, reject) => {
+function loadSdk(clientId: string, lang: Lang) {
+  scriptPromise ??= new Promise<void>((resolve, reject) => {
     if (window.paypal) return resolve();
     const s = document.createElement("script");
     s.src = SDK_SRC;
@@ -39,15 +42,21 @@ function loadSdk(clientId: string) {
     s.onload = () => resolve();
     s.onerror = () => reject(new Error("PayPal could not load. Check your connection."));
     document.head.appendChild(s);
-  }).then(async () => {
-    const sdk = await window.paypal!.createInstance({ clientId, components: ["paypal-payments"], pageType: "checkout" });
-    const methods = await sdk.findEligibleMethods({ currencyCode: "USD" });
-    return { sdk, eligible: methods.isEligible("paypal") };
   });
-  instancePromise.catch(() => {
-    instancePromise = null;
+  scriptPromise.catch(() => {
+    scriptPromise = null;
   });
-  return instancePromise;
+  let p = instances.get(lang);
+  if (!p) {
+    p = scriptPromise.then(async () => {
+      const sdk = await window.paypal!.createInstance({ clientId, components: ["paypal-payments"], pageType: "checkout", locale: lang === "es" ? "es-US" : "en-US" });
+      const methods = await sdk.findEligibleMethods({ currencyCode: "USD" });
+      return { sdk, eligible: methods.isEligible("paypal") };
+    });
+    p.catch(() => instances.delete(lang));
+    instances.set(lang, p);
+  }
+  return p;
 }
 
 export type Capture = { reference_id: string; capture_id: string | null; amount: string | null; payee: string };
@@ -57,7 +66,8 @@ export type Receipt = { orderId: string; captureId: string; amount: string; paye
  * PayPal JavaScript SDK v6 button. `createOrder` asks our server for an order (the server decides amounts and payees);
  * on approval the server captures it.
  */
-export function PayPalPay({ createOrder, onPaid, disabled }: { createOrder: () => Promise<string>; onPaid?: (r: Receipt) => void; disabled?: boolean }) {
+export function PayPalPay({ createOrder, onPaid, disabled, lang = "en" }: { createOrder: () => Promise<string>; onPaid?: (r: Receipt) => void; disabled?: boolean; lang?: Lang }) {
+  const t = giftText(lang);
   const router = useRouter();
   const ref = useRef<HTMLElement>(null);
   const createRef = useRef(createOrder);
@@ -79,7 +89,7 @@ export function PayPalPay({ createOrder, onPaid, disabled }: { createOrder: () =
       return;
     }
     let cancelled = false;
-    loadSdk(clientId)
+    loadSdk(clientId, lang)
       .then(({ sdk, eligible }) => {
         if (cancelled || !ref.current) return;
         if (!eligible) {
@@ -89,12 +99,12 @@ export function PayPalPay({ createOrder, onPaid, disabled }: { createOrder: () =
         const session = sdk.createPayPalOneTimePaymentSession({
           async onApprove({ orderId }) {
             setState("working");
-            setMessage("Completing the payment with PayPal…");
+            setMessage(t.ppCompleting);
             const res = await fetch(`/api/paypal/orders/${orderId}/capture`, { method: "POST" });
             const json = await res.json();
             if (!res.ok) {
               setState("error");
-              setMessage(json.error?.message ?? "PayPal could not complete the payment.");
+              setMessage(json.error?.message ?? t.ppFailed);
               return;
             }
             setState("ready");
@@ -104,11 +114,11 @@ export function PayPalPay({ createOrder, onPaid, disabled }: { createOrder: () =
           },
           onCancel() {
             setState("ready");
-            setMessage("Payment cancelled. Nothing was charged.");
+            setMessage(t.ppCancelled);
           },
           onError(e) {
             setState("error");
-            setMessage(e?.message ? `PayPal: ${e.message}` : "PayPal had a problem. Please try again.");
+            setMessage(e?.message ? `PayPal: ${e.message}` : t.ppProblem);
           },
         });
         const btn = ref.current;
@@ -134,13 +144,13 @@ export function PayPalPay({ createOrder, onPaid, disabled }: { createOrder: () =
     return () => {
       cancelled = true;
     };
-  }, [clientId, router]);
+  }, [clientId, router, lang, t]);
 
   return (
     <div className="pp-wrap">
       <paypal-button ref={ref} type="pay" hidden className="pp-button" aria-disabled={disabled ? "true" : undefined} data-disabled={disabled ? "" : undefined} />
-      {state === "loading" && <p className="pp-note">Loading PayPal…</p>}
-      {state === "unavailable" && <p className="pp-note">PayPal checkout is not connected on this server yet.</p>}
+      {state === "loading" && <p className="pp-note">{t.ppLoading}</p>}
+      {state === "unavailable" && <p className="pp-note">{t.ppUnavailable}</p>}
       {message && (
         <p className="pp-note" data-tone={state === "error" ? "attention" : undefined} role="status">
           {message}

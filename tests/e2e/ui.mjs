@@ -173,6 +173,17 @@ await page.getByRole("button", { name: "Move it" }).click();
 const moved = (await page.locator(".bc-moves").innerText()).replace(/\s+/g, " ");
 ok("Benefit calendar shows the gifts, and moving a cash gift into November changes which check it lowers", calEvents >= 5 && /check \$[\d,.]+ to \$[\d,.]+/.test(moved), `${calEvents} events; ${moved.slice(0, 120)}`);
 
+// 8c. The gift page in Spanish: the page, a need's rule, the giving card's split and the check, all in Spanish.
+await page.goto(B + "/g/maya?lang=es", { waitUntil: "networkidle" });
+await page.locator(".give-input").fill("1500");
+await page.waitForTimeout(400);
+const es = (await page.locator("main").innerText()).replace(/\s+/g, " ");
+ok(
+  "Spanish gift page: title, a need's rule, the split and the check are in Spanish, and the switch leads back to English",
+  /Ayude a Maya/.test(es) && /Reparación de la silla de ruedas/.test(es) && /Su cheque de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) se mantiene en \$[\d,]+/.test(es) && /Giftwise lo envía aquí/.test(es) && (await page.locator(".give-seg").count()) >= 2 && (await page.locator('a.gift-lang[hreflang="en"]').count()) === 1,
+  es.slice(0, 120),
+);
+
 // 9. Header links: which pages are missing
 const hrefs = [...new Set(await page.$$eval("header a, footer a", (as) => as.map((a) => a.getAttribute("href")).filter((h) => h && h.startsWith("/"))))];
 const broken = [];
