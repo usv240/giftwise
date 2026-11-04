@@ -15,12 +15,17 @@ export type StartedGift =
  * and a payee, for every recipient. Used by the gift page's button and by AI agents through the MCP server.
  * With redirect set, PayPal returns an approval link for a person to open; Giftwise captures when PayPal sends them back.
  */
-export async function startRoutedGift(slug: string, amount: number, o: { actor: "person" | "agent"; redirect?: { returnUrl: string; cancelUrl: string } }): Promise<StartedGift> {
+export async function startRoutedGift(
+  slug: string,
+  amount: number,
+  o: { actor: "person" | "agent"; redirect?: { returnUrl: string; cancelUrl: string }; plan?: (household: { needs: Parameters<typeof openNeeds>[0]; payments: NonNullable<Awaited<ReturnType<typeof getHousehold>>>["payments"]; profile: Profile; name: string }) => RoutedGift; tag?: string },
+): Promise<StartedGift> {
   const data = await getHousehold(slug);
   if (!data) return { ok: false, code: "not_found", message: "That gift page was not found.", status: 404 };
 
   const profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
-  const plan = routeGift(amount, openNeeds(data.needs), today(), profile, `${data.household.name}'s ABLE account`);
+  // A monthly gift passes its own planner (that month's needs); either way the server, never the caller, routes it.
+  const plan = o.plan ? o.plan({ needs: data.needs, payments: data.payments, profile, name: data.household.name }) : routeGift(amount, openNeeds(data.needs), today(), profile, `${data.household.name}'s ABLE account`);
   if (plan.lines.length === 0) return { ok: false, code: "invalid_request", message: "There is no benefit-safe way to place this gift right now.", status: 422 };
   if (plan.checkWithRouting < plan.baseline) return { ok: false, code: "invalid_request", message: "This gift would lower the SSI check, so Giftwise did not create it.", status: 422 };
 
@@ -53,6 +58,7 @@ export async function startRoutedGift(slug: string, amount: number, o: { actor: 
       checkIfCash: plan.checkIfCash,
       checkWithRouting: plan.checkWithRouting,
       via: o.redirect ? "approval_link" : "button",
+      ...(o.tag ? { tag: o.tag } : {}),
     });
     const approveUrl = order.links?.find((l) => l.rel === "payer-action" || l.rel === "approve")?.href ?? null;
     return { ok: true, orderId: order.id!, status: String(order.status), approveUrl, plan, name: data.household.name };

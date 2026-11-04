@@ -147,3 +147,39 @@ export const checkRuns = pgTable("check_runs", {
   startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
   finishedAt: timestamp("finished_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * A giver's monthly gift: the same amount each month, routed again by the rules engine for that month's needs.
+ * The giver reaches it by a secret link (/m/{token}); Giftwise keeps no payment method and never holds the money.
+ */
+export const monthlyGifts = pgTable("monthly_gifts", {
+  id: serial("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  householdId: integer("household_id")
+    .notNull()
+    .references(() => households.id),
+  giverName: text("giver_name").notNull().default(""),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  /** active | stopped */
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** One month of a monthly gift: the split the rules chose that month, what changed and why, and the PayPal order that paid it. */
+export const monthlyRuns = pgTable(
+  "monthly_runs",
+  {
+    id: serial("id").primaryKey(),
+    monthlyGiftId: integer("monthly_gift_id")
+      .notNull()
+      .references(() => monthlyGifts.id),
+    month: text("month").notNull(),
+    plan: jsonb("plan").notNull(),
+    changes: jsonb("changes").notNull().default([]),
+    orderId: text("order_id"),
+    /** planned | paid */
+    status: text("status").notNull().default("planned"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("monthly_runs_gift_month_idx").on(t.monthlyGiftId, t.month)],
+);

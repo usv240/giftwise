@@ -1,0 +1,113 @@
+/* A giver's monthly gift: one card per month, newest first, each with its split, what changed and why, and its payment. */
+.monthly {
+  padding-bottom: clamp(3rem, 2rem + 3vw, 5rem);
+}
+.mo-months {
+  list-style: none;
+  margin: clamp(1.5rem, 1rem + 2vw, 2.5rem) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  max-width: 46rem;
+}
+.mo-month {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: clamp(18px, 1rem + 1vw, 28px);
+  display: grid;
+  gap: 14px;
+}
+.mo-month-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.mo-month-title {
+  font-size: var(--step-lead);
+}
+.mo-status {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+}
+.mo-status[data-paid] {
+  background: var(--surface-2);
+  color: var(--positive);
+}
+.mo-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.mo-lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mo-lines li > :last-child {
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.mo-check {
+  font-size: 15px;
+}
+.mo-changes {
+  display: grid;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-2);
+}
+.mo-k {
+  font-size: 14px;
+  color: var(--muted);
+}
+.mo-changes ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.mo-changes li {
+  display: grid;
+  gap: 2px;
+  font-size: 15px;
+}
+.mo-change-what {
+  font-weight: 500;
+}
+.mo-change-why {
+  color: var(--muted);
+}
+.mo-same {
+  font-size: 15px;
+}
+.mo-next {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+.mo-note {
+  font-size: 14px;
+  color: var(--muted);
+}
+.mo-note[data-tone="attention"] {
+  color: var(--attention);
+}
+.mo-start {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mo-back {
+  margin-top: 32px;
+}

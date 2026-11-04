@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Info } from "../Info";
 import { usePrefs } from "../prefs";
+import { StartMonthly } from "./MonthlyActions";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { routeGift, type OpenNeed, type RoutedLine } from "@/lib/routing";
 import { DEFAULT_PROFILE, monthName, pronounWords, usd, type Profile } from "@/lib/rules";
@@ -56,6 +57,7 @@ export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE }: 
           <button type="button" className="give-again" onClick={() => setReceipt(null)}>
             Give again
           </button>
+          <StartMonthly slug={slug} amount={Number(receipt.amount)} orderId={receipt.orderId} giverName={receipt.payerFirstName} />
         </p>
       </div>
     );
