@@ -34,7 +34,7 @@ const PATH = [
 const MORE = [
   { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
   { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answers; Claude alone, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
-  { href: "#field-cases", label: "Real cases from federal courts", look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did, and the run found a real gap, now fixed.` },
+  { href: "#field-cases", label: "Real cases from federal courts", look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did; routed through Giftwise, the same help keeps $${fieldResults.summary.dollars.as_shown_in_the_opinions.kept_per_month_2026.toLocaleString("en-US", { minimumFractionDigits: 2 })} a month.` },
   { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
   { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
   { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },

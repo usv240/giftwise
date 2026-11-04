@@ -7,7 +7,7 @@
  *   with a sandbox access token in its environment. This is PayPal's documented local setup.
  * - Hosted: PayPal's remote server over HTTP + SSE. GET {base}/sse opens an event stream whose first "endpoint" event
  *   names a URL; JSON-RPC requests are POSTed there and the answers arrive on the stream, matched by id. Its tool calls
- *   currently fail on PayPal's side with PAYPAL_API_SETUP_ERROR (github.com/paypal/AI-Toolkit/issues/34), so it is
+ *   currently answer PAYPAL_API_SETUP_ERROR for this sandbox app (github.com/paypal/AI-Toolkit/issues/34), so it is
  *   tried only when the local server cannot start, or when PAYPAL_MCP_MODE=hosted.
  */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";

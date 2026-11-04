@@ -79,17 +79,20 @@ function headline() {
   return some.join(" ");
 }
 
-/** Where the second reviewer did, and did not, add a measurable gain on this run. */
+const list = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}` : xs[0]);
+
+/** What the referee does on this run, in words built from the numbers so it never drifts from the run. */
 function gain() {
   const w = NC.wrong_routes_accepted;
   const ref = w.referee;
   const better = SETUP.filter(([k]) => k !== "referee" && w[k] > ref).map(([k]) => NAME[k]);
   const same = SETUP.filter(([k]) => k !== "referee" && w[k] === ref).map(([k]) => NAME[k]);
-  const s = R.summary;
-  let text = better.length ? `The referee accepted fewer wrong routes than ${better.join(" and ")}.` : "The referee accepted no fewer wrong routes than any single setup.";
-  if (same.length) text += ` On this run ${same.join(" and ")} did as well on this measure.`;
-  text += ` The cost of the referee is more bills left unsettled: it got ${s.referee.correct} of ${s.referee.clear_cases} clear bills right and left ${s.referee.abstained} unsettled, against ${s.poms.correct} right for the manual reviewer alone. Each unsettled bill goes to the ABLE account.`;
-  return text;
+  const s = R.summary.referee;
+  const parts: string[] = [];
+  if (better.length) parts.push(`The referee accepted fewer wrong routes than ${list(better)}${same.length ? `, as few as ${list(same)},` : ""} and kept her check whole on ${s.check_kept_whole} of ${s.all_cases} bills.`);
+  else if (same.length) parts.push(`The referee accepted as few wrong routes as ${list(same)} and kept her check whole on ${s.check_kept_whole} of ${s.all_cases} bills.`);
+  parts.push(`It settled ${s.correct} of ${s.clear_cases} clear bills on a shared, checked reading; for the other ${s.abstained} it chose the route that keeps her check whole under either reading.`);
+  return parts.join(" ");
 }
 
 /** If one reviewer is wrong: the same bills with one reviewer's recorded answer flipped. Computed from the recorded run, no AI call. */
@@ -199,7 +202,7 @@ export function EvalResults() {
               ))}
             </tr>
             <tr>
-              <th scope="row">Left unsettled</th>
+              <th scope="row">Sent to the either-reading route</th>
               {SETUP.map(([key]) => (
                 <td key={key} className="tabular">
                   {s[key].abstained}
@@ -239,7 +242,7 @@ export function EvalResults() {
         </table>
       </div>
       <p className="page-prose">
-        The referee had no shared, checked reading on {n(NC.disagreements_total, "bill", "bills")}: {k.opposite_answers} where the reviewers gave opposite answers, {k.one_reviewer_unsettled} where one
+        The two checked readings differed on {n(NC.disagreements_total, "bill", "bills")}: {k.opposite_answers} where the reviewers gave opposite answers, {k.one_reviewer_unsettled} where one
         rulebook did not settle it, {k.both_reviewers_unsettled} where neither did
         {k.quote_set_aside ? `, and ${k.quote_set_aside} where a quote was set aside` : ""}. It sent {NC.disagreements_sent_to_safe_route} of {NC.disagreements_total} to a route that keeps her check whole
         under either reading. {gain()}

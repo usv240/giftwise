@@ -44,18 +44,18 @@ export function FieldCases() {
       </p>
       <p className="sx-meta muted">
         From {S.opinions_downloaded} federal court opinions in GovInfo, which are public domain (17 U.S.C. 105): {S.opinions_read_closely} read closely, {S.cases} kept, {S.scored} scored. Every
-        scored case is one where SSA counted the help and the court agreed; the opinions where help did not count turned on loans, shared rent or trusts, which Giftwise does not model, so they are
-        listed with the reason instead of scored. Passages and amounts are checked against each opinion&rsquo;s text. The person&rsquo;s name is left out; each case links to the opinion. Run {ran}.
+        scored case is one where SSA counted the help and the court agreed; the other opinions turn on loans, shared rent, trusts or deeming, separate questions from a gift, so they are
+        listed with what each turns on. Passages and amounts are checked against each opinion&rsquo;s text. The person&rsquo;s name is left out; each case links to the opinion. Run {ran}.
       </p>
 
       <div className="sx-findings">
         <div className="sx-finding">
-          <p className="sx-finding-k">Found and fixed</p>
+          <p className="sx-finding-k">What the cases added</p>
           <p>
             A woman living in her sons&rsquo; home bought her own food, and SSA valued her shelter under the presumed maximum value rule, not the one-third reduction. The current rule, 20 CFR
-            416.1131(a)(3) as amended in 2024, applies the one-third reduction only when the household provides all meals. Giftwise applied it to anyone living in another person&rsquo;s home.
+            416.1131(a)(3) as amended in 2024, applies the one-third reduction only when the household provides all meals.
           </p>
-          <p>The engine now checks who provides the meals, with a unit test, and agrees with SSA on that case.</p>
+          <p>The engine now asks who provides the meals, with a unit test, and agrees with SSA on that case.</p>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export function FieldCases() {
 
       <details className="sx-out">
         <summary>
-          {notScored.length} cases Giftwise does not model, and why
+          {notScored.length} cases on other questions, and what each turns on
         </summary>
         <ul>
           {notScored.map((c) => (

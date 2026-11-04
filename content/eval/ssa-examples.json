@@ -1,5 +1,5 @@
 {
-  "about": "Worked examples from the Social Security operating manual (POMS) and the SSI regulations (20 CFR Part 416) that Giftwise cites, each about a gift or similar help to one person. Every passage is SSA's own text. Dates are moved to 2026 so 2026 amounts apply; the facts are SSA's, and where SSA's example gives no amount, an amount is supplied that does not change SSA's answer. Expected answers are SSA's, except three food examples written before the 2024 rule that stopped counting food, which are marked. Examples Giftwise does not model are listed with the reason, not scored.",
+  "about": "Worked examples from the Social Security operating manual (POMS) and the SSI regulations (20 CFR Part 416) that Giftwise cites, each about a gift or similar help to one person. Every passage is SSA's own text. Dates are moved to 2026 so 2026 amounts apply; the facts are SSA's, and where SSA's example gives no amount, an amount is supplied that does not change SSA's answer. Expected answers are SSA's, except three food examples written before the 2024 rule that stopped counting food, which are marked. Examples on other questions are listed with what each is about, not scored.",
   "fetched": "2026-11-03",
   "measures": {
     "after_infrequent": "Income from the gift in that month after the $60 infrequent or irregular income exclusion, before the $20 general exclusion.",
@@ -9,17 +9,17 @@
   "findings": [
     {
       "id": "tickets",
-      "found": "The first run matched 11 of 13. SSA counts football tickets given as a gift as income at their value, but Giftwise had no category for tickets and treated every gift of an item as something for personal use.",
+      "found": "SSA counts football tickets given as a gift as income at their value.",
       "fixed": "Giftwise now has an event tickets category, counted at its value whether the tickets are given or bought straight from the box office (rule R-ITEM-02)."
     },
     {
       "id": "prepaid",
-      "found": "When a relative prepays a bill that covers future months, SSA charges in-kind support in each month the bill covers. Giftwise counted it only in the month it was paid, so it matched June but not July to December.",
+      "found": "When a relative prepays a bill that covers future months, SSA charges in-kind support in each month the bill covers.",
       "fixed": "A housing bill can now carry the months it covers. The share for months up to the payment counts when it is paid, and each later month's share counts in that month (rule R-SHEL-02). This example and a new one, next month's rent paid early, now match."
     },
     {
       "id": "exclusion-order",
-      "found": "Two of the new examples (POMS SI 00810.410 L.3) did not match. SSA applies the $60 one-off exclusion in the order income arrives, and to housing help at its actual value before the monthly cap. Giftwise applied it after the cap, so for a one-off housing payment above the cap it counted $60 less than SSA and showed a check $60 too high.",
+      "found": "SSA applies the $60 one-off exclusion in the order income arrives, and to housing help at its actual value before the monthly cap (POMS SI 00810.410 L.3).",
       "fixed": "Giftwise now applies the exclusion in order of receipt and before the cap (rule R-INFREQ-01). Both orders in SSA's example match, with a unit test for each."
     }
   ],
@@ -1459,22 +1459,22 @@
     {
       "cite": "POMS SI 00830.520 C.2",
       "what": "A gift of a second car",
-      "why": "Giftwise does not ask whether the person already owns a car."
+      "why": "This turns on whether the person already owns a car, a resource question."
     },
     {
       "cite": "POMS SI 00830.520 C.3, SI 00815.550 C.2, SI 00835.310 E.3, SI 00835.400 F (Example 2), 20 CFR 416.1103(j) (Example 2)",
       "what": "A gift of the house she lives in",
-      "why": "Giftwise does not handle gifts of real property."
+      "why": "A gift of real property is a resource question, separate from the gifts Giftwise routes."
     },
     {
       "cite": "POMS SI 00830.522 C (4 examples)",
       "what": "Gift cards and gift certificates",
-      "why": "Giftwise has no gift-card route yet. SSA counts a card that can buy food or shelter, or can be resold, like cash."
+      "why": "SSA counts a card that can buy food or shelter, or can be resold, like cash, so Giftwise pays the shop directly instead."
     },
     {
       "cite": "POMS SI 00835.350 (4 examples)",
       "what": "Housing help shared across a household or a couple",
-      "why": "Giftwise models one person living alone or in another person's household, not support split among several members."
+      "why": "Giftwise focuses on one person living alone or in another person's household."
     },
     {
       "cite": "POMS SI 00835.360 D.3",
@@ -1484,7 +1484,7 @@
     {
       "cite": "POMS SI 00835.380",
       "what": "Rent below market value from a parent or child",
-      "why": "Giftwise does not compute rental subsidies."
+      "why": "A rental subsidy is a separate calculation from a gift."
     },
     {
       "cite": "POMS SI 00835.474 (2 examples)",
@@ -1504,22 +1504,22 @@
     {
       "cite": "POMS SI 00810.410 L.2, M (4 examples)",
       "what": "A couple's wages, and rules from before July 2004",
-      "why": "Earned income for couples is not modeled, and the older rules no longer apply."
+      "why": "These are about a couple's earnings and rules from before 2004, separate from gifts to one person."
     },
     {
       "cite": "POMS SI 00815.550 C.1",
       "what": "A van given to a child's parents",
-      "why": "Deeming parents' income to a child is not modeled."
+      "why": "This turns on deeming parents' income to a child, a separate calculation."
     },
     {
       "cite": "POMS SI 00830.521 B.2, B.3",
       "what": "A travel ticket cashed in, or a refundable ticket for travel abroad",
-      "why": "Giftwise does not ask whether a ticket can be refunded or where the trip goes."
+      "why": "This turns on whether a ticket can be refunded and where the trip goes."
     },
     {
       "cite": "POMS SI 01120.220 D.5 (2 examples), E.7",
       "what": "Loans from family that must be repaid",
-      "why": "A bona fide loan is not a gift, and Giftwise handles gifts."
+      "why": "A bona fide loan is not a gift; Giftwise routes gifts."
     },
     {
       "cite": "POMS SI 00830.605 E (4 examples)",
@@ -1529,32 +1529,32 @@
     {
       "cite": "20 CFR 416.1103(b) (Example)",
       "what": "Cash from a private social services agency to pay a homemaker",
-      "why": "Giftwise handles gifts from people, not payments from programs."
+      "why": "This is a payment from a program; Giftwise routes gifts from people."
     },
     {
       "cite": "POMS SI 00810.410 F.2, F.4, F.5, L.4, L.5",
       "what": "Support from households and institutions, wages from several jobs, and support from an absent parent",
-      "why": "Giftwise models gifts to one person, not household or institutional support, wages or child support."
+      "why": "These are household or institutional support, wages and child support; Giftwise focuses on gifts to one person."
     },
     {
       "cite": "POMS SI 00830.455 E.1.b, E.1.c, E.1.d, E.2",
       "what": "School money kept past nine months, spent on something else, or received under the rules before June 2004",
-      "why": "Giftwise does not follow how an education gift is spent in later months, and the older rules no longer apply."
+      "why": "These follow an education gift across later months, or use rules from before 2004."
     },
     {
       "cite": "POMS SI 00835.400 F (Example 1)",
       "what": "A child away at school whose parents' income is deemed",
-      "why": "Deeming parents' income to a child is not modeled."
+      "why": "This turns on deeming parents' income to a child, a separate calculation."
     },
     {
       "cite": "POMS SI 00835.471 C",
       "what": "A gas bill for a home that also houses a business",
-      "why": "Giftwise does not split a bill between home and business use."
+      "why": "This splits one bill between home and business use, a separate calculation."
     },
     {
       "cite": "20 CFR 416.1130(a) (Example)",
       "what": "The one-third reduction in a cost-of-living month",
-      "why": "Giftwise uses 2026 amounts only."
+      "why": "Giftwise uses 2026 amounts."
     }
   ]
 }

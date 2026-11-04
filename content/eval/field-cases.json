@@ -908,7 +908,7 @@
     {
       "id": "roommate-rent-split",
       "status": "not_scored",
-      "not_scored_reason": "Housing shared between joint tenants and the business-arrangement test are not modeled, the same limit ssa-examples.json lists.",
+      "not_scored_reason": "Housing shared between joint tenants and the business-arrangement test, separate questions from a gift, as in ssa-examples.json.",
       "title": "Two roommates split a market-rate rent unevenly",
       "source": {
         "court": "U.S. District Court Northern District of California",
@@ -931,7 +931,7 @@
     {
       "id": "father-below-market-rent",
       "status": "not_scored",
-      "not_scored_reason": "A rental subsidy (rent below market from a relative) is not modeled, as ssa-examples.json notes.",
+      "not_scored_reason": "A rental subsidy (rent below market from a relative), a separate calculation, as in ssa-examples.json.",
       "title": "Renting from a father below market value",
       "source": {
         "court": "U.S. District Court Eastern District of New York",
@@ -977,7 +977,7 @@
     {
       "id": "mother-back-rent-loan",
       "status": "not_scored",
-      "not_scored_reason": "A bona fide loan of in-kind support (POMS SI 00835.482) is not income; Giftwise models gifts and has no loan input.",
+      "not_scored_reason": "A bona fide loan of in-kind support (POMS SI 00835.482) is not income; Giftwise routes gifts.",
       "title": "Back rent owed to a mother",
       "source": {
         "court": "U.S. District Court District of Oregon",
@@ -1027,7 +1027,7 @@
     {
       "id": "brother-money-in-trust",
       "status": "not_scored",
-      "not_scored_reason": "Not a gift: a claimed trust over money in the person's own name. Trusts are not modeled.",
+      "not_scored_reason": "Not a gift: a claimed trust over money in the person's own name, a trust question.",
       "title": "A brother's money said to be held in trust",
       "source": {
         "court": "U.S. District Court Northern District of California",
@@ -1054,7 +1054,7 @@
     {
       "id": "community-fundraiser",
       "status": "not_scored",
-      "not_scored_reason": "Remanded without deciding; also a child, whose parents' income is deemed to him, which Giftwise does not model.",
+      "not_scored_reason": "Remanded without deciding; also a child, whose parents' income is deemed to him, a separate calculation.",
       "title": "A community fundraiser for an injured child",
       "source": {
         "court": "U.S. District Court Northern District of Illinois",
@@ -1100,7 +1100,7 @@
     {
       "id": "child-household-remand",
       "status": "not_scored",
-      "not_scored_reason": "Remanded without deciding; a child whose parents' income is deemed, which Giftwise does not model.",
+      "not_scored_reason": "Remanded without deciding; a child whose parents' income is deemed, a separate calculation.",
       "title": "A disabled child in a household with adult siblings: first appeal",
       "source": {
         "court": "U.S. District Court District of Maryland",
@@ -1123,7 +1123,7 @@
     {
       "id": "child-household-adult-siblings",
       "status": "not_scored",
-      "not_scored_reason": "A child living with a parent whose income is deemed; deeming is not modeled.",
+      "not_scored_reason": "A child living with a parent whose income is deemed, a separate calculation.",
       "title": "A disabled child in a household with adult siblings",
       "source": {
         "court": "U.S. District Court District of Maryland",
@@ -1169,7 +1169,7 @@
     {
       "id": "trust-pays-hoa",
       "status": "not_scored",
-      "not_scored_reason": "Payments from a trust; trusts are not modeled.",
+      "not_scored_reason": "Payments from a trust, a trust question.",
       "title": "A family trust pays condo fees and utilities",
       "source": {
         "court": "U.S. District Court Southern District of California",
@@ -1196,7 +1196,7 @@
     {
       "id": "trust-monthly-loan",
       "status": "not_scored",
-      "not_scored_reason": "Payments from a trust; trusts are not modeled.",
+      "not_scored_reason": "Payments from a trust, a trust question.",
       "title": "A family trust's $200 a month called a loan",
       "source": {
         "court": "U.S. District Court Southern District of California",
@@ -1246,7 +1246,7 @@
     {
       "id": "parents-deed-land",
       "status": "not_scored",
-      "not_scored_reason": "A gift of real property is not modeled, as ssa-examples.json notes.",
+      "not_scored_reason": "A gift of real property, a resource question, as in ssa-examples.json.",
       "title": "Parents deed land to their son",
       "source": {
         "court": "U.S. District Court Eastern District of Kentucky",
@@ -1269,7 +1269,7 @@
     {
       "id": "partner-pays-housing",
       "status": "not_scored",
-      "not_scored_reason": "The dispute is spousal deeming, which is not modeled; in-kind support was not decided.",
+      "not_scored_reason": "The dispute is spousal deeming; the court did not reach in-kind support.",
       "title": "An unmarried partner pays housing and utilities",
       "source": {
         "court": "U.S. District Court Southern District of Indiana",
@@ -1315,7 +1315,7 @@
     {
       "id": "joint-account-brother",
       "status": "not_scored",
-      "not_scored_reason": "Ownership of a joint account is not modeled; the help from friends was not decided.",
+      "not_scored_reason": "The dispute is ownership of a joint account; the court did not reach the help from friends.",
       "title": "A joint account with a brother",
       "source": {
         "court": "U.S. District Court Northern District of California",
@@ -1342,7 +1342,7 @@
     {
       "id": "son-below-market-apartments",
       "status": "not_scored",
-      "not_scored_reason": "A rental subsidy, which is not modeled; also remanded without deciding.",
+      "not_scored_reason": "A rental subsidy, a separate calculation; also remanded without deciding.",
       "title": "Apartments rented from a son below market rent",
       "source": {
         "court": "U.S. District Court Eastern District of New York",
@@ -1369,7 +1369,7 @@
     {
       "id": "father-support-child-criminal",
       "status": "not_scored",
-      "not_scored_reason": "A criminal case about a child with parental deeming; not modeled.",
+      "not_scored_reason": "A criminal case about a child with parental deeming.",
       "title": "Unreported support from a child's father",
       "source": {
         "court": "U.S. Court of Appeals for the Eleventh Circuit",
@@ -1392,7 +1392,7 @@
     {
       "id": "former-wife-unpaid-rent",
       "status": "not_scored",
-      "not_scored_reason": "Remanded without deciding; unpaid rent and the business-arrangement test are not modeled.",
+      "not_scored_reason": "Remanded without deciding; unpaid rent and the business-arrangement test, separate questions from a gift.",
       "title": "Unpaid rent owed to a former wife",
       "source": {
         "court": "U.S. District Court District of Massachusetts",
@@ -1415,7 +1415,7 @@
     {
       "id": "co-owner-pays-more",
       "status": "not_scored",
-      "not_scored_reason": "Pro rata sharing of household expenses is not modeled, the same limit ssa-examples.json lists.",
+      "not_scored_reason": "Pro rata sharing of household expenses, a separate question from a gift, as in ssa-examples.json.",
       "title": "A co-owner pays more than half the household costs",
       "source": {
         "court": "U.S. District Court Northern District of California",

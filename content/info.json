@@ -472,7 +472,7 @@
     "title": "An assistant that asks first",
     "what": "A Claude assistant answering a real question from June, Maya’s aunt. It has no knowledge of SSI rules beyond what the Giftwise tools return.",
     "why": "It shows the whole path: what cash would do, the safer way, a PayPal checkout June approves herself, and PayPal’s own record of what that order pays.",
-    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Giftwise tools are discovered with tools/list and called with tools/call over HTTP to /api/mcp. paypal_get_order asks PayPal’s own MCP server: the @paypal/mcp package (PayPal Agent Toolkit), which Giftwise runs as a child process over stdio with a sandbox access token. PayPal’s hosted server (mcp.sandbox.paypal.com, SSE) is the second choice; its tool calls currently fail on PayPal’s side (github.com/paypal/AI-Toolkit/issues/34). GET /v2/checkout/orders/{id} answers when neither can."
+    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Giftwise tools are discovered with tools/list and called with tools/call over HTTP to /api/mcp. paypal_get_order asks PayPal’s own MCP server: the @paypal/mcp package (PayPal Agent Toolkit), which Giftwise runs as a child process over stdio with a sandbox access token. PayPal’s hosted server (mcp.sandbox.paypal.com, SSE) is the second choice (github.com/paypal/AI-Toolkit/issues/34). GET /v2/checkout/orders/{id} answers when neither can."
   },
   "agents.connect": {
     "title": "Connect your agent",

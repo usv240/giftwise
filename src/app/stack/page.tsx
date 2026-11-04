@@ -68,7 +68,7 @@ const PAYPAL_APIS: { api: string; call: string; job: string; file: string }[] = 
   { api: "Balances", call: "GET /v1/reporting/balances", job: "Shows the fund's PayPal balance before it sends a batch.", file: "src/lib/paypal/reporting.ts" },
   { api: "Webhooks", call: "POST /v1/notifications/verify-webhook-signature", job: "Captures a payment if the giver never comes back, after checking PayPal's signature.", file: "src/app/api/paypal/webhook/route.ts" },
   { api: "Negative testing", call: "PayPal-Mock-Response header", job: "Makes the sandbox decline on purpose, for the failure cases.", file: "src/lib/paypal/capture.ts" },
-  { api: "PayPal MCP server", call: "@paypal/mcp over stdio, tool get_order", job: "Asked first when the assistant on /agents reads an order back. Giftwise runs PayPal's own server package; PayPal's hosted server is the second choice, since its tool calls fail on PayPal's side for now (AI-Toolkit issue 34). If neither answers, the Orders API does, and the page says which one did.", file: "src/lib/agent/paypal-mcp.ts" },
+  { api: "PayPal MCP server", call: "@paypal/mcp over stdio, tool get_order", job: "Asked first when the assistant on /agents reads an order back. Giftwise runs PayPal's own server package; PayPal's hosted server is the second choice (AI-Toolkit issue 34 tracks its sandbox setup). If neither answers, the Orders API does, and the page says which one did.", file: "src/lib/agent/paypal-mcp.ts" },
 ];
 
 export default function StackPage() {

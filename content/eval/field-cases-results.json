@@ -58,11 +58,11 @@
     "not_scored_cases": [
       {
         "id": "roommate-rent-split",
-        "reason": "Housing shared between joint tenants and the business-arrangement test are not modeled, the same limit ssa-examples.json lists."
+        "reason": "Housing shared between joint tenants and the business-arrangement test, separate questions from a gift, as in ssa-examples.json."
       },
       {
         "id": "father-below-market-rent",
-        "reason": "A rental subsidy (rent below market from a relative) is not modeled, as ssa-examples.json notes."
+        "reason": "A rental subsidy (rent below market from a relative), a separate calculation, as in ssa-examples.json."
       },
       {
         "id": "relatives-home-remand",
@@ -70,7 +70,7 @@
       },
       {
         "id": "mother-back-rent-loan",
-        "reason": "A bona fide loan of in-kind support (POMS SI 00835.482) is not income; Giftwise models gifts and has no loan input."
+        "reason": "A bona fide loan of in-kind support (POMS SI 00835.482) is not income; Giftwise routes gifts."
       },
       {
         "id": "father-money-in-account",
@@ -78,11 +78,11 @@
       },
       {
         "id": "brother-money-in-trust",
-        "reason": "Not a gift: a claimed trust over money in the person's own name. Trusts are not modeled."
+        "reason": "Not a gift: a claimed trust over money in the person's own name, a trust question."
       },
       {
         "id": "community-fundraiser",
-        "reason": "Remanded without deciding; also a child, whose parents' income is deemed to him, which Giftwise does not model."
+        "reason": "Remanded without deciding; also a child, whose parents' income is deemed to him, a separate calculation."
       },
       {
         "id": "son-pays-utilities-taxes",
@@ -90,11 +90,11 @@
       },
       {
         "id": "child-household-remand",
-        "reason": "Remanded without deciding; a child whose parents' income is deemed, which Giftwise does not model."
+        "reason": "Remanded without deciding; a child whose parents' income is deemed, a separate calculation."
       },
       {
         "id": "child-household-adult-siblings",
-        "reason": "A child living with a parent whose income is deemed; deeming is not modeled."
+        "reason": "A child living with a parent whose income is deemed, a separate calculation."
       },
       {
         "id": "mother-checks-remand",
@@ -102,11 +102,11 @@
       },
       {
         "id": "trust-pays-hoa",
-        "reason": "Payments from a trust; trusts are not modeled."
+        "reason": "Payments from a trust, a trust question."
       },
       {
         "id": "trust-monthly-loan",
-        "reason": "Payments from a trust; trusts are not modeled."
+        "reason": "Payments from a trust, a trust question."
       },
       {
         "id": "family-deposits-remand",
@@ -114,11 +114,11 @@
       },
       {
         "id": "parents-deed-land",
-        "reason": "A gift of real property is not modeled, as ssa-examples.json notes."
+        "reason": "A gift of real property, a resource question, as in ssa-examples.json."
       },
       {
         "id": "partner-pays-housing",
-        "reason": "The dispute is spousal deeming, which is not modeled; in-kind support was not decided."
+        "reason": "The dispute is spousal deeming; the court did not reach in-kind support."
       },
       {
         "id": "partner-support-couple",
@@ -126,23 +126,23 @@
       },
       {
         "id": "joint-account-brother",
-        "reason": "Ownership of a joint account is not modeled; the help from friends was not decided."
+        "reason": "The dispute is ownership of a joint account; the court did not reach the help from friends."
       },
       {
         "id": "son-below-market-apartments",
-        "reason": "A rental subsidy, which is not modeled; also remanded without deciding."
+        "reason": "A rental subsidy, a separate calculation; also remanded without deciding."
       },
       {
         "id": "father-support-child-criminal",
-        "reason": "A criminal case about a child with parental deeming; not modeled."
+        "reason": "A criminal case about a child with parental deeming."
       },
       {
         "id": "former-wife-unpaid-rent",
-        "reason": "Remanded without deciding; unpaid rent and the business-arrangement test are not modeled."
+        "reason": "Remanded without deciding; unpaid rent and the business-arrangement test, separate questions from a gift."
       },
       {
         "id": "co-owner-pays-more",
-        "reason": "Pro rata sharing of household expenses is not modeled, the same limit ssa-examples.json lists."
+        "reason": "Pro rata sharing of household expenses, a separate question from a gift, as in ssa-examples.json."
       }
     ]
   },

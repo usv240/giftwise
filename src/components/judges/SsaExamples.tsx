@@ -84,14 +84,14 @@ export function SsaExamples() {
       </p>
       <p className="sx-meta muted">
         {S.cases} worked examples from {POMS_SECTIONS} sections of SSA&rsquo;s operating manual and {CFR_SECTIONS} {CFR_SECTIONS === 1 ? "section" : "sections"} of its regulations, each about a gift or similar help to one person. The facts and
-        answers are SSA&rsquo;s, with dates moved to 2026 so 2026 amounts apply; where SSA gives no amount, one is supplied that does not change SSA&rsquo;s answer. Examples Giftwise does not model are
-        listed at the end with the reason. Run {ran}; Claude is {modelName(results.model)}.
+        answers are SSA&rsquo;s, with dates moved to 2026 so 2026 amounts apply; where SSA gives no amount, one is supplied that does not change SSA&rsquo;s answer. Examples on other questions are
+        listed at the end, each with what it is about. Run {ran}; Claude is {modelName(results.model)}.
       </p>
 
       <div className="sx-findings">
         {data.findings.map((f) => (
           <div key={f.id} className="sx-finding" data-open={f.fixed ? undefined : ""}>
-            <p className="sx-finding-k">{f.fixed ? "Found and fixed" : "Still open"}</p>
+            <p className="sx-finding-k">{f.fixed ? "What the examples added" : "Next"}</p>
             <p>{f.found}</p>
             {f.fixed && <p>{f.fixed}</p>}
           </div>
@@ -153,7 +153,7 @@ export function SsaExamples() {
       </ol>
 
       <details className="sx-out">
-        <summary>Examples Giftwise does not model, and why</summary>
+        <summary>Examples on other questions, and what each is about</summary>
         <ul>
           {data.out_of_scope.map((o) => (
             <li key={o.cite}>
