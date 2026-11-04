@@ -173,7 +173,8 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
   }
 
   const vtrApplied = vtrHousehold(profile) && shelterPaid > 0;
-  const cap = pmv(couple);
+  const payMonth = addMonths(month, P.rmaLagMonths);
+  const cap = pmv(couple, payMonth);
   const ismValue = shelterPaid > 0 && !vtrApplied ? Math.min(shelterPaid, cap) : 0;
 
   // No exclusion applies to the one-third reduction (SI 00835.200A.6), so housing help under it takes none of the allowance.
@@ -191,15 +192,16 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
   const infrequentUsed = otherExcluded + shelterExcluded;
   const infrequentExcluded = otherExcluded + (ismValue - ismCounted);
 
-  const unearnedBeforeGie = Math.max(0, cashIncome + inKind + ismValue + profile.otherUnearnedMonthly - infrequentExcluded);
+  // Rounded to the cent here so the order the amounts were added in can never move the check by a cent.
+  const unearnedBeforeGie = round2(Math.max(0, cashIncome + inKind + ismValue + profile.otherUnearnedMonthly - infrequentExcluded));
   const generalExcludedFromUnearned = Math.min(P.generalIncomeExclusion, unearnedBeforeGie);
   const gieLeft = P.generalIncomeExclusion - generalExcludedFromUnearned;
   const generalExcludedFromEarned = Math.min(gieLeft, profile.earnedMonthly);
   const earnedCountable = Math.max(0, profile.earnedMonthly - generalExcludedFromEarned - P.earnedIncomeExclusion) / 2;
 
-  const vtrCounted = vtrApplied ? vtr(couple) : 0;
+  const vtrCounted = vtrApplied ? vtr(couple, payMonth) : 0;
   const countableIncome = round2(unearnedBeforeGie - generalExcludedFromUnearned + earnedCountable + vtrCounted);
-  const check = round2(Math.max(0, fbr(couple) - countableIncome));
+  const check = round2(Math.max(0, fbr(couple, payMonth) - countableIncome));
 
   return {
     month,
@@ -216,7 +218,7 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
     otherUnearned: profile.otherUnearnedMonthly,
     countableIncome,
     check,
-    paymentMonth: addMonths(month, P.rmaLagMonths),
+    paymentMonth: payMonth,
   };
 }
 
@@ -356,8 +358,8 @@ function explain(
     if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
   } else if (t.kind === "ism_shelter") {
     plain = trace.vtrApplied
-      ? `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple))}, to ${usd(trace.check)}.`
-      : `Help with ${label} counts as housing support, up to ${usd(pmv(profile.couple))} a month. ${usd(counted)} would be counted, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
+      ? `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple, trace.paymentMonth))}, to ${usd(trace.check)}.`
+      : `Help with ${label} counts as housing support, up to ${usd(pmv(profile.couple, trace.paymentMonth))} a month. ${usd(counted)} would be counted, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
     if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
   } else if (t.ruleIds.includes("R-FOOD-01")) {
     plain = `Food paid for by others has not been counted since September 30, 2024. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`;
@@ -377,7 +379,7 @@ function explain(
     `Rules ${rules}. Income month ${trace.month}, payment month ${trace.paymentMonth} (retrospective monthly accounting, lag ${P.rmaLagMonths}). ` +
     `Cash ${usd(trace.cashIncome)}; in kind ${usd(trace.inKindIncome)}; shelter paid by others ${usd(trace.shelterPaidByOthers)}; ISM value ${usd(trace.ismValue)}${trace.vtrApplied ? " (VTR)" : ""}; ` +
     `infrequent exclusion ${usd(trace.infrequentExcluded)}; general exclusion ${usd(trace.generalExcludedFromUnearned)}; countable ${usd(trace.countableIncome)}; ` +
-    `FBR ${usd(fbr(profile.couple))} gives ${usd(trace.check)}. Best route: ${best} (${usd(bestCheck)}).`;
+    `FBR ${usd(fbr(profile.couple, trace.paymentMonth))} gives ${usd(trace.check)}. Best route: ${best} (${usd(bestCheck)}).`;
 
   return { plain, technical };
 }

@@ -1,6 +1,9 @@
 // End-to-end API checks against the running dev server. Prints PASS/FAIL lines only.
 const B = process.env.BASE_URL ?? "http://localhost:3100";
 let pass = 0, fail = 0;
+// A gift given today counts in the check paid two months later, at that year's rate: $994 in 2026, $1,029 from January 2027 (91 FR 67380).
+const PAY = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 2, 1));
+const FULL = PAY.getUTCFullYear() >= 2027 ? 1029 : 994;
 const ok = (name, cond, extra = "") => { if (cond) pass++; else fail++; console.log(`${cond ? "PASS" : "FAIL"}  ${name}${extra ? "  | " + extra : ""}`); };
 const post = (p, body, headers = { "Content-Type": "application/json" }) => fetch(B + p, { method: "POST", headers, body: typeof body === "string" ? body : JSON.stringify(body) });
 
@@ -69,7 +72,7 @@ else ok("read-bill live reads the electric bill as a $138 utility and routes to 
 r = await post("/api/v1/analyze-fundraiser", { url: "/samples/fundraiser.html" });
 j = await r.json();
 if (r.status === 503) ok("analyze-fundraiser live (skipped: AI not configured)", true);
-else ok("analyze-fundraiser live plans every use so her check stays $994", r.status === 200 && j.data.plan.length >= 2 && j.data.plan.every((p) => p.check_with_route === 994), `${j.data?.plan?.length} uses`);
+else ok(`analyze-fundraiser live plans every use so her check stays $${FULL}`, r.status === 200 && j.data.plan.length >= 2 && j.data.plan.every((p) => p.check_with_route === FULL), `${j.data?.plan?.length} uses`);
 r = await post("/api/v1/analyze-fundraiser", { url: "ftp://x" });
 ok("analyze-fundraiser rejects non-http url", r.status === 400, `${r.status}`);
 
@@ -87,7 +90,7 @@ ok("openapi lists review-bill with its request schema", Boolean(j.paths?.["/api/
 // Gift pages from a list of needs: the engine picks each route, and the page uses the chosen pronouns
 r = await post("/api/v1/gift-pages", { name: "Jordan", pronoun: "they", organizer: "E2E", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] });
 j = await r.json();
-ok("gift-pages: the lift is paid straight to the shop, rent goes to the ABLE account, check stays $994", r.status === 200 && j.data.needs[0].route === "vendor" && j.data.needs[1].route === "able" && j.data.needs.every((n) => n.check_after === 994), `${r.status} ${JSON.stringify(j.data?.needs?.map((n) => n.route))}`);
+ok(`gift-pages: the lift is paid straight to the shop, rent goes to the ABLE account, check stays $${FULL}`, r.status === 200 && j.data.needs[0].route === "vendor" && j.data.needs[1].route === "able" && j.data.needs.every((n) => n.check_after === FULL), `${r.status} ${JSON.stringify(j.data?.needs?.map((n) => n.route))}`);
 if (j.data?.url) {
   r = await fetch(B + j.data.url);
   const text = ((await r.text()).match(/<body[\s\S]*<\/body>/)?.[0] ?? "").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ");
@@ -120,7 +123,7 @@ r = await post("/api/paypal/gift-orders", { slug: "maya", amount: 1500 });
 j = await r.json();
 const units = j.data?.plan?.lines ?? [];
 ok("gift-orders $1,500 -> one order, every open need plus ABLE", r.status === 200 && units.length === 5 && units.at(-1)?.referenceId === "able-savings", `${units.length} lines`);
-ok("gift-orders plan keeps her full check, cash would not", j.data?.plan?.checkWithRouting === 994 && j.data?.plan?.checkIfCash < 994, `${j.data?.plan?.checkIfCash} vs ${j.data?.plan?.checkWithRouting}`);
+ok("gift-orders plan keeps her full check, cash would not", j.data?.plan?.checkWithRouting === FULL && j.data?.plan?.checkIfCash < FULL, `${j.data?.plan?.checkIfCash} vs ${j.data?.plan?.checkWithRouting}`);
 ok("gift-orders lines add up to the gift", Math.abs(units.reduce((s, l) => s + l.amount, 0) - 1500) < 0.01);
 if (j.data?.id) {
   r = await fetch(`${B}/api/paypal/orders/${j.data.id}`);
@@ -228,10 +231,10 @@ const names = (j.result?.tools ?? []).map((t) => t.name);
 ok("MCP lists the seven tools with input schemas", ["check_gift", "get_gift_page", "get_ssa_report", "plan_gift", "review_bill", "start_gift_checkout", "start_monthly_gift"].every((n) => names.includes(n)) && j.result.tools.every((t) => t.inputSchema?.type === "object"), names.join(","));
 r = await mcp("tools/call", { name: "start_monthly_gift", arguments: { slug: "maya", amount: 300, giver_name: "E2E" } });
 j = await r.json();
-ok("MCP start_monthly_gift returns the giver's page, nothing charged, check stays $994", !j.result?.isError && /\/m\/[\w-]{20,}/.test(j.result?.content?.[0]?.text ?? "") && j.result?.structuredContent?.check_with_giftwise === 994, (j.result?.content?.[0]?.text ?? JSON.stringify(j.error ?? j)).slice(0, 120));
+ok(`MCP start_monthly_gift returns the giver's page, nothing charged, check stays $${FULL}`, !j.result?.isError && /\/m\/[\w-]{20,}/.test(j.result?.content?.[0]?.text ?? "") && j.result?.structuredContent?.check_with_giftwise === FULL, (j.result?.content?.[0]?.text ?? JSON.stringify(j.error ?? j)).slice(0, 120));
 r = await mcp("tools/call", { name: "plan_gift", arguments: { slug: "maya", amount: 500 } });
 j = await r.json();
-ok("MCP plan_gift splits $500 so her check stays $994 (cash would be $574)", j.result?.structuredContent?.check_with_giftwise === 994 && j.result?.structuredContent?.check_if_cash === 574, j.result?.content?.[0]?.text?.slice(0, 80));
+ok(`MCP plan_gift splits $500 so her check stays $${FULL} (cash would be $${FULL - 420})`, j.result?.structuredContent?.check_with_giftwise === FULL && j.result?.structuredContent?.check_if_cash === FULL - 420, j.result?.content?.[0]?.text?.slice(0, 80));
 r = await mcp("tools/call", { name: "get_ssa_report", arguments: { slug: "maya", month: "2026-10" } });
 j = await r.json();
 ok("MCP get_ssa_report: October needs no income report, due November 10", j.result?.structuredContent?.status === "nothing_counts" && j.result?.structuredContent?.due?.date === "2026-11-10" && /Nothing here counts as income/.test(j.result?.content?.[0]?.text ?? ""), j.result?.content?.[0]?.text?.slice(0, 80));
@@ -254,7 +257,7 @@ r = await post("/api/org/payouts", { grants: [{ slug: "nobody-here", amount: 20 
 ok("org payouts to an unknown page -> 422", r.status === 422, `${r.status}`);
 r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }], preview: true });
 j = await r.json();
-ok("org payouts preview routes a $10 grant and keeps the check at $994", r.status === 200 && j.data.preview === true && j.data.items.length >= 1 && j.data.households[0].checkWithGrant === 994, JSON.stringify(j.data?.items?.map((i) => i.payeeName)));
+ok(`org payouts preview routes a $10 grant and keeps the check at $${FULL}`, r.status === 200 && j.data.preview === true && j.data.items.length >= 1 && j.data.households[0].checkWithGrant === FULL, JSON.stringify(j.data?.items?.map((i) => i.payeeName)));
 r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }] });
 j = await r.json();
 const payoutBatch = j.data?.batch_id;
@@ -271,5 +274,14 @@ if (payoutBatch) {
 }
 r = await fetch(`${B}/api/org/payouts/NOTABATCH1`);
 ok("unknown payout batch -> 404", r.status === 404, `${r.status}`);
+
+// The rules watch: asked live, every Federal Register document is one Giftwise has reviewed, and the 2027 amounts are in use.
+r = await fetch(`${B}/api/rules-watch`);
+j = await r.json();
+ok(
+  "rules-watch: the Federal Register answers live, every SSI income rule and amounts notice is reviewed, 2027 amounts in use",
+  r.status === 200 && j.data?.live === true && j.data?.status === "current" && j.data?.rateYears?.includes(2027) && j.data?.documents?.some((d) => d.citation === "91 FR 67380"),
+  j.data?.sentence?.slice(0, 120),
+);
 await post("/api/demo/reset", {});
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -20,7 +20,10 @@ await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clien
 const started = await rpc("tools/call", { name: "start_gift_checkout", arguments: { slug: "maya", amount: 600 } });
 const d = started?.structuredContent ?? {};
 ok("start_gift_checkout returns a PayPal approval link and a receipt address", !started?.isError && /paypal\.com/.test(d.approve_url ?? "") && Boolean(d.order_id), started?.content?.[0]?.text?.slice(0, 120));
-ok("the checkout is split by the rules across several payees", (d.lines?.length ?? 0) >= 2 && d.check_with_giftwise === 994, JSON.stringify(d.lines?.map((l) => l.paid_to)));
+// A gift given today counts in the check paid two months later, at that year's rate: $994 in 2026, $1,029 from January 2027 (91 FR 67380).
+const PAY = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 2, 1));
+const FULL = PAY.getUTCFullYear() >= 2027 ? 1029 : 994;
+ok("the checkout is split by the rules across several payees", (d.lines?.length ?? 0) >= 2 && d.check_with_giftwise === FULL, JSON.stringify(d.lines?.map((l) => l.paid_to)));
 
 if (d.approve_url && email && password) {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });

@@ -58,7 +58,10 @@ await page.goto(`${B}${start.data.url}`, { waitUntil: "networkidle" });
 const first = page.locator(".mo-month").first();
 const firstMonth = (await first.locator(".mo-month-title").textContent())?.trim();
 ok("the current month is planned when the page opens", (await first.locator(".mo-lines li").count()) > 0, firstMonth);
-ok("its check stays $994", /check stays \$994/.test((await first.locator(".mo-check").textContent()) ?? ""));
+// November's gift counts in January's check, paid at the 2027 rate (91 FR 67380; POMS SI 02005.001 E.4.c).
+const PAY = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 2, 1));
+const FULL = PAY.getUTCFullYear() >= 2027 ? "1,029" : "994";
+ok(`its check stays $${FULL}`, new RegExp(`check stays \\$${FULL}`).test((await first.locator(".mo-check").textContent()) ?? ""));
 await page.waitForFunction(() => document.querySelectorAll(".mo-month paypal-button:not([hidden])").length > 0, null, { timeout: 30000 });
 const firstOrder = await payMonth(first, "first");
 ok("the first month is paid", (await first.locator(".mo-status[data-paid]").count()) === 1, firstOrder);

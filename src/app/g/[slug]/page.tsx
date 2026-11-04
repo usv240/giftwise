@@ -11,7 +11,7 @@ import { SandboxLogin } from "@/components/SandboxLogin";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
-import { DEFAULT_PROFILE, evaluateGift, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, evaluateGift, monthName, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import "./gift.css";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -106,7 +106,9 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
               </h2>
               <Info id="gift.month" label="" />
             </div>
-            <p className="gift-k">SSI check, every month</p>
+            <p className="gift-k">
+              SSI check, {monthName(cash.paymentMonth)} {cash.paymentMonth.slice(0, 4)}
+            </p>
             <p className="gift-check tabular">{usd(cash.checkBaseline)}</p>
             <dl className="gift-facts">
               <div>

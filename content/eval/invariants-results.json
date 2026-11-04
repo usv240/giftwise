@@ -1,0 +1,82 @@
+{
+  "ran_at": "2026-11-04T18:02:37.347Z",
+  "ms": 862721,
+  "seed": 20261104,
+  "gifts": 100000,
+  "dollars": 600819375.43,
+  "lines": 332149,
+  "results": [
+    {
+      "id": "to-the-cent",
+      "promise": "Every cent is either paid to a recipient or handed back, never lost or made up",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "check-whole",
+      "promise": "Her check is exactly what it would be with no gift at all",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "beats-cash",
+      "promise": "Routed, her check is never lower than the same gift as cash",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "need-cap",
+      "promise": "No recipient is paid more than the need still open",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "able-limit",
+      "promise": "ABLE deposits stay within the $20,000 yearly limit",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "able-eligible",
+      "promise": "Money goes to an ABLE account only for someone who can have one",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "paypal-limit",
+      "promise": "One checkout never needs more than PayPal's 10 recipients",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "whole-cents",
+      "promise": "Every amount is positive and in whole cents",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "cites-a-rule",
+      "promise": "Every line cites a rule in Giftwise's rule table",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "within-rate",
+      "promise": "No check is above the federal SSI rate or below zero",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "recomputed",
+      "promise": "Recomputing the month from the lines gives the same check",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "same-answer",
+      "promise": "The same gift always gets the same answer",
+      "kept": 100000,
+      "broken": 0
+    }
+  ]
+}

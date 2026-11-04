@@ -44,7 +44,7 @@ describe("monthly gifts", () => {
       ["Wheelchair repair", 120],
       ["Laptop for college", 42],
     ]);
-    expect(nov.checkWithRouting).toBe(994);
+    expect(nov.checkWithRouting).toBe(1029);
 
     // After November is paid: the repair is paid in full, the laptop has $42.
     const after = NEEDS.map((n) => (n.id === 2 ? { ...n, funded: "420.00", status: "paid" } : n.id === 3 ? { ...n, funded: "42.00", status: "partial" } : n));
@@ -59,7 +59,7 @@ describe("monthly gifts", () => {
       { kind: "removed", title: "Wheelchair repair", payee: "Wheelchair repair shop", from: 120, to: 0, why: "Wheelchair repair is paid in full, so nothing goes there now." },
       { kind: "changed", title: "Laptop for college", payee: "Laptop for college shop", from: 42, to: 162, why: "Needs before it take less this month, so more is left for this one." },
     ]);
-    expect(dec.checkWithRouting).toBe(994);
+    expect(dec.checkWithRouting).toBe(1029);
   });
 
   it("the first month has nothing to compare with", () => {

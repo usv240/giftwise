@@ -48,7 +48,7 @@ Each rule has an id, a plain sentence and its sources in `RULES`:
 | R-RES-01 | Countable savings must be $2,000 or less on the 1st ($3,000 for a couple) | POMS SI 01110.003, SI 01110.600 |
 | R-RMA-01 | Income in one month sets the check two months later | POMS SI 02005.001 |
 
-Set `householdProvidesAllMeals: false` on the profile when the person lives in another's household but buys their own food. Amounts are the 2026 federal figures ($994 a month for an individual). State supplements, deeming from a spouse or parent, earned income beyond the standard exclusions and trusts are not modeled.
+Set `householdProvidesAllMeals: false` on the profile when the person lives in another's household but buys their own food. Amounts follow the check's year: $994 a month for an individual in 2026 and $1,029 from January 2027 (91 FR 67380), so November and December income set the January and February checks at the new rate, as SSA does (POMS SI 02005.001 E.4.c). State supplements, deeming from a spouse or parent, earned income beyond the standard exclusions and trusts are not modeled.
 
 ## Checked against Social Security's own answers
 

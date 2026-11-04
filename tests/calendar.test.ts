@@ -29,8 +29,8 @@ describe("the benefit calendar", () => {
     const oct = calendarModel([gift("a", "2026-10-02", 100), gift("b", "2026-10-20", 100)], base, "cash").checks;
     expect(oct.find((c) => c.paidOn === "2026-12-01")?.amount).toBe(994 - (200 - 60 - 20));
     const split = calendarModel([gift("a", "2026-12-30", 100), gift("b", "2027-01-02", 100)], base, "cash").checks;
-    expect(split.find((c) => c.paidOn === "2027-02-01")?.amount).toBe(994 - 20);
-    expect(split.find((c) => c.paidOn === "2027-03-01")?.amount).toBe(994 - 20);
+    expect(split.find((c) => c.paidOn === "2027-02-01")?.amount).toBe(1029 - 20);
+    expect(split.find((c) => c.paidOn === "2027-03-01")?.amount).toBe(1029 - 20);
   });
 
   it("gifts paid to the shop stay green on any day", () => {

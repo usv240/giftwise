@@ -368,3 +368,62 @@
   text-underline-offset: 0.2em;
   cursor: pointer;
 }
+
+/* The split: one bar, one segment per recipient, sized by what each receives. Segments re-flow as the giver types. */
+.give-split {
+  display: flex;
+  gap: 3px;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.give-seg {
+  flex: 0 1 0;
+  min-width: 6px;
+  background: var(--tone, var(--positive));
+  transition: flex-grow 260ms var(--ease-out);
+}
+.give-seg[data-able] {
+  background: var(--accent);
+}
+.give-seg[data-unplaced] {
+  background: repeating-linear-gradient(135deg, var(--surface-2) 0 4px, color-mix(in oklab, var(--muted) 30%, var(--surface-2)) 4px 8px);
+}
+.give-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 3px;
+  background: var(--tone, var(--positive));
+  vertical-align: 0.05em;
+}
+.give-swatch[data-able] {
+  background: var(--accent);
+}
+/* Her check against the check with no gift: cash shrinks it, the Giftwise route keeps it full. */
+.give-meter {
+  display: block;
+  margin-top: 8px;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--muted) 18%, var(--surface));
+  overflow: hidden;
+}
+.give-meter-fill {
+  display: block;
+  height: 100%;
+  background: var(--positive);
+  transform-origin: left center;
+  transition: transform 320ms var(--ease-out);
+}
+.give-meter-fill[data-cash] {
+  background: var(--attention);
+}
+@media (prefers-reduced-motion: reduce) {
+  .give-seg,
+  .give-meter-fill {
+    transition: none;
+  }
+}

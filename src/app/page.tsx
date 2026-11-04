@@ -42,6 +42,12 @@ const BUILT = [
   { id: "apimatic", tool: "APIMatic", job: "Generated the PayPal SDK Giftwise builds with" },
 ];
 
+/** Published counts only, each from the source it links to. */
+const REACH = [
+  { fig: "793,000", text: "people on SSI whose check Social Security lowered in a single month for food or housing someone else provided.", src: "fr-88-9779-ism-count", srcLabel: "SSA, January 2022" },
+  { fig: "14 million", text: "people who can open an ABLE account: about 8 million under the original law and an estimated 6 million more since January 1, 2026.", src: "able-nrc-age-case-summary", srcLabel: "ABLE National Resource Center" },
+  { fig: "246,000", text: "ABLE accounts open so far, holding over $3.2 billion. Every Giftwise gift with money left over goes to one.", src: "able-nrc-accounts-2026", srcLabel: "ABLE NRC, March 31, 2026" },
+];
 const RESEARCH = ["cfr-416-1103-g", "poms-si-00815-400", "poms-si-01130-740", "fr-89-21199", "ssa-understanding-ssi-living", "sna-crowdfunding", "hhl-survey-2026", "berliner-kenworthy-2017"];
 const RESEARCH_LABEL: Record<string, string> = {
   "cfr-416-1103-g": "20 CFR 416.1103(g)",
@@ -236,6 +242,29 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Who it reaches: published counts, each linked to its source */}
+      <section className="section frame reach" aria-labelledby="reach-title">
+        <div className="title-row">
+          <h2 id="reach-title" className="section-title">
+            Who it reaches
+          </h2>
+          <Info id="reach.row" />
+        </div>
+        <ul className="reach-list">
+          {REACH.map((r) => (
+            <li key={r.fig} className="reach-row">
+              <span className="reach-fig tabular">{r.fig}</span>
+              <span className="reach-text">
+                {r.text}{" "}
+                <a className="text-link muted reach-src" href={SRC[r.src].url} target="_blank" rel="noreferrer">
+                  {r.srcLabel}
+                </a>
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Grounded in research: names as one line */}

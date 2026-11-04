@@ -6,6 +6,9 @@ const B = process.env.BASE_URL ?? "http://localhost:3100";
 const OUT = process.argv[2] ?? ".taste-skill";
 const AXE = readFileSync("node_modules/axe-core/axe.min.js", "utf8");
 let pass = 0, fail = 0;
+// A gift given today counts in the check paid two months later, at that year's rate: $994 in 2026, $1,029 from January 2027 (91 FR 67380).
+const PAY = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 2, 1));
+const FULL = PAY.getUTCFullYear() >= 2027 ? 1029 : 994;
 const ok = (n, c, x = "") => { if (c) pass++; else fail++; console.log(`${c ? "PASS" : "FAIL"}  ${n}${x ? "  | " + x : ""}`); };
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
@@ -146,7 +149,7 @@ ok("organizations page shows the fund's PayPal balance", /\$[\d,]+/.test((await 
 await page.getByLabel("Grant to Maya in dollars").fill("120");
 await page.getByRole("button", { name: "Show the routing" }).click();
 await page.locator(".org-plans").waitFor({ timeout: 30000 });
-ok("a $120 grant is routed so her check stays $994", /Check stays \$994/.test((await page.locator(".org-plans").innerText()) ?? ""));
+ok(`a $120 grant is routed so her check stays $${FULL}`, new RegExp(`Check stays \\$${FULL.toLocaleString("en-US")}`).test((await page.locator(".org-plans").innerText()) ?? ""));
 
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });

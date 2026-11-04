@@ -585,7 +585,7 @@
   margin: clamp(1.75rem, 1.25rem + 1.5vw, 2.75rem) 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   max-width: 68rem;
 }
@@ -642,5 +642,59 @@
 @media (hover: hover) and (pointer: fine) {
   .jr-link:hover .jr-what {
     text-decoration-color: currentColor;
+  }
+}
+
+/* The rules watch: the live answer first, then each document and what Giftwise does with it. */
+.rw-status {
+  margin: 0 0 1rem;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: var(--step-body);
+  max-width: 60rem;
+}
+.rw-status[data-state="current"] {
+  box-shadow: inset 4px 0 0 var(--positive);
+}
+.rw-status[data-state="new_documents"] {
+  box-shadow: inset 4px 0 0 var(--attention);
+}
+.rw-date {
+  white-space: nowrap;
+}
+.inv .doc-table td:last-child {
+  white-space: nowrap;
+}
+.inv > * + *,
+.rw > * + * {
+  margin-top: 1.25rem;
+}
+/* On a phone each document is one block: its date and citation, then what Giftwise does. */
+@media (max-width: 700px) {
+  .rw .doc-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .rw .doc-table tr {
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--surface-2);
+  }
+  .rw .doc-table tbody > tr:last-child {
+    border-bottom: 0;
+  }
+  .rw .doc-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+  .rw .rw-date {
+    font-size: 13px;
+    color: var(--muted);
   }
 }

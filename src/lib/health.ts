@@ -4,6 +4,7 @@ import { latestRun } from "./checks";
 import { db, dbConfigured } from "./db";
 import { accessToken, paypalConfigured } from "./paypal/client";
 import { connectPayPalMcp, type PayPalMcpClient } from "./agent/paypal-mcp";
+import { rulesWatch } from "./rules-watch";
 import pkg from "../../package.json";
 
 /** Versions as the project pins them; "npm:@bryntum/calendar-trial@7.3.7" reads as 7.3.7. */
@@ -53,10 +54,11 @@ async function timed(fn: () => Promise<string>): Promise<{ ok: boolean; detail: 
 /** Live checks for every integration, with the fallback each one uses when it is not reachable. */
 /** probeMcp: also connect to PayPal's hosted MCP server (the Status page). Render's health check leaves it off to stay fast. */
 export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {}): Promise<Check[]> {
-  const [pp, database, mcp] = await Promise.all([
+  const [pp, database, mcp, fr] = await Promise.all([
     paypalConfigured() ? timed(async () => (await accessToken()) && "Sandbox token issued") : Promise.resolve(null),
     dbConfigured() ? timed(async () => (await db().execute(sql`select 1`)) && "Query ok") : Promise.resolve(null),
     paypalConfigured() && probeMcp ? paypalMcp() : Promise.resolve(mcpCache),
+    probeMcp ? rulesWatch() : Promise.resolve(null),
   ]);
   const agKey = Boolean(process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY?.trim());
   const run = database?.ok ? await latestRun().catch(() => null) : null;
@@ -84,6 +86,12 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       detail: agKey ? `ag-studio-react ${pinned("ag-studio-react")}, licensed` : `ag-studio-react ${pinned("ag-studio-react")} on the trial; it shows a licence notice until a key is set`,
     },
     { id: "bryntum", name: "Bryntum Calendar", mode: "live", detail: `@bryntum/calendar ${pinned("@bryntum/calendar")}, the hackathon trial, which shows a trial watermark` },
+    {
+      id: "rules-watch",
+      name: "Federal Register watch",
+      mode: fr ? (fr.live && fr.status === "current" ? "live" : "fallback") : "live",
+      detail: fr ? fr.sentence : "Checked on the Status page and every night by the outside checks",
+    },
     { id: "database", name: "Postgres", mode: database?.ok ? "live" : "not_connected", detail: database ? database.detail : "DATABASE_URL not set", ms: database?.ms },
     {
       id: "checks",

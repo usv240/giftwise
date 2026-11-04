@@ -5,12 +5,15 @@ import results from "../../../content/test-results.json";
 import billResults from "../../../content/eval-results.json";
 import fieldResults from "../../../content/eval/field-cases-results.json";
 import ssaResults from "../../../content/eval/ssa-examples-results.json";
+import invResults from "../../../content/eval/invariants-results.json";
 import { Info } from "@/components/Info";
 import { CaseRunner } from "@/components/judges/CaseRunner";
 import { EvalResults } from "@/components/judges/EvalResults";
 import { FieldCases } from "@/components/judges/FieldCases";
+import { Invariants } from "@/components/judges/Invariants";
 import { NightlyChecks } from "@/components/judges/NightlyChecks";
 import { Results } from "@/components/judges/Results";
+import { RulesWatch } from "@/components/judges/RulesWatch";
 import { SsaExamples } from "@/components/judges/SsaExamples";
 import { SandboxLogin } from "@/components/SandboxLogin";
 import { Suspense } from "react";
@@ -35,6 +38,8 @@ const MORE = [
   { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
   { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answers; Claude alone, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
   { href: "#field-cases", label: "Real cases from federal courts", look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did; routed through Giftwise, the same help keeps $${fieldResults.summary.dollars.as_shown_in_the_opinions.kept_per_month_2026.toLocaleString("en-US", { minimumFractionDigits: 2 })} a month.` },
+  { href: "#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, look: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
+  { href: "#rules-watch", label: "The rules watch the Federal Register", look: "Asked live: every change to SSI's income rules and amounts since 2022, each with what Giftwise does. The 2027 amounts, published October 26, are in use." },
   { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
   { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
   { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
@@ -43,7 +48,7 @@ const MORE = [
 ];
 
 const CRITERIA = [
-  { name: "Technological implementation", where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, and Claude structured outputs checked by a deterministic rules engine.", links: [["/status", "Status"], ["/stack", "Stack"]] },
+  { name: "Technological implementation", where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, PayPal's own MCP server, and Claude structured outputs checked by a deterministic rules engine that keeps twelve promises across 100,000 random gifts.", links: [["/status", "Status"], ["/stack", "Stack"], ["#invariants", "100,000 gifts"]] },
   {
     name: "Design",
     where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA. The AG Studio dashboard takes its colors and fonts from the same tokens.",
@@ -56,7 +61,7 @@ const CRITERIA = [
   },
   {
     name: "Potential impact",
-    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). Gifts given as cash can lower the check. Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
+    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). In January 2022 SSA lowered the check of 793,000 of them for food or housing someone else provided (88 FR 9779), and about 14 million people can now open an ABLE account, which more than 246,000 have (ABLE National Resource Center). Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
     links: [
       ["/learn", "The rules, explained"],
       ["/about#real", "How this works for real"],
@@ -65,11 +70,12 @@ const CRITERIA = [
   {
     name: "Innovation",
     where:
-      "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt. AI assistants can ask Giftwise first over MCP, and two reviewers with different rulebooks must quote their source word for word.",
+      "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt. AI assistants can ask Giftwise first over MCP, two reviewers with different rulebooks must quote their source word for word, and the rules check the Federal Register for their own updates.",
     links: [
       ["/g/maya", "Give any amount"],
       ["/agents", "For AI agents"],
       ["/try/presets/electric-bill", "The two reviewers"],
+      ["#rules-watch", "The rules watch"],
     ],
   },
   { name: "Presentation", where: "This page, the demo video, and a sample household you can reset to the same starting point at any time.", links: [["/about", "About"]] },
@@ -180,6 +186,28 @@ export default function JudgesPage() {
         <FieldCases />
       </section>
 
+      <section id="invariants" className="page-section" aria-labelledby="inv-h">
+        <div className="title-row">
+          <h2 id="inv-h">{invResults.gifts.toLocaleString("en-US")} random gifts, every promise kept</h2>
+          <Info id="judges.invariants" label="" />
+        </div>
+        <Invariants />
+      </section>
+
+      <section id="rules-watch" className="page-section" aria-labelledby="rw-h">
+        <div className="title-row">
+          <h2 id="rw-h">The rules watch the Federal Register</h2>
+          <Info id="judges.rules_watch" label="" />
+        </div>
+        <p className="page-prose jp-intro">
+          SSI&rsquo;s rules change in the Federal Register. This asks it, live, for every change to how SSI counts income and in-kind support and every notice of the year&rsquo;s amounts, and shows what
+          Giftwise does with each one.
+        </p>
+        <Suspense fallback={<p className="page-loading">Asking the Federal Register…</p>}>
+          <RulesWatch />
+        </Suspense>
+      </section>
+
       <section className="page-section" aria-labelledby="crit-h">
         <h2 id="crit-h">Where each criterion shows</h2>
         <dl className="jp-criteria">
@@ -213,7 +241,7 @@ export default function JudgesPage() {
           {results.suites.map((s) => (
             <li key={s.id} className="jp-test" data-ui>
               <p className="jp-test-score tabular">
-                {s.passed}/{s.total}
+                {s.passed.toLocaleString("en-US")}/{s.total.toLocaleString("en-US")}
               </p>
               <div>
                 <p className="jp-test-name">{s.name}</p>

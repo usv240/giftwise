@@ -229,3 +229,21 @@ describe("rule table", () => {
     }
   });
 });
+
+describe("the 2027 cost-of-living increase", () => {
+  const profile = { ...DEFAULT_PROFILE };
+  it("October income sets the December 2026 check at the 2026 rate", () => {
+    expect(computeMonth("2026-10", [], profile).check).toBe(994);
+  });
+  it("November and December income set the January and February 2027 checks at the 2027 rate (POMS SI 02005.001 E.4.c)", () => {
+    expect(computeMonth("2026-11", [], profile).check).toBe(1029);
+    expect(computeMonth("2026-12", [], profile).check).toBe(1029);
+  });
+  it("housing help in November is valued with the 2027 presumed maximum value and one-third reduction", () => {
+    const rent = (p: typeof profile) => computeMonth("2026-11", [{ id: "r", date: "2026-11-05", amount: 900, delivery: "vendor", category: "rent", recurring: true }], p);
+    expect(rent(profile).ismValue).toBe(363);
+    expect(rent(profile).check).toBe(round(1029 - (363 - 20)));
+    expect(rent({ ...profile, livesInAnothersHousehold: true }).check).toBe(round(1029 - 343 - 0));
+  });
+});
+const round = (n: number) => Math.round(n * 100) / 100;

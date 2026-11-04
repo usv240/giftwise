@@ -220,6 +220,24 @@
       "href": "/learn#sources"
     }
   },
+  "reach.row": {
+    "title": "Who it reaches",
+    "what": "Published counts from Social Security and the ABLE National Resource Center. Each figure links to its source.",
+    "why": "Help with housing changes the check for hundreds of thousands of people on SSI, and many more people can now open an ABLE account than have one.",
+    "technical": "793,000 and its split (358,000 under the one-third reduction, 434,000 under the presumed maximum value) are SSA's estimate for January 2022 in 88 FR 9779. ABLE counts are ABLE NRC's: more than 246,000 accounts and over $3.2 billion as of March 31, 2026; about 8 million eligible under the original law and an estimated 6 million more from January 1, 2026."
+  },
+  "judges.invariants": {
+    "title": "Random gifts, every promise kept",
+    "what": "A program makes up gifts, needs and people at random, routes each gift, and checks every answer against twelve promises.",
+    "why": "Hand-written tests cover the cases someone thought of. Random ones cover the rest: odd amounts, many small needs, ABLE accounts near the limit, people with wages and other income.",
+    "technical": "src/lib/invariants.ts: a seeded mulberry32 generator, so the same seed gives the same cases. routeGift() is checked for cent conservation, check equal to the no-gift check, never below cash, need caps, ABLE yearly limit and eligibility, at most 10 PayPal purchase units, whole cents, rule ids from the rule table, checks within the federal rate, recomputation and determinism."
+  },
+  "judges.rules_watch": {
+    "title": "The rules watch",
+    "what": "Giftwise asks the Federal Register for every change to SSI's income rules and yearly amounts, and lists what it does with each one.",
+    "why": "Rules and amounts change. SSA published the 2027 amounts on October 26, 2026, and January's checks already use them.",
+    "technical": "GET /api/rules-watch. Three queries to api.federalregister.gov (no key), matched by document number against content/rules-watch.json; any document not on the list is named and fails the nightly check. Under retrospective accounting the January and February checks use the new rate, and the one-third reduction and presumed maximum value follow it (POMS SI 02005.001 E.4.c)."
+  },
   "dev.teaser": {
     "title": "For developers",
     "what": "Other apps can check any gift with one API call, or connect an AI agent through our MCP server.",

@@ -88,6 +88,7 @@ export const API = [
   { id: "ledger", title: "The audit ledger's hash chain verifies end to end" },
   { id: "ssa-report", title: "October's report: nothing counts, her check stays $994" },
   { id: "mcp", title: "The MCP server lists its seven tools" },
+  { id: "rules-watch", title: "Every Federal Register change to SSI's income rules and amounts is reviewed" },
   { id: "openapi", title: "OpenAPI names the public address, not the internal port" },
   { id: "paypal-return", title: "PayPal's return link sends people to the public address" },
 ] as const;
@@ -115,6 +116,10 @@ export async function checkApi(e: Env, id: string): Promise<Omit<CheckResult, "a
         const j = (await res.json()) as { result?: { tools: { name: string }[] } };
         const names = j.result?.tools.map((t) => t.name) ?? [];
         return { ok: names.length === 7 && names.includes("get_ssa_report") && names.includes("start_gift_checkout") && names.includes("start_monthly_gift"), detail: names.join(", ") };
+      }
+      case "rules-watch": {
+        const j = (await (await call(`${e.app}/api/rules-watch`)).json()) as { data: { status: string; live: boolean; documents: { citation: string; reviewed: boolean }[]; sentence: string } };
+        return { ok: j.data.live && j.data.status === "current", detail: j.data.sentence.slice(0, 600) };
       }
       case "openapi": {
         const j = (await (await call(`${e.app}/openapi.json`)).json()) as { servers: { url: string }[] };

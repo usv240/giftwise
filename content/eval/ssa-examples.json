@@ -1554,7 +1554,7 @@
     {
       "cite": "20 CFR 416.1130(a) (Example)",
       "what": "The one-third reduction in a cost-of-living month",
-      "why": "Giftwise uses 2026 amounts."
+      "why": "Giftwise now follows this rule: November and December income set the January and February checks at the new year's rate (tests/rules.test.ts)."
     }
   ]
 }

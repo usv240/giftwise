@@ -8,12 +8,18 @@ import { usePrefs } from "../prefs";
 import { StartMonthly } from "./MonthlyActions";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { routeGift, type OpenNeed, type RoutedLine } from "@/lib/routing";
-import { DEFAULT_PROFILE, monthName, pronounWords, usd, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, P, addMonths, monthName, monthOf, pronounWords, usd, type Profile } from "@/lib/rules";
 
 /**
  * "Give any amount": the donor types a number; the rules engine routes it across the open needs and the ABLE account,
  * and one PayPal checkout pays every recipient directly.
  */
+
+/** Shop segments step through shades of the site's green; the ABLE account keeps the accent. */
+const tone = (i: number) => `color-mix(in oklab, var(--positive) ${[100, 74, 56, 42, 32][i % 5]}%, var(--surface))`;
+/** Her check as a share of the check with no gift, for the meter. */
+const share = (check: number, baseline: number) => (baseline > 0 ? Math.max(0, Math.min(1, check / baseline)) : 0);
+
 export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE }: { slug: string; name: string; needs: OpenNeed[]; date: string; profile?: Profile }) {
   const w = pronounWords(profile.pronoun);
   const { prefs } = usePrefs();
@@ -79,26 +85,43 @@ export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE }: 
       {amount > 0 && (
         <>
           <p className="give-k">Giftwise sends it here</p>
+          {/* The one number, split: each segment is a recipient, sized by what it receives. The list below carries the same facts for screen readers. */}
+          <div className="give-split" aria-hidden="true">
+            {plan.lines.map((l, i) => (
+              <span key={l.referenceId} className="give-seg" data-able={l.route === "able" ? "" : undefined} style={{ flexGrow: l.amount, ["--tone" as string]: tone(i) }} />
+            ))}
+            {plan.unplaced > 0 && <span key="unplaced" className="give-seg" data-unplaced="" style={{ flexGrow: plan.unplaced }} />}
+          </div>
           <ul className="give-lines" aria-live="polite">
-            {plan.lines.map((l) => (
+            {plan.lines.map((l, i) => (
               <li key={l.referenceId}>
                 <span>
+                  <span className="give-swatch" data-able={l.route === "able" ? "" : undefined} style={{ ["--tone" as string]: tone(i) }} aria-hidden="true" />
                   {l.payeeName} <span className="muted">({l.title})</span>
                 </span>
                 <span className="tabular">{usd(l.amount)}</span>
               </li>
             ))}
           </ul>
+          <p className="give-k">
+            {w.Poss} {monthName(addMonths(monthOf(date), P.rmaLagMonths))} check
+          </p>
           <div className="give-compare">
             <div>
               <p className="give-k">As cash</p>
               <p className="give-fig tabular">{usd(plan.checkIfCash)}</p>
+              <span className="give-meter" aria-hidden="true">
+                <span className="give-meter-fill" data-cash="" style={{ transform: `scaleX(${share(plan.checkIfCash, plan.baseline)})` }} />
+              </span>
             </div>
             <div>
               <p className="give-k">With Giftwise</p>
               <p className="give-fig tabular" data-kept="">
                 {usd(plan.checkWithRouting)}
               </p>
+              <span className="give-meter" aria-hidden="true">
+                <span className="give-meter-fill" style={{ transform: `scaleX(${share(plan.checkWithRouting, plan.baseline)})` }} />
+              </span>
             </div>
           </div>
           <p className="give-note">

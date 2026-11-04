@@ -1,11 +1,12 @@
 import bills from "../../../content/eval-results.json";
 import field from "../../../content/eval/field-cases-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
+import inv from "../../../content/eval/invariants-results.json";
 import { usd } from "@/lib/rules";
 
 /**
  * The results, above the fold: a benchmark from Social Security's own text, a run on real cases Giftwise did not
- * write, and what it refused. Every figure is read from the result files the sections below show in full.
+ * write, what it accepted, and the promises it keeps across random gifts. Every figure is read from the result files the sections below show in full.
  */
 export function Results() {
   const ex = ssa.summary;
@@ -44,6 +45,16 @@ export function Results() {
           <span className="jr-what">bills where Giftwise accepted a route that lowers her check.</span>
           <span className="jr-base">
             Claude with no rulebook accepted <span className="tabular">{b.baseline.wrong_routes_accepted}</span>.
+          </span>
+        </a>
+      </li>
+      <li className="jr-item">
+        <a className="jr-link" href="#invariants">
+          <span className="jr-fig tabular">{inv.gifts.toLocaleString("en-US")}</span>
+          <span className="jr-what">random gifts to made-up people, and every one keeps all {inv.results.length} promises.</span>
+          <span className="jr-base">
+            Every cent placed, and her check exactly as with no gift, in <span className="tabular">{inv.results.find((r) => r.id === "check-whole")!.kept.toLocaleString("en-US")}</span> of{" "}
+            <span className="tabular">{inv.gifts.toLocaleString("en-US")}</span>.
           </span>
         </a>
       </li>

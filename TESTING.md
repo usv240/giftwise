@@ -50,7 +50,7 @@ Each payment in the order names its own payee, and PayPal captures each one sepa
 
 ## Checked every night, on Render Workflows
 
-On `/judges`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 23 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and six public API promises (status, ledger, the SSA report, the MCP tools, the OpenAPI address and PayPal's return link).
+On `/judges`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 24 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and six public API promises (status, ledger, the SSA report, the MCP tools, the OpenAPI address and PayPal's return link).
 
 1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
 2. In about a minute the run files its results and the panel refreshes with the new time and count. Set **View** to Technical to see what each check found.
@@ -84,7 +84,7 @@ The runner can be started again 20 seconds after the last run.
 
 ## Maya's benefit calendar, in Bryntum
 
-Open `/g/maya/calendar`. Gifts are green when they do not count and orange when they do; Social Security's dates are blue (the check on the 1st, the report due on the 10th). Press **As cash**, then drag Aunt June's $150 on October 28 to November 2, or use **Move a gift** below the calendar. **What moving it did** lists each check that changed: December rises from $456 to $606 and January drops from $994 to $864, because the gift moved to a later income month. The calendar is Bryntum Calendar 7.3.7 (the free trial, so it shows a trial watermark), and its theme follows the site's light and dark mode.
+Open `/g/maya/calendar`. Gifts are green when they do not count and orange when they do; Social Security's dates are blue (the check on the 1st, the report due on the 10th). Press **As cash**, then drag Aunt June's $150 on October 28 to November 2, or use **Move a gift** below the calendar. **What moving it did** lists each check that changed: December rises from $456 to $606 and January drops from $1,029 to $899, because the gift moved to a later income month (January is paid at the 2027 rate). The calendar is Bryntum Calendar 7.3.7 (the free trial, so it shows a trial watermark), and its theme follows the site's light and dark mode.
 
 ## Maya's year, in AG Studio
 
@@ -157,9 +157,11 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow and the cited answers | `npm test` | 83 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers and 1,000 random gifts | `npm test` | 90 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
+| 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
+| The rules watch, asked live | `GET /api/rules-watch` | Every Federal Register document reviewed; 2026 and 2027 amounts in use |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
 | API end to end | `npm run e2e:api` | 85 passed |
 | Browser end to end | `npm run e2e:ui` | 58 passed |
