@@ -62,6 +62,11 @@ export default function AgentsPage() {
         <pre className="dev-pre tabular" tabIndex={0} aria-label="Command to add Giftwise to VS Code">{`code --add-mcp '${JSON.stringify({ name: "giftwise", type: "http", url })}'`}</pre>
         <p className="ag-k">Other MCP clients</p>
         <pre className="dev-pre tabular" tabIndex={0} aria-label="MCP client configuration">{JSON.stringify({ mcpServers: { giftwise: { type: "http", url } } }, null, 2)}</pre>
+        <p className="ag-k">Found without being told</p>
+        <p className="page-prose">
+          An agent pointed at this site can find the server on its own: the domain&rsquo;s AI Catalog at <code>/.well-known/ai-catalog.json</code> lists its MCP Server Card at{" "}
+          <code>{url}/server-card</code>, the discovery format MCP adopted in SEP-2127, and <code>/llms.txt</code> describes Giftwise in plain text.
+        </p>
       </section>
 
       <section className="page-section" aria-labelledby="tools-h">

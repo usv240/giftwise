@@ -2,12 +2,13 @@ import { z } from "zod";
 import { guard } from "@/lib/api/keys";
 import { INSTRUCTIONS, SERVER_INFO, TOOLS, type ToolResult } from "@/lib/mcp/tools";
 import { publicOrigin } from "@/lib/origin";
+import { SUPPORTED_VERSIONS } from "@/lib/mcp/card";
 
 /**
  * The Giftwise MCP server: Model Context Protocol over Streamable HTTP, stateless, answering each JSON-RPC request with
  * a JSON response. Add it to an agent with: claude mcp add --transport http giftwise https://<host>/api/mcp
  */
-const VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26"];
+const VERSIONS = SUPPORTED_VERSIONS;
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",

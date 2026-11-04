@@ -19,7 +19,7 @@ const SRC = sources as Record<string, { title: string; url: string }>;
 
 const RULE_ROWS = [
   { id: "rules.limit", name: "Savings limit on the first of each month", value: usd(V.resource_limit_individual.value), href: "/learn#savings" },
-  { id: "rules.fbr", name: "SSI federal payment, 2026", value: usd(V.fbr_individual.value), href: "/learn#payment" },
+  { id: "rules.fbr", name: `SSI federal payment, 2026 (2027: ${usd(V.fbr_individual_2027.value)})`, value: usd(V.fbr_individual.value), href: "/learn#payment" },
   { id: "rules.infrequent", name: "One-off gifts not counted, per quarter", value: `first ${usd(V.infrequent_unearned_per_quarter.value)}`, href: "/learn#exclusions" },
   { id: "rules.gie", name: "General monthly exclusion", value: usd(V.general_income_exclusion.value), href: "/learn#exclusions" },
   { id: "rules.pmv", name: "Most that housing help can lower the check", value: usd(V.pmv_individual.value), href: "/learn#housing" },
@@ -45,6 +45,7 @@ const BUILT = [
 /** Published counts only, each from the source it links to. */
 const REACH = [
   { fig: "793,000", text: "people on SSI whose check Social Security lowered in a single month for food or housing someone else provided.", src: "fr-88-9779-ism-count", srcLabel: "SSA, January 2022" },
+  { fig: "$410 million", text: "in SSI overpayments in one year from in-kind support: help with food or housing that should have lowered the check, found after it was paid. Giftwise checks every gift before PayPal moves it.", src: "ssa-oig-152601", srcLabel: "SSA Inspector General, FY 2024" },
   { fig: "14 million", text: "people who can open an ABLE account: about 8 million under the original law and an estimated 6 million more since January 1, 2026.", src: "able-nrc-age-case-summary", srcLabel: "ABLE National Resource Center" },
   { fig: "246,000", text: "ABLE accounts open so far, holding over $3.2 billion. Every Giftwise gift with money left over goes to one.", src: "able-nrc-accounts-2026", srcLabel: "ABLE NRC, March 31, 2026" },
 ];

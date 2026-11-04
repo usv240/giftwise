@@ -5,6 +5,7 @@ import { giftSubject } from "@/lib/report/data";
 import { easyRead, reminderIcs } from "@/lib/report/easy";
 import { buildReport, currentReportMonth, reportCsv, reportJson } from "@/lib/report/ssa";
 import { monthOf } from "@/lib/rules";
+import { reportCode, verifyPath } from "@/lib/report/verify";
 
 /**
  * GET /api/v1/ssa-report?page=maya&month=2026-10&view=given|cash&format=json|csv|easy|ics&lang=en|es
@@ -43,7 +44,8 @@ async function handle(req: Request) {
       headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="giftwise-ssa-report-${subject.slug}-${report.month}.csv"` },
     });
   }
-  return ok(reportJson(report), started);
+  const code = report.view === "given" && report.status !== "no_gifts" ? reportCode(subject.slug, report) : null;
+  return ok({ ...reportJson(report), verify: code ? { code, url: `${publicOrigin(req)}${verifyPath(subject.slug, report.month, code)}` } : null }, started);
 }
 
 export const GET = (req: Request) => guard(req, "ssa-report", () => handle(req));

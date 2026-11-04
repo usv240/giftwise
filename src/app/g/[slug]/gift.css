@@ -427,3 +427,82 @@
     transition: none;
   }
 }
+
+/* Share this page: the share sheet or a copied link, and a QR code to print or show. */
+.gift-share {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 20px 22px;
+  display: grid;
+  gap: 8px;
+}
+.gift-share-title {
+  font-size: 17px;
+  font-weight: 500;
+}
+.gift-share-text {
+  font-size: 15px;
+  color: var(--muted);
+}
+.gift-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+.gift-share-btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+.gift-share-btn:active {
+  transform: scale(0.97);
+}
+.gift-share-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.gift-share-note {
+  font-size: 14px;
+  color: var(--positive);
+  overflow-wrap: anywhere;
+}
+.gift-share-qr summary {
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+.gift-share-qr-img {
+  margin-top: 8px;
+  width: 168px;
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 10px;
+}
+.gift-share-qr-img svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.gift-share-url {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gift-share-btn {
+    transition: none;
+  }
+}

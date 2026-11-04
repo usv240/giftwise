@@ -35,7 +35,7 @@ export default function AboutPage() {
         <h2 id="scope-h">Scope</h2>
         <ul className="about-list">
           <li>Guidance based on published Social Security rules, with sources. For complex situations, such as couples, state supplements or Medicaid rules that differ by state, a benefits counselor can help.</li>
-          <li>Uses the 2026 federal amounts. State supplements are not included yet.</li>
+          <li>Uses the federal amounts for the year each check is paid: 2026, and 2027 from January. Federal SSI only; a state&rsquo;s own supplement is added on top by that state.</li>
           <li>Runs in PayPal&rsquo;s sandbox, a practice version of PayPal where no real money moves.</li>
           <li>The household on the sample pages, Maya, and the shops are fictional.</li>
         </ul>

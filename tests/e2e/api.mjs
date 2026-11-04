@@ -283,5 +283,39 @@ ok(
   r.status === 200 && j.data?.live === true && j.data?.status === "current" && j.data?.rateYears?.includes(2027) && j.data?.documents?.some((d) => d.citation === "91 FR 67380"),
   j.data?.sentence?.slice(0, 120),
 );
+// A report that proves itself: the report names its code, and the check page rebuilds it and agrees; a wrong code shows the current one.
+r = await fetch(`${B}/api/v1/ssa-report?page=maya&month=2026-10`);
+j = await r.json();
+const vurl = j.data?.verify?.url ?? "";
+const vpage = vurl ? await (await fetch(vurl.replace(/^https?:\/\/[^/]+/, B))).text() : "";
+ok("report code: October's report names its check page, and the page says it matches", /^[0-9A-Z]{5}-[0-9A-Z]{5}$/.test(j.data?.verify?.code ?? "") && /This report matches/.test(vpage) && /every fingerprint matches/.test(vpage), j.data?.verify?.url);
+const wrong = await (await fetch(`${B}/v/maya/2026-10/00000-00000`)).text();
+ok("report code: a code that does not match shows the current report's code", /has new activity since this report was made/.test(wrong) && wrong.includes(j.data?.verify?.code ?? "none"));
+
+// Discovery (SEP-2127): the AI Catalog points to the Server Card, which names the MCP endpoint; both are cacheable and open to any origin.
+r = await fetch(`${B}/.well-known/ai-catalog.json`);
+const catalog = await r.json();
+const entry = catalog.entries?.find((e) => e.type === "application/mcp-server-card+json");
+const cardRes = entry ? await fetch(entry.url.replace(/^https?:\/\/[^/]+/, B), { headers: { Accept: "application/mcp-server-card+json" } }) : null;
+const card = cardRes ? await cardRes.json() : null;
+ok(
+  "discovery: the AI Catalog lists the MCP Server Card, and the card names /api/mcp with its protocol versions",
+  r.status === 200 && r.headers.get("access-control-allow-origin") === "*" && cardRes?.status === 200 && card?.$schema?.endsWith("/v1/server-card.schema.json") && card?.remotes?.[0]?.url?.endsWith("/api/mcp") && card.remotes[0].supportedProtocolVersions?.length >= 1,
+  JSON.stringify(card?.remotes?.[0] ?? catalog).slice(0, 120),
+);
+const again = cardRes ? await fetch(entry.url.replace(/^https?:\/\/[^/]+/, B), { headers: { "If-None-Match": cardRes.headers.get("etag") ?? "" } }) : null;
+ok("discovery: the Server Card answers 304 to a matching ETag", again?.status === 304, `${again?.status}`);
+r = await fetch(`${B}/llms.txt`);
+const llms = await r.text();
+ok("llms.txt names the MCP server and every tool", r.status === 200 && llms.includes("/api/mcp") && ["check_gift", "plan_gift", "start_gift_checkout", "get_ssa_report"].every((t) => llms.includes(t)), llms.slice(0, 60));
+r = await fetch(`${B}/`);
+ok(
+  "security headers: no framing by other sites, nosniff, a referrer policy, and HSTS",
+  r.headers.get("x-content-type-options") === "nosniff" && /frame-ancestors 'self'/.test(r.headers.get("content-security-policy") ?? "") && Boolean(r.headers.get("referrer-policy")) && /max-age=\d+/.test(r.headers.get("strict-transport-security") ?? "") && !r.headers.get("x-powered-by"),
+  [...r.headers.keys()].filter((k) => /security|policy|options|transport/.test(k)).join(", "),
+);
+r = await fetch(`${B}/g/maya/opengraph-image`);
+ok("the gift page has its own share image", r.status === 200 && (r.headers.get("content-type") ?? "").startsWith("image/png"), `${r.status} ${r.headers.get("content-type")}`);
+
 await post("/api/demo/reset", {});
 console.log(`\n${pass} passed, ${fail} failed`);

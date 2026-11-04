@@ -469,3 +469,39 @@
 :root[data-mode="technical"] .rp-sheet .tech-only {
   display: block;
 }
+
+/* Anyone can check this report: the QR code beside the code and its link; it prints with the report. */
+.rp-verify {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.rp-verify-qr {
+  width: 140px;
+  padding: 6px;
+  background: #ffffff;
+  border-radius: 10px;
+}
+.rp-verify-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.rp-verify p + p {
+  margin-top: 6px;
+}
+.rp-verify-code {
+  font-weight: 500;
+}
+.rp-verify-link {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 560px) {
+  .rp-verify {
+    grid-template-columns: 1fr;
+  }
+}

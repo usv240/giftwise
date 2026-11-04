@@ -13,6 +13,7 @@ import { dbConfigured } from "@/lib/db";
 import { monthlyView, startMonthly } from "@/lib/monthly";
 import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
+import { reportCode, verifyPath } from "../report/verify";
 
 /** What a tool returns: plain text for the model, structured data for programs. */
 export type ToolResult = { text: string; data?: Record<string, unknown>; isError?: boolean };
@@ -157,9 +158,11 @@ export const TOOLS = [
           data: e as unknown as Record<string, unknown>,
         };
       }
+      const code = r.view === "given" && r.status !== "no_gifts" ? reportCode(s.slug, r) : null;
+      const verify = code ? { code, url: `${ctx.origin}${verifyPath(s.slug, r.month, code)}` } : null;
       return {
-        text: `${r.name}'s report for ${r.monthLabel}, due ${r.due.label}: ${r.headline} ${r.summary}${tell.length ? ` To tell SSA: ${tell.map((l) => l.say).join(" ")}` : ""} Call ${r.how.phone} (TTY ${r.how.tty}) or visit any Social Security office. Full report: ${ctx.origin}/g/${s.slug}/report?month=${r.month}${r.view === "cash" ? "&view=cash" : ""}.`,
-        data: reportJson(r),
+        text: `${r.name}'s report for ${r.monthLabel}, due ${r.due.label}: ${r.headline} ${r.summary}${tell.length ? ` To tell SSA: ${tell.map((l) => l.say).join(" ")}` : ""} Call ${r.how.phone} (TTY ${r.how.tty}) or visit any Social Security office. Full report: ${ctx.origin}/g/${s.slug}/report?month=${r.month}${r.view === "cash" ? "&view=cash" : ""}.${verify ? ` Anyone can check it against PayPal's records: ${verify.url} (code ${verify.code}).` : ""}`,
+        data: { ...reportJson(r), verify },
       };
     },
   }),

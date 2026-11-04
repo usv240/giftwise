@@ -224,7 +224,7 @@
     "title": "Who it reaches",
     "what": "Published counts from Social Security and the ABLE National Resource Center. Each figure links to its source.",
     "why": "Help with housing changes the check for hundreds of thousands of people on SSI, and many more people can now open an ABLE account than have one.",
-    "technical": "793,000 and its split (358,000 under the one-third reduction, 434,000 under the presumed maximum value) are SSA's estimate for January 2022 in 88 FR 9779. ABLE counts are ABLE NRC's: more than 246,000 accounts and over $3.2 billion as of March 31, 2026; about 8 million eligible under the original law and an estimated 6 million more from January 1, 2026."
+    "technical": "793,000 and its split (358,000 under the one-third reduction, 434,000 under the presumed maximum value) are SSA's estimate for January 2022 in 88 FR 9779. $0.41 billion is SSA's estimate of SSI overpayments from in-kind support and maintenance in FY 2024, as charted by the Inspector General (report 152601, Figure 5). ABLE counts are ABLE NRC's: more than 246,000 accounts and over $3.2 billion as of March 31, 2026; about 8 million eligible under the original law and an estimated 6 million more from January 1, 2026."
   },
   "judges.invariants": {
     "title": "Random gifts, every promise kept",
@@ -539,6 +539,12 @@
     "what": "PayPal’s live status for every item in the batch, and whether it already appears in PayPal’s transaction report.",
     "why": "The fund can show its board or its auditors exactly where every dollar went.",
     "technical": "GET /v1/payments/payouts/{id} for item status and transaction ids; Transaction Search (/v1/reporting/transactions) to confirm each one. Paid items count toward their needs once, however often the batch is refreshed. Payout webhooks refresh it too."
+  },
+  "page.verify": {
+    "title": "Check a report",
+    "what": "Every report to Social Security carries a code. This page rebuilds the report from Giftwise's records, asks PayPal for each payment in it, and checks the audit ledger.",
+    "why": "A caseworker or benefits counselor can confirm each gift went to the shop or ABLE account the report names, without logging in and without trusting a printout.",
+    "technical": "/v/{slug}/{month}/{code}. The code is 50 bits of SHA-256 over the report's facts in Crockford base 32. Payments are read with GET /v2/checkout/orders/{id} and GET /v1/payments/payouts/{batch}; the ledger is checked with verifyChain()."
   },
   "page.report": {
     "title": "The report to Social Security",

@@ -6,6 +6,9 @@ import { Info } from "@/components/Info";
 import { Checklist, CopyScript, PrintButton } from "@/components/report/ReportActions";
 import { today } from "@/lib/api/envelope";
 import { giftSubject } from "@/lib/report/data";
+import { reportCode, verifyPath } from "@/lib/report/verify";
+import { pageOrigin } from "@/lib/origin";
+import QRCode from "qrcode";
 import { buildReport, currentReportMonth, type Evidence, type ReportLine, type SsaReport } from "@/lib/report/ssa";
 import { monthName, monthOf, pronounWords, usd } from "@/lib/rules";
 import "../../../pages.css";
@@ -76,6 +79,10 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
   const prev = at > 0 ? months[at - 1] : at === -1 ? months.filter((m) => m < month).at(-1) : undefined;
   const next = at >= 0 && at < months.length - 1 ? months[at + 1] : at === -1 ? months.find((m) => m > month) : undefined;
   const href = (m: string, v = view) => `/g/${slug}/report?month=${m}${v === "cash" ? "&view=cash" : ""}`;
+  // The report as given carries its own check: a code, and a QR code for the page that verifies it.
+  const code = view === "given" && r.status !== "no_gifts" ? reportCode(slug, r) : null;
+  const verifyUrl = code ? `${await pageOrigin()}${verifyPath(slug, r.month, code)}` : null;
+  const qr = verifyUrl ? await QRCode.toString(verifyUrl, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#21232e", light: "#ffffff" } }) : null;
 
   return (
     <>
@@ -282,6 +289,28 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
             Reporting by {r.due.label} keeps {w.poss} check right. A report that is late can mean a deduction of {usd(r.penalty.amounts[0])} the first time, then {usd(r.penalty.amounts[1])}, then {usd(r.penalty.amounts[2])}.
           </p>
         </section>
+
+        {code && verifyUrl && qr && (
+          <section className="rp-part rp-verify" aria-labelledby="rp-verify-h">
+            <div className="rp-verify-qr" role="img" aria-label="QR code that opens the page checking this report" dangerouslySetInnerHTML={{ __html: qr }} />
+            <div>
+              <div className="title-row">
+                <h3 id="rp-verify-h">Anyone can check this report</h3>
+                <Info id="page.verify" label="" />
+              </div>
+              <p>
+                Scan the code, or open the link, and Giftwise rebuilds this report from its records, asks PayPal for every payment in it, and checks the audit ledger. A benefits counselor or caseworker
+                can do it without logging in.
+              </p>
+              <p className="rp-verify-code">
+                Report code <span className="tabular">{code}</span>
+              </p>
+              <Link className="text-link rp-verify-link" href={verifyPath(slug, r.month, code)}>
+                {verifyUrl.replace(/^https?:\/\//, "")}
+              </Link>
+            </div>
+          </section>
+        )}
 
         <footer className="rp-part rp-law" aria-labelledby="rp-law">
           <h3 id="rp-law">What the rules say</h3>

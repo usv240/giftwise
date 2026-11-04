@@ -6,11 +6,14 @@ import { Info } from "@/components/Info";
 import { GiveAny } from "@/components/gift/GiveAny";
 import { NeedCard, type NeedView } from "@/components/gift/NeedCard";
 import { ResetSample } from "@/components/gift/ResetSample";
+import { ShareGift } from "@/components/gift/ShareGift";
 import { RealWorld } from "@/components/RealWorld";
 import { SandboxLogin } from "@/components/SandboxLogin";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
+import { pageOrigin } from "@/lib/origin";
+import QRCode from "qrcode";
 import { DEFAULT_PROFILE, evaluateGift, monthName, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import "./gift.css";
 
@@ -36,6 +39,8 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
   const profile: Profile = { ...DEFAULT_PROFILE, ...(household.profile as Partial<Profile>) };
   const w = pronounWords(profile.pronoun);
   const cash = evaluateGift({ id: "cash", date: today(), amount: 300, delivery: "cash", category: "other" }, profile);
+  const shareUrl = `${await pageOrigin()}/g/${slug}`;
+  const qrSvg = await QRCode.toString(shareUrl, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#21232e", light: "#ffffff" } });
   // Payments are newest first, so the first row per need is the latest one.
   const paidByNeed = new Map<number, (typeof payments)[number]>();
   for (const p of payments) if (p.needId && !paidByNeed.has(p.needId)) paidByNeed.set(p.needId, p);
@@ -79,7 +84,7 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
         <p className="gift-sample muted">
           {household.isSample
             ? "Sample household for the demo. Names and shops are fictional."
-            : "Made from a fundraiser page, in the PayPal sandbox. Figures assume the 2026 federal SSI amount and no other income. In the sandbox, every shop is paid through one test business account."}
+            : "Made from a fundraiser page, in the PayPal sandbox. Figures use the federal SSI amount for the month each check is paid ($994 in 2026, $1,029 from January 2027) and assume no other income. In the sandbox, every shop is paid through one test business account."}
         </p>
       </header>
       <div className="gift-layout">
@@ -150,6 +155,7 @@ async function GiftPage({ params }: { params: Promise<{ slug: string }> }) {
               </Link>
             )}
           </div>
+          <ShareGift url={shareUrl} title={`Help ${household.name}`} text={`Help ${household.name}: every gift is paid straight to the shop through PayPal, so ${w.poss} SSI check stays whole.`} qrSvg={qrSvg} />
           <details className="gift-cash">
             <summary>Prefer to give cash?</summary>
             <p>

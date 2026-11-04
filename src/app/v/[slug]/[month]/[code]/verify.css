@@ -1,0 +1,99 @@
+/* The verdict first, then three checks, then every gift with what PayPal says about it now. */
+.vf-verdict {
+  margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  max-width: 68rem;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: clamp(20px, 1rem + 1.5vw, 32px);
+  box-shadow: inset 6px 0 0 var(--positive);
+}
+.vf-verdict[data-state="changed"],
+.vf-verdict[data-state="unconfirmed"] {
+  box-shadow: inset 6px 0 0 var(--accent);
+}
+.vf-k {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.vf-head {
+  margin-top: 8px;
+  font-size: var(--step-lead);
+  font-weight: 500;
+  line-height: 1.25;
+  max-width: 40rem;
+}
+.vf-sub {
+  margin-top: 8px;
+  color: var(--muted);
+}
+.vf-checks {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.vf-checks li {
+  display: grid;
+  grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+  gap: 4px 1.5rem;
+  padding: 12px 0 0 28px;
+  border-top: 1px solid var(--surface-2);
+  position: relative;
+}
+.vf-checks li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 17px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+}
+.vf-checks li[data-ok]::before {
+  border-color: var(--positive);
+  background: var(--positive);
+  box-shadow: inset 0 0 0 3px var(--surface);
+}
+.vf-check-k {
+  font-weight: 500;
+}
+@media (max-width: 700px) {
+  .vf-checks li {
+    grid-template-columns: 1fr;
+  }
+}
+.vf-pp {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+.vf-badge {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--surface-2);
+}
+.vf-badge[data-ok] {
+  background: var(--positive);
+  color: var(--positive-ink);
+}
+.vf-id,
+.vf-payee {
+  font-size: 13px;
+}
+.vf-why {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.vf-nowrap {
+  white-space: nowrap;
+}
+.vf-total {
+  margin-top: 1rem;
+}
