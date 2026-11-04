@@ -87,7 +87,7 @@ export const API = [
   { id: "health", title: "Service status: PayPal, Claude and the database live" },
   { id: "ledger", title: "The audit ledger's hash chain verifies end to end" },
   { id: "ssa-report", title: "October's report: nothing counts, her check stays $994" },
-  { id: "mcp", title: "The MCP server lists its six tools" },
+  { id: "mcp", title: "The MCP server lists its seven tools" },
   { id: "openapi", title: "OpenAPI names the public address, not the internal port" },
   { id: "paypal-return", title: "PayPal's return link sends people to the public address" },
 ] as const;
@@ -114,7 +114,7 @@ export async function checkApi(e: Env, id: string): Promise<Omit<CheckResult, "a
         const res = await call(`${e.app}/api/mcp`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) });
         const j = (await res.json()) as { result?: { tools: { name: string }[] } };
         const names = j.result?.tools.map((t) => t.name) ?? [];
-        return { ok: names.length === 6 && names.includes("get_ssa_report") && names.includes("start_gift_checkout"), detail: names.join(", ") };
+        return { ok: names.length === 7 && names.includes("get_ssa_report") && names.includes("start_gift_checkout") && names.includes("start_monthly_gift"), detail: names.join(", ") };
       }
       case "openapi": {
         const j = (await (await call(`${e.app}/openapi.json`)).json()) as { servers: { url: string }[] };

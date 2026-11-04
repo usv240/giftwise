@@ -80,7 +80,7 @@ export default function AgentsPage() {
                 <tr key={t.name}>
                   <td className="tabular">{t.name}</td>
                   <td>{t.description}</td>
-                  <td>{t.annotations.readOnlyHint ? "No" : "Creates a sandbox order; nothing is charged until the giver approves"}</td>
+                  <td>{t.annotations.readOnlyHint ? "No" : (t.changes ?? "Yes")}</td>
                 </tr>
               ))}
             </tbody>
@@ -93,6 +93,7 @@ export default function AgentsPage() {
         <ul className="page-prose ag-rules">
           <li>It can check any gift, read a gift page, plan a gift and ask the two reviewers.</li>
           <li>It can prepare a PayPal checkout. Only the person giving can approve it, in PayPal, and Giftwise captures the payment only after that.</li>
+          <li>It can set up a monthly gift. The giver still approves each month in PayPal, on their own page; nothing is ever charged on its own.</li>
           <li>It never chooses where money goes: the rules engine does, for every dollar.</li>
           <li>
             Every checkout an agent starts is written to the same ledger as everything else, marked as made by an agent. See{" "}

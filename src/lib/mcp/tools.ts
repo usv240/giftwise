@@ -9,6 +9,8 @@ import { routeGift } from "@/lib/routing";
 import { giftSubject } from "@/lib/report/data";
 import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
 import { easyRead } from "@/lib/report/easy";
+import { dbConfigured } from "@/lib/db";
+import { monthlyView, startMonthly } from "@/lib/monthly";
 import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
 
@@ -21,6 +23,8 @@ type Tool<S extends z.ZodType> = {
   description: string;
   input: S;
   annotations: { readOnlyHint: boolean; destructiveHint: boolean; idempotentHint: boolean; openWorldHint: boolean };
+  /** For a tool that changes something: what it changes, in plain words, for the /agents page. */
+  changes?: string;
   run: (input: z.infer<S>, ctx: Ctx) => Promise<ToolResult>;
 };
 const tool = <S extends z.ZodType>(t: Tool<S>) => t;
@@ -166,6 +170,7 @@ export const TOOLS = [
       "Create a PayPal checkout that pays every recipient of a gift directly (the shops and the ABLE account), split by the rules so the SSI check stays whole. Returns a PayPal link for the person giving to open and approve. Nothing is charged until that person approves in PayPal; never approve on their behalf. This build uses the PayPal sandbox, so no real money moves.",
     input: z.object({ slug, amount: z.number().min(1).max(10000).describe("Total gift in US dollars.") }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    changes: "Creates a sandbox order; nothing is charged until the giver approves",
     run: async (i, ctx) => {
       const r = await startRoutedGift(i.slug, i.amount, { actor: "agent", redirect: { returnUrl: `${ctx.origin}/api/paypal/return`, cancelUrl: `${ctx.origin}/g/${i.slug}` } });
       if (!r.ok) return { text: r.message, isError: true };
@@ -175,8 +180,36 @@ export const TOOLS = [
       };
     },
   }),
+  tool({
+    name: "start_monthly_gift",
+    title: "Set up a monthly gift",
+    description:
+      "Set up the same gift every month for someone with a Giftwise page. Each month the rules route it again for that month's needs (recurring bills come back, paid-off needs drop away) and say what changed. Returns the giver's own page, where they approve each month in PayPal. Nothing is charged by this call or by Giftwise on its own; never approve on the giver's behalf. Sandbox only.",
+    input: z.object({
+      slug,
+      amount: z.number().min(1).max(10000).describe("The gift each month, in US dollars."),
+      giver_name: z.string().trim().max(60).optional().describe("The giver's first name, shown on their page."),
+    }),
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+    changes: "Saves a monthly plan; nothing is charged until the giver approves each month",
+    run: async (i, ctx) => {
+      if (!dbConfigured()) return { text: "Monthly gifts need the database, which is not connected here.", isError: true };
+      const started = await startMonthly({ slug: i.slug, amount: i.amount, giverName: i.giver_name, month: monthOf(today()) });
+      if (!started) return { text: `No gift page named "${i.slug}".`, isError: true };
+      const v = await monthlyView(started.token, today());
+      const month = v?.runs[0];
+      const url = `${ctx.origin}/m/${started.token}`;
+      if (!v || !month) return { text: `Monthly gift set up. The giver's page: ${url}`, data: { url } };
+      const w = pronounWords(v.household.profile.pronoun);
+      const split = month.plan.lines.map((l) => `${usd(l.amount)} to ${l.payeeName} (${l.title})`).join("; ");
+      return {
+        text: `Monthly gift of ${usd(v.amount)} to ${v.household.name} set up. ${month.label}: ${split}. ${w.Poss} check stays ${usd(month.plan.checkWithRouting)}; as cash it would be ${usd(month.plan.checkIfCash)}. Each month the rules route it again, and the giver approves it in PayPal on their own page: ${url}. Nothing is charged until they do.`,
+        data: { url, amount: v.amount, month: month.month, lines: month.plan.lines.map((l) => ({ paid_to: l.payeeName, for: l.title, amount: l.amount })), check_with_giftwise: month.plan.checkWithRouting, check_if_cash: month.plan.checkIfCash },
+      };
+    },
+  }),
 ];
 
-export const SERVER_INFO = { name: "giftwise", title: "Giftwise", version: "2026.11.2" };
+export const SERVER_INFO = { name: "giftwise", title: "Giftwise", version: "2026.11.4" };
 export const INSTRUCTIONS =
-  "Giftwise helps people give to someone who receives SSI without lowering their monthly check. Call check_gift before suggesting cash. To give to a person with a Giftwise page, read it with get_gift_page, show the split with plan_gift, and start_gift_checkout returns a PayPal link the giver approves themselves. For the person receiving SSI, get_ssa_report writes the month's report to Social Security from the gifts. Sandbox only.";
+  "Giftwise helps people give to someone who receives SSI without lowering their monthly check. Call check_gift before suggesting cash. To give to a person with a Giftwise page, read it with get_gift_page, show the split with plan_gift, and start_gift_checkout returns a PayPal link the giver approves themselves; start_monthly_gift sets up the same gift every month, approved by the giver each month. For the person receiving SSI, get_ssa_report writes the month's report to Social Security from the gifts, in Easy Read or Spanish with reader \"person\". Sandbox only.";
