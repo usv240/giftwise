@@ -50,7 +50,7 @@ Each payment in the order names its own payee, and PayPal captures each one sepa
 
 ## Checked every night, on Render Workflows
 
-On `/judges`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 22 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and six public API promises (status, ledger, the SSA report, the MCP tools, the OpenAPI address and PayPal's return link).
+On `/judges`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 23 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and six public API promises (status, ledger, the SSA report, the MCP tools, the OpenAPI address and PayPal's return link).
 
 1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
 2. In about a minute the run files its results and the panel refreshes with the new time and count. Set **View** to Technical to see what each check found.
@@ -157,11 +157,13 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, the SSA report, the checks workflow and the cited answers | `npm test` | 69 passed |
-| Social Security's own worked examples | `npm run eval:ssa` | 12 of 13 match SSA (Claude alone 9 of 13) |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow and the cited answers | `npm test` | 83 passed |
+| Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
+| Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
+| A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
 | API end to end | `npm run e2e:api` | 84 passed |
 | Browser end to end | `npm run e2e:ui` | 58 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 80 page views pass |
+| Accessibility and layout | `npm run e2e:a11y` | All 92 page views pass |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |
