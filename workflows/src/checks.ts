@@ -61,6 +61,7 @@ export const PATH = [
   { id: "home", path: "/", title: "Home page", expect: "Give so she keeps" },
   { id: "gift-page", path: "/g/maya", title: "Maya's gift page", expect: "Help Maya" },
   { id: "report", path: "/g/maya/report?month=2026-10", title: "Maya's report to Social Security", expect: "Nothing here counts as income." },
+  { id: "easy-read", path: "/g/maya/report/easy?month=2026-10&lang=es", title: "Her report in Easy Read, in Spanish", expect: "No tiene que llamar al Seguro Social" },
   { id: "judges", path: "/judges", title: "For judges", expect: "The five-minute path" },
   { id: "agents", path: "/agents", title: "For AI agents", expect: "For AI agents" },
   { id: "organizations", path: "/organizations", title: "For organizations", expect: "For organizations" },

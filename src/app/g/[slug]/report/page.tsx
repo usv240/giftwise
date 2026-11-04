@@ -112,6 +112,12 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
           </Link>
         </div>
         <div className="rp-actions">
+          <Link className="btn btn-quiet" href={`/g/${slug}/report/easy?month=${month}${view === "cash" ? "&view=cash" : ""}`}>
+            Easy Read
+          </Link>
+          <Link className="btn btn-quiet" href={`/g/${slug}/report/easy?month=${month}&lang=es${view === "cash" ? "&view=cash" : ""}`} hrefLang="es" lang="es">
+            En español
+          </Link>
           <PrintButton />
           <a className="btn btn-quiet" href={`/api/v1/ssa-report?page=${slug}&month=${month}${view === "cash" ? "&view=cash" : ""}&format=csv`} download>
             Download CSV

@@ -1,0 +1,151 @@
+/*
+ * The Easy Read report: one idea per line, a picture beside each, large type, plenty of space between lines
+ * (ASAN, "One Idea Per Line", 2021). The sheet is the same paper as the full report so the two read as one product.
+ */
+.er-bar {
+  max-width: 46rem;
+}
+
+.er-sheet {
+  margin-top: 20px;
+  max-width: 46rem;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: clamp(24px, 1.5rem + 2vw, 56px);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent),
+    0 12px 32px -18px color-mix(in srgb, var(--ink) 22%, transparent);
+  font-size: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
+  line-height: 1.45;
+}
+
+.er-label {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+  font-size: 16px;
+  font-weight: 500;
+}
+.er-title {
+  margin-top: 14px;
+  font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+/* The answer is the first thing read: the largest sentences on the page. */
+.er-answer {
+  margin-top: clamp(24px, 1.25rem + 1vw, 36px);
+  padding-bottom: clamp(24px, 1.25rem + 1vw, 36px);
+  border-bottom: 1px solid var(--surface-2);
+  display: grid;
+  gap: 18px;
+  font-size: clamp(1.5rem, 1.3rem + 0.9vw, 2rem);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.er-sheet[data-status="nothing_counts"] .er-answer .er-line:first-child .er-pic,
+.er-sheet[data-status="no_gifts"] .er-answer .er-line:first-child .er-pic {
+  color: var(--positive);
+}
+.er-sheet[data-status="report"] .er-answer .er-line:first-child .er-pic {
+  color: var(--attention);
+}
+
+.er-part {
+  padding-top: clamp(28px, 1.5rem + 1.5vw, 44px);
+}
+.er-part-title {
+  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+  font-weight: 500;
+}
+.er-lines {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+}
+
+/* A picture column, then the words. A line without a picture keeps the column, so the sentences stay aligned. */
+.er-line {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.er-pic-cell {
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+.er-pic {
+  width: 44px;
+  height: 44px;
+  color: var(--ink);
+}
+.er-words {
+  display: grid;
+  gap: 2px;
+}
+.er-note {
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+.er-script {
+  margin-top: 16px;
+  padding-left: 1.6em;
+  display: grid;
+  gap: 10px;
+}
+.er-script li::marker {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.er-sheet .rp-copy {
+  margin-top: 16px;
+}
+
+.er-foot {
+  margin-top: clamp(32px, 2rem + 1vw, 48px);
+  padding-top: 20px;
+  border-top: 1px solid var(--surface-2);
+  display: grid;
+  gap: 4px;
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+@media (max-width: 30rem) {
+  .er-line {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .er-pic {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media print {
+  .er-bar {
+    display: none;
+  }
+  .er-sheet {
+    margin: 0;
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: none;
+  }
+  .er-part,
+  .er-line {
+    break-inside: avoid;
+  }
+}
+
+.er-whatif {
+  margin-top: 18px;
+}

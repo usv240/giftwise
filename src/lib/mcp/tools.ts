@@ -8,6 +8,7 @@ import { startRoutedGift } from "@/lib/paypal/gift-order";
 import { routeGift } from "@/lib/routing";
 import { giftSubject } from "@/lib/report/data";
 import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
+import { easyRead } from "@/lib/report/easy";
 import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
 
@@ -133,6 +134,8 @@ export const TOOLS = [
       slug,
       month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional().describe("Income month, YYYY-MM. Defaults to the month whose report is due next."),
       view: z.enum(["given", "cash"]).default("given").describe('"given" for the gifts as they were made; "cash" for the report the same gifts would have needed as cash.'),
+      reader: z.enum(["helper", "person"]).default("helper").describe('"helper" for the full report a family member or counselor reads; "person" for the Easy Read version written to the person on SSI, one short sentence per idea.'),
+      lang: z.enum(["en", "es"]).default("en").describe('Language of the Easy Read version: "en" or "es". The full report is in English.'),
     }),
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     run: async (i, ctx) => {
@@ -142,6 +145,14 @@ export const TOOLS = [
       const months = [...new Set(s.gifts.map((g) => monthOf(g.date)))];
       const r = buildReport({ name: s.name, profile: s.profile, gifts: s.gifts, month: i.month ?? currentReportMonth(now, months), today: now, view: i.view });
       const tell = r.lines.filter((l) => l.section === "tell");
+      if (i.reader === "person") {
+        const e = easyRead(r, i.lang);
+        const sentences = [e.whatIf, ...e.answer.map((l) => l.text), ...e.sections.flatMap((x) => [x.title + ":", ...x.lines.map((l) => l.text)])].filter(Boolean);
+        return {
+          text: `${e.title}. ${sentences.join(" ")}${e.script.length ? ` ${e.ui.say}: ${e.script.join(" ")}` : ""} ${ctx.origin}/g/${s.slug}/report/easy?month=${r.month}${i.lang === "es" ? "&lang=es" : ""}${r.view === "cash" ? "&view=cash" : ""}`,
+          data: e as unknown as Record<string, unknown>,
+        };
+      }
       return {
         text: `${r.name}'s report for ${r.monthLabel}, due ${r.due.label}: ${r.headline} ${r.summary}${tell.length ? ` To tell SSA: ${tell.map((l) => l.say).join(" ")}` : ""} Call ${r.how.phone} (TTY ${r.how.tty}) or visit any Social Security office. Full report: ${ctx.origin}/g/${s.slug}/report?month=${r.month}${r.view === "cash" ? "&view=cash" : ""}.`,
         data: reportJson(r),

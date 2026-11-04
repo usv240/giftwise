@@ -93,6 +93,8 @@ export type SsaReport = {
     checkIfCash: number;
   };
   todo: { id: string; text: string; ruleId?: string }[];
+  /** Countable savings on the 1st of the next month, for the gifts as given (null in the cash view). */
+  savings: { onDate: string; amount: number; limit: number; over: boolean } | null;
   script: string[];
   how: { phone: string; tty: string; office: string };
   penalty: { amounts: number[]; source: string };
@@ -299,6 +301,7 @@ export function buildReport(o: { name: string; profile: Profile; gifts: ReportGi
       checkIfCash: cashTrace?.check ?? baseline.check,
     },
     todo,
+    savings: trace && view === "given" ? { onDate: `${addMonths(month, 1)}-01`, amount: trace.savingsOnNextFirst, limit: resourceLimit(profile.couple), over: trace.overResourceLimit } : null,
     script,
     how: { phone: reporting.phone, tty: reporting.tty, office: "Or visit or write any Social Security office." },
     penalty: { amounts: reporting.penalties, source: "cfr-416-724" },

@@ -63,16 +63,16 @@ export function Checklist({ storeKey, items }: { storeKey: string; items: { id: 
 }
 
 /** Print or save the report as a PDF; the print stylesheet keeps only the sheet. */
-export function PrintButton() {
+export function PrintButton({ label = "Print or save as PDF" }: { label?: string }) {
   return (
     <button type="button" className="btn btn-quiet" onClick={() => window.print()}>
-      Print or save as PDF
+      {label}
     </button>
   );
 }
 
 /** Copy the call script, so it can go into a note or a message to whoever makes the call. */
-export function CopyScript({ lines }: { lines: string[] }) {
+export function CopyScript({ lines, label = "Copy the script", copied = "Copied", failed = "Select the text to copy it" }: { lines: string[]; label?: string; copied?: string; failed?: string }) {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
   const copy = async () => {
     try {
@@ -86,10 +86,10 @@ export function CopyScript({ lines }: { lines: string[] }) {
   return (
     <span className="rp-copy">
       <button type="button" className="btn btn-quiet" onClick={copy}>
-        Copy the script
+        {label}
       </button>
       <span className="rp-copy-note" role="status" aria-live="polite">
-        {state === "copied" ? "Copied" : state === "failed" ? "Select the text to copy it" : ""}
+        {state === "copied" ? copied : state === "failed" ? failed : ""}
       </span>
     </span>
   );
