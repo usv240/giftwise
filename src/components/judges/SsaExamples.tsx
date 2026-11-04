@@ -2,6 +2,7 @@ import data from "../../../content/eval/ssa-examples.json";
 import results from "../../../content/eval/ssa-examples-results.json";
 import sources from "../../../content/sources.json";
 import { usd } from "@/lib/rules";
+import { modelName } from "@/lib/ai/model-name";
 
 const SRC = sources as Record<string, { title: string; url: string }>;
 type Value = { month: string; measure: keyof typeof data.measures; value: number; got: number | null };
@@ -36,7 +37,12 @@ function claudeMisses() {
 }
 
 function Verdict({ side }: { side: Side | null }) {
-  if (!side) return <span className="muted">Not run</span>;
+  if (!side)
+    return (
+      <span className="sx-verdict" data-none="">
+        Not run
+      </span>
+    );
   return (
     <span className="sx-verdict" data-ok={side.match ? "" : undefined}>
       {side.match ? "Matches" : "Differs"}
@@ -79,7 +85,7 @@ export function SsaExamples() {
       <p className="sx-meta muted">
         {S.cases} worked examples from {POMS_SECTIONS} sections of SSA&rsquo;s operating manual and {CFR_SECTIONS} {CFR_SECTIONS === 1 ? "section" : "sections"} of its regulations, each about a gift or similar help to one person. The facts and
         answers are SSA&rsquo;s, with dates moved to 2026 so 2026 amounts apply; where SSA gives no amount, one is supplied that does not change SSA&rsquo;s answer. Examples Giftwise does not model are
-        listed at the end with the reason. Run {ran}; Claude is {results.model}.
+        listed at the end with the reason. Run {ran}; Claude is {modelName(results.model)}.
       </p>
 
       <div className="sx-findings">

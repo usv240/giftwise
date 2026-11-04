@@ -40,13 +40,14 @@ export function KeyUsage() {
   if (!usage) return <p className="page-loading">Loading your keys…</p>;
   if (usage.keys.length === 0) {
     return (
-      <section className="page-section">
-        <p>No keys in this browser yet.</p>
-        <p>
-          <Link className="text-link" href="/developers#key-h">
+      <section className="page-section" aria-labelledby="keys-h">
+        <h2 id="keys-h">Keys</h2>
+        <div className="usage-empty">
+          <p>No keys in this browser yet. Once you get a sandbox key, it shows here with its calls.</p>
+          <Link className="btn btn-primary" href="/developers#key-h">
             Get a free sandbox key
           </Link>
-        </p>
+        </div>
       </section>
     );
   }

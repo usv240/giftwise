@@ -115,7 +115,7 @@ export default function StackPage() {
           {PAYPAL_APIS.length} PayPal APIs and tools, each with one job. All run against the PayPal sandbox. Going live changes only the base URL, the client ID and the secret.
         </p>
         <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="PayPal APIs Giftwise calls">
-          <table className="doc-table">
+          <table className="doc-table pp-apis-table">
             <thead>
               <tr>
                 <th scope="col">PayPal</th>

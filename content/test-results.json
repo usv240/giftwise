@@ -14,9 +14,9 @@
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 84,
-      "total": 84,
-      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the monthly SSA report and its CSV, the MCP server, the outside checks and their shared secret, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
+      "passed": 85,
+      "total": 85,
+      "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the monthly SSA report and its CSV, the MCP server and its seven tools, a monthly gift started by an agent, the outside checks and their shared secret, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",

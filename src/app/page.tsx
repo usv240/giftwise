@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import facts from "../../content/facts.json";
+import billResults from "../../content/eval-results.json";
+import fieldResults from "../../content/eval/field-cases-results.json";
+import ssaResults from "../../content/eval/ssa-examples-results.json";
 import sampleYear from "../../content/sample-year.json";
 import sources from "../../content/sources.json";
 import { GiftChecker } from "@/components/GiftChecker";
@@ -247,18 +250,46 @@ export default function Home() {
           />
           <figcaption className="muted">A pharmacy counter. Medicine paid straight to the pharmacy is not counted as income.</figcaption>
         </figure>
-        <p className="research-line">
-          <span id="research-title">Grounded in</span>{" "}
-          {RESEARCH.map((k, i) => (
-            <span key={k}>
-              <a className="text-link" href={SRC[k].url} target="_blank" rel="noreferrer">
-                {RESEARCH_LABEL[k]}
-              </a>
-              {i < RESEARCH.length - 2 ? ", " : i === RESEARCH.length - 2 ? " and " : "."}
-            </span>
-          ))}{" "}
-          <Info id="research.row" />
-        </p>
+        <div className="research-copy">
+          <p className="research-line">
+            <span id="research-title">Grounded in</span>{" "}
+            {RESEARCH.map((k, i) => (
+              <span key={k}>
+                <a className="text-link" href={SRC[k].url} target="_blank" rel="noreferrer">
+                  {RESEARCH_LABEL[k]}
+                </a>
+                {i < RESEARCH.length - 2 ? ", " : i === RESEARCH.length - 2 ? " and " : "."}
+              </span>
+            ))}{" "}
+            <Info id="research.row" />
+          </p>
+          <ul className="research-proof" aria-label="How the rules were checked">
+            <li>
+              <Link className="research-proof-link" href="/judges#ssa-examples">
+                <span className="research-proof-fig tabular">
+                  {ssaResults.summary.engine_matches} of {ssaResults.summary.cases}
+                </span>
+                <span>of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer</span>
+              </Link>
+            </li>
+            <li>
+              <Link className="research-proof-link" href="/judges#field-cases">
+                <span className="research-proof-fig tabular">
+                  {fieldResults.summary.agreed} of {fieldResults.summary.scored}
+                </span>
+                <span>real SSI cases from federal courts reach the outcome SSA and the court did</span>
+              </Link>
+            </li>
+            <li>
+              <Link className="research-proof-link" href="/judges#evaluation">
+                <span className="research-proof-fig tabular">
+                  {billResults.summary.referee.wrong_routes_accepted} of {billResults.summary.referee.all_cases}
+                </span>
+                <span>bills where Giftwise accepted a route that lowers her check</span>
+              </Link>
+            </li>
+          </ul>
+        </div>
       </section>
 
       {/* For developers */}

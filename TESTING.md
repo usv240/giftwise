@@ -161,7 +161,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
-| API end to end | `npm run e2e:api` | 84 passed |
+| API end to end | `npm run e2e:api` | 85 passed |
 | Browser end to end | `npm run e2e:ui` | 58 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 92 page views pass |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |

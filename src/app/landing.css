@@ -689,10 +689,11 @@
 .dev-copy .lede {
   margin-top: 1rem;
 }
+/* The board tokens keep code dark in both themes (ink would turn it into a white slab on the dark page). */
 .dev-code {
   grid-column: 7 / span 6;
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--board);
+  color: var(--board-ink);
   border-radius: 12px;
   padding: 22px;
 }
@@ -970,18 +971,56 @@
   margin-top: 0.6rem;
   font-size: var(--step-small);
 }
-.research-line {
+.research-copy {
   grid-column: 7 / span 6;
+}
+/* Three checks under the sources: each figure links to the evidence on For judges. */
+.research-proof {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  border-top: 1px solid var(--surface-2);
+}
+.research-proof li {
+  border-bottom: 1px solid var(--surface-2);
+}
+.research-proof-link {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .research-proof-link:hover span:last-child {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+}
+.research-proof-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.research-proof-fig {
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--positive);
+  white-space: nowrap;
 }
 @media (max-width: 900px) {
   .showcase-copy,
   .showcase-photo,
   .research-photo,
-  .research-line {
+  .research-copy {
     grid-column: 1 / -1;
   }
   .showcase-photo,
-  .research-line {
+  .research-copy {
     margin-top: 2rem;
   }
 }

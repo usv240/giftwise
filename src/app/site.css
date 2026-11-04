@@ -240,11 +240,12 @@
 .tile-email {
   font-size: var(--step-body);
 }
+/* Board tokens: the closing wordmark stays a dark field in both themes instead of turning white on a dark page. */
 .tile-wordmark {
   grid-column: span 8;
   min-height: 320px;
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--board);
+  color: var(--board-ink);
   font-size: clamp(4rem, 9vw, 9.5rem);
   font-weight: 500;
   letter-spacing: -0.04em;
@@ -314,6 +315,21 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+/* Page titles and the home page's section titles wrap on narrow screens. Set inline, the Info dot follows the
+   last word instead of being stranded at the far edge of the row. The raise centres the dot on the lowercase
+   letters at every title size. */
+.title-row:has(> :is(h1, .section-title):first-child) {
+  display: block;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.title-row > :is(h1, .section-title):first-child {
+  display: inline;
+}
+.title-row > :is(h1, .section-title):first-child + .info-trigger {
+  margin-left: 0.35rem;
+  vertical-align: calc(clamp(0.5625rem, 0.375rem + 0.6vw, 0.9375rem) - 4.5px);
 }
 .lede {
   font-size: var(--step-lead);

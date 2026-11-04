@@ -279,7 +279,8 @@
   font-weight: 500;
   color: var(--muted);
 }
-.doc-table tr:last-child td {
+/* The last row closes on the panel's edge: no rule under its row heading either. */
+.doc-table > :last-child > tr:last-child > :is(td, th) {
   border-bottom: 0;
 }
 .doc-req {
@@ -332,6 +333,18 @@
 }
 
 /* Usage */
+/* No keys yet: the panel sits where the keys will appear, with the one action that fills it. */
+.usage-empty {
+  max-width: 68rem;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
 .usage-keys {
   list-style: none;
   margin: 0;

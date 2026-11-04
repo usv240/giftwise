@@ -11,6 +11,28 @@
 .try-head .lede {
   margin-top: 1rem;
 }
+/* An example page: the way back, the header, then the input beside the result, then the two reviewers. */
+.preset-head {
+  margin-top: 0.75rem;
+}
+.preset-head .lede + .muted {
+  margin-top: 0.5rem;
+}
+.preset-body {
+  margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+}
+.preset-input .month-gifts {
+  margin-top: 0.75rem;
+}
+.preset-input .try-actions {
+  margin-top: 1rem;
+}
+.preset-input .try-privacy {
+  margin-top: 0.6rem;
+}
+.preset-body + .rv {
+  margin-top: clamp(3rem, 2rem + 3vw, 4.5rem);
+}
 .try-layout {
   margin-top: clamp(2.5rem, 2rem + 2vw, 4rem);
   display: grid;

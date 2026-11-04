@@ -1,4 +1,11 @@
 /* Maya's year: AG Studio on the site's canvas */
+/* The lede streams in after the title, outside the page head, so it takes the head's spacing here. */
+.dashboard > .lede {
+  margin-top: 1rem;
+}
+.dashboard > .fd-note {
+  margin-top: 0.75rem;
+}
 .fd {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

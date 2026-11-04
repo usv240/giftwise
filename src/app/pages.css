@@ -47,11 +47,9 @@
   border-radius: 10px;
   padding: 14px 18px;
 }
+/* Name and Info dot set inline, so a name that wraps keeps its dot after the last word. */
 .status-name {
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 .status-detail {
   color: var(--muted);
@@ -97,7 +95,7 @@
 }
 .stack-row {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 260px minmax(0, 1fr);
   gap: 8px 24px;
   background: var(--surface);
   border-radius: 12px;
@@ -111,9 +109,7 @@
 .stack-tool {
   font-weight: 500;
   font-size: var(--step-lead);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  line-height: 1.2;
   align-self: start;
 }
 .stack-job {
@@ -137,6 +133,10 @@
 @media (max-width: 760px) {
   .stack-row {
     grid-template-columns: 1fr;
+  }
+  /* Four columns, one of them code: on a phone the table keeps readable columns and scrolls inside its frame. */
+  .pp-apis-table {
+    min-inline-size: 44rem;
   }
 }
 

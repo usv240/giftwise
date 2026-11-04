@@ -39,7 +39,8 @@ export function FieldCases() {
       <p className="sx-vs">
         In {D.as_shown_in_the_opinions.cases_where_routing_keeps_money} of these cases the facts allow a route Giftwise uses. The same help, routed that way, keeps{" "}
         <strong className="tabular">{usd(D.as_shown_in_the_opinions.kept_per_month_2026)} a month</strong> at 2026 rates. If each person qualified for an ABLE account, {D.if_each_person_is_able_eligible.cases_where_routing_keeps_money} cases
-        and <span className="tabular">{usd(D.if_each_person_is_able_eligible.kept_per_month_2026)}</span> a month.
+        and <span className="tabular">{usd(D.if_each_person_is_able_eligible.kept_per_month_2026)}</span> a month. In {S.overpayments_stated.scored.length} of the cases the opinion states what SSA asked to be paid back:{" "}
+        <strong className="tabular">{usd(S.overpayments_stated.scored_total)}</strong>, from money family members gave or deposited for them.
       </p>
       <p className="sx-meta muted">
         From {S.opinions_downloaded} federal court opinions in GovInfo, which are public domain (17 U.S.C. 105): {S.opinions_read_closely} read closely, {S.cases} kept, {S.scored} scored. Every
@@ -74,11 +75,13 @@ export function FieldCases() {
                         {r.engine.match ? "Agrees" : "Differs"}
                       </span>
                     </span>
-                    {kept !== null && kept > 0 && (
-                      <span className="sx-side tabular">
-                        <span className="sx-who">Routed</span> keeps {usd(kept)}/mo
-                      </span>
-                    )}
+                    <span className="sx-side tabular" data-slot="routed">
+                      {kept !== null && kept > 0 && (
+                        <>
+                          <span className="sx-who">Routed</span> keeps {usd(kept)}/mo
+                        </>
+                      )}
+                    </span>
                   </span>
                 </summary>
                 <div className="sx-body">

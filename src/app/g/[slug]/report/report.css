@@ -82,12 +82,12 @@
   .rp-views {
     width: 100%;
   }
+  /* Two even columns, so each action keeps its label on one or two lines instead of four. */
   .rp-actions {
     margin-left: 0;
     width: 100%;
-  }
-  .rp-actions .btn {
-    flex: 1 1 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePrefs } from "../prefs";
+import { modelName } from "@/lib/ai/model-name";
 
 type Step =
   { kind: "ask"; text: string } | { kind: "say"; text: string } | { kind: "call"; tool: string; input: unknown } | { kind: "result"; tool: string; text: string; isError: boolean };
@@ -123,8 +124,8 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
     <div className="ag">
       <p className="muted ag-source">
         {live
-          ? `Run live just now with ${run.model}: ${calls} tool calls in ${Math.round(run.ms / 1000)} seconds.`
-          : `Recorded ${run.recorded_at ? new Date(run.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" }) : ""} with ${run.model}: ${calls} tool calls. The PayPal link from the recording is removed; a live run makes a fresh one.`}
+          ? `Run live just now with ${modelName(run.model)}: ${calls} tool calls in ${Math.round(run.ms / 1000)} seconds.`
+          : `Recorded ${run.recorded_at ? new Date(run.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" }) : ""} with ${modelName(run.model)}: ${calls} tool calls. The PayPal link from the recording is removed; a live run makes a fresh one.`}
       </p>
       <ol className="ag-steps" aria-live="polite">
         {run.steps.map((s, i) => {

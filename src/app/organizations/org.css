@@ -44,7 +44,13 @@
 }
 .org-limits {
   font-size: 14px;
-  margin-top: 8px;
+  margin-top: 12px;
+}
+.org-limits + .try-actions {
+  margin-top: 1rem;
+}
+.org .try-actions ~ .result-attention {
+  margin-top: 0.75rem;
 }
 .org-plans {
   display: grid;

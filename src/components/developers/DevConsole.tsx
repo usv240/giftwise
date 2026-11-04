@@ -235,7 +235,7 @@ function KeyForm({ onKey }: { onKey: (k: string) => void }) {
         <span>I understand sandbox keys are for testing: no real money and no real personal data.</span>
       </label>
       <div className="dev-wide dev-form-foot">
-        <button type="submit" className="btn btn-ink" disabled={state === "busy"}>
+        <button type="submit" className="btn btn-primary" disabled={state === "busy"}>
           {state === "busy" ? "Creating…" : "Get an API key"}
         </button>
         {note && (

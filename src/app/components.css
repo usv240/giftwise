@@ -244,6 +244,13 @@
   grid-template-columns: 1fr;
   gap: 2px;
 }
+/* On a phone the label sits above its value, so the email address is not broken across three lines. */
+@media (max-width: 480px) {
+  .sbl > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
 .sbl dt {
   color: var(--muted);
   font-size: var(--step-small);

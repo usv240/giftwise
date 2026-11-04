@@ -466,7 +466,7 @@
     "title": "About this page",
     "what": "How AI assistants use Giftwise: they check a gift before giving to someone on SSI, and can prepare a PayPal checkout that only the giver approves.",
     "why": "More giving now starts with an assistant. A check the assistant can call keeps the gift from lowering someone’s monthly check.",
-    "technical": "Model Context Protocol over Streamable HTTP at /api/mcp, stateless JSON-RPC. Six tools; five only read."
+    "technical": "Model Context Protocol over Streamable HTTP at /api/mcp, stateless JSON-RPC. Seven tools; five only read. start_gift_checkout creates a sandbox order the giver approves; start_monthly_gift saves a monthly plan the giver approves each month."
   },
   "agents.demo": {
     "title": "An assistant that asks first",
@@ -476,7 +476,7 @@
   },
   "agents.connect": {
     "title": "Connect your agent",
-    "what": "Add the Giftwise MCP server to Claude Code or any MCP client with one URL.",
+    "what": "Add the Giftwise MCP server to Claude, Claude Code, Cursor, VS Code or any MCP client with one URL.",
     "why": "Any assistant can then check a gift before it gives.",
     "technical": "Streamable HTTP, protocol versions 2025-03-26 to 2025-11-25, JSON responses, no session. Rate limit 20 requests a minute per client."
   },

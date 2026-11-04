@@ -346,11 +346,16 @@
   font-weight: 500;
   letter-spacing: -0.01em;
 }
+/* After a gift: what to do next. Each action keeps to one line; the row wraps in a narrow column. */
 .give-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 8px 18px;
   font-size: 15px;
+}
+.give-actions > * {
+  white-space: nowrap;
 }
 .give-again {
   background: none;

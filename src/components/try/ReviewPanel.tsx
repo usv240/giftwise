@@ -5,6 +5,7 @@ import { Info } from "../Info";
 import { usePrefs } from "../prefs";
 import { referee, routeForDecision, type Review } from "@/lib/review/referee";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Category, type Gift } from "@/lib/rules";
+import { modelName } from "@/lib/ai/model-name";
 
 export type ReviewInput = { description: string; amount: number; category: Category; date: string; recurring?: boolean };
 export type ReviewOut = {
@@ -42,7 +43,7 @@ const toReview = (r: ReviewOut): Review => ({ authority: r.authority, answer: r.
 export function ReviewPanel({ input, recorded }: { input: ReviewInput; recorded?: RecordedReview }) {
   const { prefs } = usePrefs();
   const [data, setData] = useState<ReviewData | null>(recorded?.data ?? null);
-  const [source, setSource] = useState(recorded ? `Recorded ${new Date(recorded.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" })} with ${recorded.model}.` : "");
+  const [source, setSource] = useState(recorded ? `Recorded ${new Date(recorded.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" })} with ${modelName(recorded.model)}.` : "");
   const [status, setStatus] = useState<"idle" | "running" | "error">("idle");
   const [note, setNote] = useState("");
   const [test, setTest] = useState(false);
@@ -57,7 +58,7 @@ export function ReviewPanel({ input, recorded }: { input: ReviewInput; recorded?
       const j = await r.json();
       if (!r.ok) throw new Error(j.error?.message ?? "The reviewers could not run. Please try again.");
       setData(j.data);
-      setSource(`Run live just now with ${j.meta?.model ?? "Claude"}, in ${Math.round((j.meta?.latency_ms ?? 0) / 1000)} seconds.`);
+      setSource(`Run live just now with ${modelName(j.meta?.model)}, in ${Math.round((j.meta?.latency_ms ?? 0) / 1000)} seconds.`);
       setStatus("idle");
     } catch (e) {
       setNote((e as Error).message);

@@ -139,6 +139,17 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
+/* The reset removes list markers. These lists are indented for a marker, so they get it back, in the muted ink. */
+:is(.about-list, .jp-more, .sx-out ul, .result-rules ul, .case-evidence, .try-problems, .ag-rules, .ag-record ul, .bc-moves ul, .org-recent) {
+  list-style: disc;
+}
+:is(.rp-script ol, .er-script) {
+  list-style: decimal;
+}
+:is(.about-list, .jp-more, .sx-out ul, .result-rules ul, .case-evidence, .try-problems, .ag-rules, .ag-record ul, .bc-moves ul, .org-recent, .rp-script ol, .er-script) > li::marker {
+  color: var(--muted);
+}
+
 a {
   color: inherit;
 }

@@ -1,5 +1,6 @@
 import results from "../../../content/eval-results.json";
 import { stressTest } from "@/lib/review/stress";
+import { modelName } from "@/lib/ai/model-name";
 
 type Setup = "baseline" | "regs" | "poms" | "referee";
 type SetId = "first" | "hard";
@@ -154,7 +155,7 @@ export function EvalResults() {
       <p className="page-prose">
         {R.cases.length} bills paid by someone else, in two sets: the first {R.sets.first.bills}, and {R.sets.hard.bills} harder bills near the line between housing and everything else, such as lot rent
         for a mobile home, a second mortgage, condo fees and a refundable utility deposit. Each is labeled from the rule text with the passage cited: {NC.clear_bills} where the rules are clear, and{" "}
-        {NC.contested_bills} where the two rulebooks point different ways or neither settles it. Run {date} with {R.model}. {R.quotes_checked} of {R.quotes_total} quotes were found word for word.
+        {NC.contested_bills} where the two rulebooks point different ways or neither settles it. Run {date} with {modelName(R.model)}. {R.quotes_checked} of {R.quotes_total} quotes were found word for word.
       </p>
       <p className="page-prose">
         The baseline is the obvious alternative: Claude alone, given only the bill, decides whether it is housing and picks the route, with no rulebook, no quotes and no referee. A wrong route is one that
