@@ -184,6 +184,19 @@ ok(
   es.slice(0, 120),
 );
 
+// 8d. The guided tour from /judges: eight stops across six pages, each with its element ringed, and Finish closes it.
+await page.goto(B + "/judges", { waitUntil: "networkidle" });
+await page.getByRole("button", { name: "Take the guided tour" }).click();
+const stops = [];
+for (let i = 0; i < 8; i++) {
+  await page.waitForFunction((n) => document.querySelector(".tour-k")?.textContent?.includes(`stop ${n} of`), i + 1, { timeout: 30000 });
+  await page.locator("[data-tour-target]").first().waitFor({ timeout: 30000 }).catch(() => {});
+  stops.push(`${new URL(page.url()).pathname}:${await page.locator("[data-tour-target]").count()}`);
+  await page.locator(".tour").getByRole("button", { name: i === 7 ? "Finish" : "Next", exact: true }).click();
+}
+await page.waitForTimeout(300);
+ok("guided tour: eight stops, each page's element ringed, and Finish closes the card", stops.length === 8 && stops.every((x) => x.endsWith(":1")) && (await page.locator(".tour").count()) === 0, stops.join(" "));
+
 // 9. Header links: which pages are missing
 const hrefs = [...new Set(await page.$$eval("header a, footer a", (as) => as.map((a) => a.getAttribute("href")).filter((h) => h && h.startsWith("/"))))];
 const broken = [];

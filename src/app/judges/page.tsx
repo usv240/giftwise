@@ -15,6 +15,7 @@ import { NightlyChecks } from "@/components/judges/NightlyChecks";
 import { Results } from "@/components/judges/Results";
 import { RulesWatch } from "@/components/judges/RulesWatch";
 import { SsaExamples } from "@/components/judges/SsaExamples";
+import { TourStart } from "@/components/tour/Tour";
 import { SandboxLogin } from "@/components/SandboxLogin";
 import { Suspense } from "react";
 import "../pages.css";
@@ -52,9 +53,10 @@ const CRITERIA = [
   { name: "Technological implementation", where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, PayPal's own MCP server, and Claude structured outputs checked by a deterministic rules engine that keeps twelve promises across 100,000 random gifts.", links: [["/status", "Status"], ["/stack", "Stack"], ["#invariants", "100,000 gifts"]] },
   {
     name: "Design",
-    where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA. The AG Studio dashboard takes its colors and fonts from the same tokens.",
+    where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA on 104 page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.",
     links: [
       ["/g/maya", "Gift page"],
+      ["/g/maya?lang=es", "En español"],
       ["/try", "Try it"],
       ["/dashboard", "Maya's year"],
       ["/g/maya/calendar", "Her benefit calendar"],
@@ -71,7 +73,7 @@ const CRITERIA = [
   {
     name: "Innovation",
     where:
-      "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt. AI assistants can ask Giftwise first over MCP, two reviewers with different rulebooks must quote their source word for word, and the rules check the Federal Register for their own updates.",
+      "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt. AI assistants can ask Giftwise first over MCP, two reviewers with different rulebooks must quote their source word for word, the rules check the Federal Register for their own updates, and every report carries a code anyone can check against PayPal and the ledger.",
     links: [
       ["/g/maya", "Give any amount"],
       ["/agents", "For AI agents"],
@@ -79,7 +81,7 @@ const CRITERIA = [
       ["#rules-watch", "The rules watch"],
     ],
   },
-  { name: "Presentation", where: "This page, the demo video, and a sample household you can reset to the same starting point at any time.", links: [["/about", "About"]] },
+  { name: "Presentation", where: "This page and its guided tour, the demo video, and a sample household you can reset to the same starting point at any time.", links: [["/about", "About"]] },
 ] as const;
 
 export default function JudgesPage() {
@@ -91,6 +93,9 @@ export default function JudgesPage() {
           <Info id="page.judges" />
         </div>
         <p className="lede">The five-minute path through Giftwise, every failure case run live against PayPal, and the test results.</p>
+        <p className="jp-tour">
+          <TourStart /> <span className="muted">Eight stops in this tab, about five minutes. Escape ends it.</span>
+        </p>
       </header>
       <Results />
 

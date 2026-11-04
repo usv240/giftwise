@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { PREFS_SCRIPT, PrefsProvider } from "@/components/prefs";
 import { Reveal } from "@/components/Reveal";
 import { StackStrip } from "@/components/StackStrip";
+import { Tour } from "@/components/tour/Tour";
 import "./globals.css";
 import "./site.css";
 import "./components.css";
@@ -48,6 +49,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Footer />
           <Suspense fallback={null}>
             <Reveal />
+          </Suspense>
+          <Suspense fallback={null}>
+            <Tour />
           </Suspense>
         </PrefsProvider>
       </body>
