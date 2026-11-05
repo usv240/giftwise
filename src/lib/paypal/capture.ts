@@ -2,6 +2,8 @@ import { and, eq, ne, sql } from "drizzle-orm";
 import { audit } from "../audit";
 import { db, schema } from "../db";
 import { paypalRest } from "./client";
+import { notifyGift } from "../manage";
+import { publicOrigin } from "../origin";
 
 export type CaptureLine = { reference_id: string; capture_id: string | null; amount: string | null; payee: string };
 export type CaptureOutcome =
@@ -127,7 +129,11 @@ async function record(orderId: string, rows: PaymentRow[], body: PayPalOrder, ac
   }
   const captures = lines(after.filter((r) => r.status === "captured"));
   // The ledger gets one entry per capture, from whichever call recorded it.
-  if (flippedHere.length) await audit(actor, "paypal.order.captured", `order:${orderId}`, { captures: flippedHere.map((c) => ({ ref: c.reference_id, capture: c.capture_id, amount: c.amount })) });
+  if (flippedHere.length) {
+    await audit(actor, "paypal.order.captured", `order:${orderId}`, { captures: flippedHere.map((c) => ({ ref: c.reference_id, capture: c.capture_id, amount: c.amount })) });
+    // Tell the organizer's webhook (a Zapier Catch Hook, say) without holding up the giver's thank-you.
+    void notifyGift(orderId, publicOrigin()).catch(() => undefined);
+  }
   return { kind: "captured", captures, payerFirstName: g?.given_name ?? null, status: body.status ?? "COMPLETED" };
 }
 

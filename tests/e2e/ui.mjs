@@ -121,9 +121,14 @@ await page.getByLabel("Their first name").fill("Maya");
 await page.getByLabel("she/her").check();
 await page.getByLabel("Your name (optional)").fill("E2E");
 await page.getByRole("button", { name: "Make the gift page" }).click();
+// A new page opens the organizer's private manage link first, then the page givers see.
+await page.waitForURL(/\/manage\/[A-Za-z0-9_-]{24}\?new=1$/, { timeout: 60000, waitUntil: "commit" });
+await page.getByText("Keep this link").waitFor({ timeout: 60000 });
+const managedNeeds = await page.locator(".mg-need").count();
+await page.getByRole("link", { name: "Open the page givers see" }).click();
 await page.waitForURL(/\/g\/maya-[0-9a-f]{6}$/, { timeout: 60000, waitUntil: "commit" });
 await page.locator(".need").first().waitFor({ timeout: 60000 });
-ok("fundraiser becomes a live gift page with every use as a payable need", uses >= 2 && (await page.locator(".need").count()) === uses, `${uses} uses`);
+ok("fundraiser becomes a live gift page with every use as a payable need, managed from its own private link", uses >= 2 && managedNeeds === uses && (await page.locator(".need").count()) === uses, `${uses} uses, ${managedNeeds} managed`);
 
 // 7d. For AI agents: the recorded conversation shows June, the assistant, and each Giftwise tool it called over MCP
 await page.goto(B + "/agents", { waitUntil: "networkidle" });

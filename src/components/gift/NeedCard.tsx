@@ -25,7 +25,7 @@ export type NeedView = {
   captureId: string | null;
 };
 
-export function NeedCard({ need, name, lang = "en" }: { need: NeedView; name: string; lang?: Lang }) {
+export function NeedCard({ need, name, lang = "en", closed = false }: { need: NeedView; name: string; lang?: Lang; closed?: boolean }) {
   const t = giftText(lang);
   const router = useRouter();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
@@ -67,7 +67,7 @@ export function NeedCard({ need, name, lang = "en" }: { need: NeedView; name: st
               </Link>
             )}
           </div>
-        ) : (
+        ) : closed ? null : (
           <PayPalPay
             lang={lang}
             createOrder={() => requestOrder("/api/paypal/orders", { needId: need.id })}

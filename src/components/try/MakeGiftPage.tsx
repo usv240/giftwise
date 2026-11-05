@@ -48,7 +48,7 @@ export function MakeGiftPage({ uses, sourceUrl }: { uses: FundraiserUse[]; sourc
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error?.message ?? "The page could not be made. Please try again.");
-      router.push(j.data.url);
+      router.push(`${j.data.manage_url}?new=1`);
     } catch (err) {
       setNote((err as Error).message);
       setStatus("error");

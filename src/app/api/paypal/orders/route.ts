@@ -4,7 +4,8 @@ import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
 import { getNeed, payeeEmail } from "@/lib/households";
 import { createPayeeOrder, describePayPalError } from "@/lib/paypal/orders";
-import { DEFAULT_PROFILE, evaluateGift, type Category, type Delivery } from "@/lib/rules";
+import { eq } from "drizzle-orm";
+import { DEFAULT_PROFILE, evaluateGift, type Category, type Delivery, type Profile } from "@/lib/rules";
 
 const Body = z.object({ needId: z.number().int().positive() });
 
@@ -19,15 +20,19 @@ export async function POST(req: Request) {
   const need = await getNeed(parsed.data.needId);
   if (!need) return fail("not_found", "That need was not found.", 404);
   if (need.status === "paid") return fail("invalid_request", "This need is already paid. Thank you!", 409);
+  const [household] = await db().select().from(schema.households).where(eq(schema.households.id, need.householdId)).limit(1);
+  if (household?.status === "closed") return fail("invalid_request", `${household.name}'s page is closed to new gifts. Its receipts stay public.`, 409);
+  const profile: Profile = { ...DEFAULT_PROFILE, ...((household?.profile ?? {}) as Partial<Profile>) };
+  const name = household?.name ?? "them";
 
   // Check the rule before money moves: the route must keep her full check.
   const amount = Number(need.amount) - Number(need.funded);
   const check = evaluateGift(
     { id: `need-${need.id}`, date: today(), amount, delivery: need.route as Delivery, category: need.category as Category, recurring: need.recurring },
-    DEFAULT_PROFILE,
+    profile,
   );
   if (check.checkAfter < check.checkBaseline) {
-    return fail("invalid_request", "This route would lower her check, so Giftwise suggests a different way to give.", 422);
+    return fail("invalid_request", `This route would lower ${name}'s check, so Giftwise suggests a different way to give.`, 422);
   }
 
   try {
@@ -35,7 +40,7 @@ export async function POST(req: Request) {
     const order = await createPayeeOrder({
       amount,
       payeeEmail: email,
-      description: `${need.title} for Maya, paid to ${need.payeeName}`,
+      description: `${need.title} for ${name}, paid to ${need.payeeName}`,
       referenceId: `need-${need.id}`,
       requestId: `need-${need.id}-${crypto.randomUUID()}`,
       softDescriptor: "GIFTWISE",

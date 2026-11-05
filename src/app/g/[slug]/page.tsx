@@ -97,6 +97,18 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
         </div>
         <p className="gift-note">{own(household.note)}</p>
         <p className="gift-sample muted">{household.isSample ? t.sampleNote : t.madeNote}</p>
+        {household.isSample && lang === "en" && (
+          <p className="gift-sample">
+            <Link className="text-link" href="/manage/maya-sample-organizer">
+              See the organizer&rsquo;s view of this page
+            </Link>
+          </p>
+        )}
+        {household.status === "closed" && (
+          <p className="gift-closed" role="status">
+            {t.closed(household.name)}
+          </p>
+        )}
       </header>
       <div className="gift-layout" lang={lang}>
         <div className="gift-needs">
@@ -106,7 +118,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
           </div>
           <div className="gift-list">
             {views.map((v) => (
-              <NeedCard key={v.id} need={v} name={household.name} lang={lang} />
+              <NeedCard key={v.id} need={v} name={household.name} lang={lang} closed={household.status === "closed"} />
             ))}
           </div>
           <div className="gift-real" lang="en">
@@ -119,7 +131,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
           </div>
         </div>
         <aside className="gift-aside" aria-labelledby="month-h">
-          <GiveAny slug={slug} name={household.name} needs={openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }))} date={today()} profile={profile} lang={lang} />
+          {household.status !== "closed" && <GiveAny slug={slug} name={household.name} needs={openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }))} date={today()} profile={profile} lang={lang} />}
           <div className="gift-month" data-ui>
             <div className="title-row">
               <h2 id="month-h" className="gift-month-title">

@@ -1,0 +1,248 @@
+/* The organizer's view: the page at a glance, the needs, the gifts, sharing, notifications. */
+.mg-head-links {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+}
+.mg-keep {
+  margin-top: 1.5rem;
+  max-width: 52rem;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: inset 5px 0 0 var(--accent);
+}
+.mg-keep h2 {
+  font-size: var(--step-lead);
+  font-weight: 500;
+}
+.mg-keep p + p,
+.mg-keep h2 + p {
+  margin-top: 6px;
+}
+.mg-keep-url code {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.mg-sample {
+  margin-top: 1rem;
+  font-size: 15px;
+  max-width: 52rem;
+}
+.mg-summary {
+  margin-top: 1.5rem;
+  max-width: 68rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.mg-summary > div {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+.mg-k {
+  font-size: 14px;
+  color: var(--muted);
+}
+.mg-fig {
+  margin-top: 4px;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.mg-fig[data-kept] {
+  color: var(--positive);
+}
+.mg-state {
+  font-size: 22px;
+}
+.mg-state[data-state="closed"] {
+  color: var(--muted);
+}
+@media (max-width: 760px) {
+  .mg-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mg-needs {
+  max-width: 68rem;
+}
+.mg-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.mg-need {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 24px;
+}
+.mg-need:has(.mg-form) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.mg-need-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+.mg-need-to {
+  margin-top: 4px;
+  font-size: 15px;
+}
+.mg-need-to strong {
+  font-weight: 500;
+}
+.mg-need-rule {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--positive);
+}
+.mg-need-side {
+  text-align: right;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+.mg-need-amount {
+  font-size: 24px;
+  font-weight: 500;
+}
+.mg-need-funded {
+  font-size: 14px;
+  color: var(--muted);
+}
+.mg-need-actions {
+  margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+}
+@media (max-width: 600px) {
+  .mg-need {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mg-need-side {
+    text-align: left;
+  }
+  .mg-need-actions {
+    justify-content: flex-start;
+  }
+}
+.mg-link {
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  min-height: 32px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.mg-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.mg-add {
+  margin-top: 12px;
+}
+
+.mg-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  align-items: end;
+}
+.mg-field {
+  display: grid;
+  gap: 6px;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.mg-wide {
+  grid-column: 1 / -1;
+}
+.mg-field input,
+.mg-field select,
+.mg-field textarea {
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  border-radius: 10px;
+  padding: 0 12px;
+  min-height: 46px;
+  width: 100%;
+  min-width: 0;
+}
+.mg-field textarea {
+  padding: 10px 12px;
+  line-height: 1.45;
+  resize: vertical;
+}
+.mg-field input:disabled {
+  color: var(--muted);
+  background: var(--surface-2);
+}
+.mg-field input:focus-visible,
+.mg-field select:focus-visible,
+.mg-field textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.mg-check {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  min-height: 32px;
+}
+.mg-check input {
+  width: 18px;
+  height: 18px;
+}
+.mg-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.mg-note {
+  font-size: 14px;
+  color: var(--muted);
+}
+@media (max-width: 600px) {
+  .mg-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.mg-status,
+.mg-hook {
+  max-width: 52rem;
+  margin-top: 1rem;
+  display: grid;
+  gap: 12px;
+}
+.mg-secret {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.mg-share {
+  max-width: 28rem;
+  margin-top: 1rem;
+}

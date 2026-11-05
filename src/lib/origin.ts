@@ -5,7 +5,8 @@
  */
 export function publicOrigin(req?: Request): string {
   if (process.env.RENDER_EXTERNAL_URL) return process.env.RENDER_EXTERNAL_URL.replace(/\/$/, "");
-  return req ? new URL(req.url).origin : "http://localhost:3000";
+  if (req) return new URL(req.url).origin;
+  return (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 }
 
 /** The hosted demo, shown where no request is at hand (for example, the MCP address printed on /agents). */

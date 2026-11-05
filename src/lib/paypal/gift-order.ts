@@ -22,6 +22,7 @@ export async function startRoutedGift(
 ): Promise<StartedGift> {
   const data = await getHousehold(slug);
   if (!data) return { ok: false, code: "not_found", message: "That gift page was not found.", status: 404 };
+  if (data.household.status === "closed") return { ok: false, code: "invalid_request", message: `${data.household.name}'s page is closed to new gifts. Its receipts stay public.`, status: 409 };
 
   const profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
   // A monthly gift passes its own planner (that month's needs); either way the server, never the caller, routes it.

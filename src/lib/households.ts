@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "./db";
-import { DEFAULT_PROFILE, SHELTER_CATEGORIES, evaluateGift, pronounWords, type Category, type Pronoun } from "./rules";
+import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Pronoun } from "./rules";
+import { SAMPLE_MANAGE_TOKEN, hashToken, newToken, resetSampleManage, routeNeed } from "./manage";
 
 export type NeedRow = typeof schema.needs.$inferSelect;
 export type PaymentRow = typeof schema.payments.$inferSelect;
@@ -25,10 +26,15 @@ export const SAMPLE = {
 export async function ensureSample() {
   const d = db();
   const [existing] = await d.select().from(schema.households).where(eq(schema.households.slug, SAMPLE.slug)).limit(1);
+  if (existing && !existing.manageTokenHash) {
+    // Deployments made before manage links: give the sample its public organizer link.
+    const [h] = await d.update(schema.households).set({ manageTokenHash: hashToken(SAMPLE_MANAGE_TOKEN) }).where(eq(schema.households.id, existing.id)).returning();
+    return h;
+  }
   if (existing) return existing;
   const [h] = await d
     .insert(schema.households)
-    .values({ slug: SAMPLE.slug, name: SAMPLE.name, caregiverName: SAMPLE.caregiverName, note: SAMPLE.note, profile: SAMPLE.profile, isSample: true })
+    .values({ slug: SAMPLE.slug, name: SAMPLE.name, caregiverName: SAMPLE.caregiverName, note: SAMPLE.note, profile: SAMPLE.profile, isSample: true, manageTokenHash: hashToken(SAMPLE_MANAGE_TOKEN) })
     .onConflictDoNothing()
     .returning();
   const household = h ?? (await d.select().from(schema.households).where(eq(schema.households.slug, SAMPLE.slug)).limit(1))[0];
@@ -107,19 +113,28 @@ export async function resetSample() {
   // Bring each sample need back in line with the code (title, wording, payee), so a database made by an older build
   // matches the current sample after one reset. Needs are matched by their place in the list.
   const rows = await d.select({ id: schema.needs.id, sortOrder: schema.needs.sortOrder }).from(schema.needs).where(eq(schema.needs.householdId, h.id));
+  const kept = new Set<number>();
   for (const row of rows) {
     const n = SAMPLE.needs[row.sortOrder];
-    if (n) await d.update(schema.needs).set({ title: n.title, detail: n.detail, payeeName: n.payeeName, payeeAccount: n.payeeAccount }).where(eq(schema.needs.id, row.id));
+    // Needs an organizer added in the manage view go; the sample's own come back exactly as written.
+    if (!n || kept.has(row.sortOrder)) {
+      await d.delete(schema.needs).where(eq(schema.needs.id, row.id));
+      continue;
+    }
+    kept.add(row.sortOrder);
+    await d
+      .update(schema.needs)
+      .set({ title: n.title, detail: n.detail, category: n.category, route: n.route, payeeName: n.payeeName, payeeAccount: n.payeeAccount, amount: n.amount, recurring: n.recurring })
+      .where(eq(schema.needs.id, row.id));
   }
+  // A sample need removed in the manage view comes back too.
+  const missing = SAMPLE.needs.map((n, i) => ({ n, i })).filter(({ i }) => !kept.has(i));
+  if (missing.length) await d.insert(schema.needs).values(missing.map(({ n, i }) => ({ householdId: h.id, ...n, sortOrder: i })));
+  await d.update(schema.households).set({ note: SAMPLE.note }).where(eq(schema.households.id, h.id));
+  await resetSampleManage();
 }
 
 export type NewNeed = { title: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean };
-
-/** "a van conversion shop" -> "Van conversion shop". */
-function payeeLabel(vendor: string | null | undefined) {
-  const v = (vendor ?? "").trim().replace(/^(a|an|the)\s+/i, "");
-  return v ? v[0].toUpperCase() + v.slice(1, 80) : "The shop";
-}
 
 /**
  * Create a gift page from a fundraiser's stated uses. The rules engine, not the caller, decides each route:
@@ -132,27 +147,28 @@ export async function createGiftPage(o: { name: string; pronoun: Pronoun; organi
   const note =
     o.note?.trim() ||
     `${o.name} receives SSI. Every gift on this page is paid straight to the shop or to ${w.poss} ABLE account, so ${w.poss} SSI check stays the same.${o.organizer ? ` With thanks, ${o.organizer}.` : ""}`;
+  const manageToken = newToken();
   const [household] = await d
     .insert(schema.households)
-    .values({ slug, name: o.name, caregiverName: o.organizer ?? "", note, profile: { ...DEFAULT_PROFILE, pronoun: o.pronoun }, isSample: false })
+    .values({ slug, name: o.name, caregiverName: o.organizer ?? "", note, profile: { ...DEFAULT_PROFILE, pronoun: o.pronoun }, isSample: false, manageTokenHash: hashToken(manageToken) })
     .returning();
   const rows = o.needs.map((n, i) => {
-    const housing = SHELTER_CATEGORIES.includes(n.category);
-    const r = evaluateGift({ id: `new-${i}`, date: new Date().toISOString().slice(0, 10), amount: n.amount, delivery: housing ? "able" : "vendor", category: n.category, recurring: n.recurring }, { ...DEFAULT_PROFILE, pronoun: o.pronoun });
+    const r = routeNeed(o.name, o.pronoun, { ...n, detail: o.sourceUrl ? "From the fundraiser." : "" });
+    const check = evaluateGift({ id: `new-${i}`, date: new Date().toISOString().slice(0, 10), amount: n.amount, delivery: r.route as "vendor" | "able", category: n.category, recurring: n.recurring }, { ...DEFAULT_PROFILE, pronoun: o.pronoun });
     const row = {
       householdId: household.id,
       title: n.title.slice(0, 80),
-      detail: housing ? `Housing paid by someone else lowers the check, so this goes to ${w.poss} ABLE account.` : (o.sourceUrl ? "From the fundraiser." : ""),
+      detail: r.route === "able" ? `Housing paid by someone else lowers the check, so this goes to ${w.poss} ABLE account.` : r.detail,
       category: n.category,
-      route: housing ? "able" : "vendor",
-      payeeName: housing ? `${o.name}'s ABLE account` : payeeLabel(n.vendor),
-      payeeAccount: housing ? "able" : "vendor",
+      route: r.route,
+      payeeName: r.payeeName,
+      payeeAccount: r.payeeAccount,
       amount: n.amount.toFixed(2),
       recurring: Boolean(n.recurring),
       sortOrder: i,
     };
-    return { row, checkAfter: r.checkAfter };
+    return { row, checkAfter: check.checkAfter };
   });
   await d.insert(schema.needs).values(rows.map((x) => x.row));
-  return { slug, household, needs: rows.map(({ row, checkAfter }) => ({ title: row.title, route: row.route, payee: row.payeeName, amount: Number(row.amount), check_after: checkAfter })) };
+  return { slug, household, manageToken, needs: rows.map(({ row, checkAfter }) => ({ title: row.title, route: row.route, payee: row.payeeName, amount: Number(row.amount), check_after: checkAfter })) };
 }

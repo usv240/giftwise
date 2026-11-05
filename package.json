@@ -20,6 +20,7 @@
     "e2e:a11y": "node tests/e2e/pages-a11y.mjs",
     "e2e:routed": "tsx --env-file=.env.local scripts/routed-gift-e2e.ts",
     "e2e:agent": "node --env-file-if-exists=.env.local tests/e2e/agent-checkout.mjs",
+    "e2e:manage": "tsx --env-file=.env.local scripts/manage-e2e.ts",
     "test:ledger-race": "tsx --env-file=.env.local scripts/ledger-race.ts 60",
     "checks:local": "cd workflows && tsx --env-file=../.env.local src/local.ts",
     "eval:ssa": "tsx --env-file=.env.local scripts/run-ssa-examples.ts"

@@ -95,3 +95,19 @@ export const KeyRequest = z.object({
   purpose: z.string().max(200).optional().describe("What you are building. Optional."),
   accept: z.literal(true).describe("You accept that sandbox keys are for testing, with no real money and no real personal data."),
 });
+
+export const ManageNeedRequest = z.object({
+  title: z.string().trim().min(2).max(80).describe("What the money is for, in a few words."),
+  detail: z.string().trim().max(200).optional().describe("One line for givers. Optional."),
+  amount: z.number().min(1).max(20000).describe("Dollars still needed."),
+  category: CategorySchema,
+  vendor: z.string().trim().max(80).nullable().optional().describe("Who is paid: the shop, clinic or school. Housing always goes to the ABLE account."),
+  recurring: z.boolean().optional(),
+});
+
+export const ManagePageRequest = z.object({
+  note: z.string().trim().max(400).optional(),
+  status: z.enum(["open", "closed"]).optional(),
+});
+
+export const ManageWebhookRequest = z.object({ url: z.string().trim().max(2000).nullable() });

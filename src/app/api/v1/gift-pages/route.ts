@@ -25,7 +25,8 @@ async function handle(req: Request) {
   const b = parsed.data;
   const page = await createGiftPage({ name: b.name, pronoun: b.pronoun, organizer: b.organizer, note: b.note, sourceUrl: b.source_url, needs: b.needs });
   await audit("person", "gift_page.created", `household:${page.household.id}`, { slug: page.slug, needs: page.needs.length, source: b.source_url ?? null });
-  return ok({ slug: page.slug, url: `/g/${page.slug}`, needs: page.needs }, started);
+  // The manage link is the organizer's private key to the page: shown once here, stored only as a hash.
+  return ok({ slug: page.slug, url: `/g/${page.slug}`, manage_url: `/manage/${page.manageToken}`, needs: page.needs }, started);
 }
 
 export const POST = (req: Request) => guard(req, "gift-pages", () => handle(req));

@@ -540,6 +540,24 @@
     "why": "The fund can show its board or its auditors exactly where every dollar went.",
     "technical": "GET /v1/payments/payouts/{id} for item status and transaction ids; Transaction Search (/v1/reporting/transactions) to confirm each one. Paid items count toward their needs once, however often the batch is refreshed. Payout webhooks refresh it too."
   },
+  "page.manage": {
+    "title": "Manage a gift page",
+    "what": "The organizer's private view of a gift page: add, change or remove needs, see gifts as they arrive, share the page, get told about each gift, and close the page.",
+    "why": "Needs change. A family can keep the page right without an account, and Giftwise still chooses where every need is paid.",
+    "technical": "/manage/{token}. The token is 24 random characters, shown once when the page is made; only its SHA-256 is stored (households.manage_token_hash). API: GET and PATCH /api/manage/{token}, POST /needs, PATCH and DELETE /needs/{id}, PUT and POST /webhook."
+  },
+  "manage.needs": {
+    "title": "Where each need is paid",
+    "what": "You say what the need is and who sells it. Giftwise decides the route: housing (rent, utilities, mortgage, property tax) always goes to the ABLE account; everything else is paid straight to the shop.",
+    "why": "Housing paid by someone else lowers the SSI check even when it is paid to the landlord, so the rules choose the route, not the form.",
+    "technical": "routeNeed() in src/lib/manage.ts; every need's rule line comes from evaluateGift(). A need with gifts cannot be removed or lowered below what was paid, so its receipts keep pointing at it."
+  },
+  "manage.notify": {
+    "title": "Gift notifications",
+    "what": "Each gift is sent to your web address the moment PayPal completes it: who gave, what it paid for, and the check it keeps.",
+    "why": "Zapier's Catch Hook turns that into a text, an email or a spreadsheet row, so the family knows to say thank you.",
+    "technical": "POST with JSON (event gift.received or gift.test) and a Giftwise-Signature header: t=<unix seconds>,v1=<HMAC-SHA256 of \"t.body\" with the page's secret>. HTTPS only; addresses that resolve to private networks are refused."
+  },
   "page.verify": {
     "title": "Check a report",
     "what": "Every report to Social Security carries a code. This page rebuilds the report from Giftwise's records, asks PayPal for each payment in it, and checks the audit ledger.",

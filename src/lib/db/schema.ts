@@ -10,9 +10,16 @@ export const households = pgTable(
     caregiverName: text("caregiver_name").notNull().default(""),
     profile: jsonb("profile").notNull().default({}),
     isSample: boolean("is_sample").notNull().default(true),
+    /** SHA-256 of the organizer's private manage link token; the token itself is shown once and never stored. */
+    manageTokenHash: text("manage_token_hash"),
+    /** open | closed. A closed page shows its needs and receipts but takes no new gifts. */
+    status: text("status").notNull().default("open"),
+    /** Where to POST gift events (a Zapier Catch Hook, Slack workflow, any HTTPS endpoint), and the key that signs them. */
+    webhookUrl: text("webhook_url"),
+    webhookSecret: text("webhook_secret"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex("households_slug_idx").on(t.slug)],
+  (t) => [uniqueIndex("households_slug_idx").on(t.slug), uniqueIndex("households_manage_token_idx").on(t.manageTokenHash)],
 );
 
 export const needs = pgTable("needs", {
