@@ -77,6 +77,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
       paidBy: p?.payerName?.split(" ")[0] ?? null,
       orderId: p?.orderId ?? null,
       captureId: p?.captureId ?? null,
+      link: n.link,
     };
   });
   const open = views.filter((v) => v.status !== "paid");

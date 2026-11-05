@@ -9,6 +9,7 @@ const need = (o: Partial<NeedRow> & Pick<NeedRow, "id" | "title" | "category" | 
   payeeName: o.route === "able" ? "Maya's ABLE account" : `${o.title} shop`,
   payeeAccount: o.route === "able" ? "able" : "vendor:riverside",
   recurring: false,
+  link: null,
   status: "open",
   funded: "0",
   sortOrder: o.id,

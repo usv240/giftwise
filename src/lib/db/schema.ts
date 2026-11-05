@@ -37,6 +37,8 @@ export const needs = pgTable("needs", {
   payeeAccount: text("payee_account").notNull(),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   recurring: boolean("recurring").notNull().default(false),
+  /** Where givers can see the item, when the need came from a product search (Channel3). */
+  link: text("link"),
   /** open | partial | paid */
   status: text("status").notNull().default("open"),
   funded: numeric("funded", { precision: 10, scale: 2 }).notNull().default("0"),

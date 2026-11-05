@@ -5,6 +5,8 @@ import { db, dbConfigured } from "./db";
 import { accessToken, paypalConfigured } from "./paypal/client";
 import { connectPayPalMcp, type PayPalMcpClient } from "./agent/paypal-mcp";
 import { rulesWatch } from "./rules-watch";
+import { channel3Configured } from "./channel3";
+import { elasticConfigured } from "./rulebook";
 import pkg from "../../package.json";
 
 /** Versions as the project pins them; "npm:@bryntum/calendar-trial@7.3.7" reads as 7.3.7. */
@@ -91,6 +93,18 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       name: "Federal Register watch",
       mode: fr ? (fr.live && fr.status === "current" ? "live" : "fallback") : "live",
       detail: fr ? fr.sentence : "Checked on the Status page and every night by the outside checks",
+    },
+    {
+      id: "channel3",
+      name: "Channel3 product search",
+      mode: channel3Configured() ? "live" : "fallback",
+      detail: channel3Configured() ? "Key set; the gift finder searches real products, each checked against the SSI rules" : "The gift finder uses its sample catalog until CHANNEL3_API_KEY is set",
+    },
+    {
+      id: "elastic",
+      name: "Elasticsearch rulebook search",
+      mode: elasticConfigured() ? "live" : "fallback",
+      detail: elasticConfigured() ? "Hybrid keyword and semantic search with jina-embeddings-v3 over the regulations, SSA's manual and its worked examples" : "Ask the rulebook uses the in-app keyword search until ELASTIC_URL and ELASTIC_API_KEY are set",
     },
     { id: "database", name: "Postgres", mode: database?.ok ? "live" : "not_connected", detail: database ? database.detail : "DATABASE_URL not set", ms: database?.ms },
     {

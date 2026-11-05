@@ -193,6 +193,7 @@ export function ManageNeeds({ token, needs }: { token: string; needs: ManageNeed
           {note}
         </p>
       )}
+      <GiftFinder token={token} onAdded={() => router.refresh()} />
       {adding ? (
         <div className="mg-need" data-ui>
           <NeedForm
@@ -344,5 +345,134 @@ export function Notifications({ token, url: initialUrl }: { token: string; url: 
         </p>
       )}
     </div>
+  );
+}
+
+type Found = {
+  id: string;
+  title: string;
+  brand: string | null;
+  image: string | null;
+  imageAlt: string | null;
+  url: string | null;
+  domain: string | null;
+  price: number;
+  inStock: boolean;
+  category: string;
+  giftCard: boolean;
+  addable: boolean;
+  check: number;
+  rule: string;
+};
+
+/** Search real products for a need; every result is checked against the SSI rules before it can be added. */
+export function GiftFinder({ token, onAdded }: { token: string; onAdded: () => void }) {
+  const [q, setQ] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [res, setRes] = useState<{ mode: string; note?: string; products: Found[] } | null>(null);
+  const [added, setAdded] = useState<Set<string>>(new Set());
+  const [msg, setMsg] = useState("");
+  const base = `/api/manage/${encodeURIComponent(token)}`;
+  return (
+    <section className="mg-finder" aria-labelledby="mg-finder-h">
+      <h3 id="mg-finder-h" className="mg-finder-h">
+        Find it with Channel3
+      </h3>
+      <p className="mg-finder-sub">Search real products across retailers. Giftwise checks each one against the SSI rules before it can go on the page.</p>
+      <form
+        className="mg-finder-form"
+        role="search"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (q.trim().length < 2) return;
+          setBusy(true);
+          setMsg("");
+          try {
+            setRes(await send(`${base}/find?q=${encodeURIComponent(q.trim())}`, "GET"));
+          } catch (err) {
+            setMsg((err as Error).message);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <label className="mg-field mg-finder-q">
+          <span>What does the person need?</span>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="wheelchair cushion" minLength={2} maxLength={120} />
+        </label>
+        <button type="submit" className="btn btn-ink" disabled={busy}>
+          {busy ? "Searching…" : "Search"}
+        </button>
+      </form>
+      {msg && (
+        <p className="mg-note" role="status">
+          {msg}
+        </p>
+      )}
+      {res && (
+        <div aria-live="polite">
+          <p className="mg-finder-mode muted">{res.mode === "live" ? `${res.products.length} products from Channel3, each checked against the rules.` : res.note}</p>
+          <ul className="mg-finds">
+            {res.products.map((p) => (
+              <li key={p.id} className="mg-find" data-ui data-blocked={p.addable ? undefined : ""}>
+                <div className="mg-find-img" aria-hidden={p.image ? undefined : "true"}>
+                  {p.image ? (
+                    // Product images come from many retailers' hosts, so a plain img is used rather than next/image.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.image} alt={p.imageAlt ?? p.title} loading="lazy" decoding="async" />
+                  ) : (
+                    <span className="mg-find-noimg">{p.category.replace("_", " ")}</span>
+                  )}
+                </div>
+                <div className="mg-find-body">
+                  <p className="mg-find-title">{p.title}</p>
+                  <p className="mg-find-where muted">
+                    {p.domain ?? "Retailer"}
+                    {p.brand && p.brand !== "Sample" ? `, ${p.brand}` : ""}
+                  </p>
+                  <p className="mg-find-price tabular">{usd(p.price)}</p>
+                  <p className="mg-find-rule" data-tone={p.addable ? "kept" : "attention"}>
+                    {p.rule}
+                  </p>
+                  <div className="mg-find-actions">
+                    {p.addable ? (
+                      <button
+                        type="button"
+                        className="btn btn-ink"
+                        disabled={added.has(p.id)}
+                        onClick={async () => {
+                          setMsg("");
+                          try {
+                            await send(`${base}/needs`, "POST", {
+                              title: p.title.slice(0, 80),
+                              amount: p.price,
+                              category: p.category,
+                              vendor: p.domain,
+                              link: p.url,
+                              detail: p.domain ? `From ${p.domain}.` : undefined,
+                            });
+                            setAdded((x) => new Set(x).add(p.id));
+                            onAdded();
+                          } catch (err) {
+                            setMsg((err as Error).message);
+                          }
+                        }}
+                      >
+                        {added.has(p.id) ? "Added" : "Add to the page"}
+                      </button>
+                    ) : null}
+                    {p.url && (
+                      <a className="text-link" href={p.url} target="_blank" rel="noreferrer nofollow">
+                        See it at {p.domain}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
   );
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import glossary from "../../../content/glossary.json";
 import sources from "../../../content/sources.json";
 import { Info } from "@/components/Info";
+import { AskRulebook } from "@/components/learn/AskRulebook";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Gift } from "@/lib/rules";
 import "./learn.css";
 
@@ -137,6 +138,7 @@ export default function LearnPage() {
         <p className="lede">
           How Social Security counts gifts for people on SSI. Each rule has a worked example and links to its source. Switch to Technical in the View menu for rule numbers and details.
         </p>
+        <AskRulebook />
       </header>
 
       <div className="learn-body">

@@ -17,7 +17,7 @@ export const newToken = () => randomBytes(18).toString("base64url");
 /** The sample page has a fixed, public manage link so judges can try the organizer's side; a reset restores it. */
 export const SAMPLE_MANAGE_TOKEN = "maya-sample-organizer";
 
-export type NeedInput = { title: string; detail?: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean };
+export type NeedInput = { title: string; detail?: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean; link?: string | null };
 
 /** "a van conversion shop" -> "Van conversion shop". */
 export function payeeLabel(vendor: string | null | undefined) {
@@ -67,7 +67,8 @@ export async function manageView(token: string) {
 }
 
 function sanitize(n: NeedInput) {
-  return { ...n, title: n.title.trim().slice(0, 80), detail: n.detail?.trim().slice(0, 200), amount: Math.round(n.amount * 100) / 100 };
+  const link = n.link && /^https:\/\/[^\s]+$/.test(n.link) ? n.link.slice(0, 2000) : null;
+  return { ...n, title: n.title.trim().slice(0, 80), detail: n.detail?.trim().slice(0, 200), amount: Math.round(n.amount * 100) / 100, link };
 }
 
 export async function addNeed(token: string, input: NeedInput) {
@@ -79,7 +80,7 @@ export async function addNeed(token: string, input: NeedInput) {
   const [{ max }] = await db().select({ max: sql<number>`coalesce(max(${schema.needs.sortOrder}), -1)` }).from(schema.needs).where(eq(schema.needs.householdId, h.id));
   const [row] = await db()
     .insert(schema.needs)
-    .values({ householdId: h.id, title: n.title, detail: r.detail, category: n.category, route: r.route, payeeName: r.payeeName, payeeAccount: r.payeeAccount, amount: n.amount.toFixed(2), recurring: Boolean(n.recurring), sortOrder: Number(max) + 1 })
+    .values({ householdId: h.id, title: n.title, detail: r.detail, category: n.category, route: r.route, payeeName: r.payeeName, payeeAccount: r.payeeAccount, amount: n.amount.toFixed(2), recurring: Boolean(n.recurring), link: r.route === "vendor" ? n.link : null, sortOrder: Number(max) + 1 })
     .returning();
   await audit("person", "gift_page.need_added", `household:${h.id}`, { need: row.id, category: row.category, route: row.route });
   return row;
@@ -99,7 +100,7 @@ export async function editNeed(token: string, id: number, input: NeedInput) {
   const status = funded <= 0 ? "open" : funded >= n.amount ? "paid" : "partial";
   const [row] = await db()
     .update(schema.needs)
-    .set({ title: n.title, detail: r.detail, category: n.category, route: r.route, payeeName: r.payeeName, payeeAccount: cur.route === r.route && r.route === "vendor" ? cur.payeeAccount : r.payeeAccount, amount: n.amount.toFixed(2), recurring: Boolean(n.recurring), status })
+    .set({ title: n.title, detail: r.detail, category: n.category, route: r.route, payeeName: r.payeeName, payeeAccount: cur.route === r.route && r.route === "vendor" ? cur.payeeAccount : r.payeeAccount, amount: n.amount.toFixed(2), recurring: Boolean(n.recurring), link: r.route === "vendor" ? (n.link === undefined ? cur.link : n.link) : null, status })
     .where(eq(schema.needs.id, id))
     .returning();
   await audit("person", "gift_page.need_edited", `household:${h.id}`, { need: id, category: row.category, route: row.route });

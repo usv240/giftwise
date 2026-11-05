@@ -103,6 +103,14 @@ export const ManageNeedRequest = z.object({
   category: CategorySchema,
   vendor: z.string().trim().max(80).nullable().optional().describe("Who is paid: the shop, clinic or school. Housing always goes to the ABLE account."),
   recurring: z.boolean().optional(),
+  link: z
+    .string()
+    .trim()
+    .max(2000)
+    .regex(/^https:\/\//, "Use an https link.")
+    .nullable()
+    .optional()
+    .describe("Where givers can see the item, for example the product page a search found."),
 });
 
 export const ManagePageRequest = z.object({
@@ -111,3 +119,7 @@ export const ManagePageRequest = z.object({
 });
 
 export const ManageWebhookRequest = z.object({ url: z.string().trim().max(2000).nullable() });
+
+export const AskRulesRequest = z.object({
+  question: z.string().trim().min(4).max(300).describe("A question about SSI and gifts, in plain words, for example \"Does it count if my sister pays my phone bill?\""),
+});

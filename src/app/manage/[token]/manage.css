@@ -246,3 +246,113 @@
   max-width: 28rem;
   margin-top: 1rem;
 }
+
+/* The gift finder: search, then a grid of products, each with the rule's verdict before it can be added. */
+.mg-finder {
+  margin-top: 1.5rem;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+.mg-finder-h {
+  font-size: 18px;
+  font-weight: 500;
+}
+.mg-finder-sub {
+  margin-top: 4px;
+  font-size: 15px;
+  color: var(--muted);
+}
+.mg-finder-form {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px 12px;
+}
+.mg-finder-q {
+  flex: 1 1 18rem;
+}
+.mg-finder-mode {
+  margin-top: 12px;
+  font-size: 14px;
+}
+.mg-finds {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 12px;
+}
+.mg-find {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.mg-find-img {
+  aspect-ratio: 4 / 3;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+}
+.mg-find-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.mg-find-noimg {
+  font-size: 14px;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.mg-find-body {
+  padding: 12px 14px 14px;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+.mg-find-title {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.mg-find-where {
+  font-size: 13px;
+}
+.mg-find-price {
+  font-size: 20px;
+  font-weight: 500;
+}
+.mg-find-rule {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--positive);
+}
+.mg-find-rule[data-tone="attention"] {
+  color: var(--attention);
+}
+.mg-find-actions {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-size: 14px;
+}
+/* Sample products carry no photo: a short tinted band with the category, not an empty square. */
+.mg-find-img:has(.mg-find-noimg) {
+  aspect-ratio: 16 / 5;
+  background: color-mix(in oklab, var(--positive) 10%, var(--surface));
+}
+.mg-find-noimg {
+  font-weight: 500;
+  color: var(--positive);
+}
+.mg-find-actions .btn {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 15px;
+}

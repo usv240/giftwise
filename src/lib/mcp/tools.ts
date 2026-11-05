@@ -14,6 +14,8 @@ import { monthlyView, startMonthly } from "@/lib/monthly";
 import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
 import { reportCode, verifyPath } from "../report/verify";
+import { findGifts } from "../channel3";
+import { askRulebook } from "../rulebook";
 
 /** What a tool returns: plain text for the model, structured data for programs. */
 export type ToolResult = { text: string; data?: Record<string, unknown>; isError?: boolean };
@@ -86,6 +88,56 @@ export const TOOLS = [
       return {
         text: `Gift page for ${p.household.name} (${ctx.origin}/g/${p.household.slug}). ${open.length ? `Open needs: ${list}.` : "Every need is covered right now."} Any amount can also go to ${pronounWords(p.profile.pronoun).poss} ABLE account.`,
         data: { name: p.household.name, pronoun: p.profile.pronoun ?? "she", url: `${ctx.origin}/g/${p.household.slug}`, open_needs: open, sample: p.household.isSample },
+      };
+    },
+  }),
+  tool({
+    name: "ask_rulebook",
+    title: "Ask the SSI rulebook",
+    description:
+      "Answer a question about SSI and gifts from the rule text itself: Elasticsearch finds the passages across the regulations, SSA's operating manual and its worked examples, the answer uses only those passages, and every quote is checked word for word. Use it when a person asks why a gift counts or not.",
+    input: z.object({ question: z.string().trim().min(4).max(300).describe("The question, in plain words.") }),
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    run: async (i) => {
+      const a = await askRulebook(i.question);
+      const found = a.quotes.filter((q) => q.found);
+      const cites = [...new Set(a.retrieval.docs.slice(0, 3).map((d) => d.cite))].join("; ");
+      return {
+        text: `${a.answer ?? "Passages that match:"} ${found.map((q) => `"${q.quote}" (${q.doc.cite})`).join(" ")}${a.answer ? "" : ` ${cites}.`}`.trim(),
+        data: {
+          answer: a.answer,
+          quotes: a.quotes.map((q) => ({ cite: q.doc.cite, quote: q.quote, found_word_for_word: q.found, url: q.doc.url })),
+          passages: a.retrieval.docs.map((d) => ({ cite: d.cite, title: d.title, text: d.text, url: d.url })),
+          retrieval: a.retrieval.mode === "elastic" ? "elasticsearch" : "in-app",
+        },
+      };
+    },
+  }),
+  tool({
+    name: "find_gift",
+    title: "Find a benefit-safe gift",
+    description:
+      "Search real products across retailers (Channel3) for something a person on SSI needs, and check each one against the SSI rules for that person: whether buying it straight from the retailer keeps their check whole. Gift cards are flagged, because SSA counts a card that can buy food or shelter like cash. Nothing is bought.",
+    input: z.object({
+      slug,
+      query: z.string().trim().min(2).max(120).describe("What the person needs, in a few words, for example \"wheelchair cushion\"."),
+      max_price: z.number().min(1).max(20000).optional().describe("Highest price to show, in US dollars."),
+    }),
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    run: async (i, ctx) => {
+      const p = await page(i.slug);
+      if (!p) return { text: `No gift page named "${i.slug}".`, isError: true };
+      const r = await findGifts(i.query, p.profile, today(), { maxPrice: i.max_price, user: p.household.slug });
+      const ok = r.products.filter((x) => x.addable).slice(0, 5);
+      const cards = r.products.filter((x) => x.giftCard).length;
+      const list = ok.map((x) => `${x.title} (${usd(x.price)} at ${x.domain ?? "a retailer"}): ${x.rule}`).join(" ");
+      return {
+        text: `${r.mode === "live" ? "From Channel3" : "Sample products (Channel3 is not connected here)"}, for ${p.household.name}: ${ok.length ? list : "nothing that keeps the check whole matched."}${cards ? ` ${cards} gift card${cards === 1 ? " was" : "s were"} left out: SSA counts a card that can buy food or shelter like cash.` : ""} The organizer can add any of these to the page at ${ctx.origin}/g/${p.household.slug}.`,
+        data: {
+          mode: r.mode,
+          query: r.query,
+          products: r.products.map((x) => ({ title: x.title, price: x.price, retailer: x.domain, url: x.url, in_stock: x.inStock, category: x.category, gift_card: x.giftCard, keeps_check_whole: x.addable, check_after: x.check, rule: x.rule })),
+        },
       };
     },
   }),

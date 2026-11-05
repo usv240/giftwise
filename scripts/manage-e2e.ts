@@ -60,6 +60,23 @@ async function main() {
   r = await api(`/api/manage/${T}/needs`, "POST", { title: "x", amount: 0, category: "rent" });
   ok("a need with no amount is refused with a plain message", r.status === 400 && /amount/.test(r.json?.error?.message ?? ""));
 
+  // 2b. The gift finder: products checked against the rules, a gift card held back, and one added with its link
+  r = await api(`/api/manage/${T}/find?q=${encodeURIComponent("wheelchair cushion")}`);
+  const found = (r.json?.data?.products ?? []) as { title: string; addable: boolean; giftCard: boolean; price: number; category: string; domain: string | null; url: string | null }[];
+  const mode = String(r.json?.data?.mode ?? "");
+  const pick = found.find((p) => p.addable);
+  ok(`the gift finder returns products, each checked against the rules (${mode})`, r.status === 200 && found.length > 0 && Boolean(pick), `${found.length} found`);
+  r = await api(`/api/manage/${T}/find?q=${encodeURIComponent("grocery gift card")}`);
+  const cards = ((r.json?.data?.products ?? []) as { giftCard: boolean; addable: boolean }[]).filter((p) => p.giftCard);
+  ok("a gift card is found but held back, because SSA counts it like cash", r.status === 200 && (mode === "live" ? cards.every((c) => !c.addable) : cards.length > 0 && cards.every((c) => !c.addable)));
+  if (pick) {
+    const link = pick.url ?? "https://mobility.example/cushion";
+    r = await api(`/api/manage/${T}/needs`, "POST", { title: pick.title.slice(0, 80), amount: pick.price, category: pick.category, vendor: pick.domain, link });
+    const giftPage = await (await fetch(`${B}/g/maya`)).text();
+    ok("a found product goes on the page, paid straight to the retailer, with a link givers can open", r.status === 200 && r.json?.data?.route === "vendor" && giftPage.includes(pick.title.slice(0, 40).replace(/&/g, "&amp;")) && giftPage.includes("See it at"), JSON.stringify(r.json?.data));
+    await api(`/api/manage/${T}/needs/${(r.json?.data as { id?: number } | undefined)?.id}`, "DELETE");
+  }
+
   // 3. Close and reopen
   r = await api(`/api/manage/${T}`, "PATCH", { status: "closed" });
   const closedOrder = await api("/api/paypal/gift-orders", "POST", { slug: "maya", amount: 100 });

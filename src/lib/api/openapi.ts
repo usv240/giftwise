@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { RULES_VERSION } from "../rules";
 import { ENDPOINTS, ERRORS } from "./endpoints";
-import { AnalyzeFundraiserRequest, CheckGiftRequest, GiftPageRequest, KeyRequest, PlanMonthRequest, ReviewBillRequest } from "./schemas";
+import { AnalyzeFundraiserRequest, CheckGiftRequest, GiftPageRequest, KeyRequest, PlanMonthRequest, ReviewBillRequest, AskRulesRequest } from "./schemas";
 
 const json = (s: z.ZodType) => {
   const { $schema: _drop, ...rest } = z.toJSONSchema(s, { io: "input" }) as Record<string, unknown>;
@@ -14,6 +14,7 @@ const BODIES: Record<string, Record<string, unknown>> = {
   "plan-month": json(PlanMonthRequest),
   "analyze-fundraiser": json(AnalyzeFundraiserRequest),
   "review-bill": json(ReviewBillRequest),
+  "ask-rules": json(AskRulesRequest),
   "gift-pages": json(GiftPageRequest),
 };
 

@@ -1,0 +1,15 @@
+{
+  "about": "Fictional products on reserved .example domains, so the gift finder works without a Channel3 key. Live searches return real products from Channel3; these never appear alongside them.",
+  "products": [
+    { "id": "sample-cushion", "title": "Pressure-relief wheelchair cushion", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "mobility.example", "price": 89, "currency": "USD", "inStock": true, "categoryPath": "Health > Mobility > Wheelchair accessories" },
+    { "id": "sample-rims", "title": "Wheelchair push rims, pair", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "mobility.example", "price": 145, "currency": "USD", "inStock": true, "categoryPath": "Health > Mobility > Wheelchair parts" },
+    { "id": "sample-shower-chair", "title": "Shower chair with back", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "homecare.example", "price": 54, "currency": "USD", "inStock": true, "categoryPath": "Health > Bath safety" },
+    { "id": "sample-laptop", "title": "14-inch laptop for school", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "electronics.example", "price": 429, "currency": "USD", "inStock": true, "categoryPath": "Electronics > Computers > Laptops" },
+    { "id": "sample-textbook", "title": "Intro to Psychology textbook, used", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "books.example", "price": 62, "currency": "USD", "inStock": true, "categoryPath": "Books > Textbooks" },
+    { "id": "sample-backpack", "title": "Wheelchair backpack that hangs on the push handles", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "mobility.example", "price": 38, "currency": "USD", "inStock": true, "categoryPath": "Health > Mobility > Wheelchair accessories" },
+    { "id": "sample-coat", "title": "Waterproof winter coat", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "apparel.example", "price": 110, "currency": "USD", "inStock": true, "categoryPath": "Clothing > Coats" },
+    { "id": "sample-headphones", "title": "Noise-cancelling headphones", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "electronics.example", "price": 99, "currency": "USD", "inStock": true, "categoryPath": "Electronics > Audio > Headphones" },
+    { "id": "sample-bp", "title": "Upper-arm blood pressure monitor", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "homecare.example", "price": 46, "currency": "USD", "inStock": true, "categoryPath": "Health > Medical devices" },
+    { "id": "sample-grocery-card", "title": "Grocery store gift card, $100", "brand": "Sample", "image": null, "imageAlt": null, "url": null, "domain": "grocer.example", "price": 100, "currency": "USD", "inStock": true, "categoryPath": "Gift cards" }
+  ]
+}

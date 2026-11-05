@@ -23,6 +23,7 @@ export type NeedView = {
   paidBy: string | null;
   orderId: string | null;
   captureId: string | null;
+  link?: string | null;
 };
 
 export function NeedCard({ need, name, lang = "en", closed = false }: { need: NeedView; name: string; lang?: Lang; closed?: boolean }) {
@@ -40,6 +41,13 @@ export function NeedCard({ need, name, lang = "en", closed = false }: { need: Ne
           {need.title}
         </h3>
         <p className="need-detail">{need.detail}</p>
+        {need.link && (
+          <p className="need-link">
+            <a className="text-link" href={need.link} target="_blank" rel="noreferrer nofollow">
+              {t.seeItem(new URL(need.link).hostname.replace(/^www\./, ""))}
+            </a>
+          </p>
+        )}
         <p className="need-route">
           <span>
             {t.paidStraightTo} <strong>{payeeInline(lang, need.payeeName)}</strong>

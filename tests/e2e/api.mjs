@@ -228,7 +228,7 @@ ok("MCP notification -> 202 with no body", r.status === 202);
 r = await mcp("tools/list");
 j = await r.json();
 const names = (j.result?.tools ?? []).map((t) => t.name);
-ok("MCP lists the seven tools with input schemas", ["check_gift", "get_gift_page", "get_ssa_report", "plan_gift", "review_bill", "start_gift_checkout", "start_monthly_gift"].every((n) => names.includes(n)) && j.result.tools.every((t) => t.inputSchema?.type === "object"), names.join(","));
+ok("MCP lists the nine tools with input schemas", ["ask_rulebook", "check_gift", "find_gift", "get_gift_page", "get_ssa_report", "plan_gift", "review_bill", "start_gift_checkout", "start_monthly_gift"].every((n) => names.includes(n)) && j.result.tools.every((t) => t.inputSchema?.type === "object"), names.join(","));
 r = await mcp("tools/call", { name: "start_monthly_gift", arguments: { slug: "maya", amount: 300, giver_name: "E2E" } });
 j = await r.json();
 ok(`MCP start_monthly_gift returns the giver's page, nothing charged, check stays $${FULL}`, !j.result?.isError && /\/m\/[\w-]{20,}/.test(j.result?.content?.[0]?.text ?? "") && j.result?.structuredContent?.check_with_giftwise === FULL, (j.result?.content?.[0]?.text ?? JSON.stringify(j.error ?? j)).slice(0, 120));
@@ -291,6 +291,18 @@ const vpage = vurl ? await (await fetch(vurl.replace(/^https?:\/\/[^/]+/, B))).t
 ok("report code: October's report names its check page, and the page says it matches", /^[0-9A-Z]{5}-[0-9A-Z]{5}$/.test(j.data?.verify?.code ?? "") && /This report matches/.test(vpage) && /every fingerprint matches/.test(vpage), j.data?.verify?.url);
 const wrong = await (await fetch(`${B}/v/maya/2026-10/00000-00000`)).text();
 ok("report code: a code that does not match shows the current report's code", /has new activity since this report was made/.test(wrong) && wrong.includes(j.data?.verify?.code ?? "none"));
+
+// Ask the rulebook: passages retrieved (Elasticsearch, or the in-app search), each quote checked against its passage.
+r = await post("/api/v1/ask-rules", { question: "Does it count if my sister pays my phone bill?" }, keyed);
+j = await r.json();
+const top = (j.data?.passages ?? []).map((p) => p.cite).join(" | ");
+ok(
+  "ask-rules: the phone bill question finds SSA's own passage on bills paid by someone else, and every quote it shows is checked",
+  r.status === 200 && (j.data?.passages ?? []).some((p) => /phone|bill/i.test(p.text)) && (j.data?.quotes ?? []).every((q) => typeof q.found_word_for_word === "boolean"),
+  `${j.data?.retrieval?.engine}: ${top.slice(0, 120)}`,
+);
+r = await post("/api/v1/ask-rules", { question: "x" }, keyed);
+ok("ask-rules: a question that is too short gets a plain 400", r.status === 400);
 
 // Discovery (SEP-2127): the AI Catalog points to the Server Card, which names the MCP endpoint; both are cacheable and open to any origin.
 r = await fetch(`${B}/.well-known/ai-catalog.json`);

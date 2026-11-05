@@ -108,6 +108,7 @@ const EN = {
   ppFailed: "PayPal could not complete the payment.",
   ppStartFailed: "Could not start the payment.",
   realWorldNote: "",
+  seeItem: (host: string) => `See it at ${host}`,
   closed: (n: string) => `${n}'s page is closed to new gifts. Thank you to everyone who gave; the receipts below stay public.`,
 };
 
@@ -178,6 +179,7 @@ const ES: GiftText = {
   ppFailed: "PayPal no pudo completar el pago.",
   ppStartFailed: "No se pudo empezar el pago.",
   realWorldNote: "Estas respuestas están en inglés, cada una con sus fuentes.",
+  seeItem: (host) => `Verlo en ${host}`,
   closed: (n) => `La página de ${n} ya no recibe regalos. Gracias a todas las personas que dieron; los recibos siguen públicos.`,
 };
 
