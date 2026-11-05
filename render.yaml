@@ -59,6 +59,13 @@ services:
         sync: false
       - key: NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY
         sync: false
+      # Optional: each has a working fallback until it is set (sample products; the in-app rulebook search).
+      - key: CHANNEL3_API_KEY
+        sync: false
+      - key: ELASTIC_URL
+        sync: false
+      - key: ELASTIC_API_KEY
+        sync: false
 
   - type: workflow
     name: giftwise-checks
