@@ -28,6 +28,17 @@ describe("the gift finder's rules check", () => {
     expect(c.rule).toMatch(/counts a gift card .* like cash/);
   });
 
+  it("reads Channel3's category path before the title, so a toy grocery set is a toy and a laptop is equipment", () => {
+    expect(categoryFor("Asus Vivobook S16", "Electronics > Computers > Laptops")).toBe("equipment");
+    expect(categoryFor("Supermarket Grocery Set", "Toys & Games > Toys > Pretend Play > Pretend Shopping & Grocery")).toBe("personal");
+  });
+
+  it("tells a gift card from a gift card holder", () => {
+    expect(isGiftCard("LEGO Gift Card")).toBe(true);
+    expect(isGiftCard("Holiday Gift Card Holders", "Arts & Entertainment > Party & Celebration > Special Occasion Card Boxes & Holders")).toBe(false);
+    expect(isGiftCard("Prepaid Visa card, $50")).toBe(true);
+  });
+
   it("holds back what is out of stock or not priced in dollars", () => {
     const [a, b] = checkProducts([product({ inStock: false }), product({ currency: "EUR" })], DEFAULT_PROFILE, "2026-11-10");
     expect(a.addable).toBe(false);

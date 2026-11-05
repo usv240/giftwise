@@ -356,3 +356,23 @@
   padding: 0 14px;
   font-size: 15px;
 }
+/* Real product photos: a fixed, modest frame, and text that wraps inside the card at any width. */
+.mg-find {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+.mg-find-body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mg-find-img {
+  aspect-ratio: 16 / 10;
+  padding: 10px;
+}
+.mg-find-img img {
+  max-width: 100%;
+  max-height: 100%;
+}
+.mg-find-actions a {
+  min-width: 0;
+}

@@ -17,7 +17,7 @@ async function handle(req: Request) {
         answer: a.answer,
         quotes: a.quotes.map((q) => ({ cite: q.doc.cite, passage_id: q.doc.id, quote: q.quote, found_word_for_word: q.found, url: q.doc.url })),
         passages: a.retrieval.docs.map((d) => ({ id: d.id, kind: d.kind, cite: d.cite, title: d.title, text: d.text, url: d.url, score: d.score })),
-        retrieval: { engine: a.retrieval.mode === "elastic" ? "elasticsearch" : "in-app", model: a.retrieval.model },
+        retrieval: { engine: a.retrieval.mode === "elastic" ? "elasticsearch" : "in-app", model: a.retrieval.model, reranker: a.retrieval.reranker },
         ai: a.ai,
       },
       started,

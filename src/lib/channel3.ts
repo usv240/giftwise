@@ -43,32 +43,58 @@ type C3Product = {
   title: string;
   brands?: { id?: string; name?: string }[];
   images?: { url: string; cleaned_url?: string | null; is_main_image?: boolean; alt_text?: string | null }[];
-  category?: { slug?: string; title?: string; path?: string | string[] } | null;
+  category?: { slug?: string; title?: string; path?: string | (string | { slug?: string; title?: string })[] } | null;
   offers?: { url: string; domain: string; price: { price: number; currency: string }; availability: string }[];
 };
 
-/** Channel3's taxonomy to Giftwise's categories. The organizer can still change it before adding. */
+/**
+ * A card that stands for money: a gift card, store credit or a prepaid card. Not a card holder, box or sleeve, which
+ * is an ordinary item, and not a greeting card.
+ */
+export const isGiftCard = (title: string, path: string | null = null) => {
+  const t = `${title} ${path ?? ""}`.toLowerCase();
+  if (/\b(holders?|boxes|box|sleeves?|envelopes?|organizers?|wallets?|cases?)\b/.test(title.toLowerCase()) && !/\$\s?\d/.test(title)) return false;
+  return /\bgift ?cards?\b|\be-?gift\b|store credit|prepaid (visa|mastercard|card)|\bgift certificates?\b/.test(t);
+};
+
+/**
+ * Channel3's taxonomy to Giftwise's categories: the product's category path first (Electronics > Computers > Laptops),
+ * then its title. A toy grocery set is a toy, not food. The organizer can still change the category before adding.
+ */
 export function categoryFor(title: string, path: string | null): Category {
-  const t = `${path ?? ""} ${title}`.toLowerCase();
-  if (/gift ?card|e-?gift|store credit|prepaid (visa|card)/.test(t)) return "other";
+  if (isGiftCard(title, path)) return "other";
+  const p = (path ?? "").toLowerCase();
+  const t = title.toLowerCase();
+  const byPath: [RegExp, Category][] = [
+    [/toys|games|pretend play/, "personal"],
+    [/wheelchair|mobility|walkers?|canes|crutches|bath safety|daily living aids|patient (lifts|care)|hearing aids/, "equipment"],
+    [/medical|health care|first aid|pharmacy|medicine|vitamins|supplements/, "medical"],
+    [/textbooks|school supplies|office supplies > (school|education)|educational/, "education"],
+    [/computers|laptops|tablets|electronics/, "equipment"],
+    [/cell phones|mobile phones|smartphones/, "phone"],
+    [/apparel|clothing|shoes|footwear|outerwear/, "clothing"],
+    [/grocery|food|beverages/, "food"],
+    [/tickets|event/, "event"],
+    [/bicycles|scooters|transportation/, "transport"],
+  ];
+  for (const [re, c] of byPath) if (re.test(p)) return c;
   if (/wheelchair|walker|mobility|cane|crutch|shower chair|commode|grab bar|lift|ramp|hearing aid|cushion|brace/.test(t)) return "equipment";
-  if (/medical|health|pharmacy|medicine|vitamin|first aid|thermometer|blood pressure/.test(t)) return "medical";
-  if (/textbook|school|backpack|calculator|notebook|course|tuition/.test(t)) return "education";
-  if (/laptop|computer|tablet|chromebook|ipad|monitor|keyboard|headphone|electronics/.test(t)) return "equipment";
+  if (/medical|pharmacy|medicine|vitamin|first aid|thermometer|blood pressure/.test(t)) return "medical";
+  if (/textbook|school|backpack|calculator|notebook|tuition/.test(t)) return "education";
+  if (/laptop|computer|tablet|chromebook|ipad|monitor|keyboard|headphone/.test(t)) return "equipment";
   if (/phone|smartphone/.test(t)) return "phone";
-  if (/cloth|apparel|shoe|boot|coat|jacket|sweater|shirt|pants|sock/.test(t)) return "clothing";
-  if (/grocery|food|snack|meal/.test(t)) return "food";
+  if (/coat|jacket|sweater|shirt|pants|sock|shoe|boot/.test(t)) return "clothing";
   if (/ticket|concert|admission/.test(t)) return "event";
-  if (/bike|bicycle|scooter|transit|bus pass/.test(t)) return "transport";
+  if (/bike|bicycle|scooter|bus pass/.test(t)) return "transport";
   return "personal";
 }
-export const isGiftCard = (title: string) => /gift ?card|e-?gift|store credit|prepaid (visa|card)/i.test(title);
 
 function normalize(p: C3Product): FoundProduct | null {
   const offer = (p.offers ?? []).find((o) => o.availability === "InStock") ?? p.offers?.[0];
   if (!offer) return null;
   const img = p.images?.find((i) => i.is_main_image) ?? p.images?.[0];
-  const path = Array.isArray(p.category?.path) ? p.category.path.join(" > ") : (p.category?.path ?? p.category?.title ?? null);
+  const raw = p.category?.path;
+  const path = Array.isArray(raw) ? raw.map((x) => (typeof x === "string" ? x : (x.title ?? x.slug ?? ""))).filter(Boolean).join(" > ") : (raw ?? p.category?.title ?? null);
   return {
     id: p.id,
     title: p.title,
@@ -87,7 +113,7 @@ function normalize(p: C3Product): FoundProduct | null {
 /** Each product through the rules: paid straight to the retailer, what happens to the check. */
 export function checkProducts(products: FoundProduct[], profile: Profile, date: string): CheckedProduct[] {
   return products.map((p) => {
-    const giftCard = isGiftCard(p.title);
+    const giftCard = isGiftCard(p.title, p.categoryPath);
     const category = categoryFor(p.title, p.categoryPath);
     if (giftCard) {
       const cash = evaluateGift({ id: p.id, date, amount: p.price, delivery: "cash", category: "other" }, profile);

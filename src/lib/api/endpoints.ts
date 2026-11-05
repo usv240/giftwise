@@ -76,7 +76,7 @@ export const ENDPOINTS: Endpoint[] = [
     path: "/api/v1/ask-rules",
     title: "Ask the rulebook",
     summary:
-      "Ask a question about SSI and gifts in plain words. Elasticsearch finds the passages (hybrid keyword and semantic search with jina-embeddings-v3) across the regulations, SSA's operating manual and its worked examples; Claude answers from only those passages, and a program checks every quote word for word.",
+      "Ask a question about SSI and gifts in plain words. Elasticsearch finds the passages (hybrid keyword and semantic search with jina-embeddings-v3, reranked by jina-reranker-v3) across the regulations, SSA's operating manual and its worked examples; Claude answers from only those passages, and a program checks every quote word for word.",
     example: { question: "Does it count as income if my sister pays my phone bill?" },
     ai: true,
     keyed: true,

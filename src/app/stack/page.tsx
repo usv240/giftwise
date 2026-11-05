@@ -56,7 +56,7 @@ const TOOLS: Tool[] = [
     id: "elastic",
     name: "Elasticsearch",
     job: "Ask the rulebook: finds the passages that answer a question about SSI and gifts.",
-    how: "Hybrid retrieval over the regulations, SSA's operating manual, its worked examples and the rule table: multi_match plus a semantic query on a semantic_text field with jina-embeddings-v3, fused by reciprocal rank (RRF). Claude answers from only those passages and a program checks every quote word for word. Without Elastic, an in-app BM25 ranking stands in.",
+    how: "Hybrid retrieval over the regulations, SSA's operating manual, its worked examples and the rule table: multi_match plus a semantic query on a semantic_text field with jina-embeddings-v3, fused by reciprocal rank (RRF), then the top 20 reranked by jina-reranker-v3. Claude answers from only those passages and a program checks every quote word for word. Without Elastic, an in-app BM25 ranking stands in.",
     files: ["src/lib/rulebook.ts", "src/app/api/v1/ask-rules/route.ts", "src/components/learn/AskRulebook.tsx"],
   },
   {

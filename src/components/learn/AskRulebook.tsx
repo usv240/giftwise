@@ -4,7 +4,7 @@ import { useState } from "react";
 
 type Passage = { id: string; kind: string; cite: string; title: string; text: string; url: string | null; score: number };
 type Quote = { cite: string; passage_id: string; quote: string; found_word_for_word: boolean; url: string | null };
-type Result = { question: string; answer: string | null; quotes: Quote[]; passages: Passage[]; retrieval: { engine: string; model: string | null }; ai: boolean };
+type Result = { question: string; answer: string | null; quotes: Quote[]; passages: Passage[]; retrieval: { engine: string; model: string | null; reranker?: string | null }; ai: boolean };
 
 const EXAMPLES = ["Does it count if my sister pays my phone bill?", "Can my mom pay my rent?", "Is a gift card counted as income?", "Can a gift go into an ABLE account?"];
 const KIND: Record<string, string> = { regulation: "Regulation", manual: "SSA's operating manual", example: "SSA's worked example", rule: "Giftwise rule" };
@@ -30,7 +30,10 @@ export function AskRulebook() {
       setBusy(false);
     }
   }
-  const engine = res?.retrieval.engine === "elasticsearch" ? `Found by Elasticsearch: keyword and semantic search${res.retrieval.model && res.retrieval.model !== "default" ? ` with ${res.retrieval.model.replace(/^\./, "")}` : ""}, fused by rank.` : "Found by keyword search in the app.";
+  const engine =
+    res?.retrieval.engine === "elasticsearch"
+      ? `Found by Elasticsearch: keyword and semantic search${res.retrieval.model && res.retrieval.model !== "default" ? ` with ${res.retrieval.model.replace(/^\./, "")}` : ""}, fused by rank${res.retrieval.reranker ? `, then reranked by ${res.retrieval.reranker.replace(/^\./, "")}` : ""}.`
+      : "Found by keyword search in the app.";
   return (
     <section className="ask" aria-labelledby="ask-h" data-ui>
       <h2 id="ask-h" className="ask-h">

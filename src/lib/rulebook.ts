@@ -1,6 +1,7 @@
 /**
  * "Ask the rulebook": a small agent over SSI's own text. Step 1, retrieve: Elasticsearch hybrid search (keyword plus
- * semantic, with jina-embeddings-v3 on Elastic's inference service, fused by reciprocal rank) over the regulations,
+ * semantic, with jina-embeddings-v3 on Elastic's inference service, fused by reciprocal rank, then reranked by
+ * jina-reranker-v3) over the regulations,
  * SSA's operating manual, its worked examples, and Giftwise's rule table. Without ELASTIC_URL and ELASTIC_API_KEY,
  * an in-app keyword ranking (BM25) stands in. Step 2, answer: Claude answers in plain words from only the passages
  * retrieved. Step 3, check: a program confirms every quote appears word for word in the passage it cites.
@@ -141,26 +142,35 @@ export function localSearch(query: string, k = 6): (RuleDoc & { score: number })
     .slice(0, k);
 }
 
-export type Retrieved = { mode: "elastic" | "local"; model: string | null; docs: (RuleDoc & { score: number })[] };
+export type Retrieved = { mode: "elastic" | "local"; model: string | null; reranker: string | null; docs: (RuleDoc & { score: number })[] };
 
-/** Step 1: retrieve. Elastic's hybrid search when connected, the in-app ranking otherwise or if Elastic does not answer. */
+const RERANKER = ".jina-reranker-v3";
+const SOURCE = ["id", "kind", "cite", "title", "text", "url"];
+
+/**
+ * Step 1: retrieve. On Elastic, three stages in one request: keyword and semantic retrievers fused by reciprocal rank,
+ * then the top 20 reranked by jina-reranker-v3 against the question. If the reranker does not answer, the fused
+ * ranking is used; if Elastic does not answer, the in-app ranking.
+ */
 export async function retrieve(query: string, k = 6): Promise<Retrieved> {
   if (elasticConfigured()) {
     try {
       const idx = await ensureIndex();
       const lexical = { standard: { query: { multi_match: { query, fields: ["cite^3", "title^2", "text"] } } } };
-      const body = idx.semantic
-        ? { retriever: { rrf: { retrievers: [lexical, { standard: { query: { semantic: { field: "semantic", query } } } }], rank_window_size: 30 } }, size: k, _source: ["id", "kind", "cite", "title", "text", "url"] }
-        : { query: lexical.standard.query, size: k, _source: ["id", "kind", "cite", "title", "text", "url"] };
-      const r = await es<{ hits?: { hits?: { _score: number | null; _source: RuleDoc }[] } }>(`/${INDEX}/_search`, { method: "POST", body: JSON.stringify(body) });
-      if (r.status < 300 && r.body.hits?.hits) {
-        return { mode: "elastic", model: idx.model, docs: r.body.hits.hits.map((h, i) => ({ ...h._source, score: h._score ?? Math.round((1 / (i + 1)) * 1000) / 1000 })) };
+      const fused = { rrf: { retrievers: [lexical, { standard: { query: { semantic: { field: "semantic", query } } } }], rank_window_size: 30 } };
+      const search = (body: unknown) => es<{ hits?: { hits?: { _score: number | null; _source: RuleDoc }[] } }>(`/${INDEX}/_search`, { method: "POST", body: JSON.stringify(body) });
+      const toDocs = (hits: { _score: number | null; _source: RuleDoc }[]) => hits.map((h, i) => ({ ...h._source, score: Math.round((h._score ?? 1 / (i + 1)) * 1000) / 1000 }));
+      if (idx.semantic) {
+        const ranked = await search({ retriever: { text_similarity_reranker: { retriever: fused, field: "text", inference_id: RERANKER, inference_text: query, rank_window_size: 20 } }, size: k, _source: SOURCE });
+        if (ranked.status < 300 && ranked.body.hits?.hits) return { mode: "elastic", model: idx.model, reranker: RERANKER, docs: toDocs(ranked.body.hits.hits) };
       }
+      const r = await search(idx.semantic ? { retriever: fused, size: k, _source: SOURCE } : { query: lexical.standard.query, size: k, _source: SOURCE });
+      if (r.status < 300 && r.body.hits?.hits) return { mode: "elastic", model: idx.model, reranker: null, docs: toDocs(r.body.hits.hits) };
     } catch {
       /* fall through to the in-app ranking */
     }
   }
-  return { mode: "local", model: null, docs: localSearch(query, k) };
+  return { mode: "local", model: null, reranker: null, docs: localSearch(query, k) };
 }
 
 const norm = (s: string) => s.toLowerCase().replace(/[“”"]/g, '"').replace(/[‘’']/g, "'").replace(/\s+/g, " ").trim();

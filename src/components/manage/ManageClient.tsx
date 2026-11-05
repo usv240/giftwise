@@ -419,7 +419,17 @@ export function GiftFinder({ token, onAdded }: { token: string; onAdded: () => v
                   {p.image ? (
                     // Product images come from many retailers' hosts, so a plain img is used rather than next/image.
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.image} alt={p.imageAlt ?? p.title} loading="lazy" decoding="async" />
+                    <img
+                      src={p.image}
+                      alt={p.imageAlt ?? p.title}
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        // A broken photo shows the category instead of an empty frame.
+                        const el = e.currentTarget;
+                        el.replaceWith(Object.assign(document.createElement("span"), { className: "mg-find-noimg", textContent: p.category.replace("_", " ") }));
+                      }}
+                    />
                   ) : (
                     <span className="mg-find-noimg">{p.category.replace("_", " ")}</span>
                   )}

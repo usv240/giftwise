@@ -104,7 +104,7 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       id: "elastic",
       name: "Elasticsearch rulebook search",
       mode: elasticConfigured() ? "live" : "fallback",
-      detail: elasticConfigured() ? "Hybrid keyword and semantic search with jina-embeddings-v3 over the regulations, SSA's manual and its worked examples" : "Ask the rulebook uses the in-app keyword search until ELASTIC_URL and ELASTIC_API_KEY are set",
+      detail: elasticConfigured() ? "Hybrid keyword and semantic search with jina-embeddings-v3, reranked by jina-reranker-v3, over the regulations, SSA's manual and its worked examples" : "Ask the rulebook uses the in-app keyword search until ELASTIC_URL and ELASTIC_API_KEY are set",
     },
     { id: "database", name: "Postgres", mode: database?.ok ? "live" : "not_connected", detail: database ? database.detail : "DATABASE_URL not set", ms: database?.ms },
     {
