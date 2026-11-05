@@ -6,7 +6,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { audit } from "./audit";
 import { db, schema } from "./db";
 import { DEFAULT_PROFILE, SHELTER_CATEGORIES, computeMonth, evaluateGift, monthName, monthOf, pronounWords, type Category, type Delivery, type Profile, type Pronoun } from "./rules";
@@ -40,7 +40,14 @@ export function routeNeed(name: string, pronoun: Pronoun, n: NeedInput) {
 export async function householdByToken(token: string) {
   if (!token || token.length > 64) return null;
   const [h] = await db().select().from(schema.households).where(eq(schema.households.manageTokenHash, hashToken(token))).limit(1);
-  return h ?? null;
+  if (h || token !== SAMPLE_MANAGE_TOKEN) return h ?? null;
+  // A database made before manage links: give the sample its public organizer link on first use.
+  const [sample] = await db()
+    .update(schema.households)
+    .set({ manageTokenHash: hashToken(SAMPLE_MANAGE_TOKEN) })
+    .where(and(eq(schema.households.slug, "maya"), isNull(schema.households.manageTokenHash)))
+    .returning();
+  return sample ?? null;
 }
 
 export async function manageView(token: string) {
