@@ -19,7 +19,7 @@ async function handle(req: Request) {
     const run = await runReviewers({ description: b.description, gift: { id: "review", date: b.date ?? today(), amount: b.amount, delivery: "vendor", category: b.category, recurring: b.recurring } }, profile);
     return ok(reviewPayload(run), started, { model: run.model });
   } catch (e) {
-    if (e instanceof AiUnavailableError) return fail("upstream_unavailable", e.message, 503);
+    if (e instanceof AiUnavailableError) return fail("upstream_unavailable", `${e.message} Open the Electric bill example to see a recorded review.`, 503);
     if (e instanceof AiRefusedError) return fail("upstream_unavailable", "The reviewers could not answer this one. Try describing the bill in other words.", 422);
     console.error("review-bill failed", e);
     return fail("internal", "Something went wrong while the reviewers worked. Please try again.", 500);

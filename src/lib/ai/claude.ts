@@ -6,8 +6,18 @@ export const MODEL = "claude-opus-5-5";
 const FALLBACK_BETA = "server-side-fallback-2026-07-01";
 
 let client: Anthropic | null = null;
+/**
+ * When the API turns this server's account away (billing, a revoked key), every AI feature uses its no-key fallback for
+ * three minutes instead of failing one request at a time: the ready-made examples, the recorded agent run, keyword answers.
+ */
+const PAUSE_MS = 3 * 60_000;
+let pausedUntil = 0;
 export function aiAvailable() {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
+  return Boolean(process.env.ANTHROPIC_API_KEY) && Date.now() >= pausedUntil;
+}
+/** True while the account is paused after the API turned it away. */
+export function aiPaused() {
+  return Boolean(process.env.ANTHROPIC_API_KEY) && Date.now() < pausedUntil;
 }
 export function claude() {
   if (!aiAvailable()) return null;
@@ -16,11 +26,29 @@ export function claude() {
 }
 
 export class AiUnavailableError extends Error {
-  constructor() {
-    super("The AI service is not connected on this server yet.");
+  constructor(message = "The AI service is not connected on this server yet.") {
+    super(message);
   }
 }
 export class AiRefusedError extends Error {}
+
+/**
+ * An error from the API, as Giftwise handles it. The account turned away (400 on billing, 401, 403): pause and use the
+ * fallbacks. Busy or unreachable after the SDK's own retries (429, 5xx, a dropped connection): this request falls back.
+ * Anything else is a real bug and is passed on.
+ */
+export function aiError(e: unknown): unknown {
+  if (e instanceof Anthropic.APIConnectionError) return new AiUnavailableError("The AI service could not be reached just now. Please try again in a minute.");
+  if (!(e instanceof Anthropic.APIError)) return e;
+  const account = e.status === 401 || e.status === 403 || (e.status === 400 && /credit balance|billing|plans? & billing/i.test(e.message));
+  if (account) {
+    pausedUntil = Date.now() + PAUSE_MS;
+    console.error(`Claude API turned the account away (${e.status}); AI features use their fallbacks for three minutes.`);
+    return new AiUnavailableError("The AI service is not available on this server just now, so the ready-made examples are shown.");
+  }
+  if (e.status === 429 || (e.status !== undefined && e.status >= 500)) return new AiUnavailableError("The AI service is busy just now. Please try again in a minute.");
+  return e;
+}
 
 /**
  * Structured output with server-side fallbacks. Thinking is adaptive (Opus 5.5 cannot disable it);
@@ -35,15 +63,19 @@ export async function structured<S extends z.ZodType>(opts: {
 }): Promise<{ data: z.infer<S>; usage: unknown; model: string }> {
   const c = claude();
   if (!c) throw new AiUnavailableError();
-  const res = await c.beta.messages.parse({
-    model: MODEL,
-    max_tokens: opts.maxTokens ?? 16000,
-    betas: [FALLBACK_BETA],
-    fallbacks: "default",
-    system: opts.system,
-    output_config: { effort: opts.effort ?? "medium", format: betaZodOutputFormat(opts.schema) },
-    messages: [{ role: "user", content: opts.content }],
-  });
+  const res = await c.beta.messages
+    .parse({
+      model: MODEL,
+      max_tokens: opts.maxTokens ?? 16000,
+      betas: [FALLBACK_BETA],
+      fallbacks: "default",
+      system: opts.system,
+      output_config: { effort: opts.effort ?? "medium", format: betaZodOutputFormat(opts.schema) },
+      messages: [{ role: "user", content: opts.content }],
+    })
+    .catch((e: unknown) => {
+      throw aiError(e);
+    });
   if (res.stop_reason === "refusal" || !res.parsed_output) {
     throw new AiRefusedError("The AI could not complete this request.");
   }

@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { AiUnavailableError, MODEL, claude } from "@/lib/ai/claude";
+import { AiUnavailableError, MODEL, aiError, claude } from "@/lib/ai/claude";
 import { paypalRest } from "@/lib/paypal/client";
 import { connectPayPalMcp, type PayPalMcpClient } from "./paypal-mcp";
 
@@ -112,7 +112,9 @@ export async function runAgentDemo(origin: string, asks = DEMO_ASKS) {
 /** One user turn: call tools over MCP until the assistant answers. */
 async function converse(c: Anthropic, tools: Anthropic.Tool[], messages: Anthropic.MessageParam[], steps: Step[], mcp: McpClient, paypal: { mcp?: PayPalMcpClient | null }) {
   for (let turn = 0; turn < 8; turn++) {
-    const res = await c.messages.create({ model: MODEL, max_tokens: 8000, system: SYSTEM, tools, messages, thinking: { type: "adaptive" } });
+    const res = await c.messages.create({ model: MODEL, max_tokens: 8000, system: SYSTEM, tools, messages, thinking: { type: "adaptive" } }).catch((e: unknown) => {
+      throw aiError(e);
+    });
     for (const b of res.content) if (b.type === "text" && b.text.trim()) steps.push({ kind: "say", text: b.text.trim() });
     messages.push({ role: "assistant", content: res.content });
     if (res.stop_reason !== "tool_use") return;

@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { and, count, eq, gte } from "drizzle-orm";
 import type { AgLlmRequest } from "ag-studio";
-import { claude } from "@/lib/ai/claude";
+import { aiError, claude } from "@/lib/ai/claude";
 import { fail } from "@/lib/api/envelope";
 import { clientId } from "@/lib/api/keys";
 import { db, dbConfigured, schema } from "@/lib/db";
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
           else throw e;
         }
       } catch (e) {
+        aiError(e); // pauses the AI features if the API turned the account away
         console.error("studio-ai turn failed", e instanceof Error ? e.message : e);
         send({ error: "The assistant could not answer just now. Please try again." });
       } finally {

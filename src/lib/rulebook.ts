@@ -9,7 +9,7 @@
 import { z } from "zod";
 import authorities from "../../content/authorities.json";
 import ssaExamples from "../../content/eval/ssa-examples.json";
-import { aiAvailable, structured } from "./ai/claude";
+import { AiUnavailableError, aiAvailable, structured } from "./ai/claude";
 import { RULES } from "./rules/table";
 
 export type RuleDoc = { id: string; kind: "regulation" | "manual" | "example" | "rule"; cite: string; title: string; text: string; url: string | null };
@@ -196,14 +196,21 @@ export async function askRulebook(question: string): Promise<Asked> {
   const retrieval = await retrieve(question, 6);
   if (!aiAvailable() || retrieval.docs.length === 0) return { question, retrieval, answer: null, quotes: [], ai: false };
   const context = retrieval.docs.map((d) => `[${d.id}] ${d.cite}, ${d.title}\n${d.text}`).join("\n\n");
-  const { data } = await structured({
-    schema: Answer,
-    effort: "low",
-    maxTokens: 2000,
-    system:
-      "You explain US Supplemental Security Income (SSI) rules about gifts and help from others. Use only the passages given. Quote them exactly. Never compute a benefit amount. If the passages do not answer the question, say that they do not.",
-    content: [{ type: "text", text: `Passages:\n\n${context}\n\nQuestion: ${question}` }],
-  });
+  let data: z.infer<typeof Answer>;
+  try {
+    ({ data } = await structured({
+      schema: Answer,
+      effort: "low",
+      maxTokens: 2000,
+      system:
+        "You explain US Supplemental Security Income (SSI) rules about gifts and help from others. Use only the passages given. Quote them exactly. Never compute a benefit amount. If the passages do not answer the question, say that they do not.",
+      content: [{ type: "text", text: `Passages:\n\n${context}\n\nQuestion: ${question}` }],
+    }));
+  } catch (e) {
+    // The passages stand on their own: with the AI busy or away, they are the answer.
+    if (e instanceof AiUnavailableError) return { question, retrieval, answer: null, quotes: [], ai: false };
+    throw e;
+  }
   const byId = new Map(retrieval.docs.map((d) => [d.id, d]));
   const quotes = data.quotes.flatMap((q) => {
     const doc = byId.get(q.doc_id);

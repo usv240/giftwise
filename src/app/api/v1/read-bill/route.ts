@@ -54,7 +54,7 @@ async function handle(req: Request) {
     );
     return ok({ bill, check: { check_after: result.checkAfter, best_route: result.bestRoute, check_with_best_route: result.checkWithBestRoute, rule_ids: result.ruleIds, ambiguous: result.ambiguous, explanation: result.explanation } }, started, { model });
   } catch (e) {
-    if (e instanceof AiUnavailableError) return fail("upstream_unavailable", e.message, 503);
+    if (e instanceof AiUnavailableError) return fail("upstream_unavailable", `${e.message} Open the Wheelchair repair or Electric bill example to see the full result.`, 503);
     if (e instanceof AiRefusedError) return fail("upstream_unavailable", "The AI could not read this document. Try a clearer photo.", 422);
     console.error("read-bill failed", e);
     return fail("internal", "Something went wrong while reading the bill. Please try again.", 500);

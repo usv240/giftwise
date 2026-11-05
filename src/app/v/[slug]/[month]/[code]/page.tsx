@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
+import { connection } from "next/server";
 import { today } from "@/lib/api/envelope";
 import { verifyReport, type LineCheck } from "@/lib/report/verify";
 import { usd } from "@/lib/rules";
@@ -38,6 +39,8 @@ function PayPalCell({ c }: { c: LineCheck }) {
 }
 
 async function Check({ params }: { params: Promise<Params> }) {
+  // A check is made now, against PayPal and the ledger as they are: always at request time.
+  await connection();
   const { slug, month, code } = await params;
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || !/^[0-9A-Za-z]{5}-[0-9A-Za-z]{5}$/.test(code)) notFound();
   const v = await verifyReport(slug, month, code, today());

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { aiAvailable } from "./ai/claude";
+import { aiAvailable, aiPaused } from "./ai/claude";
 import { latestRun } from "./checks";
 import { db, dbConfigured } from "./db";
 import { accessToken, paypalConfigured } from "./paypal/client";
@@ -67,7 +67,7 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
   const age = run ? (run.ageMinutes < 60 ? `${run.ageMinutes} min ago` : `${Math.round(run.ageMinutes / 60)} h ago`) : "";
   return [
     { id: "paypal", name: "PayPal sandbox", mode: pp?.ok ? "live" : "not_connected", detail: pp ? pp.detail : "Credentials not set", ms: pp?.ms },
-    { id: "claude", name: "Claude Opus 5.5", mode: aiAvailable() ? "live" : "fallback", detail: aiAvailable() ? "API key set; bill and fundraiser reading are live" : "Ready-made examples show saved results" },
+    { id: "claude", name: "Claude Opus 5.5", mode: aiAvailable() ? "live" : "fallback", detail: aiAvailable() ? "API key set; bill and fundraiser reading are live" : aiPaused() ? "The API is not taking requests from this account just now; ready-made examples show saved results" : "Ready-made examples show saved results" },
     {
       id: "webhooks",
       name: "PayPal webhooks",

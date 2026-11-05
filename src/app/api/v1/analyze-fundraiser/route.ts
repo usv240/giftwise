@@ -1,7 +1,7 @@
 import { guard } from "@/lib/api/keys";
 import { fail, ok, today } from "@/lib/api/envelope";
 import { AnalyzeFundraiserRequest } from "@/lib/api/schemas";
-import { AiRefusedError, aiAvailable } from "@/lib/ai/claude";
+import { AiRefusedError, AiUnavailableError, aiAvailable } from "@/lib/ai/claude";
 import { readFundraiser } from "@/lib/ai/tasks";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Category } from "@/lib/rules";
 import { readBundledSample, readPage, safePublicUrl } from "@/lib/sponsors/kernel";
@@ -55,6 +55,7 @@ async function handle(req: Request) {
       { model },
     );
   } catch (e) {
+    if (e instanceof AiUnavailableError) return fail("upstream_unavailable", `${e.message} Open the Accessible van fundraiser example to see the full result.`, 503);
     if (e instanceof AiRefusedError) return fail("upstream_unavailable", "The AI could not read this page.", 422);
     console.error("analyze-fundraiser failed", e);
     return fail("internal", "Something went wrong while reading the page. Please try again.", 500);
