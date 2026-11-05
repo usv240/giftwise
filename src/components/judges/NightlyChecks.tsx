@@ -25,7 +25,7 @@ export async function NightlyChecks() {
   const canStart = Boolean(workflowTask());
   if (!run) {
     return (
-      <div className="nc" data-ui>
+      <div className="jx-result nc" data-ui>
         <RunChecks canStart={canStart} />
         <p className="nc-empty">No run has been filed yet on this server. The first nightly run fills this in.</p>
       </div>
@@ -37,39 +37,48 @@ export async function NightlyChecks() {
   const meta = hosted
     ? `${WHEN.format(new Date(run.finishedAt))} ET, the hosted run on Render Workflows${run.runId ? `, task run ${run.runId}` : ""}. Every check ran at once and the whole run took ${secs} seconds.`
     : `Last run on the developer's machine, ${DAY.format(new Date(run.finishedAt))}. The hosted nightly run shows here once it completes. Every check ran at once and the whole run took ${secs} seconds.`;
+  const groups = GROUPS.map((g) => ({ ...g, rows: run.results.filter((r) => r.group === g.id) })).filter((g) => g.rows.length);
   return (
-    <div className="nc" data-ui>
-      <p className="nc-verdict" data-all={run.passed === run.total ? "" : undefined}>
-        <span className="tabular">
-          {run.passed} of {run.total}
-        </span>{" "}
-        checks passed {ago(run.ageMinutes)}.
-      </p>
-      <p className="nc-meta muted">{meta}</p>
-      <RunChecks canStart={canStart} />
-      <div className="nc-groups">
-        {GROUPS.map((g) => {
-          const rows = run.results.filter((r) => r.group === g.id);
-          if (!rows.length) return null;
-          return (
-            <section key={g.id} className="nc-group" aria-label={g.title}>
-              <h3>
-                {g.title} <span className="muted tabular">{rows.filter((r) => r.ok).length}/{rows.length}</span>
-              </h3>
-              <ul>
-                {rows.map((r) => (
-                  <li key={r.id} data-ok={r.ok ? "" : undefined}>
-                    <span className="nc-state">{r.ok ? "Passed" : "Needs a look"}</span>
-                    <span className="nc-title">{r.title}</span>
-                    <span className="nc-ms tabular muted tech-only">{r.ms >= 1000 ? `${(r.ms / 1000).toFixed(1)} s` : `${r.ms} ms`}</span>
-                    <span className="nc-detail tech-only">{r.detail}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
+    <>
+      <div className="jx-result nc" data-ui>
+        <p className="nc-verdict" data-all={run.passed === run.total ? "" : undefined}>
+          <span className="tabular">
+            {run.passed} of {run.total}
+          </span>{" "}
+          checks passed {ago(run.ageMinutes)}.
+        </p>
+        <p className="nc-meta muted">{meta}</p>
+        <RunChecks canStart={canStart} />
       </div>
-    </div>
+      <div className="jx-more">
+        <details className="jx-disc">
+          <summary>All {run.total} checks, with each result</summary>
+          <div className="jx-body">
+            <div className="nc-groups">
+              {groups.map((g) => (
+                <section key={g.id} className="nc-group" aria-label={g.title}>
+                  <h3>
+                    {g.title}{" "}
+                    <span className="muted tabular">
+                      {g.rows.filter((r) => r.ok).length}/{g.rows.length}
+                    </span>
+                  </h3>
+                  <ul>
+                    {g.rows.map((r) => (
+                      <li key={r.id} data-ok={r.ok ? "" : undefined}>
+                        <span className="nc-state">{r.ok ? "Passed" : "Needs a look"}</span>
+                        <span className="nc-title">{r.title}</span>
+                        <span className="nc-ms tabular muted tech-only">{r.ms >= 1000 ? `${(r.ms / 1000).toFixed(1)} s` : `${r.ms} ms`}</span>
+                        <span className="nc-detail tech-only">{r.detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </div>
+        </details>
+      </div>
+    </>
   );
 }

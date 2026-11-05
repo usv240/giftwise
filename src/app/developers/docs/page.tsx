@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Info } from "@/components/Info";
+import { OpenOnHash } from "@/components/OpenOnHash";
+import { OpenAll } from "@/components/developers/OpenAll";
 import { Toc } from "@/components/learn/Toc";
 import { ENDPOINTS, ERRORS } from "@/lib/api/endpoints";
 import { LIMITS } from "@/lib/api/keys";
@@ -8,6 +10,7 @@ import { openapi } from "@/lib/api/openapi";
 import { RECORDED_ON, docExamples } from "./examples";
 import "../../pages.css";
 import "../../learn/toc.css";
+import "../../learn/disclosure.css";
 import "../dev.css";
 
 export const metadata: Metadata = { title: "API docs", description: "Every Giftwise endpoint, its fields, errors and limits." };
@@ -85,88 +88,101 @@ export default function DocsPage() {
             </div>
           </section>
 
-          {ENDPOINTS.map((e) => {
-            const op = (spec.paths[e.path] as Record<string, { requestBody?: { content?: Record<string, { schema?: JsonSchema }> } }>)[e.method.toLowerCase()];
-            const schema = op?.requestBody?.content?.["application/json"]?.schema ?? op?.requestBody?.content?.["multipart/form-data"]?.schema;
-            const rows = schema ? fields(schema) : [];
-            const ex = examples[e.id];
-            return (
-              <section key={e.id} id={e.id} className="page-section doc-ep doc-sec" aria-labelledby={`${e.id}-h`}>
-                <div className="title-row">
-                  <h2 id={`${e.id}-h`}>{e.title}</h2>
-                  {e.ai && <span className="dev-tag">Claude</span>}
-                </div>
-                <p className="dev-route tabular">
-                  <code>
-                    <span className="dev-method">{e.method}</span> {e.path}
-                  </code>
-                </p>
-                <p className="page-prose">{e.summary}</p>
-                {rows.length > 0 && (
-                  <div className="doc-table-wrap" tabIndex={0} role="region" aria-label={`${e.title} fields`}>
-                    <table className="doc-table doc-fields">
-                      <thead>
-                        <tr>
-                          <th scope="col">Field</th>
-                          <th scope="col">Type</th>
-                          <th scope="col">About</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.map((r) => (
-                          <tr key={r.name}>
-                            <td className="doc-name">
-                              <code>{r.name}</code>
-                              {r.required && <span className="doc-req"> required</span>}
-                            </td>
-                            <td className="doc-type">
-                              <code>{r.type}</code>
-                            </td>
-                            <td>{r.about}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-                {ex && (
-                  <div className="doc-examples">
-                    <figure className="doc-example">
-                      <figcaption className="doc-cap">
-                        Example request
-                        {ex.sampleBill && (
-                          <>
-                            , with the{" "}
-                            <a className="text-link" href={ex.sampleBill}>
-                              sample electric bill
-                            </a>
-                          </>
-                        )}
-                      </figcaption>
-                      <pre className="dev-pre tabular" tabIndex={0} aria-label={`${e.title}: example request`}>
-                        {ex.request}
-                      </pre>
-                    </figure>
-                    <figure className="doc-example">
-                      <figcaption className="doc-cap">
-                        Example response <span className="muted">{ex.how === "computed" ? "Computed by the rules engine when this page was built." : `Recorded from the live API on ${RECORDED_ON}.`}</span>
-                      </figcaption>
-                      <pre className="dev-pre tabular doc-response" tabIndex={0} aria-label={`${e.title}: example response`}>
-                        {ex.response}
-                      </pre>
-                    </figure>
-                  </div>
-                )}
-                {e.id !== "health" && (
-                  <p>
-                    <Link className="text-link" href={`/developers?endpoint=${e.id}#playground`}>
-                      Try it in the playground
-                    </Link>
-                  </p>
-                )}
-              </section>
-            );
-          })}
+          <section className="page-section doc-eps" aria-labelledby="endpoints-h">
+            <div className="doc-eps-head">
+              <h2 id="endpoints-h">Endpoints</h2>
+              <OpenAll selector=".doc-ep" controls={ENDPOINTS.map((e) => e.id).join(" ")} />
+            </div>
+            <p className="page-prose">{ENDPOINTS.length} endpoints. Each one opens to its fields, an example request and the response.</p>
+            <div className="doc-ep-list">
+              {ENDPOINTS.map((e) => {
+                const op = (spec.paths[e.path] as Record<string, { requestBody?: { content?: Record<string, { schema?: JsonSchema }> } }>)[e.method.toLowerCase()];
+                const schema = op?.requestBody?.content?.["application/json"]?.schema ?? op?.requestBody?.content?.["multipart/form-data"]?.schema;
+                const rows = schema ? fields(schema) : [];
+                const ex = examples[e.id];
+                return (
+                  <details key={e.id} id={e.id} className="dsc doc-ep doc-sec">
+                    <summary>
+                      <h3 id={`${e.id}-h`} className="dsc-k">
+                        {e.title}
+                      </h3>
+                      <span className="dev-route tabular">
+                        <code>
+                          <span className="dev-method">{e.method}</span> {e.path}
+                        </code>
+                        {e.ai && <span className="dev-tag">Claude</span>}
+                      </span>
+                      <span className="doc-ep-line">{e.summary}</span>
+                    </summary>
+                    <div className="doc-ep-body">
+                      {rows.length > 0 && (
+                        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label={`${e.title} fields`}>
+                          <table className="doc-table doc-fields">
+                            <thead>
+                              <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">About</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {rows.map((r) => (
+                                <tr key={r.name}>
+                                  <td className="doc-name">
+                                    <code>{r.name}</code>
+                                    {r.required && <span className="doc-req"> required</span>}
+                                  </td>
+                                  <td className="doc-type">
+                                    <code>{r.type}</code>
+                                  </td>
+                                  <td>{r.about}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                      {ex && (
+                        <div className="doc-examples">
+                          <figure className="doc-example">
+                            <figcaption className="doc-cap">
+                              Example request
+                              {ex.sampleBill && (
+                                <>
+                                  , with the{" "}
+                                  <a className="text-link" href={ex.sampleBill}>
+                                    sample electric bill
+                                  </a>
+                                </>
+                              )}
+                            </figcaption>
+                            <pre className="dev-pre tabular" tabIndex={0} aria-label={`${e.title}: example request`}>
+                              {ex.request}
+                            </pre>
+                          </figure>
+                          <figure className="doc-example">
+                            <figcaption className="doc-cap">
+                              Example response <span className="muted">{ex.how === "computed" ? "Computed by the rules engine when this page was built." : `Recorded from the live API on ${RECORDED_ON}.`}</span>
+                            </figcaption>
+                            <pre className="dev-pre tabular doc-response" tabIndex={0} aria-label={`${e.title}: example response`}>
+                              {ex.response}
+                            </pre>
+                          </figure>
+                        </div>
+                      )}
+                      {e.id !== "health" && (
+                        <p>
+                          <Link className="text-link" href={`/developers?endpoint=${e.id}#playground`}>
+                            Try it in the playground
+                          </Link>
+                        </p>
+                      )}
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
+          </section>
 
           <section id="errors" className="page-section doc-sec" aria-labelledby="errors-h">
             <h2 id="errors-h">Errors</h2>
@@ -184,6 +200,7 @@ export default function DocsPage() {
           </section>
         </div>
       </div>
+      <OpenOnHash />
     </div>
   );
 }

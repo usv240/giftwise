@@ -25,7 +25,7 @@
 .learn-main {
   grid-column: 4 / span 7;
   display: grid;
-  gap: clamp(4rem, 3rem + 3vw, 6rem);
+  gap: clamp(3rem, 2.25rem + 2.5vw, 4.5rem);
 }
 .topic {
   display: grid;
@@ -35,7 +35,8 @@
 }
 /* About 70 characters a line for reading; the example cards and source lines keep the full column. */
 .topic > p:not(.topic-sources),
-.topic > .glossary:not(.words) {
+.topic > .glossary:not(.words),
+.topic-more > .glossary {
   max-width: 36rem;
 }
 .topic-title {
@@ -95,6 +96,17 @@
 }
 .gloss-row dd {
   margin: 0.25rem 0 0;
+}
+/* The glossary and the sources: a row that names what opens, between two hairlines, the list below it once open. */
+.topic-more {
+  border-block: 1px solid var(--surface-2);
+}
+.topic-more[open] {
+  padding-bottom: 1.25rem;
+}
+.topic-more > .glossary,
+.topic-more-body {
+  margin-top: 0.75rem;
 }
 .source-group + .source-group {
   margin-top: 0.75rem;

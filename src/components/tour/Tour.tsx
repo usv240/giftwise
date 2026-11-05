@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { openAround } from "@/components/OpenOnHash";
 import { TOUR, TOUR_KEY, onStepPage } from "./steps";
 
 const read = () => {
@@ -76,6 +77,8 @@ export function Tour() {
       const el = document.querySelector<HTMLElement>(s.target);
       if (el || ++tries > 40) window.clearInterval(timer);
       if (!el) return;
+      // A stop whose element sits in a collapsed disclosure opens it first, so the ring is never on something hidden.
+      openAround(el);
       placeFor(el);
       el.setAttribute("data-tour-target", "");
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

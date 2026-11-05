@@ -106,9 +106,9 @@ export function ViewMenu({ lang = "en" }: { lang?: "en" | "es" }) {
                 label={w.theme[0]}
                 infoId="view.theme"
                 options={[
-                  { value: "system", label: w.theme[3] },
                   { value: "light", label: w.theme[1] },
                   { value: "dark", label: w.theme[2] },
+                  { value: "system", label: w.theme[3] },
                 ]}
               />
               <Segmented

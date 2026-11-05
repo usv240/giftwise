@@ -1,4 +1,8 @@
 /* About: a read page. What it does sits beside a photograph of the case it describes. */
+/* Sections sit a step closer than on the other read pages: each is short, and the page reads as one. */
+.about .page-section {
+  margin-top: clamp(2.25rem, 1.5rem + 2.5vw, 4rem);
+}
 .about-what {
   display: grid;
   grid-template-columns: minmax(0, 40rem) minmax(0, 18rem);
@@ -12,8 +16,9 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
+  object-position: center 65%;
   border-radius: 6px;
 }
 .about-photo figcaption {
@@ -28,7 +33,7 @@
     max-width: 24rem;
   }
   .about-photo img {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
   }
 }
 

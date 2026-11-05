@@ -29,16 +29,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // The page follows the system's light or dark setting by default, so the browser bar does too.
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f5f8" },
-    { media: "(prefers-color-scheme: dark)", color: "#17181f" },
-  ],
+  // Light is the default theme; Dark and System are a choice in the Display menu.
+  themeColor: "#f4f5f8",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={clash.variable} data-theme="system" data-text="standard" data-labels="off" data-mode="plain" suppressHydrationWarning>
+    <html lang="en" className={clash.variable} data-theme="light" data-text="standard" data-labels="off" data-mode="plain" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: PREFS_SCRIPT }} />
       </head>

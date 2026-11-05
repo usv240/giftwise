@@ -150,158 +150,195 @@ function Answer({ v }: { v: Vote }) {
   );
 }
 
+/** The section's intro: what the two reviewers are, in the words the README uses. */
+export function EvalIntro() {
+  return (
+    <p className="page-prose jp-intro">
+      When a bill might be a housing cost, two Claude reviewers read it, one with the regulations and one with SSA&rsquo;s operating manual, and each must quote its rulebook word for word. Giftwise takes
+      a reading only when both checked answers agree; otherwise it uses the route that keeps her check whole under either reading.
+    </p>
+  );
+}
+
 /** The measured evaluation: Claude with no rulebook, each reviewer alone, and the referee, on two sets of labeled bills. Every number comes from content/eval-results.json. */
 export function EvalResults() {
   const date = new Date(R.ran_at).toLocaleDateString("en-US", { dateStyle: "medium" });
   const s = R.summary;
   const k = NC.disagreement_kinds;
+  const w = NC.wrong_routes_accepted;
   return (
-    <div className="ev">
-      <p className="page-prose">
-        {R.cases.length} bills paid by someone else, in two sets: the first {R.sets.first.bills}, and {R.sets.hard.bills} harder bills near the line between housing and everything else, such as lot rent
-        for a mobile home, a second mortgage, condo fees and a refundable utility deposit. Each is labeled from the rule text with the passage cited: {NC.clear_bills} where the rules are clear, and{" "}
-        {NC.contested_bills} where the two rulebooks point different ways or neither settles it. Run {date} with {modelName(R.model)}. {R.quotes_checked} of {R.quotes_total} quotes were found word for word.
-      </p>
-      <p className="page-prose">
-        The baseline is the obvious alternative: Claude alone, given only the bill, decides whether it is housing and picks the route, with no rulebook, no quotes and no referee. A wrong route is one that
-        would lower her check under the true reading; for a contested bill, under either reading.
-      </p>
-      <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Evaluation summary, all bills">
-        <table className="doc-table ev-table">
-          <thead>
-            <tr>
-              <th scope="col">All {R.cases.length} bills</th>
-              {COLS.map(([key, label]) => (
-                <th key={key} scope="col" title={label} data-ref={key === "referee" ? "" : undefined}>
-                  {SHORT[key]}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Wrong routes accepted</th>
-              {COLS.map(([key]) => (
-                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
-                  {NC.wrong_routes_accepted[key]} of {NC.bills}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <th scope="row">Right, clear bills</th>
-              {COLS.map(([key]) => (
-                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
-                  {s[key].correct} of {s[key].clear_cases}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <th scope="row">Wrong, clear bills</th>
-              {COLS.map(([key]) => (
-                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
-                  {s[key].wrong}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <th scope="row">Sent to the either-reading route</th>
-              {COLS.map(([key]) => (
-                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
-                  {s[key].abstained}
-                </td>
-              ))}
-            </tr>
-          </tbody>
-        </table>
+    <>
+      <div className="jx-result" data-ui>
+        <p className="sx-score">
+          <span className="tabular">
+            {s.referee.check_kept_whole} of {s.referee.all_cases}
+          </span>{" "}
+          labeled bills routed so her check stays whole.
+        </p>
+        <p className="sx-vs">
+          Wrong routes accepted, of {NC.bills}: <strong className="tabular">{w.referee}</strong> with both reviewers and the referee, <strong className="tabular">{w.baseline}</strong> for Claude with no
+          rulebook.
+        </p>
+        <p className="sx-meta muted">
+          {R.cases.length} bills paid by someone else, each labeled from the rule text with the passage cited. Run {date} with {modelName(R.model)}; {R.quotes_checked} of {R.quotes_total} quotes found word for
+          word.
+        </p>
       </div>
-      <p className="page-prose">{headline()}</p>
-      <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Wrong routes accepted, by set">
-        <table className="doc-table ev-table">
-          <thead>
-            <tr>
-              <th scope="col">Wrong routes accepted</th>
-              {COLS.map(([key, label]) => (
-                <th key={key} scope="col" title={label} data-ref={key === "referee" ? "" : undefined}>
-                  {SHORT[key]}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {SETS.map(([id, label]) => (
-              <tr key={id}>
-                <th scope="row">
-                  {label} ({R.sets[id].bills})
-                </th>
-                {COLS.map(([key]) => (
-                  <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
-                    {R.sets[id].negative_control.wrong_routes_accepted[key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="page-prose">
-        The two checked readings differed on {n(NC.disagreements_total, "bill", "bills")}: {k.opposite_answers} where the reviewers gave opposite answers, {k.one_reviewer_unsettled} where one
-        rulebook did not settle it, {k.both_reviewers_unsettled} where neither did
-        {k.quote_set_aside ? `, and ${k.quote_set_aside} where a quote was set aside` : ""}. It sent {NC.disagreements_sent_to_safe_route} of {NC.disagreements_total} to a route that keeps her check whole
-        under either reading. {gain()}
-      </p>
-      <StressTable />
-      <details className="ev-cases">
-        <summary>Every bill and every answer</summary>
-        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Every bill in the evaluation">
-          <table className="doc-table">
-            <thead>
-              <tr>
-                <th scope="col">Bill</th>
-                <th scope="col">Label</th>
-                <th scope="col">No rulebook</th>
-                <th scope="col">Regulations</th>
-                <th scope="col">Manual</th>
-                <th scope="col">Giftwise</th>
-              </tr>
-            </thead>
-            {SETS.map(([id, label]) => (
-              <tbody key={id}>
-                <tr>
-                  <th scope="rowgroup" colSpan={6}>
-                    {label}
-                  </th>
-                </tr>
-                {R.cases
-                  .filter((c) => (c.set ?? "first") === id)
-                  .map((c) => (
-                    <tr key={c.id}>
-                      <td>
-                        {c.description}
-                        <span className="ev-basis">{c.basis}</span>
+      <div className="jx-more">
+        <details className="jx-disc">
+          <summary>Both tables, and what happens when one reviewer is wrong</summary>
+          <div className="jx-body ev">
+            <p className="page-prose">
+              {R.cases.length} bills paid by someone else, in two sets: the first {R.sets.first.bills}, and {R.sets.hard.bills} harder bills near the line between housing and everything else, such as lot
+              rent for a mobile home, a second mortgage, condo fees and a refundable utility deposit. Each is labeled from the rule text with the passage cited: {NC.clear_bills} where the rules are clear,
+              and {NC.contested_bills} where the two rulebooks point different ways or neither settles it. Run {date} with {modelName(R.model)}. {R.quotes_checked} of {R.quotes_total} quotes were found word
+              for word.
+            </p>
+            <p className="page-prose">
+              The baseline is the obvious alternative: Claude alone, given only the bill, decides whether it is housing and picks the route, with no rulebook, no quotes and no referee. A wrong route is one
+              that would lower her check under the true reading; for a contested bill, under either reading.
+            </p>
+            <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Evaluation summary, all bills">
+              <table className="doc-table ev-table">
+                <thead>
+                  <tr>
+                    <th scope="col">All {R.cases.length} bills</th>
+                    {COLS.map(([key, label]) => (
+                      <th key={key} scope="col" title={label} data-ref={key === "referee" ? "" : undefined}>
+                        {SHORT[key]}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Wrong routes accepted</th>
+                    {COLS.map(([key]) => (
+                      <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                        {NC.wrong_routes_accepted[key]} of {NC.bills}
                       </td>
-                      <td>{WORD[c.truth]}</td>
-                      <td>
-                        {c.baseline ? `${WORD[c.baseline.answer] ?? c.baseline.answer}, ${ROUTE[c.baseline.route] ?? c.baseline.route}` : "No answer"}
-                        {!c.outcome.baseline.safe && ", check lower"}
+                    ))}
+                  </tr>
+                  <tr>
+                    <th scope="row">Right, clear bills</th>
+                    {COLS.map(([key]) => (
+                      <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                        {s[key].correct} of {s[key].clear_cases}
                       </td>
-                      <td>
-                        <Answer v={c.regs} />
+                    ))}
+                  </tr>
+                  <tr>
+                    <th scope="row">Wrong, clear bills</th>
+                    {COLS.map(([key]) => (
+                      <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                        {s[key].wrong}
                       </td>
-                      <td>
-                        <Answer v={c.poms} />
+                    ))}
+                  </tr>
+                  <tr>
+                    <th scope="row">Sent to the either-reading route</th>
+                    {COLS.map(([key]) => (
+                      <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                        {s[key].abstained}
                       </td>
-                      <td>
-                        {c.outcome.referee.route ? ROUTE[c.outcome.referee.route] : "No route"}
-                        {c.outcome.referee.safe ? ", check whole" : ", check lower"}
-                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="page-prose">{headline()}</p>
+            <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Wrong routes accepted, by set">
+              <table className="doc-table ev-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Wrong routes accepted</th>
+                    {COLS.map(([key, label]) => (
+                      <th key={key} scope="col" title={label} data-ref={key === "referee" ? "" : undefined}>
+                        {SHORT[key]}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {SETS.map(([id, label]) => (
+                    <tr key={id}>
+                      <th scope="row">
+                        {label} ({R.sets[id].bills})
+                      </th>
+                      {COLS.map(([key]) => (
+                        <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                          {R.sets[id].negative_control.wrong_routes_accepted[key]}
+                        </td>
+                      ))}
                     </tr>
                   ))}
-              </tbody>
-            ))}
-          </table>
-        </div>
-      </details>
-      <p className="muted tech-only">scripts/run-eval.ts over content/eval/bills.json and content/eval/bills-hard.json; add --rescore to re-score the recorded answers with no AI calls.</p>
-    </div>
+                </tbody>
+              </table>
+            </div>
+            <p className="page-prose">
+              The two checked readings differed on {n(NC.disagreements_total, "bill", "bills")}: {k.opposite_answers} where the reviewers gave opposite answers, {k.one_reviewer_unsettled} where one
+              rulebook did not settle it, {k.both_reviewers_unsettled} where neither did
+              {k.quote_set_aside ? `, and ${k.quote_set_aside} where a quote was set aside` : ""}. It sent {NC.disagreements_sent_to_safe_route} of {NC.disagreements_total} to a route that keeps her check
+              whole under either reading. {gain()}
+            </p>
+            <StressTable />
+            <p className="muted tech-only">scripts/run-eval.ts over content/eval/bills.json and content/eval/bills-hard.json; add --rescore to re-score the recorded answers with no AI calls.</p>
+          </div>
+        </details>
+        <details className="jx-disc">
+          <summary>All {R.cases.length} bills, with every answer</summary>
+          <div className="jx-body">
+            <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Every bill in the evaluation">
+              <table className="doc-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Bill</th>
+                    <th scope="col">Label</th>
+                    <th scope="col">No rulebook</th>
+                    <th scope="col">Regulations</th>
+                    <th scope="col">Manual</th>
+                    <th scope="col">Giftwise</th>
+                  </tr>
+                </thead>
+                {SETS.map(([id, label]) => (
+                  <tbody key={id}>
+                    <tr>
+                      <th scope="rowgroup" colSpan={6}>
+                        {label}
+                      </th>
+                    </tr>
+                    {R.cases
+                      .filter((c) => (c.set ?? "first") === id)
+                      .map((c) => (
+                        <tr key={c.id}>
+                          <td>
+                            {c.description}
+                            <span className="ev-basis">{c.basis}</span>
+                          </td>
+                          <td>{WORD[c.truth]}</td>
+                          <td>
+                            {c.baseline ? `${WORD[c.baseline.answer] ?? c.baseline.answer}, ${ROUTE[c.baseline.route] ?? c.baseline.route}` : "No answer"}
+                            {!c.outcome.baseline.safe && ", check lower"}
+                          </td>
+                          <td>
+                            <Answer v={c.regs} />
+                          </td>
+                          <td>
+                            <Answer v={c.poms} />
+                          </td>
+                          <td>
+                            {c.outcome.referee.route ? ROUTE[c.outcome.referee.route] : "No route"}
+                            {c.outcome.referee.safe ? ", check whole" : ", check lower"}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                ))}
+              </table>
+            </div>
+          </div>
+        </details>
+      </div>
+    </>
   );
 }

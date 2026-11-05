@@ -78,7 +78,7 @@
   --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
   --step-display: clamp(4rem, 2.5rem + 6vw, 8.5rem);
   --margin: clamp(1rem, 0.5rem + 2.2vw, 2rem);
-  --section-gap: clamp(6rem, 4rem + 8vw, 13rem);
+  --section-gap: clamp(4rem, 3rem + 4vw, 8rem);
   --radius-btn: 4px;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);

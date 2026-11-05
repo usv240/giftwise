@@ -8,6 +8,7 @@ import { Toc } from "@/components/learn/Toc";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Gift } from "@/lib/rules";
 import "../pages.css";
 import "./toc.css";
+import "./disclosure.css";
 import "./learn.css";
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ const SOURCES_GROUPED = (() => {
     return { title: g.title, items };
   }).filter((g) => g.items.length > 0);
 })();
+const SOURCE_COUNT = SOURCES_GROUPED.reduce((n, g) => n + g.items.length, 0);
 
 const monthName = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleString("en-US", { month: "long", timeZone: "UTC" });
 
@@ -245,17 +247,23 @@ export default function LearnPage() {
             <h2 id="glossary-h" className="topic-title">
               Glossary
             </h2>
-            <dl className="glossary">
-              {glossary.map((gl) => (
-                <div key={gl.term} className="gloss-row">
-                  <dt>{gl.term}</dt>
-                  <dd>
-                    {gl.plain}
-                    <span className="tech-only"> {gl.technical}</span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <p>The words Social Security and this site use, in plain words.</p>
+            <details className="dsc topic-more">
+              <summary>
+                <span className="dsc-k">All {glossary.length} terms, each explained</span>
+              </summary>
+              <dl className="glossary">
+                {glossary.map((gl) => (
+                  <div key={gl.term} className="gloss-row">
+                    <dt>{gl.term}</dt>
+                    <dd>
+                      {gl.plain}
+                      <span className="tech-only"> {gl.technical}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </details>
           </section>
 
           <section id="sources" className="topic" aria-labelledby="sources-h">
@@ -263,21 +271,28 @@ export default function LearnPage() {
               Sources
             </h2>
             <p>Every rule, number and claim on this site comes from one of these documents.</p>
-            {SOURCES_GROUPED.map((grp) => (
-              <div key={grp.title} className="source-group">
-                <h3 className="source-h">{grp.title}</h3>
-                <ul className="source-list">
-                  {grp.items.map(([k, s]) => (
-                    <li key={k}>
-                      <a className="text-link" href={s.url} target="_blank" rel="noreferrer">
-                        {s.title}
-                      </a>
-                      <span className="muted"> {s.publisher}</span>
-                    </li>
-                  ))}
-                </ul>
+            <details className="dsc topic-more">
+              <summary>
+                <span className="dsc-k">All {SOURCE_COUNT} sources, by kind</span>
+              </summary>
+              <div className="topic-more-body">
+                {SOURCES_GROUPED.map((grp) => (
+                  <div key={grp.title} className="source-group">
+                    <h3 className="source-h">{grp.title}</h3>
+                    <ul className="source-list">
+                      {grp.items.map(([k, s]) => (
+                        <li key={k}>
+                          <a className="text-link" href={s.url} target="_blank" rel="noreferrer">
+                            {s.title}
+                          </a>
+                          <span className="muted"> {s.publisher}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
-            ))}
+            </details>
             <p className="muted">
               Giftwise gives guidance based on published rules, with sources, and is not legal advice. For complex situations, a benefits counselor can help.{" "}
               <Link href="/about" className="text-link">

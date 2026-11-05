@@ -73,7 +73,7 @@
   },
   "view.theme": {
     "title": "Theme",
-    "what": "System is the default: the site follows your device's light or dark setting. Light and Dark stay the same whatever the device says.",
+    "what": "Light is the default. Dark is easier on the eyes at night. System follows your device setting.",
     "why": "Choose whichever is most comfortable to read."
   },
   "view.text": {

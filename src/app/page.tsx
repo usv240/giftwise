@@ -8,8 +8,10 @@ import sampleYear from "../../content/sample-year.json";
 import sources from "../../content/sources.json";
 import { GiftChecker } from "@/components/GiftChecker";
 import { Info } from "@/components/Info";
+import { OpenOnHash } from "@/components/OpenOnHash";
 import { CtaDialog } from "@/components/landing/CtaDialog";
 import { Faq } from "@/components/landing/Faq";
+import { HowNav } from "@/components/landing/HowNav";
 import { LoopVideo } from "@/components/landing/LoopVideo";
 import { ShowcaseBoard } from "@/components/landing/ShowcaseBoard";
 import { usd } from "@/lib/rules";
@@ -76,6 +78,21 @@ const HELP_TOTAL = HELP.reduce((s, h) => s + h.v, 0);
 const HELP_MAX = HELP.reduce((mi, h, i, arr) => (h.v > arr[mi].v ? i : mi), 0);
 const PRINTED = [...new Set([HELP_MAX, 0, HELP.length - 1])];
 
+/** One published count: the figure leading its line, then what it counts and its source. */
+function ReachRow({ r }: { r: (typeof REACH)[number] }) {
+  return (
+    <li className="reach-row">
+      <span className="reach-fig tabular">{r.fig}</span>
+      <span className="reach-text">
+        {r.text}{" "}
+        <a className="text-link muted reach-src" href={SRC[r.src].url} target="_blank" rel="noreferrer">
+          {r.srcLabel}
+        </a>
+      </span>
+    </li>
+  );
+}
+
 export default function Home() {
   return (
     <>
@@ -128,28 +145,30 @@ export default function Home() {
         </p>
       </section>
 
-      {/* How it works: one card, four fields */}
+      {/* How it works: one card, four fields. On a phone the four fields sit in one row that scrolls sideways, the next
+          one peeking in, with Previous and Next beside the heading. */}
       <section id="how" className="how" aria-labelledby="how-title">
-        {HOW.map((h, i) => (
-          <div key={h.clause} className="how-field" data-field={i}>
-            {i === 0 && (
-              <div className="how-heading">
-                <h2 id="how-title">How it works</h2>
+        <div className="how-heading">
+          <h2 id="how-title">How it works</h2>
+          <HowNav track="how-track" count={HOW.length} />
+        </div>
+        <ol id="how-track" className="how-track" aria-labelledby="how-title">
+          {HOW.map((h, i) => (
+            <li key={h.clause} className="how-field" data-field={i}>
+              <div className="how-card" data-ui data-reveal style={{ ["--reveal-i" as string]: i }}>
+                <p className="how-card-title">{h.card.title}</p>
+                <p className="how-card-meta tabular">
+                  {h.card.meta}
+                  {h.card.tech && <span className="how-tech"> {h.card.tech}</span>}
+                </p>
+                <p className="how-card-status" data-step={i}>
+                  {h.card.status}
+                </p>
               </div>
-            )}
-            <div className="how-card" data-ui data-reveal style={{ ["--reveal-i" as string]: i }}>
-              <p className="how-card-title">{h.card.title}</p>
-              <p className="how-card-meta tabular">
-                {h.card.meta}
-                {h.card.tech && <span className="how-tech"> {h.card.tech}</span>}
-              </p>
-              <p className="how-card-status" data-step={i}>
-                {h.card.status}
-              </p>
-            </div>
-            <p className="how-clause">{h.clause}</p>
-          </div>
-        ))}
+              <p className="how-clause">{h.clause}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
       {/* Showcase: rows as a board */}
@@ -203,84 +222,20 @@ export default function Home() {
         </figure>
       </section>
 
-      {/* Stats: bars standing on the edge */}
-      <section className="stats section" aria-labelledby="stats-title">
-        <div className="frame stats-head">
-          <p className="stats-figure tabular" aria-hidden="true">
-            $0
-          </p>
-          <h2 id="stats-title" className="stats-claim">
-            counted against her all year
-          </h2>
-          <p className="stats-sub">
-            Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {new Set(sampleYear.gifts.map((g) => g.giver)).size} people, every gift through Giftwise. Her check stayed $994 every month.
-          </p>
-        </div>
-        <div className="bars" data-ui role="list" aria-label="Help delivered each month in the sample year">
-          {HELP.map((h, i) => (
-            <div
-              key={h.m}
-              role="listitem"
-              className="bar"
-              data-accent={i === HELP_MAX ? "" : undefined}
-              data-print={PRINTED.includes(i) ? "" : undefined}
-              tabIndex={0}
-              style={{ ["--h" as string]: `${(h.v / HELP[HELP_MAX].v) * 84}%` }}
-              aria-label={`${h.m}: ${usd(h.v)} of help, $0 counted`}
-            >
-              <span className="bar-value tabular">{usd(h.v)}</span>
-              <span className="bar-fill" aria-hidden="true" />
-              <span className="bar-month">{h.m}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Who it reaches: published counts, each linked to its source */}
-      <section className="section frame reach" aria-labelledby="reach-title">
+      {/* Evidence: the strongest published counts and the three checks open, then one disclosure for the ABLE counts,
+          the sample year month by month and every source. */}
+      <section className="section frame evidence" aria-labelledby="reach-title">
         <h2 id="reach-title" className="section-title">
           Who it reaches
         </h2>
         <ul className="reach-list">
-          {REACH.map((r) => (
-            <li key={r.fig} className="reach-row">
-              <span className="reach-fig tabular">{r.fig}</span>
-              <span className="reach-text">
-                {r.text}{" "}
-                <a className="text-link muted reach-src" href={SRC[r.src].url} target="_blank" rel="noreferrer">
-                  {r.srcLabel}
-                </a>
-              </span>
-            </li>
+          {REACH.slice(0, 2).map((r) => (
+            <ReachRow key={r.fig} r={r} />
           ))}
         </ul>
-      </section>
-
-      {/* Grounded in research: names as one line */}
-      <section className="section frame research" aria-labelledby="research-title">
-        <figure className="research-photo">
-          <Image
-            src="/images/pharmacy-shop-interior-counter-work-fortepan-74179.jpg"
-            alt="Archival photograph of pharmacists working at a pharmacy counter"
-            width={960}
-            height={680}
-            sizes="(max-width: 900px) 100vw, 38vw"
-          />
-          <figcaption className="muted">A pharmacy counter. Medicine paid straight to the pharmacy is not counted as income.</figcaption>
-        </figure>
-        <div className="research-copy">
-          <p className="research-line">
-            <span id="research-title">Grounded in</span>{" "}
-            {RESEARCH.map((k, i) => (
-              <span key={k}>
-                <a className="text-link" href={SRC[k].url} target="_blank" rel="noreferrer">
-                  {RESEARCH_LABEL[k]}
-                </a>
-                {i < RESEARCH.length - 2 ? ", " : i === RESEARCH.length - 2 ? " and " : "."}
-              </span>
-            ))}
-          </p>
-          <ul className="research-proof" aria-label="How the rules were checked">
+        <div className="ev-checks">
+          <h3 className="ev-sub">How the rules were checked</h3>
+          <ul className="research-proof">
             <li>
               <Link className="research-proof-link" href="/judges#ssa-examples">
                 <span className="research-proof-fig tabular">
@@ -307,11 +262,76 @@ export default function Home() {
             </li>
           </ul>
         </div>
+        <details id="evidence-more" className="ev-more">
+          <summary>ABLE figures, the sample year month by month, and all {RESEARCH.length} sources</summary>
+          <div className="ev-more-body">
+            <ul className="reach-list">
+              {REACH.slice(2).map((r) => (
+                <ReachRow key={r.fig} r={r} />
+              ))}
+            </ul>
+
+            {/* The sample year: bars standing on the edge */}
+            <div className="stats">
+              <div className="stats-head">
+                <h3 className="stats-title">
+                  <span className="stats-figure tabular">$0</span> <span className="stats-claim">counted against her all year</span>
+                </h3>
+                <p className="stats-sub">
+                  Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {new Set(sampleYear.gifts.map((g) => g.giver)).size} people, every gift through Giftwise. Her check stayed $994 every month.
+                </p>
+              </div>
+              <div className="bars" data-ui role="list" aria-label="Help delivered each month in the sample year">
+                {HELP.map((h, i) => (
+                  <div
+                    key={h.m}
+                    role="listitem"
+                    className="bar"
+                    data-accent={i === HELP_MAX ? "" : undefined}
+                    data-print={PRINTED.includes(i) ? "" : undefined}
+                    tabIndex={0}
+                    style={{ ["--h" as string]: `${(h.v / HELP[HELP_MAX].v) * 84}%` }}
+                    aria-label={`${h.m}: ${usd(h.v)} of help, $0 counted`}
+                  >
+                    <span className="bar-value tabular">{usd(h.v)}</span>
+                    <span className="bar-fill" aria-hidden="true" />
+                    <span className="bar-month">{h.m}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Grounded in research: names as one line */}
+            <div className="research">
+              <figure className="research-photo">
+                <Image
+                  src="/images/pharmacy-shop-interior-counter-work-fortepan-74179.jpg"
+                  alt="Archival photograph of pharmacists working at a pharmacy counter"
+                  width={960}
+                  height={680}
+                  sizes="(max-width: 900px) 100vw, 30vw"
+                />
+                <figcaption className="muted">A pharmacy counter. Medicine paid straight to the pharmacy is not counted as income.</figcaption>
+              </figure>
+              <p className="research-line">
+                Grounded in{" "}
+                {RESEARCH.map((k, i) => (
+                  <span key={k}>
+                    <a className="text-link" href={SRC[k].url} target="_blank" rel="noreferrer">
+                      {RESEARCH_LABEL[k]}
+                    </a>
+                    {i < RESEARCH.length - 2 ? ", " : i === RESEARCH.length - 2 ? " and " : "."}
+                  </span>
+                ))}
+              </p>
+            </div>
+          </div>
+        </details>
       </section>
 
-      {/* For developers */}
-      <section className="section frame dev grid-12" aria-labelledby="dev-title">
-        <div className="dev-copy">
+      {/* For developers, and how it is built: side by side on a wide screen */}
+      <div className="section frame dev-built">
+        <section className="dev" aria-labelledby="dev-title">
           <h2 id="dev-title" className="section-title">
             Make any gift benefit-safe
           </h2>
@@ -324,10 +344,9 @@ export default function Home() {
               Read the docs
             </Link>
           </div>
-        </div>
-        <div className="dev-code" data-ui>
-          <pre>
-            <code>{`POST /api/v1/check-gift
+          <div className="dev-code" data-ui>
+            <pre>
+              <code>{`POST /api/v1/check-gift
 Authorization: Bearer gw_test_...
 { "gift": { "amount": 1000, "delivery": "cash" } }
 
@@ -338,31 +357,31 @@ Authorization: Bearer gw_test_...
     "check_with_best_route": 994.00,
     "rule_ids": ["R-CASH-01", "R-INFREQ-01", "R-GIE-01"]
 } }`}</code>
-          </pre>
-        </div>
-      </section>
+            </pre>
+          </div>
+        </section>
 
-      {/* How it is built */}
-      <section className="section frame built" aria-labelledby="built-title">
-        <h2 id="built-title" className="section-title">
-          How it is built
-        </h2>
-        <ul className="built-list">
-          {BUILT.map((b) => (
-            <li key={b.id} className="built-row">
-              <span className="built-tool">
-                <Link href={`/stack#${b.id}`} className="rules-link">
-                  {b.tool}
-                </Link>
-              </span>
-              <span className="built-job">{b.job}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <section className="built" aria-labelledby="built-title">
+          <h2 id="built-title" className="section-title">
+            How it is built
+          </h2>
+          <ul className="built-list">
+            {BUILT.map((b) => (
+              <li key={b.id} className="built-row">
+                <span className="built-tool">
+                  <Link href={`/stack#${b.id}`} className="rules-link">
+                    {b.tool}
+                  </Link>
+                </span>
+                <span className="built-job">{b.job}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
 
       {/* FAQ: question index, one answer */}
-      <section className="section frame" aria-labelledby="faq-title">
+      <section className="section frame faq-section" aria-labelledby="faq-title">
         <h2 id="faq-title" className="section-title">
           Plain answers
         </h2>
@@ -380,6 +399,8 @@ Authorization: Bearer gw_test_...
         </div>
         <CtaDialog />
       </section>
+      {/* A link to anything inside the evidence disclosure opens it first. */}
+      <OpenOnHash />
     </>
   );
 }

@@ -165,7 +165,8 @@ ok(`a $120 grant is routed so her check stays $${FULL}`, new RegExp(`Check stays
 
 // 8. Gift page: PayPal buttons, reset link
 await page.goto(B + "/g/maya", { waitUntil: "networkidle" });
-await page.waitForTimeout(3500);
+// PayPal loads at the first sign of a person, or about 3 seconds after the page loads; wait for it rather than a fixed time.
+await page.waitForFunction(() => [...document.querySelectorAll("paypal-button")].some((e) => !e.hasAttribute("hidden")), null, { timeout: 15000 }).catch(() => {});
 const visibleButtons = await page.$$eval("paypal-button", (els) => els.filter((e) => !e.hasAttribute("hidden")).length);
 ok("Gift page renders a live PayPal button per open need", visibleButtons >= 1, `${visibleButtons}`);
 const realQs = page.locator(".rw-item");

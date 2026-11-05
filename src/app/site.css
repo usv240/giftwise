@@ -220,8 +220,8 @@
 
 /* Stack strip: one sentence of names, above the footer on every page. */
 .stack-strip {
-  padding-top: clamp(4rem, 3rem + 4vw, 7rem);
-  padding-bottom: clamp(3rem, 2rem + 3vw, 5rem);
+  padding-top: clamp(2.5rem, 2rem + 2vw, 4rem);
+  padding-bottom: clamp(1.75rem, 1.5rem + 1.2vw, 2.75rem);
 }
 .stack-sentence {
   font-size: var(--step-lead);
@@ -249,12 +249,12 @@
   background: var(--surface-2);
   border-radius: 6px;
   padding: 20px;
-  min-height: 220px;
+  min-height: 168px;
   display: flex;
   flex-direction: column;
 }
 .tile-statement {
-  grid-column: span 4;
+  grid-column: span 3;
   justify-content: space-between;
 }
 .tile-lead {
@@ -268,14 +268,26 @@
   color: var(--muted);
 }
 .tile-nav {
-  grid-column: span 3;
+  grid-column: span 4;
 }
 .tile-nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 0.35rem;
+  /* Two columns of four, so the links never set the height of the whole row. */
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1rem;
+}
+@media (pointer: coarse) {
+  .tile-nav ul {
+    gap: 0;
+  }
+  .tile-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }
 .tile-made {
   grid-column: span 2;
@@ -292,10 +304,10 @@
 /* Board tokens: the closing wordmark stays a dark field in both themes instead of turning white on a dark page. */
 .tile-wordmark {
   grid-column: span 8;
-  min-height: 320px;
+  min-height: 200px;
   background: var(--board);
   color: var(--board-ink);
-  font-size: clamp(4rem, 9vw, 9.5rem);
+  font-size: clamp(3.5rem, 7vw, 7rem);
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -304,7 +316,7 @@
 }
 .tile-cta {
   grid-column: span 4;
-  min-height: 320px;
+  min-height: 200px;
   background: var(--accent);
   color: var(--accent-ink);
   text-decoration: none;
@@ -328,13 +340,20 @@
   .tile-wordmark {
     grid-column: 1 / -1;
     order: -2;
-    min-height: 160px;
-    font-size: 18vw;
+    min-height: 104px;
+    font-size: 15vw;
   }
   .tile-cta {
     grid-column: 1 / -1;
     order: -1;
-    min-height: 140px;
+    min-height: 88px;
+    flex-direction: row;
+    align-items: center;
+  }
+  .tile-cta svg {
+    width: 32px;
+    height: 32px;
+    align-self: center;
   }
   .tile-nav,
   .tile-repo,
@@ -346,10 +365,29 @@
 }
 @media (max-width: 520px) {
   .tile-nav,
-  .tile-repo,
-  .tile-made,
   .tile-statement {
     grid-column: 1 / -1;
+  }
+  .tile-made,
+  .tile-repo {
+    grid-column: 1 / -1;
+  }
+  /* On a phone the hackathon line and the repository share one tile's worth of height. */
+  .tile-made {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0 0.5rem;
+  }
+  .tile-cta {
+    min-height: 64px;
+  }
+  /* The header already carries the wordmark; on a phone the big decorative tile only adds length. */
+  .tile-wordmark {
+    display: none;
+  }
+  .tile {
+    padding: 16px;
   }
 }
 
@@ -357,9 +395,9 @@
 .footer-quiet {
   display: grid;
   gap: 0.75rem;
-  padding-top: 2.5rem;
-  padding-bottom: 3rem;
-  margin-top: clamp(3rem, 2rem + 3vw, 5rem);
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
+  margin-top: clamp(2rem, 1.5rem + 2vw, 3.5rem);
   border-top: 1px solid var(--surface-2);
 }
 .stack-strip + .footer-quiet {

@@ -140,10 +140,6 @@
   .stack-row {
     grid-template-columns: 1fr;
   }
-  /* Four columns, one of them code: on a phone the table keeps readable columns and scrolls inside its frame. */
-  .pp-apis-table {
-    min-inline-size: 44rem;
-  }
 }
 
 /* About */

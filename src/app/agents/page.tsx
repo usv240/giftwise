@@ -7,6 +7,7 @@ import { CopyButton } from "@/components/developers/CopyButton";
 import { TOOLS } from "@/lib/mcp/tools";
 import "../pages.css";
 import "../developers/dev.css";
+import "../learn/disclosure.css";
 import "./agents.css";
 import { HOSTED_URL } from "@/lib/origin";
 
@@ -14,21 +15,41 @@ export const metadata: Metadata = { title: "For AI agents", description: "Giftwi
 
 const HOST = (process.env.RENDER_EXTERNAL_URL || HOSTED_URL).replace(/\/$/, "");
 
-/** One client: its name, how to add Giftwise, and the command to copy when there is one. */
-function Client({ name, command, label, children }: { name: string; command?: string; label?: string; children?: React.ReactNode }) {
+/** One tool's job in a line; the full description an agent reads opens below it. A tool not listed here shows its description. */
+const TOOL_JOBS: Record<string, string> = {
+  check_gift: "How one gift changes the SSI check, and the benefit-safe way to give it.",
+  get_gift_page: "Reads a gift page: who it is for, what is still needed, and who gets paid.",
+  ask_rulebook: "Answers a question about SSI and gifts from the rule text, with every quote checked.",
+  find_gift: "Finds real products for a need and checks each one against the SSI rules.",
+  plan_gift: "Splits any amount across a page's needs and the ABLE account, compared with cash.",
+  review_bill: "Two reviewers decide whether a bill counts as housing under SSI rules.",
+  get_ssa_report: "Writes one month's report to Social Security from the gifts themselves.",
+  start_gift_checkout: "Prepares a PayPal checkout that pays each recipient directly, for the giver to approve.",
+  start_monthly_gift: "Sets up the same gift every month; the giver approves each month in PayPal.",
+};
+
+/**
+ * One client: its name, how to add Giftwise, and the command to copy when there is one. The clients share a name, so
+ * opening one closes the one before: one set of steps on screen at a time.
+ */
+function Client({ name, command, label, open, children }: { name: string; command?: string; label?: string; open?: boolean; children?: React.ReactNode }) {
   return (
-    <div className="ag-client">
-      <div className="ag-client-head">
-        <h3>{name}</h3>
-        {command && <CopyButton text={command} label="Copy" />}
+    <details className="dsc ag-client" name="ag-connect" open={open}>
+      <summary>
+        <h3 className="dsc-k">{name}</h3>
+      </summary>
+      <div className="ag-client-body">
+        {children}
+        {command && (
+          <div className="ag-cmd">
+            <pre className="dev-pre tabular" tabIndex={0} aria-label={label}>
+              {command}
+            </pre>
+            <CopyButton text={command} label="Copy" />
+          </div>
+        )}
       </div>
-      {children}
-      {command && (
-        <pre className="dev-pre tabular" tabIndex={0} aria-label={label}>
-          {command}
-        </pre>
-      )}
-    </div>
+    </details>
   );
 }
 
@@ -85,54 +106,52 @@ export default function AgentsPage() {
         <p className="page-prose">
           Streamable HTTP at <code>{url}</code>. No key needed in the sandbox.
         </p>
-        <Client name="Claude on the web or Claude Desktop">
-          <p className="page-prose">
-            Settings, then Connectors, then Add custom connector. Name it Giftwise and paste <code>{url}</code>.
-          </p>
-        </Client>
-        <Client name="Claude Code" command={claudeCode} label="Command to add Giftwise to Claude Code" />
-        <Client name="Cursor">
-          <div className="ag-cursor">
-            <a className="btn btn-quiet" href={`cursor://anysphere.cursor-deeplink/mcp/install?name=giftwise&config=${Buffer.from(JSON.stringify({ url })).toString("base64")}`}>
-              Add to Cursor
-            </a>
-            <p>Cursor shows the server and its address before anything is added.</p>
-          </div>
-        </Client>
-        <Client name="VS Code" command={vsCode} label="Command to add Giftwise to VS Code" />
-        <Client name="Other MCP clients" command={config} label="MCP client configuration" />
-        <Client name="Found without being told">
-          <p className="page-prose">
-            An agent pointed at this site can find the server on its own: the domain&rsquo;s AI Catalog at <code>/.well-known/ai-catalog.json</code> lists its MCP Server Card at{" "}
-            <code>{url}/server-card</code>, the discovery format MCP adopted in SEP-2127, and <code>/llms.txt</code> describes Giftwise in plain text.
-          </p>
-        </Client>
+        <div className="ag-clients">
+          <Client name="Claude on the web or Claude Desktop" open>
+            <p className="page-prose">
+              Settings, then Connectors, then Add custom connector. Name it Giftwise and paste <code>{url}</code>.
+            </p>
+          </Client>
+          <Client name="Claude Code" command={claudeCode} label="Command to add Giftwise to Claude Code" />
+          <Client name="Cursor">
+            <div className="ag-cursor">
+              <a className="btn btn-quiet" href={`cursor://anysphere.cursor-deeplink/mcp/install?name=giftwise&config=${Buffer.from(JSON.stringify({ url })).toString("base64")}`}>
+                Add to Cursor
+              </a>
+              <p>Cursor shows the server and its address before anything is added.</p>
+            </div>
+          </Client>
+          <Client name="VS Code" command={vsCode} label="Command to add Giftwise to VS Code" />
+          <Client name="Other MCP clients" command={config} label="MCP client configuration" />
+          <Client name="Found without being told">
+            <p className="page-prose">
+              An agent pointed at this site can find the server on its own: the domain&rsquo;s AI Catalog at <code>/.well-known/ai-catalog.json</code> lists its MCP Server Card at{" "}
+              <code>{url}/server-card</code>, the discovery format MCP adopted in SEP-2127, and <code>/llms.txt</code> describes Giftwise in plain text.
+            </p>
+          </Client>
+        </div>
       </section>
 
       <section className="page-section" aria-labelledby="tools-h">
         <h2 id="tools-h">Tools</h2>
-        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Giftwise MCP tools">
-          <table className="doc-table ag-tools">
-            <thead>
-              <tr>
-                <th scope="col">Tool</th>
-                <th scope="col">What it does</th>
-                <th scope="col">Changes anything</th>
-              </tr>
-            </thead>
-            <tbody>
-              {TOOLS.map((t) => (
-                <tr key={t.name}>
-                  <td>
-                    <code>{t.name}</code>
-                  </td>
-                  <td>{t.description}</td>
-                  <td>{t.annotations.readOnlyHint ? "No" : (t.changes ?? "Yes")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <p className="page-prose">{TOOLS.length} tools, each with its job. Each one opens to the full description an agent reads, and whether it changes anything.</p>
+        <ul className="ag-tools">
+          {TOOLS.map((t) => (
+            <li key={t.name}>
+              <details className="dsc ag-tool-row">
+                <summary>
+                  <code className="ag-tool-name">{t.name}</code>
+                  <span className="ag-tool-job dsc-k">{TOOL_JOBS[t.name] ?? t.description}</span>
+                  {!t.annotations.readOnlyHint && <span className="dev-tag ag-tool-tag">Changes something</span>}
+                </summary>
+                <div className="ag-tool-body">
+                  <p>{t.description}</p>
+                  <p className="muted">Changes anything: {t.annotations.readOnlyHint ? "No" : (t.changes ?? "Yes")}</p>
+                </div>
+              </details>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="page-section" aria-labelledby="limits-h">

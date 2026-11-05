@@ -334,7 +334,7 @@
   /* Links that stand alone as the next step get a full-size touch target; links inside sentences keep the text's height. */
   .dev-use-link .text-link,
   .dev-more .text-link,
-  .doc-ep > p > .text-link:only-child,
+  .doc-ep-body > p > .text-link:only-child,
   .dev-docs .page-prose > p > .text-link:only-child {
     display: inline-flex;
     align-items: center;
@@ -369,8 +369,95 @@
     scroll-margin-top: 4.5rem;
   }
 }
-.doc-ep .dev-route {
-  margin-bottom: 0.5rem;
+/* Endpoints: one row each, closed by default. The row gives the title, the route and what it does; it opens to the
+   fields, the example request and the response. "Open all" opens every row for a reader who wants the whole reference. */
+.doc-eps-head {
+  max-width: 68rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.doc-eps-head h2 {
+  margin-bottom: 0;
+}
+.doc-eps-head + .page-prose {
+  margin-top: 0.25rem;
+  color: var(--muted);
+}
+.open-all {
+  min-height: 2.25rem;
+  padding: 0 14px;
+  font-size: 0.875rem;
+}
+.doc-ep-list {
+  margin-top: 1rem;
+  max-width: 68rem;
+  border-bottom: 1px solid var(--surface-2);
+}
+.doc-ep {
+  border-top: 1px solid var(--surface-2);
+}
+.dsc.doc-ep > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12px;
+  grid-template-areas:
+    "title icon"
+    "route icon"
+    "line icon";
+  align-items: center;
+  gap: 4px 20px;
+  padding: 14px 0;
+  font-weight: 400;
+}
+/* The plus sits on the title's line, where the eye starts reading the row. */
+.dsc.doc-ep > summary::after {
+  grid-area: icon;
+  align-self: start;
+  margin-top: 0.4em;
+}
+.dsc.doc-ep > summary h3 {
+  grid-area: title;
+  font-size: var(--step-body);
+  font-weight: 500;
+  letter-spacing: normal;
+}
+.dsc.doc-ep > summary .dev-route {
+  grid-area: route;
+  font-size: 0.875rem;
+}
+.doc-ep-line {
+  grid-area: line;
+  max-width: 40rem;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+/* Wide screens: title and route on the left, what it does beside them, so most closed rows are two lines tall. */
+@media (min-width: 1040px) {
+  .dsc.doc-ep > summary {
+    grid-template-columns: minmax(0, 21rem) minmax(0, 1fr) 12px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "title line icon"
+      "route line icon";
+    align-items: start;
+    column-gap: 24px;
+  }
+  .doc-ep-line {
+    padding-top: 0.15em;
+  }
+}
+.doc-ep-body {
+  padding: 0.25rem 0 1.75rem;
+}
+.doc-ep-body > :first-child {
+  margin-top: 0;
+}
+@media (pointer: coarse) {
+  .open-all {
+    min-height: 44px;
+  }
 }
 /* Tables that are wider than the screen scroll inside their panel; a soft shade on an edge shows there is more. */
 .doc-table-wrap {
@@ -491,12 +578,29 @@
 .doc-response {
   max-height: 24rem;
 }
-.doc-ep > p + p,
-.doc-ep pre + p,
-.doc-ep .doc-table-wrap + p {
+/* From 1040px the request and its response sit side by side: captions on one line, the code blocks level below them. */
+@media (min-width: 1040px) {
+  .doc-ep .doc-examples {
+    max-width: 68rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0.4rem 1rem;
+  }
+  .doc-ep .doc-example {
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+    gap: 0;
+  }
+  .doc-ep .doc-example .dev-pre {
+    align-self: start;
+  }
+}
+.doc-ep-body > p + p,
+.doc-ep-body pre + p,
+.doc-ep-body .doc-table-wrap + p {
   margin-top: 0.75rem;
 }
-.doc-ep .doc-examples + p {
+.doc-ep-body .doc-examples + p {
   margin-top: 1rem;
 }
 .dev-docs code,

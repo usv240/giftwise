@@ -147,18 +147,39 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
                 <Rich text={s.text} />
               </li>
             );
-          if (s.kind === "call")
+          if (s.kind === "call") {
+            // The call and its answer share one row; what was sent and what came back open below it.
+            const next = run.steps[i + 1];
+            const result = next?.kind === "result" && next.tool === s.tool ? next : null;
             return (
               <li key={i} className="ag-step ag-call">
-                <p>
-                  <span className="ag-tool tabular">{s.tool}</span> {TOOL_WORDS[s.tool] ?? ""}
-                </p>
-                {prefs.mode === "technical" && <pre className="ag-json tabular">{JSON.stringify(s.input)}</pre>}
+                <details className="dsc ag-io">
+                  <summary>
+                    <span className="ag-tool tabular">{s.tool}</span>
+                    <span className="dsc-k">{TOOL_WORDS[s.tool] ?? ""}</span>
+                    <span className="ag-io-hint">What it sent and got back</span>
+                  </summary>
+                  <div className="ag-io-body">
+                    <p className="ag-io-k">Sent</p>
+                    <pre className="ag-json tabular">{JSON.stringify(s.input)}</pre>
+                    {result && (
+                      <>
+                        <p className="ag-io-k">Got back</p>
+                        <p className="ag-result-text">{tidy(result.text)}</p>
+                      </>
+                    )}
+                  </div>
+                </details>
               </li>
             );
+          }
+          // PayPal's own record of the order, and any error, stay in view. Other answers are inside their call's row.
+          const card = s.tool === "paypal_get_order" && !s.isError;
+          const prev = run.steps[i - 1];
+          if (!card && !s.isError && prev?.kind === "call" && prev.tool === s.tool) return null;
           return (
             <li key={i} className="ag-step ag-result" data-error={s.isError ? "" : undefined}>
-              {s.tool === "paypal_get_order" && !s.isError ? <PayPalOrderCard text={s.text} technical={prefs.mode === "technical"} /> : <p className="ag-result-text">{tidy(s.text)}</p>}
+              {card ? <PayPalOrderCard text={s.text} technical={prefs.mode === "technical"} /> : <p className="ag-result-text">{tidy(s.text)}</p>}
             </li>
           );
         })}

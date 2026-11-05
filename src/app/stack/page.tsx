@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Info } from "@/components/Info";
+import { OpenOnHash } from "@/components/OpenOnHash";
 import "../pages.css";
 import "../developers/dev.css";
+import "../learn/disclosure.css";
 import "./stack.css";
 
 export const metadata: Metadata = { title: "How it is built", description: "Every tool in Giftwise, the one job it does, and where it lives in the code." };
@@ -148,7 +150,7 @@ export default function StackPage() {
               </li>
             ))}
             <li>
-              <a className="text-link" href="#paypal-apis">
+              <a className="text-link" href="#paypal-apis-all">
                 Every PayPal API
               </a>
             </li>
@@ -161,8 +163,11 @@ export default function StackPage() {
             <span className="stack-tool">
               {t.name} <Info id={`stack.${t.id}`} label="" />
             </span>
-            <div>
-              <p className="stack-job">{t.job}</p>
+            <p className="stack-job">{t.job}</p>
+            <details className="dsc stack-more">
+              <summary>
+                <span className="dsc-k">How it works and where it lives</span>
+              </summary>
               <p className="stack-how">{t.how}</p>
               {t.files.length > 0 && (
                 <p className="stack-files">
@@ -171,7 +176,7 @@ export default function StackPage() {
                   ))}
                 </p>
               )}
-            </div>
+            </details>
           </li>
         ))}
       </ul>
@@ -184,34 +189,39 @@ export default function StackPage() {
         <p className="page-prose">
           {PAYPAL_APIS.length} PayPal APIs and tools, each with one job. All run against the PayPal sandbox. Going live changes only the base URL, the client ID and the secret.
         </p>
-        <p className="stack-swipe">Swipe the table sideways to see each call.</p>
-        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="PayPal APIs Giftwise calls">
-          <table className="doc-table pp-apis-table">
-            <thead>
-              <tr>
-                <th scope="col">PayPal</th>
-                <th scope="col">Call</th>
-                <th scope="col">What it does here</th>
-                <th scope="col">Where</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PAYPAL_APIS.map((a) => (
-                <tr key={a.api}>
-                  <td>{a.api}</td>
-                  <td>
-                    <code>{a.call}</code>
-                  </td>
-                  <td>{a.job}</td>
-                  <td>
-                    <FileLink file={a.file} />
-                  </td>
+        <details id="paypal-apis-all" className="dsc pp-apis">
+          <summary>
+            <span className="dsc-k">All {PAYPAL_APIS.length} PayPal APIs and tools, with the call and the file for each</span>
+          </summary>
+          <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="PayPal APIs Giftwise calls">
+            <table className="doc-table pp-apis-table">
+              <thead>
+                <tr>
+                  <th scope="col">PayPal</th>
+                  <th scope="col">Call</th>
+                  <th scope="col">What it does here</th>
+                  <th scope="col">Where</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {PAYPAL_APIS.map((a) => (
+                  <tr key={a.api}>
+                    <td>{a.api}</td>
+                    <td>
+                      <code>{a.call}</code>
+                    </td>
+                    <td>{a.job}</td>
+                    <td>
+                      <FileLink file={a.file} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
       </section>
+      <OpenOnHash />
     </div>
   );
 }

@@ -90,8 +90,11 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
   const latest = payments[0]?.orderId ?? null;
 
   return (
-    <>
-      <header className="gift-head" lang={lang}>
+    // Reading order is the phone order: the header, give, the needs, her month and the sandbox, then the questions about
+    // real money. On a wide screen the grid sets give and her month in the right-hand column, beside the header, so the
+    // whole way to give, PayPal button included, is on the first screen.
+    <div className="gift-layout" lang={lang} data-closed={household.status === "closed" ? "" : undefined}>
+      <header className="gift-head">
         {/* The language switch has its own place at the end of the title row, named in its own language. */}
         <div className="gift-title-row">
           <h1 className="gift-title">{t.help(household.name)}</h1>
@@ -114,51 +117,50 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
           </p>
         )}
       </header>
-      {/* Reading order is the phone order: give, the needs, her month and the sandbox, then the questions about real
-          money. On a wide screen the grid sets the first and third in the right-hand column. */}
-      <div className="gift-layout" lang={lang}>
-        {household.status !== "closed" && (
-          <div className="gift-give">
-            <GiveAny slug={slug} name={household.name} needs={openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }))} date={today()} profile={profile} lang={lang} />
-          </div>
-        )}
-        <div className="gift-needs">
-          <h2 className="gift-h2">{t.needsH(household.name)}</h2>
-          <div className="gift-list">
-            {views.map((v) => (
-              <NeedCard key={v.id} need={v} pronoun={profile.pronoun} lang={lang} closed={household.status === "closed"} />
-            ))}
-          </div>
+      {household.status !== "closed" && (
+        <div className="gift-give">
+          <GiveAny slug={slug} name={household.name} needs={openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }))} date={today()} profile={profile} lang={lang} />
         </div>
-        <aside className="gift-aside" aria-labelledby="month-h">
-          <div className="gift-month" data-ui>
-            <h2 id="month-h" className="gift-month-title">
-              {t.monthH(household.name)}
-            </h2>
-            <p className="gift-k">
-              {t.checkMonth(monthIn(lang, cash.paymentMonth), cash.paymentMonth.slice(0, 4), giftMonth)}
-            </p>
-            <p className="gift-check tabular">{usd(cash.checkBaseline)}</p>
-            <dl className="gift-facts">
+      )}
+      <div className="gift-needs">
+        <h2 className="gift-h2">{t.needsH(household.name)}</h2>
+        <div className="gift-list">
+          {views.map((v) => (
+            <NeedCard key={v.id} need={v} pronoun={profile.pronoun} lang={lang} closed={household.status === "closed"} />
+          ))}
+        </div>
+      </div>
+      <aside className="gift-aside" aria-labelledby="month-h">
+        <div className="gift-month" data-ui>
+          <h2 id="month-h" className="gift-month-title">
+            {t.monthH(household.name)}
+          </h2>
+          <p className="gift-k">
+            {t.checkMonth(monthIn(lang, cash.paymentMonth), cash.paymentMonth.slice(0, 4), giftMonth)}
+          </p>
+          <p className="gift-check tabular">{usd(cash.checkBaseline)}</p>
+          <dl className="gift-facts">
+            <div>
+              <dt>{t.givenSoFar}</dt>
+              <dd className="tabular">{usd(paidTotal)}</dd>
+            </div>
+            <div>
+              <dt>{t.stillNeeded}</dt>
+              <dd className="tabular">{usd(openTotal)}</dd>
+            </div>
+            {saved > 0 && (
               <div>
-                <dt>{t.givenSoFar}</dt>
-                <dd className="tabular">{usd(paidTotal)}</dd>
+                <dt>{t.savedAble(w)}</dt>
+                <dd className="tabular">{usd(saved)}</dd>
               </div>
-              <div>
-                <dt>{t.stillNeeded}</dt>
-                <dd className="tabular">{usd(openTotal)}</dd>
-              </div>
-              {saved > 0 && (
-                <div>
-                  <dt>{t.savedAble(w)}</dt>
-                  <dd className="tabular">{usd(saved)}</dd>
-                </div>
-              )}
-              <div>
-                <dt>{t.counted}</dt>
-                <dd className="tabular">$0</dd>
-              </div>
-            </dl>
+            )}
+            <div>
+              <dt>{t.counted}</dt>
+              <dd className="tabular">$0</dd>
+            </div>
+          </dl>
+          {/* Her reports and calendar: the links wrap side by side, so two short ones share a line. */}
+          <div className="gift-links">
             {latest && (
               <Link className="text-link gift-latest" href={`/r/${latest}${es}`}>
                 {t.latestReceipt}
@@ -186,36 +188,36 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
               </Link>
             )}
           </div>
-          <ShareGift url={shareUrl} title={t.help(household.name)} text={t.shareMessage(household.name, w)} qrSvg={qrSvg} lang={lang} />
-          <details className="gift-cash">
-            <summary>{t.cashQ}</summary>
-            <p>
-              {t.cashText(w, usd(cash.checkAfter), usd(cash.checkBaseline))}{" "}
-              <Link className="text-link" href="/try">
-                {t.checkAny}
-              </Link>
-            </p>
-          </details>
-          <div className="gift-sandbox">
-            <div className="title-row">
-              <p className="gift-sandbox-title">{t.sandboxTitle}</p>
-              <Info id="gift.sandbox" label="" topic={t.sandboxTitle} lang={lang} />
-            </div>
-            <p>{t.sandboxText}</p>
-            <SandboxLogin compact lang={lang} />
-            {household.isSample && <ResetSample slug={slug} lang={lang} />}
-          </div>
-        </aside>
-        <div className="gift-real" lang="en">
-          {lang === "es" && (
-            <p className="gift-real-note muted" lang="es">
-              {t.realWorldNote}
-            </p>
-          )}
-          <RealWorld />
         </div>
+        <ShareGift url={shareUrl} title={t.help(household.name)} text={t.shareMessage(household.name, w)} qrSvg={qrSvg} lang={lang} />
+        <details className="gift-cash">
+          <summary>{t.cashQ}</summary>
+          <p>
+            {t.cashText(w, usd(cash.checkAfter), usd(cash.checkBaseline))}{" "}
+            <Link className="text-link" href="/try">
+              {t.checkAny}
+            </Link>
+          </p>
+        </details>
+        <div className="gift-sandbox">
+          <div className="title-row">
+            <p className="gift-sandbox-title">{t.sandboxTitle}</p>
+            <Info id="gift.sandbox" label="" topic={t.sandboxTitle} lang={lang} />
+          </div>
+          <p>{t.sandboxText}</p>
+          <SandboxLogin compact lang={lang} />
+          {household.isSample && <ResetSample slug={slug} lang={lang} />}
+        </div>
+      </aside>
+      <div className="gift-real" lang="en">
+        {lang === "es" && (
+          <p className="gift-real-note muted" lang="es">
+            {t.realWorldNote}
+          </p>
+        )}
+        <RealWorld />
       </div>
-    </>
+    </div>
   );
 }
 
