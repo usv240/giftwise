@@ -202,6 +202,15 @@ for (let i = 0; i < 8; i++) {
 await page.waitForTimeout(300);
 ok("guided tour: eight stops, each page's element ringed, and Finish closes the card", stops.length === 8 && stops.every((x) => x.endsWith(":1")) && (await page.locator(".tour").count()) === 0, stops.join(" "));
 
+// 8e. The calendar's planner: as cash, it moves gifts on the Bryntum calendar itself and says what that kept.
+await page.goto(B + "/g/maya/calendar?month=2026-10", { waitUntil: "networkidle" });
+await page.locator(".b-cal-event").first().waitFor({ timeout: 60000 }).catch(() => {});
+await page.getByRole("button", { name: "As cash" }).click();
+await page.getByRole("button", { name: "Plan the cash dates" }).click();
+await page.waitForFunction(() => /The planner moved \d+ cash/.test(document.querySelector(".bc-planner-text")?.textContent ?? ""), null, { timeout: 60000 });
+const planned = (await page.locator(".bc-planner-text").innerText()).replace(/\s+/g, " ");
+ok("calendar planner: moves cash gifts by a week or less, keeps more of the checks, and compares it with paying the shop", /kept \$[\d,.]+ more/.test(planned) && /Paying the shop instead keeps \$[\d,.]+ more/.test(planned) && (await page.locator(".bc-moves li").filter({ hasText: "The planner moved" }).count()) >= 1, planned.slice(0, 160));
+
 // 9. Header links: which pages are missing
 const hrefs = [...new Set(await page.$$eval("header a, footer a", (as) => as.map((a) => a.getAttribute("href")).filter((h) => h && h.startsWith("/"))))];
 const broken = [];

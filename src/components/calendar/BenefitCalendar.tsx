@@ -7,6 +7,7 @@ import { StringHelper, type EventModel } from "@bryntum/calendar";
 import { BryntumCalendar } from "@bryntum/calendar-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { calendarModel, checkChanges, type CalGift, type View } from "@/lib/calendar/model";
+import { planDates } from "@/lib/calendar/schedule";
 import { ensureBryntumTheme } from "./theme";
 import { usd, type Profile } from "@/lib/rules";
 
@@ -55,7 +56,10 @@ function useBryntumTheme() {
   }, []);
 }
 
-type Move = { id: string; label: string; from: string; to: string; changes: { paidOn: string; before: number; after: number }[] };
+type Move = { id: string; label: string; from: string; to: string; changes: { paidOn: string; before: number; after: number }[]; byPlanner?: boolean };
+type PlanState = { status: "idle" | "planning" | "moving" | "done"; kept?: number; moved?: number; gap?: number; note?: string };
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sumChecks = (c: { amount: number }[]) => Math.round(c.reduce((a, x) => a + x.amount, 0) * 100) / 100;
 
 export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: { gifts: CalGift[]; profile: Profile; name: string; month: string; poss: string }) {
   useBryntumTheme();
@@ -69,8 +73,39 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
   const [pick, setPick] = useState(initial.at(-1)?.id ?? "");
   const [to, setTo] = useState(initial.at(-1)?.date ?? `${month}-01`);
 
+  const [plan, setPlan] = useState<PlanState>({ status: "idle" });
+  const [moved, setMoved] = useState<Set<string>>(new Set());
   const model = useMemo(() => calendarModel(gifts, profile, view), [gifts, profile, view]);
+  const events = useMemo(() => model.events.map((e) => (moved.has(e.id) ? { ...e, cls: "bc-moved", name: `${e.name}, moved` } : e)), [model.events, moved]);
   const counted = model.events.filter((e) => e.resourceId === "counts").length;
+
+  /** The planner: find the days that keep more of the check, then move each gift on the calendar, one at a time. */
+  async function runPlanner() {
+    setPlan({ status: "planning" });
+    await sleep(30);
+    const p = planDates(gifts, profile, view);
+    if (!p.moves.length) {
+      setPlan({ status: "done", moved: 0, note: view === "given" ? "Nothing here counts as income, so there is nothing to move." : "No move of a week or less keeps more of the check for these gifts." });
+      return;
+    }
+    setPlan({ status: "moving" });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let cur = gifts;
+    const months = gifts.map((g) => g.date.slice(0, 7)).sort();
+    const span = { first: months[0], last: months.at(-1)! };
+    for (const m of p.moves) {
+      const next = cur.map((x) => (x.id === m.id ? { ...x, date: m.to } : x)).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+      const changes = checkChanges(calendarModel(cur, profile, view, span).checks, calendarModel(next, profile, view, span).checks);
+      cur = next;
+      setGifts(next);
+      setMoved((s) => new Set(s).add(m.id));
+      setMoves((x) => [{ id: m.id, label: `The planner moved ${m.giver}'s ${usd(m.amount)}`, from: m.from, to: m.to, changes, byPlanner: true }, ...x].slice(0, 6));
+      await sleep(reduce ? 0 : 900);
+    }
+    // The same gifts paid the Giftwise way, against the best the planner found for cash.
+    const given = sumChecks(calendarModel(initial, profile, "given", span).checks);
+    setPlan({ status: "done", kept: p.kept, moved: p.moves.length, gap: Math.round((given - p.after) * 100) / 100 });
+  }
 
   function move(id: string, newDate: string) {
     const g = gifts.find((x) => x.id === id);
@@ -106,6 +141,8 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
             onClick={() => {
               setGifts(initial);
               setMoves([]);
+              setMoved(new Set());
+              setPlan({ status: "idle" });
             }}
           >
             Put every gift back
@@ -126,7 +163,7 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
           tbar={TBAR}
           weekStartDay={0}
           resources={RESOURCES}
-          events={model.events}
+          events={events}
           eventEditFeature={false}
           eventMenuFeature={false}
           scheduleMenuFeature={false}
@@ -134,6 +171,22 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
           eventTooltipFeature={TOOLTIP}
           onDragMoveEnd={({ eventRecord }: { eventRecord: EventModel }) => move(String(eventRecord.id), localIso(eventRecord.startDate as Date))}
         />
+      </div>
+
+      <div className="bc-planner" aria-live="polite">
+        <div>
+          <p className="bc-k">Let the planner move the cash</p>
+          <p className="bc-planner-text">
+            {plan.status === "done" && plan.moved
+              ? `The planner moved ${plan.moved} cash ${plan.moved === 1 ? "gift" : "gifts"} by a week or less and kept ${usd(plan.kept ?? 0)} more of ${poss.toLowerCase()} checks across the year. Paying the shop instead keeps ${usd(Math.max(0, plan.gap ?? 0))} more than the best cash schedule.`
+              : plan.status === "done"
+                ? plan.note
+                : `Some relatives give cash whatever happens. The planner moves each cash gift by up to a week so that more of it falls under SSI's $20 monthly and $60 quarterly exclusions. It never moves a gift into a month with no check, because that can affect Medicaid.`}
+          </p>
+        </div>
+        <button type="button" className="btn btn-ink bc-plan-btn" onClick={() => void runPlanner()} disabled={plan.status === "planning" || plan.status === "moving"}>
+          {plan.status === "planning" ? "Planning…" : plan.status === "moving" ? "Moving the gifts…" : view === "cash" ? "Plan the cash dates" : "Check for cash to move"}
+        </button>
       </div>
 
       <div className="bc-under">

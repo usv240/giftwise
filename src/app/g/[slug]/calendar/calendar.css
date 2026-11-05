@@ -172,3 +172,33 @@
 .bc-cal .b-cal-cell-header .b-day-num {
   color: var(--ink) !important;
 }
+
+/* The planner: what it does in one line, and the button that lets it move the cash on the calendar. */
+.bc-planner {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+.bc-planner > div {
+  flex: 1 1 28rem;
+}
+.bc-planner-text {
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.bc-plan-btn {
+  flex: 0 0 auto;
+}
+/* A gift the planner moved keeps a ring, so the change is easy to find on the month grid. */
+.b-cal-event.bc-moved {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
