@@ -24,8 +24,9 @@ export function FieldCases() {
         <span className="tabular">
           {S.agreed} of {S.scored}
         </span>{" "}
-        real cases: the rules engine reaches the outcome SSA and the court did.
+        real cases agree
       </p>
+      <p className="sx-lead">The rules engine reaches the outcome SSA and the court did.</p>
       <p className="sx-vs">
         Whether the help counts: <strong className="tabular">{S.agreed_on_whether_it_counts} of {S.scored}</strong>. The way it is valued, where the opinion names it:{" "}
         <strong className="tabular">

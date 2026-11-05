@@ -1,11 +1,20 @@
 .gift {
   padding-top: clamp(2rem, 1rem + 4vw, 5rem);
 }
-.gift-head {
+/* The title row runs the full width, so the language switch sits at its end; the text below keeps a reading measure. */
+.gift-head > :not(.gift-title-row) {
   max-width: 46rem;
+}
+.gift-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
 }
 .gift-title {
   font-size: clamp(2.25rem, 1.5rem + 2.4vw, 3.75rem);
+  text-wrap: balance;
 }
 .gift-note {
   margin-top: 1rem;
@@ -66,7 +75,8 @@
   margin-top: 2rem;
 }
 
-/* One need: what, where the money goes, the rule, then the PayPal button. */
+/* One need: what it is and the rule, then the amount, who is paid, and its own PayPal button. The cards read as a list,
+   so their type sits a step below the "Give any amount" card. */
 .need {
   background: var(--surface);
   border-radius: 20px;
@@ -81,32 +91,28 @@
 @media (max-width: 700px) {
   .need {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 .need-title {
-  font-size: 20px;
+  font-size: 1.125rem;
   font-weight: 500;
   letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 .need-detail {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 16px;
-}
-.need-route {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 16px;
-}
-.need-route strong {
-  font-weight: 500;
+  font-size: 1rem;
 }
 .need-rule {
-  margin-top: 6px;
-  font-size: 15px;
+  margin-top: 10px;
+  font-size: 1rem;
   color: var(--positive);
+}
+.need-link {
+  margin-top: 4px;
+  font-size: 1rem;
 }
 .need-side {
   display: grid;
@@ -114,10 +120,22 @@
   gap: 10px;
 }
 .need-amount {
-  font-size: 32px;
+  font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1;
+}
+.need-progress {
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+/* Right above the card's button: the exact amount and who is paid. */
+.need-pay {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.need-pay .info-trigger {
+  margin-left: 0.15rem;
 }
 .need-receipt {
   display: grid;
@@ -128,16 +146,21 @@
   background: var(--positive);
   color: var(--positive-ink);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 0.875rem;
   padding: 4px 10px;
   border-radius: 5px;
 }
 .need-receipt-line {
-  font-size: 15px;
+  font-size: 1rem;
 }
 .need-receipt-id {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.need-receipt-link {
+  justify-self: start;
+  font-size: 1rem;
 }
 
 /* Aside: her month, cash note, sandbox help */
@@ -152,16 +175,16 @@
   padding: 22px;
 }
 .gift-month-title {
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 500;
 }
 .gift-k {
   margin-top: 14px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .gift-check {
-  font-size: 64px;
+  font-size: 4rem;
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -175,7 +198,8 @@
 .gift-facts div {
   display: flex;
   justify-content: space-between;
-  font-size: 15px;
+  gap: 12px;
+  font-size: 0.9375rem;
 }
 .gift-facts dt {
   color: var(--muted);
@@ -189,7 +213,7 @@
   background: var(--surface-2);
   border-radius: 6px;
   padding: 16px 18px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .gift-cash summary {
   cursor: pointer;
@@ -208,34 +232,52 @@
 .gift-sandbox .title-row + p {
   margin-top: 4px;
 }
-.reset-btn {
-  margin-top: 10px;
+/* Text buttons: a press dims them at once, and they come back over 160ms. */
+.reset-btn,
+.give-again {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
   background: none;
   border: 0;
-  padding: 6px 0;
+  padding: 0;
   font: inherit;
-  font-size: 14px;
   color: var(--ink);
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 0.2em;
   cursor: pointer;
+  transition: opacity 160ms var(--ease-out);
+}
+.reset-btn {
+  margin-top: 10px;
+  font-size: 0.875rem;
+}
+.reset-btn:active,
+.give-again:active {
+  opacity: 0.6;
+  transition: none;
+}
+.reset-btn:disabled,
+.give-again:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 /* One link per line, so each reads on its own and is an easy target. */
 .gift-latest {
-  display: table;
-  margin-top: 10px;
-  font-size: 15px;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 1.75rem;
+  margin-top: 6px;
+  font-size: 0.9375rem;
 }
-.need-progress {
-  font-size: 14px;
-  color: var(--muted);
-}
-.need-receipt-link {
-  font-size: 15px;
+.gift-facts + .gift-latest {
+  margin-top: 14px;
 }
 
-/* Give any amount: the number, where it goes, her check either way, one checkout. */
+/* Give any amount: the main way to give. The number, where it goes, her check either way, one checkout. */
 .give-any {
   background: var(--surface);
   border-radius: 20px;
@@ -245,14 +287,64 @@
   gap: 12px;
 }
 .give-title {
-  font-size: 17px;
+  font-size: var(--step-lead);
   font-weight: 500;
+}
+/* Suggested amounts. Each fills the field, which stays editable. */
+.give-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.give-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: 2.5rem;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out);
+}
+.give-chip-for {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--muted);
+  transition: color 160ms var(--ease-out);
+}
+.give-chip[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--surface);
+}
+.give-chip[aria-pressed="true"] .give-chip-for {
+  color: color-mix(in srgb, var(--surface) 78%, var(--ink));
+}
+.give-chip:active {
+  transform: scale(0.97);
+}
+.give-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .give-chip:not([aria-pressed="true"]):hover {
+    background: color-mix(in srgb, var(--ink) 8%, var(--surface-2));
+  }
 }
 .give-field {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .give-input-wrap {
@@ -262,7 +354,7 @@
   background: var(--surface-2);
   border-radius: 10px;
   padding: 0 14px;
-  height: 52px;
+  min-height: 3.25rem;
   font-size: var(--step-lead);
   font-weight: 500;
   color: var(--ink);
@@ -271,7 +363,12 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+/* An amount that cannot be paid as typed: the field says so too, next to the message above the button. */
+.give-input-wrap:has(.give-input[aria-invalid="true"]) {
+  box-shadow: inset 0 0 0 1.5px var(--attention);
+}
 .give-input {
+  align-self: stretch;
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -282,7 +379,7 @@
   outline: none;
 }
 .give-k {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .give-lines {
@@ -291,7 +388,7 @@
   padding: 0;
   display: grid;
   gap: 6px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .give-lines li {
   display: flex;
@@ -301,6 +398,16 @@
 .give-lines li > :last-child {
   font-weight: 500;
   flex-shrink: 0;
+}
+/* Her check: what decides it, then the verdict in words, then the two figures. */
+.give-check {
+  display: grid;
+  gap: 2px;
+}
+.give-verdict {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--positive);
 }
 .give-compare {
   display: grid;
@@ -316,7 +423,7 @@
   margin: 0;
 }
 .give-fig {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -326,17 +433,42 @@
 }
 .give-note,
 .give-tech {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .give-attention {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--attention);
 }
+/* Right above PayPal: the one payment and its total, or what to type first. */
+.give-pay {
+  margin-top: 4px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+.give-pay strong {
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+.give-pay[data-tone="hint"] {
+  color: var(--muted);
+}
+.give-pay[data-tone="alert"] {
+  color: var(--attention);
+  font-weight: 500;
+}
 .give-done {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
   letter-spacing: -0.01em;
+}
+.give-next {
+  font-size: 0.9375rem;
+}
+.give-order {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 /* After a gift: what to do next. Each action keeps to one line; the row wraps in a narrow column. */
 .give-actions {
@@ -344,24 +476,14 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 18px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .give-actions > * {
   white-space: nowrap;
 }
-.give-again {
-  background: none;
-  border: 0;
-  padding: 6px 0;
-  font: inherit;
-  color: var(--ink);
-  font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-  cursor: pointer;
-}
 
-/* The split: one bar, one segment per recipient, sized by what each receives. Segments re-flow as the giver types. */
+/* The split: one bar, one segment per recipient, sized by what each receives. Segments re-flow as the giver types.
+   flex-grow is a layout property, so the change stays short; reduced motion turns it off. */
 .give-split {
   display: flex;
   gap: 3px;
@@ -374,7 +496,7 @@
   flex: 0 1 0;
   min-width: 6px;
   background: var(--tone, var(--positive));
-  transition: flex-grow 260ms var(--ease-out);
+  transition: flex-grow 200ms var(--ease-out);
 }
 .give-seg[data-able] {
   background: var(--accent);
@@ -408,14 +530,16 @@
   height: 100%;
   background: var(--positive);
   transform-origin: left center;
-  transition: transform 320ms var(--ease-out);
+  transition: transform 240ms var(--ease-out);
 }
 .give-meter-fill[data-cash] {
   background: var(--attention);
 }
 @media (prefers-reduced-motion: reduce) {
   .give-seg,
-  .give-meter-fill {
+  .give-meter-fill,
+  .give-chip,
+  .give-chip-for {
     transition: none;
   }
 }
@@ -429,11 +553,11 @@
   gap: 8px;
 }
 .gift-share-title {
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 500;
 }
 .gift-share-text {
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 .gift-share-row {
@@ -450,7 +574,7 @@
   background: var(--ink);
   color: var(--surface);
   font: inherit;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
   transition: transform 160ms var(--ease-out);
@@ -463,13 +587,13 @@
   outline-offset: 2px;
 }
 .gift-share-note {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--positive);
   overflow-wrap: anywhere;
 }
 .gift-share-qr summary {
   cursor: pointer;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
   min-height: 32px;
   display: flex;
@@ -489,41 +613,73 @@
 }
 .gift-share-url {
   margin-top: 6px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
 @media (prefers-reduced-motion: reduce) {
-  .gift-share-btn {
+  .gift-share-btn,
+  .reset-btn,
+  .give-again {
     transition: none;
   }
 }
-/* The language switch sits at the end of the title row. */
+/* The language switch, at the end of the title row. */
 .gift-lang {
-  margin-left: auto;
-  align-self: center;
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 0.2em;
-  padding: 6px 0;
+}
+.gift-organizer {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
 }
 .gift-real-note {
-  font-size: 15px;
+  font-size: 0.9375rem;
   margin-bottom: 8px;
 }
 
 .gift-closed {
   margin-top: 1rem;
-  max-width: 46rem;
   padding: 12px 16px;
   border-radius: 10px;
-  background: var(--surface);
-  box-shadow: inset 4px 0 0 var(--accent);
-  font-size: 16px;
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+  font-size: 1rem;
 }
-.need-link {
-  margin-top: 4px;
-  font-size: 15px;
+
+/* Touch: every link, button and disclosure row on the giver's path is at least 44px tall. */
+@media (pointer: coarse) {
+  .gift-lang,
+  .gift-organizer,
+  .gift-latest,
+  .reset-btn,
+  .give-again,
+  .give-chip,
+  .gift-cash summary,
+  .gift-share-qr summary {
+    min-height: 44px;
+  }
+  .gift-latest {
+    margin-top: 0;
+  }
+  .gift-facts + .gift-latest {
+    margin-top: 8px;
+  }
+  .need-link a,
+  .need-receipt-link,
+  .give-actions .text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .reset-btn {
+    margin-top: 4px;
+  }
 }

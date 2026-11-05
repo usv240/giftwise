@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { TOUR, TOUR_KEY, onStepPage } from "./steps";
 
 const read = () => {
@@ -30,7 +30,29 @@ export function Tour() {
   const pathname = usePathname();
   const [step, setStep] = useState<number | null>(null);
   const [here, setHere] = useState(false);
+  const [side, setSide] = useState<"right" | "left">("right");
   const head = useRef<HTMLHeadingElement>(null);
+  const card = useRef<HTMLElement>(null);
+
+  // The card sits in a bottom corner. When the element it describes reaches into the right corner (the Gift Checker
+  // on stop 1, with its Try your own situation link), it takes the left corner instead. Phones keep it full width.
+  const placeFor = useCallback((el: HTMLElement | null) => {
+    const c = card.current;
+    const vw = document.documentElement.clientWidth;
+    if (!el || !c || vw <= 560) return setSide("right");
+    const t = el.getBoundingClientRect();
+    const strip = c.offsetWidth + 16;
+    setSide(t.right > vw - strip && t.left >= strip ? "left" : "right");
+  }, []);
+
+  useLayoutEffect(() => {
+    if (step === null || !onStepPage(TOUR[step], window.location)) return;
+    // Placed before the card paints, so it never jumps corners in view.
+    placeFor(document.querySelector<HTMLElement>(TOUR[step].target));
+    const onResize = () => placeFor(document.querySelector<HTMLElement>(TOUR[step].target));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [step, pathname, placeFor]);
 
   // Read the step after each navigation, and mark the element it describes once it has rendered.
   useEffect(() => {
@@ -54,13 +76,24 @@ export function Tour() {
       const el = document.querySelector<HTMLElement>(s.target);
       if (el || ++tries > 40) window.clearInterval(timer);
       if (!el) return;
+      placeFor(el);
       el.setAttribute("data-tour-target", "");
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+      const behavior = reduce ? "auto" : "smooth";
+      // On a phone the card spans the bottom of the screen: when the element fits in the space above it, centre it
+      // there so the card covers none of it (all of the Gift Checker, down to Try your own situation, on stop 1).
+      const c = card.current;
+      const room = window.innerHeight - (c ? c.offsetHeight + 16 : 0);
+      const r = el.getBoundingClientRect();
+      if (c && document.documentElement.clientWidth <= 560 && r.height + 16 <= room) {
+        window.scrollTo({ top: window.scrollY + r.top - (room - r.height) / 2, behavior });
+      } else {
+        el.scrollIntoView({ block: "start", behavior });
+      }
     }, 200);
     head.current?.focus({ preventScroll: true });
     return () => window.clearInterval(timer);
-  }, [step, pathname]);
+  }, [step, pathname, placeFor]);
 
   const go = useCallback(
     (i: number | null) => {
@@ -86,7 +119,7 @@ export function Tour() {
   const s = TOUR[step];
   const last = step === TOUR.length - 1;
   return (
-    <aside className="tour" aria-label="Guided tour" data-ui>
+    <aside ref={card} className="tour" aria-label="Guided tour" data-ui data-side={side} style={side === "left" ? { left: 16, right: "auto" } : undefined}>
       <p className="tour-k tabular">
         Tour, stop {step + 1} of {TOUR.length}
       </p>

@@ -14,7 +14,7 @@ import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
 import { pageOrigin } from "@/lib/origin";
 import QRCode from "qrcode";
-import { DEFAULT_PROFILE, evaluateGift, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import { asLang, giftText, monthIn, sampleIn } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "./gift.css";
@@ -51,6 +51,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
   const w = pronounWords(profile.pronoun);
   const own = (s: string) => sampleIn(lang, s, household.isSample);
   const cash = evaluateGift({ id: "cash", date: today(), amount: 300, delivery: "cash", category: "other" }, profile);
+  const giftMonth = monthIn(lang, monthOf(today()));
   const shareUrl = `${await pageOrigin()}/g/${slug}${es}`;
   const qrSvg = await QRCode.toString(shareUrl, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#21232e", light: "#ffffff" } });
   // Payments are newest first, so the first row per need is the latest one.
@@ -71,10 +72,11 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
       payeeName: n.payeeName,
       route: n.route,
       status: n.status,
-      // The card already says where the money goes on the line above, so the rule line starts with what it means.
-      rulePlain: lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain.replace(/^Paid straight to the shop, so it is not counted\./, "Not counted as income."),
+      rulePlain: lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain,
       ruleIds: r.ruleIds,
       checkAfter: r.checkAfter,
+      checkMonth: r.paymentMonth,
+      checkStays: r.checkAfter === r.checkBaseline,
       paidBy: p?.payerName?.split(" ")[0] ?? null,
       orderId: p?.orderId ?? null,
       captureId: p?.captureId ?? null,
@@ -90,9 +92,9 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
   return (
     <>
       <header className="gift-head" lang={lang}>
-        <div className="title-row">
+        {/* The language switch has its own place at the end of the title row, named in its own language. */}
+        <div className="gift-title-row">
           <h1 className="gift-title">{t.help(household.name)}</h1>
-          <Info id="page.gift" />
           <Link className="gift-lang" href={`/g/${slug}${t.langSwitch.lang === "es" ? "?lang=es" : ""}`} hrefLang={t.langSwitch.lang} lang={t.langSwitch.lang}>
             {t.langSwitch.label}
           </Link>
@@ -101,7 +103,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
         <p className="gift-sample muted">{household.isSample ? t.sampleNote : t.madeNote}</p>
         {household.isSample && lang === "en" && (
           <p className="gift-sample">
-            <Link className="text-link" href="/manage/maya-sample-organizer">
+            <Link className="text-link gift-organizer" href="/manage/maya-sample-organizer">
               See the organizer&rsquo;s view of this page
             </Link>
           </p>
@@ -121,26 +123,20 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
           </div>
         )}
         <div className="gift-needs">
-          <div className="title-row">
-            <h2 className="gift-h2">{t.needsH(household.name)}</h2>
-            <Info id="gift.needs" />
-          </div>
+          <h2 className="gift-h2">{t.needsH(household.name)}</h2>
           <div className="gift-list">
             {views.map((v) => (
-              <NeedCard key={v.id} need={v} name={household.name} lang={lang} closed={household.status === "closed"} />
+              <NeedCard key={v.id} need={v} pronoun={profile.pronoun} lang={lang} closed={household.status === "closed"} />
             ))}
           </div>
         </div>
         <aside className="gift-aside" aria-labelledby="month-h">
           <div className="gift-month" data-ui>
-            <div className="title-row">
-              <h2 id="month-h" className="gift-month-title">
-                {t.monthH(household.name)}
-              </h2>
-              <Info id="gift.month" label="" />
-            </div>
+            <h2 id="month-h" className="gift-month-title">
+              {t.monthH(household.name)}
+            </h2>
             <p className="gift-k">
-              {t.checkMonth(monthIn(lang, cash.paymentMonth), cash.paymentMonth.slice(0, 4))}
+              {t.checkMonth(monthIn(lang, cash.paymentMonth), cash.paymentMonth.slice(0, 4), giftMonth)}
             </p>
             <p className="gift-check tabular">{usd(cash.checkBaseline)}</p>
             <dl className="gift-facts">
@@ -203,7 +199,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
           <div className="gift-sandbox">
             <div className="title-row">
               <p className="gift-sandbox-title">{t.sandboxTitle}</p>
-              <Info id="gift.sandbox" label="" />
+              <Info id="gift.sandbox" label="" topic={t.sandboxTitle} lang={lang} />
             </div>
             <p>{t.sandboxText}</p>
             <SandboxLogin compact lang={lang} />

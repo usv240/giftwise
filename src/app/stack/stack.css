@@ -1,0 +1,68 @@
+/* How it is built: a jump line to each tool, readable line lengths, and one style for every file link.
+   The rows themselves are styled in pages.css. */
+.stack .page-prose,
+.stack-job {
+  max-width: 36rem;
+}
+/* Smaller text, so a narrower column for the same 70 or so characters a line. */
+.stack-how {
+  max-width: 28rem;
+}
+.stack-jump {
+  margin-top: 1.25rem;
+}
+.stack-jump ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1.1rem;
+  font-size: var(--step-small);
+}
+.stack-jump a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+/* File links: mono, ink, underlined, the same in the tool rows and in the PayPal table. */
+:is(.stack-files, .pp-apis-table) a.stack-file {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: color-mix(in srgb, var(--ink) 40%, transparent);
+  transition: text-decoration-color 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.stack-files, .pp-apis-table) a.stack-file:hover {
+    text-decoration-color: var(--ink);
+  }
+}
+@media (pointer: coarse) {
+  .stack-jump a,
+  :is(.stack-files, .pp-apis-table) a.stack-file {
+    min-height: 44px;
+  }
+}
+.stack-swipe {
+  display: none;
+}
+@media (max-width: 760px) {
+  .stack-swipe {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: var(--step-small);
+    color: var(--muted);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.stack-files, .pp-apis-table) a.stack-file {
+    transition: none;
+  }
+}

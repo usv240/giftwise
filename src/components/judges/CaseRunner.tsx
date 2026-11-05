@@ -37,14 +37,12 @@ export function CaseRunner() {
           {state === "running" ? "Creating real sandbox orders. This takes about 15 seconds." : note || "Each run creates small sandbox orders. No real money moves."}
         </p>
       </div>
-      <ol className="cases-list">
-        {CASES.map((c, i) => {
+      {/* Eight separate cases, not steps: a plain list, no numbers. */}
+      <ul className="cases-list">
+        {CASES.map((c) => {
           const r = results?.[c.id];
           return (
             <li key={c.id} className="case" data-ui data-outcome={r?.outcome}>
-              <span className="case-n tabular" aria-hidden="true">
-                {i + 1}
-              </span>
               <div className="case-body">
                 <p className="case-title">{c.title}</p>
                 <p className="case-expected">{c.expected}</p>
@@ -60,7 +58,7 @@ export function CaseRunner() {
             </li>
           );
         })}
-      </ol>
+      </ul>
     </div>
   );
 }

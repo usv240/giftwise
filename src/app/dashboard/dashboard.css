@@ -1,4 +1,4 @@
-/* Maya's year: AG Studio on the site's canvas */
+/* Maya's year: AG Studio on the site's canvas. Type is in rem so the View menu's Large text setting grows it. */
 /* The lede streams in after the title, outside the page head, so it takes the head's spacing here. */
 .dashboard > .lede {
   margin-top: 1rem;
@@ -13,7 +13,7 @@
   margin-top: 8px;
 }
 .fd-note {
-  font-size: 14px;
+  font-size: 0.9375rem;
   max-width: 70ch;
 }
 .fd-bar {
@@ -24,13 +24,81 @@
   gap: 8px 16px;
 }
 .fd-bar p {
-  font-size: 14px;
+  font-size: 0.9375rem;
 }
-/* 71 canvas rows of 18px: the whole report, with no empty canvas below it. */
+/* 69 canvas rows of 18px: the whole report, with no empty canvas below it. */
 .fd-studio {
-  height: 1330px;
-  /* Studio needs about 600px; on phones it scrolls inside its own box rather than widening the page. */
+  height: 1294px;
+  /* Studio needs about 600px; below that it scrolls inside its own box rather than widening the page. */
   overflow-x: auto;
+}
+
+/* Studio's loading overlay, while a chart draws: a flat block at the chart's final size and a quiet label. */
+.fd-studio .ag-studio-widget-loading {
+  background: color-mix(in srgb, var(--surface-2) 60%, var(--surface)) !important;
+  border-radius: 12px;
+}
+.fd-studio .ag-studio-widget-loading-icon {
+  display: none !important;
+}
+.fd-studio .ag-studio-widget-loading-text {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+/* The giver buttons already sit under the widget's "Giver" title. */
+.fd-studio .ag-studio-filter-widget-title:empty {
+  display: none;
+}
+/* The headline figures in the site's figure weight, the same as the check widget beside them. */
+.fd-studio .ag-studio-value-widget-content {
+  font-weight: 500 !important;
+  letter-spacing: -0.02em;
+}
+
+/* Before Studio loads: the same cards at their final size, titles shown, a flat block for each body. No shimmer. */
+.fd-skel {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  grid-template-rows: repeat(69, 18px);
+  margin-right: 38px;
+  overflow: hidden;
+}
+.fd-skel-card {
+  margin: 14px;
+  padding: 8px 8px 12px;
+  border-radius: 20px;
+  background: var(--surface);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+}
+.fd-skel-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fd-skel-block {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 60%, var(--surface));
+}
+.fd-skel-card[data-k="given"] .fd-skel-block,
+.fd-skel-card[data-k="kept"] .fd-skel-block {
+  align-self: center;
+  height: 40px;
+  width: 60%;
+}
+.fd-skel-card[data-k="giver"] .fd-skel-block {
+  height: 30px;
+}
+.fd-skel-btn {
+  display: inline-block;
+  width: 11.5rem;
+  min-height: 44px;
+  border-radius: var(--radius-btn);
+  background: var(--surface-2);
 }
 
 /* The Giftwise check widget */
@@ -42,31 +110,173 @@
   padding: 4px 6px;
 }
 .gw-check-k {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
 }
 .gw-check-v {
-  font-size: 44px;
+  font-size: 2.5rem;
   font-weight: 500;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   line-height: 1.05;
   color: var(--positive);
 }
 .gw-check-note {
-  font-size: 13px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .gw-check-cash {
-  font-size: 14px;
+  font-size: 0.9375rem;
   margin-top: 6px;
 }
+
+/* Each route keeps one color across the site: the shop green, her ABLE account blue, the item itself deep blue,
+   and orange only for cash, as on the gift page's meter and the benefit calendar. */
+.gw-route {
+  background: var(--muted);
+}
+.gw-route[data-route="vendor"] {
+  background: var(--positive);
+}
+.gw-route[data-route="able"] {
+  background: var(--accent);
+}
+.gw-route[data-route="item"] {
+  background: var(--tint-blue-ink);
+}
+.gw-route[data-route="cash"] {
+  background: var(--mark);
+}
+
+/* How the money reached her: one bar split by route, then each route with its amount and share. */
+.gw-routes {
+  height: 100%;
+  display: grid;
+  align-content: center;
+  gap: 16px;
+  padding: 4px 6px;
+}
+.gw-routes-bar {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.gw-routes-bar > span {
+  min-width: 3px;
+}
+.gw-routes-key {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 0.9375rem;
+}
+.gw-routes-key li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto 3.5rem;
+  align-items: center;
+  gap: 10px;
+}
+.gw-routes-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.gw-routes-amt {
+  font-weight: 500;
+  text-align: end;
+}
+.gw-routes-pct {
+  color: var(--muted);
+  text-align: end;
+}
+.gw-routes-note {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+/* On a phone: Studio's canvas does not fit, so the year's totals show as a list, with the report and calendar a tap
+   away. The skeleton and Studio itself only appear from 701px. */
 .fd-phone {
   display: none;
-  margin-top: 0.5rem;
-  font-size: var(--step-small);
 }
 @media (max-width: 700px) {
   .fd-phone {
     display: block;
+    margin-top: 1.75rem;
   }
+  .fd-wait,
+  .fd {
+    display: none;
+  }
+}
+.fd-phone-h {
+  font-size: var(--step-lead);
+  font-weight: 500;
+}
+.fd-list {
+  margin: 12px 0 0;
+  border-radius: 16px;
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.fd-list > div {
+  background: var(--surface);
+  padding: 14px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+.fd-list dt {
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+.fd-list dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.fd-list dd[data-kept] {
+  color: var(--positive);
+}
+.fd-phone-k {
+  margin-top: 1.5rem;
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+.fd-routes {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.fd-routes li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.fd-routes li > :last-child {
+  font-weight: 500;
+}
+.fd-phone-links {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 4px;
+}
+.fd-phone-links .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.fd-phone-note {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
 }

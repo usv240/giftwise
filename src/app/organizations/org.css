@@ -1,4 +1,7 @@
-/* For organizations: a fund's balance, grants, and one PayPal payout batch */
+/* organizations: a fund's balance, grants beside the batch they add up to, and one PayPal payout batch */
+.organizations .page-head .page-prose {
+  margin-top: 0.75rem;
+}
 .org-fund {
   display: flex;
   justify-content: space-between;
@@ -7,10 +10,9 @@
   background: var(--surface);
   border-radius: 20px;
   padding: 18px 20px;
-  max-width: 560px;
 }
 .org-balance {
-  font-size: 44px;
+  font-size: 2.75rem;
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1.1;
@@ -19,13 +21,45 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
 }
+/* The grants on the left; the fund and the batch it pays for on the right, so the first screen reads as one form.
+   On a narrower screen: the fund, the grants, then the batch. */
+.org-grants {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 45rem) minmax(0, 24rem);
+  grid-template-areas:
+    "list fund"
+    "list batch";
+  grid-template-rows: auto 1fr;
+  gap: 12px clamp(1.5rem, 1rem + 2vw, 3rem);
+  align-items: start;
+}
+.org-fund-slot {
+  grid-area: fund;
+}
+.org-grants-list {
+  grid-area: list;
+}
+.org-grants .org-batch {
+  grid-area: batch;
+}
+@media (max-width: 1000px) {
+  .org-grants {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "fund"
+      "list"
+      "batch";
+    grid-template-rows: auto;
+    row-gap: 1.5rem;
+  }
+}
 .org-households {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   gap: 10px;
-  max-width: 720px;
 }
 .org-household {
   display: grid;
@@ -42,15 +76,54 @@
 .org-amount {
   grid-template-columns: minmax(0, 1fr);
 }
+/* One box per grant: the outline sits on the $ field as a whole (about 3:1), not on the input inside it. */
+.org-amount .give-input-wrap {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 55%, transparent);
+}
+.org-amount .give-input {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-height: 0;
+}
+.org-batch {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 6px;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 20px 22px;
+}
+@media (max-width: 1000px) {
+  .org-batch {
+    position: static;
+  }
+}
+.org-batch-total {
+  font-size: var(--step-head);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
 .org-limits {
-  font-size: 14px;
-  margin-top: 12px;
+  font-size: 0.875rem;
 }
-.org-limits + .try-actions {
-  margin-top: 1rem;
-}
-.org .try-actions ~ .result-attention {
+.org-actions {
   margin-top: 0.75rem;
+  display: grid;
+  gap: 8px;
+}
+.org-actions .btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+.org-hint {
+  font-size: var(--step-small);
+}
+.org-batch .result-attention {
+  margin-top: 0.25rem;
 }
 .org-plans {
   display: grid;
@@ -58,12 +131,12 @@
   gap: 12px;
 }
 .org-batch-status {
-  font-size: 16px;
+  font-size: 1rem;
   margin-bottom: 10px;
 }
 .org-report {
   display: block;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
 }
 .org-recent {
@@ -76,4 +149,24 @@
   .org-household {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* The organization's case: the published size, then what Giftwise does for it. */
+.org-case-card {
+  max-width: 45rem;
+  display: grid;
+  gap: 10px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+.org-case-n {
+  font-size: var(--step-head);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--positive);
+}
+.org-case-k {
+  font-weight: 500;
 }

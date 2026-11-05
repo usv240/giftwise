@@ -1,10 +1,86 @@
-/* For AI agents: the assistant's conversation and how to connect */
+/* For AI agents: the server address, the assistant's conversation and how to connect */
+.agents .page-prose {
+  max-width: 36rem;
+}
+/* Technical mode adds the package and API detail to the plain sentence. */
+.ag-tech {
+  display: none;
+}
+:root[data-mode="technical"] .ag-tech {
+  display: inline;
+}
+.ag-url {
+  margin-top: 1.5rem;
+  max-width: 40rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.ag-url-k {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.ag-url-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+.ag-url-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+}
+.ag-url-actions .dev-copy {
+  margin-inline-start: 0;
+}
+@media (pointer: coarse) {
+  .ag-url-actions .text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+.ag-client {
+  margin-top: 1.75rem;
+  max-width: 52rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6rem;
+}
+.ag-client-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 2.25rem;
+}
+.ag-cursor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+.ag-cursor p {
+  flex: 1 1 16rem;
+  max-width: 32rem;
+  color: var(--muted);
+}
+.ag-client h3 {
+  font-size: var(--step-body);
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--ink);
+}
 .ag {
   display: grid;
   gap: 14px;
 }
 .ag-source {
-  font-size: 14px;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
 }
 .ag-steps {
   list-style: none;
@@ -33,22 +109,25 @@
   background: var(--surface);
 }
 .ag-who {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   opacity: 0.8;
 }
+/* Tool calls and results hang off a 1px rule, quieter than the conversation. */
 .ag-call,
 .ag-result {
   margin-left: 20px;
   padding-left: 14px;
-  border-left: 2px solid var(--surface-2);
-  font-size: 14px;
+  border-left: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  font-size: 0.875rem;
 }
 .ag-call {
   border-left-color: var(--accent);
 }
 .ag-tool {
   overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
   font-weight: 500;
   color: var(--accent);
   margin-right: 6px;
@@ -62,7 +141,7 @@
 }
 .ag-json {
   margin: 0;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -76,15 +155,15 @@
 .ag-actions p {
   flex-basis: 100%;
 }
-.ag-k {
-  font-size: 14px;
-  color: var(--muted);
-  margin-top: 12px;
-}
 .ag-rules {
   display: grid;
   gap: 8px;
   padding-left: 1.1rem;
+}
+.ag-tools code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  white-space: nowrap;
 }
 @media (max-width: 640px) {
   .ag-ask {
@@ -100,7 +179,7 @@
   background: var(--surface);
   border-radius: 8px;
   padding: 12px 14px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   display: grid;
   gap: 4px;
   overflow-wrap: anywhere;
@@ -113,5 +192,5 @@
   padding-left: 1.1rem;
 }
 .ag-record-src {
-  font-size: 13px;
+  font-size: 0.8125rem;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sample from "../content/sample-year.json";
-import { easyRead, easySentences, reminderIcs } from "@/lib/report/easy";
+import { easyLines, easyRead, easySentences, reminderIcs } from "@/lib/report/easy";
 import { buildReport, type ReportGift } from "@/lib/report/ssa";
 import { DEFAULT_PROFILE, type Category, type Delivery } from "@/lib/rules";
 
@@ -23,6 +23,29 @@ describe("Easy Read report", () => {
           }
         }
     expect(checked).toBeGreaterThan(400);
+  });
+
+  it("uses no colons, semicolons or brackets anywhere a reader looks, and starts each sentence on its own line", () => {
+    for (const month of months)
+      for (const view of ["given", "cash"] as const)
+        for (const lang of ["en", "es"] as const) {
+          const e = easyRead(buildReport({ ...maya, month, view }), lang);
+          for (const line of [...easyLines(e), e.title, e.ui.lede, ...e.sections.map((s) => s.title)]) expect(line, `${lang} ${month} ${view}`).not.toMatch(/[:;()[\]]/);
+          for (const l of [...(e.whatIf ?? []), ...e.answer, ...e.sections.flatMap((s) => s.lines)]) expect(l.text.split(/(?<=[.?!])\s+/), `${lang} ${month} ${view}: "${l.text}"`).toHaveLength(1);
+        }
+  });
+
+  it("explains an ABLE account the first time the page names one, and says what each shop or ABLE gift was for", () => {
+    const en = easyRead(buildReport({ ...maya, month: "2026-10" }), "en");
+    const lines = easyLines(en);
+    const first = lines.findIndex((t) => /\bABLE\b/.test(t));
+    expect(lines.slice(first + 1, first + 3)).toContain("An ABLE account is a savings account for people with disabilities.");
+    expect(lines.filter((t) => t === "An ABLE account is a savings account for people with disabilities.")).toHaveLength(1);
+    const records = en.sections.find((s) => s.id === "records")!.lines;
+    expect(records.find((l) => l.text === "On October 8, Priya paid Horizon Wireless $65.")?.note).toBe("It is for the phone bill.");
+    expect(records.find((l) => l.text === "On October 5, Lucy put $133 in your ABLE account.")?.note).toBe("It is for the electric bill.");
+    const es = easyRead(buildReport({ ...maya, month: "2026-10" }), "es");
+    expect(easyLines(es)).toContain("Una cuenta ABLE es una cuenta de ahorros para personas con discapacidad.");
   });
 
   it("October as given: no call needed, and her December check stays $994, in both languages", () => {

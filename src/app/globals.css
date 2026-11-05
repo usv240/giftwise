@@ -59,7 +59,7 @@
     --mark: #fe8500;
     --mark-ink: #0b0c10;
     --positive: #5bd69a;
-  --positive-ink: #0b0c10;
+    --positive-ink: #0b0c10;
     --tint-blue: #1c2b4d;
     --tint-blue-ink: #bfd3ff;
     --attention: #fe8500;
@@ -152,6 +152,22 @@ p {
 
 a {
   color: inherit;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+/* The browser's own surfaces carry the palette too: caret, native controls, scrollbars, placeholders. */
+:root {
+  accent-color: var(--accent);
+  scrollbar-color: color-mix(in srgb, var(--ink) 30%, transparent) transparent;
+}
+input,
+textarea {
+  caret-color: var(--accent);
+}
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 :focus-visible {
@@ -196,8 +212,12 @@ a {
   transition: transform var(--dur-press) var(--ease-out), background-color 160ms ease;
   border: 0;
 }
-.btn:active {
+.btn:active:not(:disabled) {
   transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 .btn-primary {
   background: var(--accent);
@@ -224,8 +244,14 @@ a {
   .text-link:hover {
     text-decoration-color: var(--ink);
   }
-  .btn-primary:hover {
+  .btn-primary:hover:not(:disabled) {
     background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+  }
+  .btn-quiet:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--surface-2) 88%, var(--ink));
+  }
+  .btn-ink:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ink) 86%, var(--bg));
   }
 }
 
@@ -249,6 +275,7 @@ a {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
@@ -260,7 +287,7 @@ a {
 
 /* Product fragments keep their own conventions (data-ui). */
 [data-ui] {
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.4;
 }
 
@@ -297,7 +324,7 @@ a {
   /* A tint of the ink, not a surface color, so the dot shows on white cards and grey panels alike. */
   background: color-mix(in srgb, var(--ink) 9%, transparent);
   color: var(--ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   display: inline-grid;
   place-items: center;
@@ -324,10 +351,11 @@ a {
   color: var(--bg);
   padding: 14px 16px;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.45;
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
-  transform-origin: top left;
+  /* Info.tsx sets --info-origin from the placement it lands in, so the tip grows from its dot. */
+  transform-origin: var(--info-origin, top left);
   animation: info-in var(--dur-tip) var(--ease-out);
 }
 .info-pop[data-instant] {
@@ -345,7 +373,7 @@ a {
   color: color-mix(in srgb, var(--bg) 82%, var(--ink));
 }
 .info-pop-tech {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .info-pop .text-link {
   color: var(--bg);

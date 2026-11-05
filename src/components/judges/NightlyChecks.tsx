@@ -8,6 +8,7 @@ const GROUPS: { id: CheckResult["group"]; title: string }[] = [
   { id: "api", title: "The public API" },
 ];
 const WHEN = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" });
+const DAY = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" });
 
 function ago(min: number) {
   if (min < 1) return "just now";
@@ -30,8 +31,12 @@ export async function NightlyChecks() {
       </div>
     );
   }
-  const where = run.source === "render-workflow" ? `on Render Workflows${run.runId ? `, task run ${run.runId}` : ""}` : "locally, in development";
+  const hosted = run.source === "render-workflow";
   const secs = Math.max(1, Math.round((Date.parse(run.finishedAt) - Date.parse(run.startedAt)) / 1000));
+  // Say where this run happened: the hosted Render Workflow run, or a run on the developer's machine until the first hosted one lands.
+  const meta = hosted
+    ? `${WHEN.format(new Date(run.finishedAt))} ET, the hosted run on Render Workflows${run.runId ? `, task run ${run.runId}` : ""}. Every check ran at once and the whole run took ${secs} seconds.`
+    : `Last run on the developer's machine, ${DAY.format(new Date(run.finishedAt))}. The hosted nightly run shows here once it completes. Every check ran at once and the whole run took ${secs} seconds.`;
   return (
     <div className="nc" data-ui>
       <p className="nc-verdict" data-all={run.passed === run.total ? "" : undefined}>
@@ -40,9 +45,7 @@ export async function NightlyChecks() {
         </span>{" "}
         checks passed {ago(run.ageMinutes)}.
       </p>
-      <p className="nc-meta muted">
-        {WHEN.format(new Date(run.finishedAt))} ET, {where}. Every check ran at once and the whole run took {secs} seconds.
-      </p>
+      <p className="nc-meta muted">{meta}</p>
       <RunChecks canStart={canStart} />
       <div className="nc-groups">
         {GROUPS.map((g) => {

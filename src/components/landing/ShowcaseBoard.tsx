@@ -61,7 +61,7 @@ export function ShowcaseBoard() {
               <div className="board-detail">
                 <p>{r.detail ?? res.explanation.plain}</p>
                 <p className="board-detail-meta tabular">
-                  Her check: {usd(res.checkAfter)}. Rules {res.ruleIds.filter((x) => x !== "R-RES-01").join(", ")}.
+                  Her check: {usd(res.checkAfter)}.<span className="board-tech"> Rules {res.ruleIds.filter((x) => x !== "R-RES-01").join(", ")}.</span>
                   {r.link && (
                     <>
                       {" "}

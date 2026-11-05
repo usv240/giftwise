@@ -38,7 +38,28 @@ function Segmented<K extends keyof Prefs>({ name, label, options, infoId }: { na
   );
 }
 
-export function ViewMenu() {
+/** The menu's words; the Spanish gift page, receipt and Easy Read report show them in Spanish. */
+const WORDS = {
+  en: {
+    button: "Display",
+    title: "Display settings",
+    mode: ["Explanations", "Plain", "Technical"],
+    labels: ["Info labels", "Show", "Hide"],
+    theme: ["Theme", "Light", "Dark", "System"],
+    text: ["Text size", "Standard", "Large"],
+  },
+  es: {
+    button: "Vista",
+    title: "Ajustes de vista",
+    mode: ["Explicaciones", "Sencillas", "Técnicas"],
+    labels: ["Etiquetas de información", "Mostrar", "Ocultar"],
+    theme: ["Tema", "Claro", "Oscuro", "Sistema"],
+    text: ["Tamaño del texto", "Normal", "Grande"],
+  },
+} as const;
+
+export function ViewMenu({ lang = "en" }: { lang?: "en" | "es" }) {
+  const w = WORDS[lang];
   const [open, setOpen] = useState(false);
   const {
     refs: { setReference, setFloating },
@@ -56,47 +77,47 @@ export function ViewMenu() {
   return (
     <>
       <button ref={setReference} type="button" className="btn btn-quiet view-btn" aria-expanded={open} {...getReferenceProps()}>
-        View
+        {w.button}
       </button>
       {open && (
         <FloatingPortal>
           <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
-            <div ref={setFloating} style={floatingStyles} className="view-pop" aria-label="View settings" {...getFloatingProps()}>
+            <div ref={setFloating} style={floatingStyles} className="view-pop" aria-label={w.title} {...getFloatingProps()}>
               <Segmented
                 name="mode"
-                label="Explanations"
+                label={w.mode[0]}
                 infoId="view.mode"
                 options={[
-                  { value: "plain", label: "Plain" },
-                  { value: "technical", label: "Technical" },
+                  { value: "plain", label: w.mode[1] },
+                  { value: "technical", label: w.mode[2] },
                 ]}
               />
               <Segmented
                 name="labels"
-                label="Info labels"
+                label={w.labels[0]}
                 infoId="view.labels"
                 options={[
-                  { value: "on", label: "Show" },
-                  { value: "off", label: "Hide" },
+                  { value: "on", label: w.labels[1] },
+                  { value: "off", label: w.labels[2] },
                 ]}
               />
               <Segmented
                 name="theme"
-                label="Theme"
+                label={w.theme[0]}
                 infoId="view.theme"
                 options={[
-                  { value: "light", label: "Light" },
-                  { value: "dark", label: "Dark" },
-                  { value: "system", label: "System" },
+                  { value: "system", label: w.theme[3] },
+                  { value: "light", label: w.theme[1] },
+                  { value: "dark", label: w.theme[2] },
                 ]}
               />
               <Segmented
                 name="text"
-                label="Text size"
+                label={w.text[0]}
                 infoId="view.text"
                 options={[
-                  { value: "standard", label: "Standard" },
-                  { value: "large", label: "Large" },
+                  { value: "standard", label: w.text[1] },
+                  { value: "large", label: w.text[2] },
                 ]}
               />
             </div>

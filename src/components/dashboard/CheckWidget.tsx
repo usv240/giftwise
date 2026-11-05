@@ -2,6 +2,7 @@
 
 import type { AgBaseWidgetDefinition, AgDefaultRegistry, AgDefaultWidgetDefinition, AgWidgetDataFormat, AgWidgetFieldReference, AgWidgetParams } from "ag-studio";
 import { useEffect, useRef, useState } from "react";
+import type { RoutesDef } from "./RoutesWidget";
 import { CATEGORY_CODE, ROUTE_CODE } from "@/lib/dashboard/labels";
 import { DEFAULT_PROFILE, monthName, planMonths, usd, type Category, type Delivery, type Gift } from "@/lib/rules";
 
@@ -17,9 +18,9 @@ export interface CheckDef {
   };
   format?: AgWidgetDataFormat<Record<string, never>>;
 }
-/** The default widgets plus the Giftwise check, as AG Studio's registry docs describe. */
+/** The default widgets plus the Giftwise check and the routes bar, as AG Studio's registry docs describe. */
 export type GiftwiseRegistry = Omit<AgDefaultRegistry, "widgets"> & {
-  widgets: readonly (AgBaseWidgetDefinition<"giftwiseCheck", CheckDef> | AgDefaultWidgetDefinition)[];
+  widgets: readonly (AgBaseWidgetDefinition<"giftwiseCheck", CheckDef> | AgBaseWidgetDefinition<"giftwiseRoutes", RoutesDef> | AgDefaultWidgetDefinition)[];
 };
 
 type Result = { lowestRouted: number; lowestCash: number; lowestCashMonth: string; kept: number; months: number; full: number };

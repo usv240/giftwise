@@ -3,6 +3,7 @@ import Link from "next/link";
 import recorded from "../../../content/agent-demo.json";
 import { Info } from "@/components/Info";
 import { AgentDemo, type AgentRun } from "@/components/agents/AgentDemo";
+import { CopyButton } from "@/components/developers/CopyButton";
 import { TOOLS } from "@/lib/mcp/tools";
 import "../pages.css";
 import "../developers/dev.css";
@@ -13,8 +14,29 @@ export const metadata: Metadata = { title: "For AI agents", description: "Giftwi
 
 const HOST = (process.env.RENDER_EXTERNAL_URL || HOSTED_URL).replace(/\/$/, "");
 
+/** One client: its name, how to add Giftwise, and the command to copy when there is one. */
+function Client({ name, command, label, children }: { name: string; command?: string; label?: string; children?: React.ReactNode }) {
+  return (
+    <div className="ag-client">
+      <div className="ag-client-head">
+        <h3>{name}</h3>
+        {command && <CopyButton text={command} label="Copy" />}
+      </div>
+      {children}
+      {command && (
+        <pre className="dev-pre tabular" tabIndex={0} aria-label={label}>
+          {command}
+        </pre>
+      )}
+    </div>
+  );
+}
+
 export default function AgentsPage() {
   const url = `${HOST}/api/mcp`;
+  const claudeCode = `claude mcp add --transport http giftwise ${url}`;
+  const vsCode = `code --add-mcp '${JSON.stringify({ name: "giftwise", type: "http", url })}'`;
+  const config = JSON.stringify({ mcpServers: { giftwise: { type: "http", url } } }, null, 2);
   return (
     <div className="page frame agents">
       <header className="page-head">
@@ -26,6 +48,16 @@ export default function AgentsPage() {
           Assistants that shop and give for people need one more check: will this gift lower someone&rsquo;s SSI check? Giftwise answers over MCP, and can prepare a PayPal checkout that
           only the giver can approve.
         </p>
+        <div className="ag-url" data-ui>
+          <p className="ag-url-k">MCP server</p>
+          <code className="ag-url-code tabular">{url}</code>
+          <div className="ag-url-actions">
+            <CopyButton text={url} label="Copy address" />
+            <a className="text-link" href="#connect">
+              Connect your agent
+            </a>
+          </div>
+        </div>
       </header>
 
       <section className="page-section" aria-labelledby="demo-h">
@@ -33,11 +65,19 @@ export default function AgentsPage() {
           <h2 id="demo-h">An assistant that asks first</h2>
           <Info id="agents.demo" label="" />
         </div>
-        <p className="page-prose">A Claude assistant that knows nothing about SSI, connected to Giftwise only through the MCP server below. After it starts the checkout, it reads the order from PayPal itself, so June hears what PayPal says it will pay, not only what Giftwise says. It asks PayPal&rsquo;s own MCP server first (its get_order tool, from PayPal&rsquo;s @paypal/mcp package, which Giftwise runs) and reads PayPal&rsquo;s Orders API when that server cannot run the call.</p>
+        <p className="page-prose">
+          A Claude assistant that knows nothing about SSI, connected to Giftwise only through the MCP server below. After it starts the checkout, it reads the order back from PayPal, so June hears what
+          PayPal will pay.
+          <span className="ag-tech">
+            {" "}
+            It asks PayPal&rsquo;s own MCP server first (its get_order tool, from PayPal&rsquo;s @paypal/mcp package, which Giftwise runs) and reads PayPal&rsquo;s Orders API when that server cannot run
+            the call.
+          </span>
+        </p>
         <AgentDemo recorded={recorded as AgentRun} />
       </section>
 
-      <section className="page-section" aria-labelledby="connect-h">
+      <section id="connect" className="page-section ag-connect" aria-labelledby="connect-h">
         <div className="title-row">
           <h2 id="connect-h">Connect your agent</h2>
           <Info id="agents.connect" label="" />
@@ -45,34 +85,34 @@ export default function AgentsPage() {
         <p className="page-prose">
           Streamable HTTP at <code>{url}</code>. No key needed in the sandbox.
         </p>
-        <p className="ag-k">Claude on the web or Claude Desktop</p>
-        <p className="page-prose">
-          Settings, then Connectors, then Add custom connector. Name it Giftwise and paste <code>{url}</code>.
-        </p>
-        <p className="ag-k">Claude Code</p>
-        <pre className="dev-pre tabular" tabIndex={0} aria-label="Command to add Giftwise to Claude Code">{`claude mcp add --transport http giftwise ${url}`}</pre>
-        <p className="ag-k">Cursor</p>
-        <p className="page-prose">
-          <a className="btn btn-quiet" href={`cursor://anysphere.cursor-deeplink/mcp/install?name=giftwise&config=${Buffer.from(JSON.stringify({ url })).toString("base64")}`}>
-            Add to Cursor
-          </a>{" "}
-          Cursor shows the server and its address before anything is added.
-        </p>
-        <p className="ag-k">VS Code</p>
-        <pre className="dev-pre tabular" tabIndex={0} aria-label="Command to add Giftwise to VS Code">{`code --add-mcp '${JSON.stringify({ name: "giftwise", type: "http", url })}'`}</pre>
-        <p className="ag-k">Other MCP clients</p>
-        <pre className="dev-pre tabular" tabIndex={0} aria-label="MCP client configuration">{JSON.stringify({ mcpServers: { giftwise: { type: "http", url } } }, null, 2)}</pre>
-        <p className="ag-k">Found without being told</p>
-        <p className="page-prose">
-          An agent pointed at this site can find the server on its own: the domain&rsquo;s AI Catalog at <code>/.well-known/ai-catalog.json</code> lists its MCP Server Card at{" "}
-          <code>{url}/server-card</code>, the discovery format MCP adopted in SEP-2127, and <code>/llms.txt</code> describes Giftwise in plain text.
-        </p>
+        <Client name="Claude on the web or Claude Desktop">
+          <p className="page-prose">
+            Settings, then Connectors, then Add custom connector. Name it Giftwise and paste <code>{url}</code>.
+          </p>
+        </Client>
+        <Client name="Claude Code" command={claudeCode} label="Command to add Giftwise to Claude Code" />
+        <Client name="Cursor">
+          <div className="ag-cursor">
+            <a className="btn btn-quiet" href={`cursor://anysphere.cursor-deeplink/mcp/install?name=giftwise&config=${Buffer.from(JSON.stringify({ url })).toString("base64")}`}>
+              Add to Cursor
+            </a>
+            <p>Cursor shows the server and its address before anything is added.</p>
+          </div>
+        </Client>
+        <Client name="VS Code" command={vsCode} label="Command to add Giftwise to VS Code" />
+        <Client name="Other MCP clients" command={config} label="MCP client configuration" />
+        <Client name="Found without being told">
+          <p className="page-prose">
+            An agent pointed at this site can find the server on its own: the domain&rsquo;s AI Catalog at <code>/.well-known/ai-catalog.json</code> lists its MCP Server Card at{" "}
+            <code>{url}/server-card</code>, the discovery format MCP adopted in SEP-2127, and <code>/llms.txt</code> describes Giftwise in plain text.
+          </p>
+        </Client>
       </section>
 
       <section className="page-section" aria-labelledby="tools-h">
         <h2 id="tools-h">Tools</h2>
         <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Giftwise MCP tools">
-          <table className="doc-table">
+          <table className="doc-table ag-tools">
             <thead>
               <tr>
                 <th scope="col">Tool</th>
@@ -83,7 +123,9 @@ export default function AgentsPage() {
             <tbody>
               {TOOLS.map((t) => (
                 <tr key={t.name}>
-                  <td className="tabular">{t.name}</td>
+                  <td>
+                    <code>{t.name}</code>
+                  </td>
                   <td>{t.description}</td>
                   <td>{t.annotations.readOnlyHint ? "No" : (t.changes ?? "Yes")}</td>
                 </tr>

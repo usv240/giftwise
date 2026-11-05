@@ -4,6 +4,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
+import { ADOPTION_ROUTES } from "@/components/judges/Adoption";
 import { OrgPayouts, type OrgHousehold } from "@/components/org/OrgPayouts";
 import { db, dbConfigured, schema } from "@/lib/db";
 import { ensureSample, openNeeds } from "@/lib/households";
@@ -16,6 +17,9 @@ import "../try/try.css";
 import "../g/[slug]/gift.css";
 import "../developers/dev.css";
 import "./org.css";
+
+/** The organization's case: the same facts and source as the Payee organizations card on For judges. */
+const PAYEES = ADOPTION_ROUTES.find((r) => r.who === "Payee organizations");
 
 export const metadata: Metadata = { title: "For organizations", description: "Foundations and mutual-aid funds pay many families' needs in one PayPal payout batch, each grant routed so the SSI check stays whole." };
 
@@ -47,21 +51,24 @@ async function Fund({ searchParams }: { searchParams: Promise<{ batch?: string }
       .orderBy(desc(sql`min(${schema.payouts.createdAt})`))
       .limit(5),
   ]);
+  // The fund's balance sits beside the grants, above the batch it pays for.
+  const fund = (
+    <section className="org-fund" aria-labelledby="fund-h" data-ui>
+      <div>
+        <p className="result-k" id="fund-h">
+          {FUNDER}
+        </p>
+        <p className="org-balance tabular">{balance ? usd(balance.available) : "Unavailable"}</p>
+        <p className="muted">
+          Available in the fund&rsquo;s PayPal account{balance?.asOf ? `, as PayPal reported it at ${new Date(balance.asOf).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" })} ET` : ""}. Sandbox money.
+        </p>
+      </div>
+      <Info id="org.fund" label="" />
+    </section>
+  );
   return (
     <>
-      <section className="page-section org-fund" aria-labelledby="fund-h" data-ui>
-        <div>
-          <p className="result-k" id="fund-h">
-            {FUNDER}
-          </p>
-          <p className="org-balance tabular">{balance ? usd(balance.available) : "Unavailable"}</p>
-          <p className="muted">
-            Available in the fund&rsquo;s PayPal account{balance?.asOf ? `, as PayPal reported it at ${new Date(balance.asOf).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" })} ET` : ""}. Sandbox money.
-          </p>
-        </div>
-        <Info id="org.fund" label="" />
-      </section>
-      <OrgPayouts households={households} limits={{ perHousehold: LIMITS.perHousehold, perBatch: LIMITS.perBatch }} initialBatch={batch && /^[A-Z0-9]{8,30}$/.test(batch) ? batch : undefined} />
+      <OrgPayouts fund={fund} households={households} limits={{ perHousehold: LIMITS.perHousehold, perBatch: LIMITS.perBatch }} initialBatch={batch && /^[A-Z0-9]{8,30}$/.test(batch) ? batch : undefined} />
       {recent.length > 0 && (
         <section className="page-section" aria-labelledby="recent-h">
           <h2 id="recent-h">Recent batches</h2>
@@ -91,13 +98,27 @@ export default function OrganizationsPage({ searchParams }: { searchParams: Prom
           <h1 className="page-title">For organizations</h1>
           <Info id="page.organizations" />
         </div>
-        <p className="lede">
+        <p className="lede">Pay many families&rsquo; needs in one PayPal payout.</p>
+        <p className="page-prose">
           Disability foundations, mutual-aid funds and churches often hold money for families. Giftwise routes each grant by the rules and pays every shop and ABLE account in one PayPal payout batch, so no family&rsquo;s SSI check goes down.
         </p>
       </header>
       <Suspense fallback={<p className="page-loading">Loading the fund…</p>}>
         <Fund searchParams={searchParams} />
       </Suspense>
+      {PAYEES && (
+        <section className="page-section org-case" aria-labelledby="org-case-h">
+          <h2 id="org-case-h">Built for payee organizations</h2>
+          <div className="org-case-card" data-ui>
+            <p className="org-case-n tabular">{PAYEES.count}</p>
+            <p className="org-case-size">{PAYEES.size}</p>
+            <p className="org-case-use">
+              <span className="org-case-k">With Giftwise. </span>
+              {PAYEES.use}
+            </p>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

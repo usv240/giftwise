@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Info } from "@/components/Info";
 import "../pages.css";
 import "../developers/dev.css";
+import "./stack.css";
 
 export const metadata: Metadata = { title: "How it is built", description: "Every tool in Giftwise, the one job it does, and where it lives in the code." };
 
@@ -106,15 +108,52 @@ const PAYPAL_APIS: { api: string; call: string; job: string; file: string }[] = 
   { api: "PayPal MCP server", call: "@paypal/mcp over stdio, tool get_order", job: "Asked first when the assistant on /agents reads an order back. Giftwise runs PayPal's own server package; PayPal's hosted server is the second choice (AI-Toolkit issue 34 tracks its sandbox setup). If neither answers, the Orders API does, and the page says which one did.", file: "src/lib/agent/paypal-mcp.ts" },
 ];
 
+/** A short name for a file link: its last two path parts, plus the folder above when that part is src or a [param]. */
+function shortPath(file: string) {
+  const parts = file.split("/");
+  let n = Math.min(2, parts.length);
+  while (n < parts.length && /^(src|\[.+\])$/.test(parts[parts.length - n])) n++;
+  return parts.slice(-n).join("/");
+}
+
+function FileLink({ file }: { file: string }) {
+  return (
+    <a className="stack-file" href={REPO + file} target="_blank" rel="noreferrer" title={file}>
+      {shortPath(file)}
+    </a>
+  );
+}
+
 export default function StackPage() {
   return (
-    <div className="page frame">
+    <div className="page frame stack">
       <header className="page-head">
         <div className="title-row">
           <h1 className="page-title">How it is built</h1>
-          <Info id="built.list" />
         </div>
-        <p className="lede">Every tool in Giftwise, the one job it does, and where it lives in the code. Live status is on the Status page.</p>
+        <p className="lede">
+          Every tool in Giftwise, the one job it does, and where it lives in the code. Live status is on the{" "}
+          <Link className="text-link" href="/status">
+            Status page
+          </Link>
+          .
+        </p>
+        <nav className="stack-jump" aria-label="Tools on this page">
+          <ul>
+            {TOOLS.map((t) => (
+              <li key={t.id}>
+                <a className="text-link" href={`#${t.id}`}>
+                  {t.name}
+                </a>
+              </li>
+            ))}
+            <li>
+              <a className="text-link" href="#paypal-apis">
+                Every PayPal API
+              </a>
+            </li>
+          </ul>
+        </nav>
       </header>
       <ul className="stack-list">
         {TOOLS.map((t) => (
@@ -124,15 +163,11 @@ export default function StackPage() {
             </span>
             <div>
               <p className="stack-job">{t.job}</p>
-              <p className="stack-how">
-                {t.how}
-              </p>
+              <p className="stack-how">{t.how}</p>
               {t.files.length > 0 && (
                 <p className="stack-files">
                   {t.files.map((f) => (
-                    <a key={f} href={REPO + f} target="_blank" rel="noreferrer">
-                      {f}
-                    </a>
+                    <FileLink key={f} file={f} />
                   ))}
                 </p>
               )}
@@ -149,6 +184,7 @@ export default function StackPage() {
         <p className="page-prose">
           {PAYPAL_APIS.length} PayPal APIs and tools, each with one job. All run against the PayPal sandbox. Going live changes only the base URL, the client ID and the secret.
         </p>
+        <p className="stack-swipe">Swipe the table sideways to see each call.</p>
         <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="PayPal APIs Giftwise calls">
           <table className="doc-table pp-apis-table">
             <thead>
@@ -168,9 +204,7 @@ export default function StackPage() {
                   </td>
                   <td>{a.job}</td>
                   <td>
-                    <a className="text-link" href={REPO + a.file} target="_blank" rel="noreferrer">
-                      {a.file.split("/").pop()}
-                    </a>
+                    <FileLink file={a.file} />
                   </td>
                 </tr>
               ))}

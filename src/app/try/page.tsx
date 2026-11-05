@@ -41,7 +41,7 @@ export default function TryPage() {
                     View
                   </Link>
                   <a href={`/api/presets/${p.id}`} className="text-link" download>
-                    Download
+                    Download as data
                   </a>
                 </div>
               </li>

@@ -11,6 +11,7 @@ import { usd } from "@/lib/rules";
 export function Results() {
   const ex = ssa.summary;
   const fc = field.summary;
+  const routed = fc.dollars.as_shown_in_the_opinions;
   const b = bills.summary;
   const bills_n = b.referee.all_cases;
   return (
@@ -33,7 +34,8 @@ export function Results() {
           </span>
           <span className="jr-what">real SSI cases from federal courts reach the outcome SSA and the court did.</span>
           <span className="jr-base">
-            Routed through Giftwise, the same help keeps <span className="tabular">{usd(fc.dollars.as_shown_in_the_opinions.kept_per_month_2026)}</span> a month.
+            In the <span className="tabular">{routed.cases_where_routing_keeps_money}</span> cases with a benefit-safe route, the same help keeps about{" "}
+            <span className="tabular">{usd(Math.round(routed.kept_per_month_2026 / routed.cases_where_routing_keeps_money))}</span> a month for each person.
           </span>
         </a>
       </li>

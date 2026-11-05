@@ -1,0 +1,770 @@
+{
+  "recorded_at": "2026-11-05",
+  "note": "Real responses from the Giftwise API, recorded for the docs page. Endpoints the rules engine can answer on its own (check-gift, plan-month, presets) are computed when the page is built instead.",
+  "responses": {
+    "read-bill": {
+      "data": {
+        "bill": {
+          "vendor_name": "Northside Electric Co-op",
+          "vendor_category": "utility",
+          "amount_due": 138,
+          "currency": "USD",
+          "due_date": "2026-11-20",
+          "customer_name": "Maya Ortiz",
+          "line_items": [
+            {
+              "description": "Electric usage, 612 kWh",
+              "amount": 112.3
+            },
+            {
+              "description": "Delivery charge",
+              "amount": 19.2
+            },
+            {
+              "description": "Taxes and fees",
+              "amount": 6.5
+            }
+          ],
+          "is_shelter_cost": true,
+          "confidence": 0.97,
+          "explanation": {
+            "plain": "This is Maya's home electric bill from Northside Electric Co-op. The total is $138.00, due November 20, 2026.",
+            "technical": "Read vendor header 'Northside Electric Co-op', 'Bill to: Maya Ortiz', 'Due: 2026-11-20', three line items, and 'Total due $138.00' (line items sum to $138.00). Category 'utility' chosen because the statement is for residential electric service (power), which also marks it as a shelter cost. Currency assumed USD from '$' symbol. Document is labeled as a sample/fictional."
+          }
+        },
+        "check": {
+          "check_after": 971,
+          "best_route": "able",
+          "check_with_best_route": 1029,
+          "rule_ids": [
+            "R-SHEL-01",
+            "R-GIE-01"
+          ],
+          "ambiguous": true,
+          "explanation": {
+            "plain": "Help with utilities counts as housing support, up to $363 a month. $58 would be counted, so her January check would be $971. Sending it to her ABLE account keeps $1,029.",
+            "technical": "Rules R-SHEL-01 (Housing costs paid by others); R-GIE-01 (General income exclusion). Income month 2026-11, payment month 2027-01 (retrospective monthly accounting, lag 2). Cash $0; in kind $0; shelter paid by others $138; ISM value $138; infrequent exclusion $60; general exclusion $20; countable $58; FBR $1,029 gives $971. Best route: able ($1,029)."
+          }
+        }
+      },
+      "meta": {
+        "request_id": "req_17d49e76c4db49279ec6",
+        "version": "2026-11-01",
+        "rules_version": "2026.1",
+        "latency_ms": 6572,
+        "model": "claude-opus-5-5"
+      },
+      "error": null
+    },
+    "analyze-fundraiser": {
+      "data": {
+        "page": {
+          "title": "Help Maya get an accessible van (sample fundraiser)",
+          "read_via": "bundled",
+          "live_view_url": null
+        },
+        "fundraiser": {
+          "title": "Help Maya get an accessible van (sample fundraiser)",
+          "goal_amount": 6000,
+          "raised_amount": 6000,
+          "beneficiary_description": "Maya, 29, lives on her own and uses a power wheelchair. She is starting community college this spring, and the bus route does not reach campus. Organized by her mom, Rosa.",
+          "uses": [
+            {
+              "description": "Wheelchair ramp and lock-down conversion of a used minivan, done by Lakeside Mobility Conversions",
+              "amount": 5200,
+              "category": "equipment",
+              "likely_vendor": "Van conversion shop (Lakeside Mobility Conversions)"
+            },
+            {
+              "description": "First months of insurance on the van",
+              "amount": 500,
+              "category": "transport",
+              "likely_vendor": "Auto insurance company"
+            },
+            {
+              "description": "Gas for her first semester of classes",
+              "amount": 300,
+              "category": "transport",
+              "likely_vendor": "Gas station"
+            }
+          ],
+          "mentions_benefits": true,
+          "explanation": {
+            "plain": "Maya's fundraiser is fully funded at $6,000! The money covers a wheelchair-accessible van conversion, insurance and gas so she can get to community college. Giftwise can help deliver it in a benefit-safe way.",
+            "technical": "Goal $6,000; raised $6,000 from 48 donors. Stated uses: $5,200 ramp and lock-down conversion of a used minivan by Lakeside Mobility Conversions (equipment); $500 initial van insurance (transport); $300 gas for first semester (transport). Uses sum to $6,000. The page states Maya receives SSI, so mentions_benefits is true. Paying vendors directly (conversion shop, insurer) may help, since SSI generally counts cash and some in-kind support as income; benefit rules should be confirmed for her specific situation."
+          }
+        },
+        "plan": [
+          {
+            "use": "Wheelchair ramp and lock-down conversion of a used minivan, done by Lakeside Mobility Conversions",
+            "amount": 5200,
+            "category": "equipment",
+            "route": "vendor",
+            "likely_vendor": "Van conversion shop (Lakeside Mobility Conversions)",
+            "check_if_cash": 0,
+            "check_with_route": 1029
+          },
+          {
+            "use": "First months of insurance on the van",
+            "amount": 500,
+            "category": "transport",
+            "route": "vendor",
+            "likely_vendor": "Auto insurance company",
+            "check_if_cash": 609,
+            "check_with_route": 1029
+          },
+          {
+            "use": "Gas for her first semester of classes",
+            "amount": 300,
+            "category": "transport",
+            "route": "vendor",
+            "likely_vendor": "Gas station",
+            "check_if_cash": 809,
+            "check_with_route": 1029
+          }
+        ],
+        "summary": "Here is how $6,000 can reach her and keep her full benefits."
+      },
+      "meta": {
+        "request_id": "req_2e6f642159df4d108653",
+        "version": "2026-11-01",
+        "rules_version": "2026.1",
+        "latency_ms": 7121,
+        "model": "claude-opus-5-5"
+      },
+      "error": null
+    },
+    "review-bill": {
+      "data": {
+        "reviews": [
+          {
+            "authority": "regs",
+            "answer": "shelter",
+            "passage_id": "cfr-416-1130-shelter",
+            "cite": "20 CFR 416.1130(b)(1)",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1130",
+            "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+            "quote_checked": true,
+            "set_aside_reason": null,
+            "reason": {
+              "plain": "Yes, this is a shelter cost. Electricity is listed by name as shelter, so someone else paying it counts as in-kind support.",
+              "technical": "20 CFR 416.1130(b)(1) lists \"electricity\" in its definition of shelter. It also counts as in-kind support and maintenance any shelter \"that you receive because someone else pays for it.\" A residential electric bill paid directly to the co-op is not income itself under 416.1103(g). However, the shelter received because of that payment is in-kind income for shelter."
+            },
+            "confidence": 0.95
+          },
+          {
+            "authority": "poms",
+            "answer": "shelter",
+            "passage_id": "poms-si-00835-020-shelter",
+            "cite": "POMS SI 00835.020B.36",
+            "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835020",
+            "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+            "quote_checked": true,
+            "set_aside_reason": null,
+            "reason": {
+              "plain": "Yes, this is a shelter cost. Electricity is on the manual's list of shelter costs, so someone else paying the bill directly counts as in-kind support.",
+              "technical": "SI 00835.020B.36 explicitly lists \"electricity\" among shelter costs. SI 00835.465C and SI 00835.020B.17 add that a non-household member paying a vendor directly for a household shelter item creates outside ISM. The bill is for residential electric service, not a business, so SI 00835.471 does not apply."
+            },
+            "confidence": 0.95
+          }
+        ],
+        "referee": {
+          "decision": "shelter",
+          "agreed": true,
+          "summary": "Both reviewers found it in their own rulebook: this bill is a housing cost."
+        },
+        "outcome": {
+          "route": "able",
+          "check_after": 1029,
+          "readings": [
+            "utility"
+          ],
+          "routes": [
+            {
+              "delivery": "vendor",
+              "possible": true,
+              "check": 911,
+              "ruleIds": [
+                "R-SHEL-01",
+                "R-GIE-01"
+              ]
+            },
+            {
+              "delivery": "able",
+              "possible": true,
+              "check": 1029,
+              "ruleIds": [
+                "R-ABLE-01",
+                "R-ABLE-02"
+              ]
+            }
+          ],
+          "rule_ids": [
+            "R-ABLE-01",
+            "R-ABLE-02"
+          ]
+        }
+      },
+      "meta": {
+        "request_id": "req_289520a1b3ae44339a30",
+        "version": "2026-11-01",
+        "rules_version": "2026.1",
+        "latency_ms": 4220,
+        "model": "claude-opus-5-5"
+      },
+      "error": null
+    },
+    "ask-rules": {
+      "data": {
+        "question": "Does it count as income if my sister pays my phone bill?",
+        "answer": "No. Under the SSI rules, when someone else pays your bill directly to the company, the payment is not your income. Phone service is also not counted because it is not food or shelter. The rules give this exact example of a sister paying an SSI recipient's phone bill and say neither the payment nor the phone service is income.",
+        "quotes": [
+          {
+            "cite": "20 CFR 416.1103(g)",
+            "passage_id": "cfr-416-1103-g",
+            "quote": "Payment of your bills by someone else directly to the supplier is not income.",
+            "found_word_for_word": true,
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103"
+          },
+          {
+            "cite": "POMS SI 00815.400 B.2",
+            "passage_id": "example-phone-bill",
+            "quote": "Neither the payment to the phone company nor the telephone service received as a result of the payment is income because it is not food or shelter.",
+            "found_word_for_word": true,
+            "url": null
+          },
+          {
+            "cite": "POMS SI 00815.400A",
+            "passage_id": "poms-si-00815-400-policy",
+            "quote": "However, anything received in kind as a result of the payment is income if it is food or shelter.",
+            "found_word_for_word": true,
+            "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400"
+          }
+        ],
+        "passages": [
+          {
+            "id": "example-phone-bill",
+            "kind": "example",
+            "cite": "POMS SI 00815.400 B.2",
+            "title": "A sister pays the phone bill",
+            "text": "Joshua Hall, an SSI recipient, is unable to pay his phone bill so his sister pays the phone company with her own money. Neither the payment to the phone company nor the telephone service received as a result of the payment is income because it is not food or shelter.",
+            "url": null,
+            "score": 1.453
+          },
+          {
+            "id": "poms-si-00815-400-example-phone",
+            "kind": "manual",
+            "cite": "POMS SI 00815.400B.2",
+            "title": "SI 00815.400 Bills Paid By a Third Party — B. Examples, 2. Third party payment does not result in income",
+            "text": "2. Third party payment does not result in income\nJoshua Hall, an SSI recipient, is unable to pay his phone bill so his sister pays the phone company with her own money. Neither the payment to the phone company nor the telephone service received as a result of the payment is income because it is not food or shelter.",
+            "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400",
+            "score": 1.444
+          },
+          {
+            "id": "cfr-416-1103-g",
+            "kind": "regulation",
+            "cite": "20 CFR 416.1103(g)",
+            "title": "§ 416.1103 What is not income? — (g) Bills paid for you",
+            "text": "(g) Bills paid for you. Payment of your bills by someone else directly to the supplier is not income. However, we count the value of anything you receive because of the payment if it is in-kind income as defined in § 416.1102.",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+            "score": 1.223
+          },
+          {
+            "id": "cfr-416-1103-g-examples",
+            "kind": "regulation",
+            "cite": "20 CFR 416.1103(g) (Examples)",
+            "title": "§ 416.1103 What is not income? — (g) Bills paid for you",
+            "text": "Examples: If your daughter uses her own money to pay your mortgage payment directly to the mortgage lender, the payment itself is not your income because you do not receive it. However, because of your daughter's payment, the transaction provides you with shelter; the mortgage payment is in-kind income for shelter to you. Similarly, if you book a hotel room on credit and your son later pays the bill, the payment to the hotel is not income to you, but the payment of the bill is in-kind income for shelter to you. In this example, if your son pays for the hotel bill in a month after the month of the hotel stay, we will count the in-kind income to you in the month in which he pays the bill. On the other hand, if your brother pays a lawn service to mow your grass, the payment is not income to you because the mowing cannot be used to meet your needs for food or shelter. Therefore, the payment for the lawn service is not in-kind income as defined in § 416.1102.",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+            "score": 1.206
+          },
+          {
+            "id": "cfr-416-1102",
+            "kind": "regulation",
+            "cite": "20 CFR 416.1102",
+            "title": "§ 416.1102 What is income?",
+            "text": "Income is anything that you receive in cash or in-kind that you can use to meet your needs for food or shelter. For purposes of this definition, income may be received actually or constructively. Income is received constructively, unless there are significant restrictions on your ability to receive it, if it is under your control or you can use it despite not actually receiving it. Sometimes income also includes more or less than you actually receive (see §§ 416.1110 and 416.1123(b)). In-kind income is not cash but is something else that you can use to meet your needs for food or shelter. Exception: Food is not included in the calculations of in-kind support and maintenance, which is a type of unearned income that we have special rules for valuing (see §§ 416.1130 through 416.1148).",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1102",
+            "score": 1.09
+          },
+          {
+            "id": "poms-si-00815-400-policy",
+            "kind": "manual",
+            "cite": "POMS SI 00815.400A",
+            "title": "SI 00815.400 Bills Paid By a Third Party — A. Policy",
+            "text": "A. Policy\nPayment of an individual's bills (including supplementary medical insurance under title XVIII or other medical insurance premiums) by a third party directly to the supplier is not income. However, anything received in kind as a result of the payment is income if it is food or shelter.",
+            "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400",
+            "score": 1.079
+          }
+        ],
+        "retrieval": {
+          "engine": "elasticsearch",
+          "model": ".jina-embeddings-v3",
+          "reranker": ".jina-reranker-v3"
+        },
+        "ai": true
+      },
+      "meta": {
+        "request_id": "req_17d7bf49052d4ee394b1",
+        "version": "2026-11-01",
+        "rules_version": "2026.1",
+        "latency_ms": 5015
+      },
+      "error": null
+    },
+    "gift-pages": {
+      "data": {
+        "slug": "jordan-9b041b",
+        "url": "/g/jordan-9b041b",
+        "manage_url": "/manage/[private token, shown once]",
+        "needs": [
+          {
+            "title": "Van wheelchair lift",
+            "route": "vendor",
+            "payee": "Van conversion shop",
+            "amount": 1800,
+            "check_after": 1029
+          },
+          {
+            "title": "Rent, December",
+            "route": "able",
+            "payee": "Jordan's ABLE account",
+            "amount": 650,
+            "check_after": 1029
+          }
+        ]
+      },
+      "meta": {
+        "request_id": "req_c567971fb00e43f9ab43",
+        "version": "2026-11-01",
+        "rules_version": "2026.1",
+        "latency_ms": 57
+      },
+      "error": null
+    },
+    "ssa-report": {
+      "data": {
+        "month": "2026-10",
+        "month_label": "October 2026",
+        "view": "given",
+        "name": "Maya",
+        "pronoun": "she",
+        "due": {
+          "date": "2026-11-10",
+          "label": "November 10, 2026",
+          "days_left": 5,
+          "state": "open"
+        },
+        "status": "nothing_counts",
+        "headline": "Nothing here counts as income.",
+        "summary": "All 5 gifts, $618 in all, went straight to a shop or her ABLE account. None of them changes her income, so there is no income change from these gifts to report for October. Her December check stays $994.",
+        "lines": [
+          {
+            "id": "s38",
+            "date": "2026-10-05",
+            "giver": "Lucy",
+            "need": "Electric bill",
+            "paid_to": "Maya's ABLE account",
+            "amount": 133,
+            "delivery": "able",
+            "category": "utility",
+            "section": "records",
+            "kind": "excluded",
+            "what": "Deposit to her ABLE account",
+            "why": "Money others put into the person's ABLE account is not income, and the first $100,000 in it does not count toward savings.",
+            "rule_ids": [
+              "R-ABLE-01",
+              "R-ABLE-02"
+            ],
+            "sources": [
+              {
+                "id": "poms-si-01130-740",
+                "title": "POMS SI 01130.740: ABLE accounts",
+                "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740"
+              },
+              {
+                "id": "ssa-spotlight-able-2026",
+                "title": "SSA: Spotlight on ABLE accounts (2026 edition)",
+                "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html"
+              }
+            ],
+            "evidence": {
+              "kind": "sample"
+            }
+          },
+          {
+            "id": "s39",
+            "date": "2026-10-08",
+            "giver": "Priya",
+            "need": "Phone bill",
+            "paid_to": "Horizon Wireless",
+            "amount": 65,
+            "delivery": "vendor",
+            "category": "phone",
+            "section": "records",
+            "kind": "excluded",
+            "what": "Paid straight to Horizon Wireless",
+            "why": "When someone pays a shop directly for something other than housing, it is not income.",
+            "rule_ids": [
+              "R-VEND-01"
+            ],
+            "sources": [
+              {
+                "id": "cfr-416-1103-g",
+                "title": "20 CFR 416.1103(g): bills paid directly to the supplier are not income",
+                "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103"
+              },
+              {
+                "id": "poms-si-00815-400",
+                "title": "POMS SI 00815.400: Bills Paid by Third Party",
+                "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400"
+              }
+            ],
+            "evidence": {
+              "kind": "sample"
+            }
+          },
+          {
+            "id": "s40",
+            "date": "2026-10-12",
+            "giver": "Rosa",
+            "need": "Therapy co-pay",
+            "paid_to": "Northside Physical Therapy",
+            "amount": 90,
+            "delivery": "vendor",
+            "category": "medical",
+            "section": "records",
+            "kind": "excluded",
+            "what": "Paid straight to Northside Physical Therapy",
+            "why": "When someone pays a shop directly for something other than housing, it is not income.",
+            "rule_ids": [
+              "R-VEND-01"
+            ],
+            "sources": [
+              {
+                "id": "cfr-416-1103-g",
+                "title": "20 CFR 416.1103(g): bills paid directly to the supplier are not income",
+                "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103"
+              },
+              {
+                "id": "poms-si-00815-400",
+                "title": "POMS SI 00815.400: Bills Paid by Third Party",
+                "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400"
+              }
+            ],
+            "evidence": {
+              "kind": "sample"
+            }
+          },
+          {
+            "id": "s41",
+            "date": "2026-10-19",
+            "giver": "Dan",
+            "need": "Wheelchair tires",
+            "paid_to": "Riverside Mobility Repair",
+            "amount": 180,
+            "delivery": "vendor",
+            "category": "equipment",
+            "section": "records",
+            "kind": "excluded",
+            "what": "Paid straight to Riverside Mobility Repair",
+            "why": "When someone pays a shop directly for something other than housing, it is not income.",
+            "rule_ids": [
+              "R-VEND-01"
+            ],
+            "sources": [
+              {
+                "id": "cfr-416-1103-g",
+                "title": "20 CFR 416.1103(g): bills paid directly to the supplier are not income",
+                "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103"
+              },
+              {
+                "id": "poms-si-00815-400",
+                "title": "POMS SI 00815.400: Bills Paid by Third Party",
+                "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400"
+              }
+            ],
+            "evidence": {
+              "kind": "sample"
+            }
+          },
+          {
+            "id": "s42",
+            "date": "2026-10-28",
+            "giver": "Aunt June",
+            "need": "Fall savings",
+            "paid_to": "Maya's ABLE account",
+            "amount": 150,
+            "delivery": "able",
+            "category": "other",
+            "section": "records",
+            "kind": "excluded",
+            "what": "Deposit to her ABLE account",
+            "why": "Money others put into the person's ABLE account is not income, and the first $100,000 in it does not count toward savings.",
+            "rule_ids": [
+              "R-ABLE-01"
+            ],
+            "sources": [
+              {
+                "id": "poms-si-01130-740",
+                "title": "POMS SI 01130.740: ABLE accounts",
+                "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740"
+              },
+              {
+                "id": "ssa-spotlight-able-2026",
+                "title": "SSA: Spotlight on ABLE accounts (2026 edition)",
+                "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html"
+              }
+            ],
+            "evidence": {
+              "kind": "sample"
+            }
+          }
+        ],
+        "totals": {
+          "gifts": 5,
+          "given": 618,
+          "tell": 0,
+          "counted": 0,
+          "check_month": "2026-12",
+          "check_month_label": "December 2026",
+          "check": 994,
+          "full_check": 994,
+          "counted_if_cash": 538,
+          "check_if_cash": 456
+        },
+        "todo": [
+          {
+            "id": "able-housing",
+            "text": "Check that the electric bill was paid from the ABLE account during October. Money taken out for housing and spent in the same month is not income; money kept into the next month counts toward savings.",
+            "rule_id": "R-ABLE-02"
+          },
+          {
+            "id": "savings",
+            "text": "On November 1, her countable savings will be $1,240, under the $2,000 limit.",
+            "rule_id": "R-RES-01"
+          },
+          {
+            "id": "receipts",
+            "text": "Keep the receipts below. Each one shows PayPal paid the shop or the ABLE account, not Maya. If Social Security asks about help from family, they are the answer."
+          }
+        ],
+        "savings": {
+          "on_date": "2026-11-01",
+          "amount": 1240,
+          "limit": 2000,
+          "over": false
+        },
+        "script": [],
+        "how": {
+          "phone": "1-800-772-1213",
+          "tty": "1-800-325-0778",
+          "office": "Or visit or write any Social Security office."
+        },
+        "penalty": {
+          "amounts": [
+            25,
+            50,
+            100
+          ],
+          "source": "cfr-416-724"
+        },
+        "passages": [
+          {
+            "id": "cfr-416-708-c",
+            "cite": "20 CFR 416.708(c)(1)",
+            "text": "Unless the circumstances in § 416.709(a) and (c) apply, you must report to us any increase or decrease in your income",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.708"
+          },
+          {
+            "id": "cfr-416-708-d",
+            "cite": "20 CFR 416.708(d)",
+            "text": "You must report to us any resources you receive or part with",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.708"
+          },
+          {
+            "id": "cfr-416-714-a",
+            "cite": "20 CFR 416.714(a)",
+            "text": "You should report to us as soon as an event listed in § 416.708 happens. If you do not report within 10 days after the close of the month in which the event happens, your report will be late. We may impose a penalty deduction from your benefits for a late report (see §§ 416.722 through 416.732).",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.714"
+          },
+          {
+            "id": "cfr-416-724-a",
+            "cite": "20 CFR 416.724(a)",
+            "text": "(1) $25 for a report overdue in the first penalty period; (2) $50 for a report overdue in the second penalty period; and (3) $100 for a report overdue in the third (or any following) penalty period.",
+            "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.724"
+          },
+          {
+            "id": "ssa-reporting-help",
+            "cite": "SSA, Reporting Responsibilities",
+            "text": "Change in help with living expenses from friends or relatives.",
+            "url": "https://www.ssa.gov/ssi/text-report-ussi.htm"
+          },
+          {
+            "id": "ssa-reporting-when",
+            "cite": "SSA, Reporting Responsibilities",
+            "text": "Report any changes that may affect your SSI as soon as possible and no later than 10 days after the end of the month in which the change occurred.",
+            "url": "https://www.ssa.gov/ssi/text-report-ussi.htm"
+          },
+          {
+            "id": "ssa-spotlight-how",
+            "cite": "SSA, Spotlight on Rights and Responsibilities",
+            "text": "Please visit or write any Social Security office, or call our toll-free number at 1-800-772-1213.",
+            "url": "https://www.ssa.gov/ssi/spotlights/spot-rights-responsibilities.htm"
+          }
+        ],
+        "months": [
+          {
+            "month": "2026-10",
+            "label": "October 2026",
+            "gifts": 5
+          },
+          {
+            "month": "2026-09",
+            "label": "September 2026",
+            "gifts": 4
+          },
+          {
+            "month": "2026-08",
+            "label": "August 2026",
+            "gifts": 5
+          },
+          {
+            "month": "2026-07",
+            "label": "July 2026",
+            "gifts": 4
+          },
+          {
+            "month": "2026-06",
+            "label": "June 2026",
+            "gifts": 4
+          },
+          {
+            "month": "2026-05",
+            "label": "May 2026",
+            "gifts": 4
+          },
+          {
+            "month": "2026-04",
+            "label": "April 2026",
+            "gifts": 4
+          },
+          {
+            "month": "2026-03",
+            "label": "March 2026",
+            "gifts": 4
+          },
+          {
+            "month": "2026-02",
+            "label": "February 2026",
+            "gifts": 5
+          },
+          {
+            "month": "2026-01",
+            "label": "January 2026",
+            "gifts": 4
+          }
+        ],
+        "rules_version": "2026.1",
+        "verify": {
+          "code": "CX2W6-Y1S4X",
+          "url": "http://localhost:3200/v/maya/2026-10/CX2W6-Y1S4X"
+        }
+      },
+      "meta": {
+        "request_id": "req_54bc5a2528bf45cca289",
+        "version": "2026-11-01",
+        "rules_version": "2026.1",
+        "latency_ms": 77
+      },
+      "error": null
+    },
+    "ledger": {
+      "data": {
+        "ok": true,
+        "count": 1284
+      },
+      "error": null
+    },
+    "health": {
+      "ok": true,
+      "checks": [
+        {
+          "id": "paypal",
+          "name": "PayPal sandbox",
+          "mode": "live",
+          "detail": "Sandbox token issued",
+          "ms": 0
+        },
+        {
+          "id": "claude",
+          "name": "Claude Opus 5.5",
+          "mode": "live",
+          "detail": "API key set; bill and fundraiser reading are live"
+        },
+        {
+          "id": "webhooks",
+          "name": "PayPal webhooks",
+          "mode": "live",
+          "detail": "Every event is signature-checked with PayPal before use"
+        },
+        {
+          "id": "paypal-mcp",
+          "name": "PayPal MCP server",
+          "mode": "fallback",
+          "detail": "Checked on the Status page"
+        },
+        {
+          "id": "apimatic",
+          "name": "PayPal Server SDK (APIMatic)",
+          "mode": "live",
+          "detail": "@paypal/paypal-server-sdk 2.5.0 creates, reads and captures orders"
+        },
+        {
+          "id": "ag-studio",
+          "name": "AG Studio",
+          "mode": "live",
+          "detail": "ag-studio-react 3.0.0, licensed"
+        },
+        {
+          "id": "bryntum",
+          "name": "Bryntum Calendar",
+          "mode": "live",
+          "detail": "@bryntum/calendar 7.3.7, the hackathon trial, which shows a trial watermark"
+        },
+        {
+          "id": "rules-watch",
+          "name": "Federal Register watch",
+          "mode": "live",
+          "detail": "Checked on the Status page and every night by the outside checks"
+        },
+        {
+          "id": "channel3",
+          "name": "Channel3 product search",
+          "mode": "live",
+          "detail": "Key set; the gift finder searches real products, each checked against the SSI rules"
+        },
+        {
+          "id": "elastic",
+          "name": "Elasticsearch rulebook search",
+          "mode": "live",
+          "detail": "Hybrid keyword and semantic search with jina-embeddings-v3, reranked by jina-reranker-v3, over the regulations, SSA's manual and its worked examples"
+        },
+        {
+          "id": "database",
+          "name": "Postgres",
+          "mode": "live",
+          "detail": "Postgres answered a test query",
+          "ms": 1
+        },
+        {
+          "id": "checks",
+          "name": "Outside checks",
+          "mode": "live",
+          "detail": "24 of 24 passed 9 h ago, run locally"
+        }
+      ],
+      "at": "2026-11-05T15:08:02.868Z"
+    }
+  }
+}

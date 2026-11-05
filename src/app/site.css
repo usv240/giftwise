@@ -48,10 +48,18 @@
   color: var(--ink);
   padding: 0.5rem 0;
 }
+/* The section you are in carries a short accent underline; hover shows a quieter one. */
+.nav-link[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.35em;
+}
 @media (hover: hover) and (pointer: fine) {
-  .nav-link:hover {
+  .nav-link:not([aria-current]):hover {
     text-decoration: underline;
-    text-underline-offset: 0.25em;
+    text-underline-offset: 0.35em;
+    text-decoration-color: color-mix(in srgb, var(--ink) 40%, transparent);
   }
 }
 .header-actions {
@@ -62,26 +70,40 @@
 }
 .view-btn,
 .menu-btn {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0.5rem 0.9rem;
   font-size: var(--step-small);
 }
 .header-cta {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0.5rem 0.95rem;
   font-size: var(--step-small);
 }
 .menu-btn {
   display: none;
 }
+/* The phone menu is a full sheet under the header: nothing from the page shows through, and the page behind it
+   does not scroll. It enters with a short fade and drop, once, from where the Menu button is. */
 .mobile-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  position: fixed;
+  inset: 72px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--bg);
   padding: 1rem var(--margin) 2rem;
   z-index: 50;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--dur-menu) var(--ease-out), transform var(--dur-menu) var(--ease-out);
+}
+@starting-style {
+  .mobile-menu {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+:root[data-menu="open"] body {
+  overflow: hidden;
 }
 .mobile-menu nav {
   display: grid;
@@ -91,6 +113,22 @@
   font-size: 1.5rem;
   text-decoration: none;
   padding: 0.6rem 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.mobile-link[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.3em;
+}
+.mobile-link:active {
+  opacity: 0.6;
+}
+.mobile-cta {
+  margin-top: 1rem;
+  justify-self: start;
 }
 @media (max-width: 1040px) {
   .site-nav {
@@ -153,6 +191,17 @@
   place-items: center;
   color: var(--muted);
 }
+.seg-opt:active {
+  transform: scale(0.98);
+}
+.seg-opt {
+  transition: transform var(--dur-press) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .seg-opt:not([data-on]):hover {
+    color: var(--ink);
+  }
+}
 .seg-opt[data-on] {
   background: var(--surface);
   color: var(--ink);
@@ -194,7 +243,7 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 8px;
-  padding: 0 10px 10px;
+  padding: 0 var(--margin) var(--margin);
 }
 .tile {
   background: var(--surface-2);
@@ -274,7 +323,7 @@
   .footer-tiles {
     grid-template-columns: 1fr 1fr;
     gap: 6px;
-    padding: 0 6px 6px;
+    padding: 0 var(--margin) var(--margin);
   }
   .tile-wordmark {
     grid-column: 1 / -1;
@@ -301,6 +350,42 @@
   .tile-made,
   .tile-statement {
     grid-column: 1 / -1;
+  }
+}
+
+/* The short footer on the pages people use to give and keep records. */
+.footer-quiet {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 2.5rem;
+  padding-bottom: 3rem;
+  margin-top: clamp(3rem, 2rem + 3vw, 5rem);
+  border-top: 1px solid var(--surface-2);
+}
+.stack-strip + .footer-quiet {
+  margin-top: 0;
+}
+.footer-quiet-lead {
+  font-size: var(--step-body);
+}
+.footer-quiet-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-quiet-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+@media print {
+  .footer-quiet,
+  .footer-tiles,
+  .stack-strip {
+    display: none;
   }
 }
 

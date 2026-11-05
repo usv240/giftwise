@@ -1,0 +1,48 @@
+{
+  "gift.any": {
+    "title": "Dé la cantidad que quiera",
+    "what": "Escriba cualquier cantidad. Giftwise la reparte entre sus necesidades abiertas, pagadas directamente a cada tienda, y pone lo que sobra en su cuenta ABLE.",
+    "why": "El mismo dinero dado en efectivo bajaría su cheque. Enviado de esta manera, cada dólar llega y su cheque no cambia.",
+    "technical": "routeGift() cubre las necesidades abiertas en orden y revisa cada línea con el motor de reglas; se salta cualquier línea que bajaría el cheque. El servidor vuelve a armar el plan y luego crea una sola orden de PayPal Orders v2 con una unidad de compra por destinatario, así un solo pago le paga a cada uno.",
+    "sponsor": ["PayPal", "Claude"]
+  },
+  "gift.route.vendor": {
+    "title": "Se paga directamente a la tienda",
+    "what": "Su pago de PayPal va directamente a la tienda, no a Maya ni a Giftwise.",
+    "why": "El Seguro Social no cuenta como ingreso los pagos hechos directamente a una tienda por sus necesidades, salvo la vivienda.",
+    "technical": "PayPal Orders v2, \"pagar a otra cuenta\": payee.email_address es la tienda. Regla R-VEND-01, 20 CFR 416.1103(g), POMS SI 00815.400.",
+    "sponsor": ["PayPal"]
+  },
+  "gift.route.able": {
+    "title": "Se paga a su cuenta ABLE",
+    "what": "La ayuda con los servicios o el alquiler va a su cuenta ABLE, y ella paga la factura desde ahí en el mismo mes.",
+    "why": "Los servicios que paga otra persona cuentan como apoyo para vivienda. El dinero dado a su cuenta ABLE no cuenta.",
+    "technical": "PayPal Orders v2 con el destinatario (payee) en la cuenta ABLE de prueba. Reglas R-ABLE-01 y R-ABLE-02, POMS SI 01130.740.",
+    "sponsor": ["PayPal"]
+  },
+  "gift.sandbox": {
+    "title": "Pruebas con el sandbox de PayPal",
+    "what": "Esta demostración usa el sandbox de PayPal, una versión de práctica de PayPal donde no se mueve dinero real.",
+    "why": "Cualquier persona puede probar el pago completo sin riesgo. Use el comprador de prueba de TESTING.md, en el repositorio del proyecto.",
+    "technical": "api-m.sandbox.paypal.com y el SDK de JavaScript del sandbox en www.sandbox.paypal.com/web-sdk/v6/core."
+  },
+  "gift.receipt": {
+    "title": "Recibo público",
+    "what": "Cualquier persona con este enlace puede ver a dónde fue el dinero, qué regla mantuvo completo su cheque y una comprobación en vivo con PayPal.",
+    "why": "Un recibo que usted mismo puede comprobar es más fácil de creer que una promesa.",
+    "technical": "Pagos y eventos de auditoría de la base de datos. \"Comprobar con PayPal ahora\" llama a GET /v2/checkout/orders/{id} en vivo; \"Verificar el registro\" vuelve a calcular cada hash SHA-256 de la cadena de auditoría.",
+    "sponsor": ["PayPal"]
+  },
+  "real.world": {
+    "title": "Cómo funciona de verdad",
+    "what": "Lo que cambia fuera del sandbox: cómo se le paga a una tienda, cómo llega un regalo a una cuenta ABLE y quién paga las comisiones.",
+    "why": "PayPal le paga directamente a cada destinatario, así que cada uno tiene que ser una cuenta comercial de PayPal o la página de regalos del propio plan ABLE.",
+    "technical": "Respuestas en content/real-world.json. Cada una cita la documentación para desarrolladores de PayPal, el IRS, el manual de operaciones del Seguro Social o la página del propio plan ABLE."
+  },
+  "monthly.why": {
+    "title": "Por qué no se cobra automáticamente",
+    "what": "Cada mes usted mismo aprueba el pago en PayPal.",
+    "why": "Giftwise nunca guarda el dinero. Un cobro automático tendría que pagarle primero a Giftwise y luego pasarlo.",
+    "technical": "Probado en el sandbox de PayPal el 2026-11-04: una billetera de PayPal guardada con Vault (store_in_vault ON_SUCCESS) en una orden con varios destinatarios funciona, pero una orden posterior con payment_source.paypal.vault_id y un destinatario externo devuelve 422 BILLING_AGREEMENT_NOT_FOUND, y varias unidades de compra con destinatarios externos devuelven VALIDATION_ERROR. Un cobro guardado solo funciona cuando la plataforma es el destinatario. Con su sesión de PayPal abierta, quien da aprueba una nueva orden con varios destinatarios en dos clics."
+  }
+}

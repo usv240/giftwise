@@ -47,6 +47,9 @@
 }
 
 /* Tabs */
+.try-tabs {
+  scroll-margin-top: 1rem;
+}
 .tabbar {
   display: flex;
   align-items: center;
@@ -73,6 +76,30 @@
   cursor: pointer;
   text-decoration: none;
   position: relative;
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    color var(--dur-press) var(--ease-out);
+}
+.tab:active {
+  transform: scale(0.98);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tab:not([aria-selected="true"]):hover {
+    color: var(--ink);
+  }
+}
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab {
+    transition: color var(--dur-press) var(--ease-out);
+  }
+  .tab:active {
+    transform: none;
+  }
 }
 .tab[aria-selected="true"] {
   color: var(--ink);
@@ -100,6 +127,46 @@
     grid-template-columns: 1fr;
   }
 }
+/* The gift, then her check, then her situation: on a phone the answer sits right under the amount that changes it.
+   Side by side, the result holds the right column beside both sets of fields. */
+.try-areas {
+  grid-template-areas:
+    "form result"
+    "profile result";
+  grid-template-rows: auto 1fr;
+  row-gap: 1.75rem;
+}
+.try-area-form {
+  grid-area: form;
+}
+.try-area-result {
+  grid-area: result;
+  position: sticky;
+  top: 1rem;
+}
+.try-area-result[hidden] {
+  display: none;
+}
+.try-area-profile {
+  grid-area: profile;
+}
+@media (max-width: 860px) {
+  .try-areas {
+    grid-template-areas:
+      "form"
+      "result"
+      "profile";
+    grid-template-rows: auto;
+  }
+  .try-area-result {
+    position: static;
+  }
+}
+.try-wait {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
 .try-form {
   display: grid;
   gap: 1.1rem;
@@ -109,6 +176,19 @@
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.9rem;
   align-items: end;
+}
+/* Label, box and note share rows across the line, so a two-line label or a note under one box never knocks the
+   boxes beside it out of line. */
+.try-row-top {
+  align-items: stretch;
+}
+.try-row-top > .try-field {
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: 6px;
+}
+.try-row-top > .try-field > :first-child {
+  align-self: end;
 }
 .try-field {
   display: grid;
@@ -121,20 +201,41 @@
 .try-field select,
 .try-field textarea {
   font: inherit;
-  font-size: 17px;
+  font-size: 1.0625rem;
   color: var(--ink);
   background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 55%, transparent);
   border-radius: 10px;
   padding: 0 12px;
   min-height: 48px;
   width: 100%;
   min-width: 0;
 }
+.try-field input[aria-invalid="true"] {
+  border-color: var(--attention);
+}
+.try-field input:focus-visible,
+.try-field select:focus-visible,
+.try-field textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+/* The line under the amount: what is being checked, or how to type it. */
+.try-note {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.try-note[data-tone="attention"] {
+  color: var(--attention);
+}
+.try-lede {
+  color: var(--ink);
+  max-width: 52ch;
+}
 .try-field textarea {
   padding: 10px 12px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 .try-grow {
@@ -171,6 +272,16 @@
   gap: 10px;
   align-items: flex-start;
   min-height: 32px;
+}
+@media (pointer: coarse) {
+  .try-check {
+    min-height: 44px;
+  }
+  .preset-actions a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }
 .try-check input {
   width: 20px;
@@ -236,7 +347,7 @@
 .ai-json {
   white-space: pre-wrap;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 /* Presets */
@@ -298,7 +409,7 @@
   gap: 8px 16px;
 }
 .read-fields dt {
-  font-size: 13.5px;
+  font-size: 0.84375rem;
   color: var(--muted);
 }
 .read-fields dd {
@@ -307,7 +418,7 @@
 }
 .read-plain,
 .read-summary {
-  font-size: 16px;
+  font-size: 1rem;
 }
 .ai-state:has(.ai-result) {
   background: none;
@@ -328,7 +439,7 @@
 }
 .rv-test {
   color: var(--attention);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .rv-grid {
   display: grid;
@@ -350,11 +461,11 @@
   font-weight: 500;
 }
 .rv-reads {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .rv-answer {
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 500;
   letter-spacing: -0.01em;
 }
@@ -365,22 +476,23 @@
 }
 .rv-quote {
   margin: 0;
-  padding-left: 12px;
-  border-left: 2px solid var(--accent);
-  font-size: 15px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  font-size: 0.9375rem;
 }
 .rv-cite {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .rv-check {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--attention);
 }
 .rv-check[data-ok] {
   color: var(--positive);
 }
 .rv-reason {
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .rv-verdict {
   background: var(--surface);
@@ -390,17 +502,17 @@
   gap: 8px;
 }
 .rv-summary {
-  font-size: 16px;
+  font-size: 1rem;
 }
 .rv-outcome {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 .rv-check-v {
   color: var(--positive);
 }
 .rv-trusted {
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 .rv-actions {

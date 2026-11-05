@@ -2,50 +2,29 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Info } from "../Info";
 
-/** "First step, already open": the product's own create dialog at true size. */
+/** "First step, already open": the gift page's first question at true size. The name carries over to the page it makes. */
 export function CtaDialog() {
   const router = useRouter();
   const [name, setName] = useState("Maya");
-  const [role, setRole] = useState<"caregiver" | "giver">("caregiver");
   return (
     <form
       className="cta-dialog"
       data-ui
       onSubmit={(e) => {
         e.preventDefault();
-        router.push(`/app?name=${encodeURIComponent(name.trim() || "Maya")}&role=${role}`);
+        router.push(`/try?name=${encodeURIComponent(name.trim() || "Maya")}#fundraiser`);
       }}
     >
-      <div className="cta-dialog-head">
-        <h3 className="cta-dialog-title">Start a gift page</h3>
-        <Info id="cta.dialog" label="" />
-      </div>
+      <h3 className="cta-dialog-title">Start a gift page</h3>
       <label className="cta-field">
-        <span>Who is it for?</span>
-        <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+        <span>Who is it for? Their first name</span>
+        <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" maxLength={40} />
       </label>
-      <fieldset className="cta-field">
-        <legend>I am</legend>
-        <div className="checker-seg">
-          {(
-            [
-              ["caregiver", "Her caregiver"],
-              ["giver", "Giving a gift"],
-            ] as const
-          ).map(([v, l]) => (
-            <label key={v} className="checker-seg-opt" data-on={role === v ? "" : undefined}>
-              <input type="radio" name="cta-role" value={v} checked={role === v} onChange={() => setRole(v)} />
-              {l}
-            </label>
-          ))}
-        </div>
-      </fieldset>
       <button type="submit" className="btn btn-primary cta-submit">
-        Create page
+        Next: add the needs
       </button>
-      <p className="cta-fine">No sign-up. Runs in PayPal sandbox.</p>
+      <p className="cta-fine">Paste a fundraiser&rsquo;s link or use the sample. No sign-up. Runs in the PayPal sandbox.</p>
     </form>
   );
 }

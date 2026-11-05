@@ -3,20 +3,37 @@
   padding-bottom: clamp(3rem, 2rem + 3vw, 5rem);
 }
 
-/* Month, view and actions sit above the sheet and never print. */
+/* The other versions of this report, as plain links under the title. */
+.rp-alt {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+}
+.rp-alt .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+}
+@media (pointer: coarse) {
+  .rp-alt .text-link {
+    min-height: 44px;
+  }
+}
+
+/* Month and view, then Print, sit above the sheet and never print. */
 .rp-bar {
-  margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  margin-top: clamp(1.25rem, 0.75rem + 1.5vw, 2rem);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 12px 16px;
   max-width: 68rem;
 }
-/* Sized so the month, the view and the four actions fit one row at the sheet's width. */
 .rp-bar .btn {
-  min-height: 40px;
-  padding: 0.5rem 0.8rem;
-  font-size: 16px;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 1rem;
 }
 .rp-months {
   display: grid;
@@ -24,9 +41,11 @@
   align-items: center;
   gap: 8px;
 }
-.rp-months .btn[aria-disabled="true"] {
-  opacity: 0.45;
-  cursor: default;
+/* The first or last month with gifts: a plain note in place of the arrow, readable at full contrast. */
+.rp-month-none {
+  font-size: 0.9375rem;
+  color: var(--muted);
+  padding: 0 0.25rem;
 }
 .rp-month {
   text-align: center;
@@ -44,51 +63,78 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 2.25rem;
   padding: 0 16px;
   border-radius: 999px;
-  color: var(--ink);
+  color: var(--muted);
   font-weight: 500;
-  font-size: 16px;
+  font-size: 1rem;
   text-decoration: none;
   white-space: nowrap;
   transition:
-    background-color 160ms ease,
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out),
     transform var(--dur-press) var(--ease-out);
 }
 .rp-view:active {
   transform: scale(0.97);
 }
+@media (hover: hover) and (pointer: fine) {
+  .rp-view:not([aria-current="page"]):hover {
+    color: var(--ink);
+  }
+}
+/* A flat thumb, like the site's other segmented controls. */
 .rp-view[aria-current="page"] {
   background: var(--surface);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 14%, transparent);
+  color: var(--ink);
+}
+@media (pointer: coarse) {
+  .rp-view {
+    min-height: 44px;
+  }
 }
 .rp-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 8px 20px;
   margin-left: auto;
+}
+.rp-csv {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+}
+@media (pointer: coarse) {
+  .rp-csv {
+    min-height: 44px;
+  }
 }
 @media (max-width: 720px) {
   .rp-months {
     width: 100%;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   }
-  .rp-months .btn:last-child {
+  .rp-months > :last-child {
     justify-self: end;
+    text-align: end;
   }
-  .rp-months .btn:first-child {
+  .rp-months > :first-child {
     justify-self: start;
+  }
+  .rp-month-none {
+    line-height: 1.25;
+    text-wrap: balance;
+    max-width: 7.5rem;
   }
   .rp-views {
     width: 100%;
   }
-  /* Two even columns, so each action keeps its label on one or two lines instead of four. */
   .rp-actions {
     margin-left: 0;
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: space-between;
   }
 }
 
@@ -118,7 +164,7 @@
   }
 }
 .rp-meta dt {
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 .rp-meta dd {
@@ -166,7 +212,7 @@
   }
 }
 .rp-figures dt {
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 .rp-figures dd {
@@ -184,7 +230,7 @@
 }
 .rp-contrast {
   margin-top: 20px;
-  font-size: 16px;
+  font-size: 1rem;
   max-width: 64ch;
 }
 
@@ -227,7 +273,7 @@
 }
 .rp-tell-why {
   margin-top: 6px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 
@@ -236,7 +282,7 @@
   margin-top: 14px;
   width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .rp-table th {
   text-align: left;
@@ -259,7 +305,7 @@
   white-space: nowrap;
 }
 .rp-table td.rp-num {
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 500;
 }
 .rp-for {
@@ -278,7 +324,7 @@
   max-width: 16ch;
 }
 .rp-tech {
-  font-size: 14px;
+  font-size: 0.9375rem;
 }
 .rp-flag {
   display: block;
@@ -316,7 +362,7 @@
   .rp-table td[data-label="Date"],
   .rp-table td[data-label="From"] {
     color: var(--muted);
-    font-size: 14px;
+    font-size: 0.9375rem;
   }
   .rp-table td[data-label="From"] {
     text-align: right;
@@ -327,7 +373,7 @@
     max-width: none;
   }
   .rp-table td[data-label="Proof"] {
-    font-size: 14px;
+    font-size: 0.9375rem;
   }
 }
 
@@ -385,12 +431,12 @@
   gap: 12px;
 }
 .rp-copy-note {
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--positive);
 }
 .rp-penalty {
   margin-top: 16px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   max-width: 68ch;
 }
 
@@ -405,15 +451,15 @@
 }
 .rp-quotes blockquote {
   margin: 0;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.5;
 }
 .rp-cite {
-  font-size: 14px;
+  font-size: 0.9375rem;
 }
 .rp-scope {
   margin-top: 18px;
-  font-size: 14px;
+  font-size: 0.9375rem;
   max-width: 72ch;
 }
 .rp-back {
@@ -429,6 +475,7 @@
   .stack-strip,
   .footer-tiles,
   .rp-bar,
+  .rp-alt,
   .rp-back,
   .rp-copy,
   .info-trigger,
@@ -498,7 +545,7 @@
 .rp-verify-link {
   display: inline-block;
   margin-top: 4px;
-  font-size: 14px;
+  font-size: 0.9375rem;
   overflow-wrap: anywhere;
 }
 @media (max-width: 560px) {

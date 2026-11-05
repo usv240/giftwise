@@ -17,8 +17,9 @@ import {
   useRole,
 } from "@floating-ui/react";
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import infoContent from "../../content/info.json";
+import infoEs from "../../content/info.es.json";
 import { usePrefs } from "./prefs";
 
 export type InfoEntry = {
@@ -31,9 +32,27 @@ export type InfoEntry = {
 };
 
 const CONTENT = infoContent as Record<string, InfoEntry>;
+/** Spanish text for the giver's pages. An id without a Spanish entry shows its English one. */
+const CONTENT_ES = infoEs as Record<string, InfoEntry>;
 
-export function Info({ id, label = "info", entry }: { id: string; label?: string; entry?: InfoEntry }) {
-  const data = entry ?? CONTENT[id];
+/** The tip grows out of its dot, so its origin is the corner nearest the trigger, wherever flip() put it. */
+function originFor(placement: string) {
+  const [side, align] = placement.split("-");
+  const x = align === "start" ? "left" : align === "end" ? "right" : "center";
+  if (side === "top") return `bottom ${x}`;
+  if (side === "bottom") return `top ${x}`;
+  const y = align === "start" ? "top" : align === "end" ? "bottom" : "center";
+  return `${y} ${side === "left" ? "right" : "left"}`;
+}
+
+/**
+ * A toggletip. Its accessible name is "About <topic>": `topic` when given (for example the heading it sits beside),
+ * otherwise the entry's own title. `label` is the small visible word beside the dot, hidden when empty.
+ */
+export function Info({ id, label = "info", entry, topic, lang = "en" }: { id: string; label?: string; entry?: InfoEntry; topic?: string; lang?: "en" | "es" }) {
+  const es = !entry && lang === "es" && CONTENT_ES[id] ? CONTENT_ES[id] : null;
+  const data = entry ?? (es ? { ...CONTENT[id], ...es } : CONTENT[id]);
+  const tipLang = es ? "es" : entry ? undefined : "en";
   const { prefs } = usePrefs();
   const [hoverOpen, setHoverOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
@@ -43,6 +62,7 @@ export function Info({ id, label = "info", entry }: { id: string; label?: string
   const {
     refs: { setReference, setFloating },
     floatingStyles,
+    placement,
     context,
   } = useFloating({
     open,
@@ -79,7 +99,7 @@ export function Info({ id, label = "info", entry }: { id: string; label?: string
         ref={setReference}
         type="button"
         className="info-trigger"
-        aria-label={`info: ${data.title}`}
+        aria-label={`${lang === "es" ? "Acerca de" : "About"} ${topic || data.title}`}
         aria-expanded={open}
         aria-controls={open ? popId : undefined}
         data-info-id={id}
@@ -95,7 +115,8 @@ export function Info({ id, label = "info", entry }: { id: string; label?: string
           <div
             ref={setFloating}
             id={popId}
-            style={floatingStyles}
+            lang={tipLang}
+            style={{ ...floatingStyles, "--info-origin": originFor(placement) } as CSSProperties}
             className="info-pop"
             data-instant={instant ? "" : undefined}
             aria-label={data.title}

@@ -16,32 +16,55 @@ export const GiftSchema = z.object({
     .optional()
     .describe("Date the gift arrives, YYYY-MM-DD. Defaults to today."),
   recurring: z.boolean().optional().describe("True when the same giver pays this every month."),
-  giver: z.string().max(80).optional(),
-  label: z.string().max(120).optional(),
+  giver: z
+    .string()
+    .max(80)
+    .optional()
+    .describe("Who gives it, for example a first name. In a list of gifts, two gifts from the same giver in one quarter (or the months either side) are not one-off, so neither gets the $60 exclusion."),
+  label: z.string().max(120).optional().describe("A short name for the gift, such as Wheelchair repair. It comes back with the answer and does not change the math."),
 });
 
 export const ProfileSchema = z
   .object({
-    couple: z.boolean().default(false),
-    livesInAnothersHousehold: z.boolean().default(false),
-    householdProvidesAllMeals: z.boolean().optional(),
-    otherUnearnedMonthly: z.number().min(0).max(100000).default(0),
-    earnedMonthly: z.number().min(0).max(100000).default(0),
-    ableEligible: z.boolean().default(true),
-    ableBalance: z.number().min(0).default(0),
-    ableContributedThisYear: z.number().min(0).default(0),
-    savings: z.number().min(0).default(1240),
+    couple: z.boolean().default(false).describe("True for a couple who both receive SSI. A couple's full check is higher ($1,491 a month in 2026) and their savings limit is $3,000."),
+    livesInAnothersHousehold: z
+      .boolean()
+      .default(false)
+      .describe("True when she lives all month in someone else's home and does not pay her share of the housing costs. Housing help is then counted with the one-third reduction ($331.33 in 2026)."),
+    householdProvidesAllMeals: z
+      .boolean()
+      .optional()
+      .describe("Only used when livesInAnothersHousehold is true: whether that household gives her all her meals. The one-third reduction applies only then. Leave it out to mean true; false values housing help at up to $351.33 instead."),
+    otherUnearnedMonthly: z.number().min(0).max(100000).default(0).describe("Other unearned income each month, in US dollars, such as a pension. It is counted along with any cash gift."),
+    earnedMonthly: z.number().min(0).max(100000).default(0).describe("Wages each month, in US dollars. After the first $65 and any of the $20 exclusion that is left, half of the rest is counted."),
+    ableEligible: z.boolean().default(true).describe("False when she cannot have an ABLE account. Then no gift is routed to ABLE."),
+    ableBalance: z.number().min(0).default(0).describe("Her ABLE account balance, in US dollars. The answer does not depend on it, because the first $100,000 in an ABLE account does not count toward savings."),
+    ableContributedThisYear: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Dollars already put into her ABLE account this year. An ABLE gift that would pass the $20,000 yearly limit comes back with ambiguous set to true."),
+    savings: z
+      .number()
+      .min(0)
+      .default(1240)
+      .describe("Her countable savings at the start of the month the gift arrives, in US dollars. Cash she keeps adds to it, and the answer says when it would pass the limit on the 1st ($2,000, or $3,000 for a couple)."),
   })
-  .partial();
+  .partial()
+  .describe("The person who receives SSI. Every field is optional; leave it out for one adult who lives on her own with $1,240 in savings.");
 
 export const CheckGiftRequest = z.object({
-  gift: GiftSchema,
+  gift: GiftSchema.describe("The gift to check."),
   profile: ProfileSchema.optional(),
 });
 export type CheckGiftRequest = z.infer<typeof CheckGiftRequest>;
 
 export const PlanMonthRequest = z.object({
-  gifts: z.array(GiftSchema.extend({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })).min(1).max(500),
+  gifts: z
+    .array(GiftSchema.extend({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe("Date the gift arrives, YYYY-MM-DD.") }))
+    .min(1)
+    .max(500)
+    .describe("Between 1 and 500 gifts, in any order. Each one needs a date."),
   profile: ProfileSchema.optional(),
 });
 
@@ -81,7 +104,7 @@ export const GiftPageRequest = z.object({
         amount: z.number().min(1).max(20000).describe("Dollars still needed."),
         category: CategorySchema,
         vendor: z.string().trim().max(80).nullable().optional().describe("The kind of business that would be paid, for example a van conversion shop."),
-        recurring: z.boolean().optional(),
+        recurring: z.boolean().optional().describe("True when the need comes back every month, such as rent."),
       }),
     )
     .min(1)
@@ -91,7 +114,7 @@ export const GiftPageRequest = z.object({
 
 export const KeyRequest = z.object({
   name: z.string().min(1).max(80).describe("Your name or your team's."),
-  email: z.email().max(200),
+  email: z.email().max(200).describe("Where to reach you about the key."),
   purpose: z.string().max(200).optional().describe("What you are building. Optional."),
   accept: z.literal(true).describe("You accept that sandbox keys are for testing, with no real money and no real personal data."),
 });

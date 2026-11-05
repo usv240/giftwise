@@ -5,7 +5,7 @@ import "@bryntum/calendar/fontawesome/css/fontawesome.css";
 import "@bryntum/calendar/fontawesome/css/solid.css";
 import { StringHelper, type EventModel } from "@bryntum/calendar";
 import { BryntumCalendar } from "@bryntum/calendar-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { calendarModel, checkChanges, type CalGift, type View } from "@/lib/calendar/model";
 import { planDates } from "@/lib/calendar/schedule";
 import { ensureBryntumTheme } from "./theme";
@@ -16,8 +16,19 @@ const RESOURCES = [
   { id: "counts", name: "Counts as income", eventColor: "orange" },
   { id: "ssa", name: "Social Security", eventColor: "blue" },
 ];
-/** Month view only. Events are 26px tall so each one is a comfortable target on a phone; the week numbers add nothing here. */
-const MODES = { day: null, week: null, year: null, agenda: null, month: { eventHeight: 26, eventSpacing: 3, showWeekColumn: false } };
+/**
+ * One view at a time. On a wide screen, the month grid: events 26px tall, and no week numbers (MonthView puts one in
+ * the corner of each Sunday cell unless showWeekNumber is off). On a phone, seven columns leave about 50px a day and
+ * every title reads "SSI c...", so the same month shows as a list, one gift per row with its full title.
+ */
+const MODES_WIDE = { day: null, week: null, year: null, agenda: null, month: { eventHeight: 26, eventSpacing: 3, showWeekColumn: false, showWeekNumber: false } };
+const MODES_NARROW = { day: null, week: null, year: null, month: null, agenda: { range: "month", listRangeMenu: null } };
+const NARROW = "(max-width: 600px)";
+const watchNarrow = (onChange: () => void) => {
+  const m = window.matchMedia(NARROW);
+  m.addEventListener("change", onChange);
+  return () => m.removeEventListener("change", onChange);
+};
 const DRAG = { creatable: false, resizable: false };
 /** One view, so no mode switch and no sidebar toggle; the arrows get names a screen reader can say. */
 const TBAR = { items: { toggleSidebar: null, modeSelector: null, todayButton: { ariaLabel: "Today" }, prevButton: { ariaLabel: "Previous month", tooltip: "Previous month" }, nextButton: { ariaLabel: "Next month", tooltip: "Next month" } } };
@@ -66,10 +77,13 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
   const calRef = useRef<HTMLDivElement>(null);
   const getRoot = useCallback(() => calRef.current, []);
   useButtonNames(getRoot);
+  const narrow = useSyncExternalStore(watchNarrow, () => window.matchMedia(NARROW).matches, () => false);
   const [gifts, setGifts] = useState(initial);
   const [view, setView] = useState<View>("given");
   const [moves, setMoves] = useState<Move[]>([]);
+  // The grid centres on mid-month; the list starts at the top of the month, so its first row is the 1st.
   const [date] = useState(() => new Date(`${month}-15T12:00:00`));
+  const [first] = useState(() => new Date(`${month}-01T12:00:00`));
   const [pick, setPick] = useState(initial.at(-1)?.id ?? "");
   const [to, setTo] = useState(initial.at(-1)?.date ?? `${month}-01`);
 
@@ -149,30 +163,7 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
           </button>
         )}
       </div>
-      <p className="bc-hint muted">
-        {view === "given"
-          ? `${counted === 0 ? "Nothing here counts as income." : `${counted} of these count as income.`} Drag a gift to another day, or use the form below, and the rules run again.`
-          : `The same gifts as cash. Move one across the end of a month or a quarter and watch which check it lowers.`}
-      </p>
-      <div className="bc-cal" ref={calRef}>
-        <BryntumCalendar
-          date={date}
-          mode="month"
-          modes={MODES}
-          sidebar={false}
-          tbar={TBAR}
-          weekStartDay={0}
-          resources={RESOURCES}
-          events={events}
-          eventEditFeature={false}
-          eventMenuFeature={false}
-          scheduleMenuFeature={false}
-          dragFeature={DRAG}
-          eventTooltipFeature={TOOLTIP}
-          onDragMoveEnd={({ eventRecord }: { eventRecord: EventModel }) => move(String(eventRecord.id), localIso(eventRecord.startDate as Date))}
-        />
-      </div>
-
+      {/* The planner is what this calendar is for, so it comes before the grid it moves gifts on. */}
       <div className="bc-planner" aria-live="polite">
         <div>
           <p className="bc-k">Let the planner move the cash</p>
@@ -187,6 +178,31 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
         <button type="button" className="btn btn-ink bc-plan-btn" onClick={() => void runPlanner()} disabled={plan.status === "planning" || plan.status === "moving"}>
           {plan.status === "planning" ? "Planning…" : plan.status === "moving" ? "Moving the gifts…" : view === "cash" ? "Plan the cash dates" : "Check for cash to move"}
         </button>
+      </div>
+
+      <p className="bc-hint muted">
+        {view === "given"
+          ? `${counted === 0 ? "Nothing here counts as income." : `${counted} of these count as income.`} ${narrow ? "Move a gift with the form below" : "Drag a gift to another day, or use the form below"}, and the rules run again.`
+          : `The same gifts as cash. Move one across the end of a month or a quarter and watch which check it lowers.`}
+      </p>
+      <div className="bc-cal" ref={calRef} data-mode={narrow ? "list" : "month"}>
+        <BryntumCalendar
+          key={narrow ? "list" : "month"}
+          date={narrow ? first : date}
+          mode={narrow ? "agenda" : "month"}
+          modes={narrow ? MODES_NARROW : MODES_WIDE}
+          sidebar={false}
+          tbar={TBAR}
+          weekStartDay={0}
+          resources={RESOURCES}
+          events={events}
+          eventEditFeature={false}
+          eventMenuFeature={false}
+          scheduleMenuFeature={false}
+          dragFeature={DRAG}
+          eventTooltipFeature={TOOLTIP}
+          onDragMoveEnd={({ eventRecord }: { eventRecord: EventModel }) => move(String(eventRecord.id), localIso(eventRecord.startDate as Date))}
+        />
       </div>
 
       <div className="bc-under">
@@ -212,7 +228,7 @@ export function BenefitCalendar({ gifts: initial, profile, name, month, poss }: 
             New day
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
           </label>
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-ink">
             Move it
           </button>
         </form>

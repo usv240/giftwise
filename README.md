@@ -17,7 +17,7 @@ Help from others changes the check for many people: in January 2022 SSA lowered 
 ## Results
 
 - **40 of 40 of Social Security's own worked examples** from its operating manual match SSA's answer. Claude with no rulebook, asked the same questions: 32 of 40.
-- **14 of 14 real SSI cases from federal courts** reach the outcome SSA and the court did. In the 4 where the facts allow a benefit-safe route, the same help routed through Giftwise keeps **$1,656.66 a month** at 2026 rates: about $414 for each family, every month. The run added a finer rule the engine now follows: who provides the meals.
+- **14 of 14 real SSI cases from federal courts** reach the outcome SSA and the court did. In the 4 where the facts allow a benefit-safe route, the same help routed through Giftwise keeps **$1,656.66 a month** at 2026 rates: about $414 for each person, every month. The run added a finer rule the engine now follows: who provides the meals.
 - **59 of 59 labeled bills** routed so the check stays whole. Claude with no rulebook: 56 of 59.
 - **100,000 random gifts, every promise kept.** A seeded generator makes up gifts from one cent to $20,000, up to twelve open needs and people in every living arrangement, and checks each answer against twelve promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit, at most 10 PayPal recipients, and more.
 
@@ -59,6 +59,14 @@ Three groups already help people on SSI with money every month, and each can run
 - **Benefits counselors.** Social Security funds free benefits counseling nationwide through its Work Incentives Planning and Assistance projects; its current round planned 75 projects and $20 million ([WIPA-WIP-21-001](https://www.highergov.com/grant-opportunity/ssa-work-incentives-planning-and-assistance-program-wipa-331605/)). A counselor makes the gift page with the family, and each month the family has the report to file by the 10th.
 - **State ABLE programs.** 46 states and DC run one, and 31 plans accept people from any state ([ABLE National Resource Center](https://www.ablenrc.org/choose-plan/)). The ABLE share of each gift goes to the plan's own gift link; needs better paid to a shop are paid there through PayPal.
 - **Payee organizations.** About 1 in 10 of the 7.7 million people with a representative payee are served by an organization ([CRS IF13018](https://www.congress.gov/crs_external_products/IF/PDF/IF13018/IF13018.2.pdf), FY2024). One PayPal Payouts batch pays shops and ABLE accounts for many people, with each person's ledger and report.
+
+## Designed for the people who use it
+
+Each page follows published research for its readers, and a design review with three design skills checked every page at phone and desktop width, light and dark.
+
+- **Givers on a phone.** The total and who gets paid sit right beside the PayPal button, amounts can be typed the way people write them ("$50", "1,000"), and suggested amounts match real needs ([Baymard checkout research](https://baymard.com/research-articles/perceived-security-of-payment-form)). After paying, the page names each shop, the amount, the PayPal order and what happens next ([GOV.UK confirmation pages](https://design-system.service.gov.uk/patterns/confirmation-pages/)).
+- **People on SSI.** The result comes first in words ("It stays $1,029 with Giftwise."), before any arithmetic ([W3C, Making Content Usable for People with Cognitive and Learning Disabilities](https://www.w3.org/TR/coga-usable/)). The Easy Read report keeps one idea per line with a picture, no colons or brackets, and 14 point print ([NHS England accessible information guide](https://www.england.nhs.uk/wp-content/uploads/2018/06/LearningDisabilityAccessCommsGuidance.pdf)).
+- **Everyone.** Every control is at least 44 pixels on touch screens, Large text reaches every part of every page, the theme follows the device, and nothing moves on its own for long ([WCAG 2.2](https://www.w3.org/TR/WCAG22/)).
 
 ## What is inside
 
@@ -119,14 +127,14 @@ Every push runs [CI](.github/workflows/ci.yml): `npm audit` at every severity (0
 
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 120 of 120 |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 158 of 158 |
 | Social Security's own worked examples (rules engine, and Claude alone as the baseline) | `npm run eval:ssa` | 40 of 40 (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 |
 | 59 labeled bills: wrong routes accepted (referee; Claude with no rulebook) | `npx tsx --env-file=.env.local scripts/run-eval.ts` | 0 (3) |
 | API end to end, including the report check page, the rulebook, the workflow jobs, discovery documents and security headers | `npm run e2e:api` | 98 of 98 |
 | The organizer's side: needs, the gift finder, closing a page, and a signed webhook from a real sandbox capture | `npm run e2e:manage` | 21 of 21 |
 | The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 of 20 assertions |
-| Browser end to end, including the Spanish gift page, the guided tour and the calendar planner | `npm run e2e:ui` | 61 of 61 |
+| Browser end to end, including the Spanish gift page, the guided tour and the calendar planner | `npm run e2e:ui` | 64 of 64 |
 | Accessibility, 27 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 108 of 108 page views |
 | Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 26 of 26 |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |

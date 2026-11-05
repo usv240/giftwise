@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 const NAV = [
   { href: "/try", label: "Try it" },
-  { href: "/app", label: "Sample workspace" },
+  { href: "/try#fundraiser", label: "Make a gift page" },
   { href: "/learn", label: "The rules, explained" },
   { href: "/developers", label: "Developers" },
   { href: "/judges", label: "For judges" },
@@ -11,8 +15,57 @@ const NAV = [
   { href: "/about", label: "About" },
 ];
 
-/** "A footer of tiles" from the dealt direction sheet. */
+/** Pages a giver or the family uses: the gift page, receipts, monthly gifts, reports, the check page and the organizer's view. */
+const QUIET = /^\/(g|r|m|v|manage)\//;
+
+/** "A footer of tiles" from the dealt direction sheet. On the pages people use to give and keep records, a short footer:
+ *  the giving and the records stay the last thing on the page, with the rules and Giftwise one link away. */
 export function Footer() {
+  return (
+    <Suspense fallback={<TileFooter />}>
+      <FooterAt />
+    </Suspense>
+  );
+}
+
+function FooterAt() {
+  return QUIET.test(usePathname() ?? "/") ? <QuietFooter /> : <TileFooter />;
+}
+
+function QuietFooter() {
+  return (
+    <footer className="footer-quiet frame" aria-label="Site footer">
+      <p className="footer-quiet-lead">
+        <Link href="/" className="text-link">
+          Giftwise
+        </Link>{" "}
+        helps families give the benefit-safe way.
+      </p>
+      <nav aria-label="Footer">
+        <ul className="footer-quiet-nav">
+          <li>
+            <Link href="/learn" className="text-link">
+              The rules, explained
+            </Link>
+          </li>
+          <li>
+            <Link href="/about" className="text-link">
+              About
+            </Link>
+          </li>
+          <li>
+            <Link href="/status" className="text-link">
+              Status
+            </Link>
+          </li>
+        </ul>
+      </nav>
+      <p className="tile-legal">Sandbox demonstration, built for the PayPal AI Hackathon. Guidance based on published Social Security rules, with sources for every answer.</p>
+    </footer>
+  );
+}
+
+function TileFooter() {
   return (
     <footer className="footer-tiles" aria-label="Site footer">
       <div className="tile tile-statement">
@@ -38,7 +91,7 @@ export function Footer() {
         <a className="tile-email text-link" href="https://github.com/usv240/giftwise">
           github.com/usv240/giftwise
         </a>
-        <p className="tile-muted">Open source, MIT licence</p>
+        <p className="tile-muted">Open source, MIT license</p>
       </div>
       <div className="tile tile-wordmark" aria-hidden="true">
         Giftwise

@@ -8,7 +8,7 @@ import { Info } from "@/components/Info";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { db, dbConfigured, schema } from "@/lib/db";
 import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
-import { asLang, monthIn, payeeIn, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
+import { asLang, monthIn, payeeIn, payeeInline, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "../../pages.css";
 import "./receipt.css";
@@ -47,26 +47,27 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
       { id: r.referenceId, date, amount: Number(r.amount), delivery: r.route as Delivery, category: (need?.category ?? "other") as Category, recurring: need?.recurring },
       profile,
     );
-    return { row: r, title: need ? sampleIn(lang, need.title, household?.isSample ?? false) : t.savingsIn(hers), check };
+    // A line with no need is the ABLE savings line; any other line without a need just says where it was paid.
+    return { row: r, title: need ? sampleIn(lang, need.title, household?.isSample ?? false) : r.route === "able" ? t.savingsIn(hers) : null, check };
   });
   const captured = rows.every((r) => r.status === "captured");
   const total = rows.reduce((s, r) => s + Number(r.amount), 0);
   const ruleIds = [...new Set(lines.flatMap((l) => l.check.ruleIds))];
   // The whole order counted together, the way Social Security counts a month.
-  const checkAfter = computeMonth(
+  const trace = computeMonth(
     monthOf(date),
     lines.map((l) => ({ id: l.row.referenceId, date, amount: Number(l.row.amount), delivery: l.row.route as Delivery, category: l.check.gift.category })),
     profile,
-  ).check;
+  );
+  const checkAfter = trace.check;
+  const checkMonth = monthIn(lang, trace.paymentMonth);
+  const baseline = computeMonth(monthOf(date), [], profile).check;
   const payer = rows.find((r) => r.payerName)?.payerName?.split(" ")[0];
 
   return (
     <div lang={lang}>
       <header className="page-head">
-        <div className="title-row">
-          <h1 className="page-title">{t.title}</h1>
-          <Info id="gift.receipt" />
-        </div>
+        <h1 className="page-title">{t.title}</h1>
         <p className="lede">{t.lede}</p>
       </header>
       <section className="rc-summary" data-ui aria-labelledby="rc-total">
@@ -76,6 +77,13 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
             {usd(total)}
           </p>
           <p className="rc-sub">{t.sub(payer, rows.length, when(rows[0].createdAt, lang))}</p>
+          {/* What happens next, in one sentence, then the reference to quote: the confirmation pattern. */}
+          {captured ? (
+            <p className="rc-next-line">{t.next(rows.map((r) => payeeInline(lang, r.payeeName)), hers, checkMonth, usd(checkAfter), checkAfter === baseline)}</p>
+          ) : (
+            rows.every((r) => r.status === "created") && <p className="rc-next-line">{t.nextStarted}</p>
+          )}
+          <p className="rc-order tabular">{t.orderLine(orderId)}</p>
         </div>
         <dl className="rc-facts">
           <div>
@@ -83,7 +91,7 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
             <dd className="tabular">$0</dd>
           </div>
           <div>
-            <dt>{t.checkAfter(hers)}</dt>
+            <dt>{t.checkAfter(hers, checkMonth)}</dt>
             <dd className="tabular" data-kept="">
               {usd(checkAfter)}
             </dd>
@@ -103,7 +111,8 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
               <div>
                 <p className="rc-payee">{payeeIn(lang, row.payeeName)}</p>
                 <p className="rc-for">
-                  {title}. {row.route === "able" ? t.routeAble : row.route === "vendor" ? t.routeVendor : row.route}.
+                  {title ? `${title}. ` : ""}
+                  {row.route === "able" ? t.routeAble : row.route === "vendor" ? t.routeVendor : row.route}.
                 </p>
                 <p className="rc-ids tabular">
                   {row.captureId ? t.capture(row.captureId) : t.order(row.orderId, row.status)}
@@ -157,7 +166,7 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
       <section className="page-section" aria-labelledby="rc-check">
         <div className="title-row">
           <h2 id="rc-check">{t.checkIt}</h2>
-          <Info id="gift.receipt" label="" />
+          <Info id="gift.receipt" label="" topic={t.checkIt} lang={lang} />
         </div>
         <ReceiptChecks orderId={orderId} lang={lang} />
         <ol className="rc-events">

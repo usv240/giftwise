@@ -16,7 +16,7 @@
   }
 }
 .rc-k {
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 .rc-total {
@@ -38,7 +38,7 @@
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  font-size: 16px;
+  font-size: 1rem;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--surface-2);
 }
@@ -73,21 +73,21 @@
   gap: 20px;
 }
 .rc-payee {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 .rc-for {
   margin-top: 2px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .rc-ids {
   margin-top: 6px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
 .rc-amount {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -109,11 +109,11 @@
   margin-top: 6px;
   display: grid;
   gap: 6px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .rc-version {
   margin-top: 20px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .rc-checks {
   display: grid;
@@ -135,7 +135,7 @@
   padding: 0;
   display: grid;
   gap: 6px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .rc-live li {
   display: grid;
@@ -144,7 +144,7 @@
 }
 .rc-live li .muted {
   grid-column: 1 / -1;
-  font-size: 14px;
+  font-size: 0.875rem;
   overflow-wrap: anywhere;
 }
 .rc-ledger {
@@ -169,7 +169,7 @@
   align-items: baseline;
   padding: 10px 0;
   border-bottom: 1px solid var(--surface-2);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 @media (max-width: 640px) {
   .rc-events li {
@@ -178,16 +178,41 @@
   }
 }
 .rc-hash {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .rc-hash-note {
   margin-top: 12px;
-  font-size: 14px;
+  font-size: 0.875rem;
   max-width: 68ch;
 }
 .rc-next {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 28px;
+}
+/* What happens next, and the reference to quote, under the total. */
+.rc-next-line {
+  margin-top: 14px;
+  font-size: var(--step-body);
+  font-weight: 500;
+  max-width: 40rem;
+}
+.rc-order {
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+/* Touch: links on the receipt are at least 44px tall. */
+@media (pointer: coarse) {
+  .rc-next .text-link,
+  .rc-sources .text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .rc-next {
+    row-gap: 0;
+  }
 }

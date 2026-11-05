@@ -28,7 +28,7 @@
   font-size: var(--step-lead);
 }
 .mo-status {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   padding: 2px 10px;
   border-radius: 999px;
@@ -56,7 +56,7 @@
   flex-shrink: 0;
 }
 .mo-check {
-  font-size: 15px;
+  font-size: 1rem;
 }
 .mo-changes {
   display: grid;
@@ -65,7 +65,7 @@
   border-top: 1px solid var(--surface-2);
 }
 .mo-k {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .mo-changes ul {
@@ -78,7 +78,7 @@
 .mo-changes li {
   display: grid;
   gap: 2px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .mo-change-what {
   font-weight: 500;
@@ -87,7 +87,7 @@
   color: var(--muted);
 }
 .mo-same {
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .mo-next {
   display: inline-flex;
@@ -97,7 +97,7 @@
   margin-top: 12px;
 }
 .mo-note {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .mo-note[data-tone="attention"] {
@@ -110,4 +110,25 @@
 }
 .mo-back {
   margin-top: 32px;
+}
+/* Right above the month's PayPal button: the total and who is paid. */
+.mo-pay {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+.mo-pay strong {
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+.mo-receipt {
+  justify-self: start;
+}
+/* Touch: links and buttons on the monthly page are at least 44px tall. */
+@media (pointer: coarse) {
+  .mo-receipt,
+  .mo-back-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }

@@ -60,14 +60,9 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
   const month = q.month && /^\d{4}-(0[1-9]|1[0-2])$/.test(q.month) ? q.month : currentReportMonth(now, months);
   const r = buildReport({ name: subject.name, profile: subject.profile, gifts: subject.gifts, month, today: now, view });
   const e = easyRead(r, lang);
-  // What Listen reads: the page in reading order, one idea per utterance; the footer stays on the page.
-  const spoken = [
-    e.title,
-    ...(e.whatIf ? [e.whatIf] : []),
-    ...e.answer.map((l) => l.text),
-    ...e.sections.flatMap((x) => [x.title, ...x.lines.map((l) => l.text)]),
-    ...(e.script.length ? [e.ui.say, ...e.script] : []),
-  ];
+  // What Listen reads: the sheet in reading order, one line per utterance; the footer stays on the page.
+  const said = (lines: EasyLine[]) => lines.flatMap((l) => (l.note ? [l.text, l.note] : [l.text]));
+  const spoken = [e.title, ...said(e.whatIf ?? []), ...said(e.answer), ...e.sections.flatMap((x) => [x.title, ...said(x.lines)]), ...(e.script.length ? [e.ui.say, ...e.script] : [])];
   const qs = (o: Record<string, string | undefined>) => {
     const p = new URLSearchParams(Object.entries({ month, view: view === "cash" ? "cash" : undefined, ...o }).filter((x): x is [string, string] => Boolean(x[1])));
     return `?${p.toString()}`;
@@ -82,19 +77,10 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
         </div>
         <p className="lede">{e.ui.lede}</p>
       </header>
-      <nav className="rp-bar er-bar" aria-label={e.ui.nav}>
+      {/* Only Listen comes before the sheet, so the answer is the next thing read. */}
+      <div className="er-bar">
         <ListenButton lines={spoken} lang={lang} labels={{ listen: e.ui.listen, stop: e.ui.stop }} />
-        <Link className="btn btn-quiet" href={`/g/${slug}/report/easy${qs({ lang: lang === "en" ? "es" : undefined })}`} hrefLang={lang === "en" ? "es" : "en"}>
-          {e.ui.other}
-        </Link>
-        <a className="btn btn-quiet" href={`/g/${slug}/report/reminder${qs({ lang: lang === "es" ? "es" : undefined })}`} download>
-          {e.ui.remind}
-        </a>
-        <PrintButton label={e.ui.print} />
-        <Link className="btn btn-quiet" href={`/g/${slug}/report?month=${month}${view === "cash" ? "&view=cash" : ""}`}>
-          {e.ui.full}
-        </Link>
-      </nav>
+      </div>
 
       <article className="er-sheet" aria-labelledby="er-title" data-status={r.status}>
         <header className="er-head">
@@ -103,7 +89,13 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
           </h2>
         </header>
 
-        {e.whatIf && <p className="rp-whatif er-whatif">{e.whatIf}</p>}
+        {e.whatIf && (
+          <ul className="er-lines er-whatif">
+            {e.whatIf.map((l) => (
+              <Line key={l.text} l={l} />
+            ))}
+          </ul>
+        )}
         <ul className="er-answer" aria-label={e.ui.answerLabel}>
           {e.answer.map((l) => (
             <Line key={l.text} l={l} />
@@ -145,6 +137,20 @@ async function Easy({ params, searchParams }: { params: Promise<{ slug: string }
           ))}
         </footer>
       </article>
+
+      {/* Everything else a reader might want, after the sheet. */}
+      <nav className="er-more" aria-label={e.ui.nav}>
+        <Link className="btn btn-quiet" href={`/g/${slug}/report/easy${qs({ lang: lang === "en" ? "es" : undefined })}`} hrefLang={lang === "en" ? "es" : "en"} lang={lang === "en" ? "es" : "en"}>
+          {e.ui.other}
+        </Link>
+        <a className="btn btn-quiet" href={`/g/${slug}/report/reminder${qs({ lang: lang === "es" ? "es" : undefined })}`} download>
+          {e.ui.remind}
+        </a>
+        <PrintButton label={e.ui.print} />
+        <Link className="btn btn-quiet" href={`/g/${slug}/report?month=${month}${view === "cash" ? "&view=cash" : ""}`}>
+          {e.ui.full}
+        </Link>
+      </nav>
 
       <p className="rp-back">
         <Link className="text-link" href={`/g/${slug}`}>

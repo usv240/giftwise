@@ -1,11 +1,13 @@
-import { TocSpy } from "@/components/learn/TocSpy";
 import type { Metadata } from "next";
 import Link from "next/link";
 import glossary from "../../../content/glossary.json";
 import sources from "../../../content/sources.json";
 import { Info } from "@/components/Info";
 import { AskRulebook } from "@/components/learn/AskRulebook";
+import { Toc } from "@/components/learn/Toc";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Gift } from "@/lib/rules";
+import "../pages.css";
+import "./toc.css";
 import "./learn.css";
 
 export const metadata: Metadata = {
@@ -13,7 +15,43 @@ export const metadata: Metadata = {
   description: "How Social Security counts gifts for people on SSI, in plain words, with worked examples and sources.",
 };
 
-const SRC = sources as Record<string, { title: string; url: string; publisher: string }>;
+type Source = { title: string; url: string; publisher: string };
+const SRC = sources as Record<string, Source>;
+
+/** The link name for a source: a citation names itself (20 CFR 416.1130, POMS SI 00835.350); other pages use their own title. */
+const sourceName = (title: string) => {
+  const [head, ...rest] = title.split(": ");
+  return rest.length && !/^(\d|POMS)/.test(head) ? rest.join(": ") : head;
+};
+
+/** The Sources list, grouped by who wrote each document. A source goes in the first group that matches. */
+const SOURCE_GROUPS: { title: string; has: (key: string, s: Source) => boolean }[] = [
+  { title: "Regulations", has: (k) => k.startsWith("cfr-") },
+  { title: "Social Security's manual", has: (k) => k.startsWith("poms-") },
+  { title: "Federal Register", has: (k, s) => k.startsWith("fr-") || s.publisher.includes("Federal Register") },
+  { title: "Social Security pages", has: (k) => k.startsWith("ssa-") && !k.startsWith("ssa-oig") },
+  { title: "ABLE accounts", has: (k) => /^(able-|irs-able|ugift-|ablenow-|stable-|calable-)/.test(k) },
+  { title: "PayPal", has: (k) => k.startsWith("paypal-") },
+  { title: "Research and reports", has: () => true },
+];
+const SOURCES_GROUPED = (() => {
+  const placed = new Set<string>();
+  return SOURCE_GROUPS.map((g) => {
+    const items = Object.entries(SRC).filter(([k, s]) => !placed.has(k) && g.has(k, s));
+    for (const [k] of items) placed.add(k);
+    return { title: g.title, items };
+  }).filter((g) => g.items.length > 0);
+})();
+
+const monthName = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleString("en-US", { month: "long", timeZone: "UTC" });
+
+/** The four words every section leans on, in plain words, before the rules start. The full glossary is at the end. */
+const WORDS = [
+  { term: "SSI check", plain: "The money Social Security pays her each month. In 2026 it is up to $994 for one person." },
+  { term: "Countable income", plain: "The part of her income that lowers the check, after a few small amounts are left out." },
+  { term: "In-kind support", plain: "Help with housing that someone else pays for, such as rent or utilities. It can lower the check by up to $351.33 a month in 2026." },
+  { term: "ABLE account", plain: "A savings account for people whose disability began before age 46. Money others put into it does not lower the check." },
+];
 
 const g = (over: Partial<Gift>): Gift => ({ id: "learn", date: "2026-04-10", amount: 1000, delivery: "cash", category: "other", ...over });
 
@@ -133,37 +171,42 @@ export default function LearnPage() {
     <div className="learn frame">
       <header className="learn-head">
         <div className="title-row">
-          <h1 className="learn-title">The rules, explained</h1>
+          <h1 className="page-title">The rules, explained</h1>
           <Info id="page.learn" />
         </div>
-        <p className="lede">
-          How Social Security counts gifts for people on SSI. Each rule has a worked example and links to its source. Switch to Technical in the View menu for rule numbers and details.
-        </p>
+        <p className="lede">How Social Security counts gifts for people on SSI. Each rule has a worked example and links to its source.</p>
+        <p className="learn-mode">For rule numbers and details, choose Technical in the Display menu.</p>
         <AskRulebook />
       </header>
 
       <div className="learn-body">
-        <nav className="learn-toc" aria-label="On this page">
-          <p className="muted">On this page</p>
-          <ul>
-            {TOPICS.map((t) => (
-              <li key={t.id}>
-                <a href={`#${t.id}`}>{t.title}</a>
-              </li>
-            ))}
-            <li>
-              <a href="#glossary">Glossary</a>
-            </li>
-            <li>
-              <a href="#sources">Sources</a>
-            </li>
-          </ul>
-          <TocSpy nav=".learn-toc" />
-        </nav>
+        <Toc className="learn-toc" items={[{ id: "words", title: "Words to know" }, ...TOPICS.map((t) => ({ id: t.id, title: t.title })), { id: "glossary", title: "Glossary" }, { id: "sources", title: "Sources" }]} />
 
         <div className="learn-main">
+          <section id="words" className="topic" aria-labelledby="words-h">
+            <h2 id="words-h" className="topic-title">
+              Words to know
+            </h2>
+            <dl className="glossary words">
+              {WORDS.map((w) => (
+                <div key={w.term} className="gloss-row">
+                  <dt>{w.term}</dt>
+                  <dd>{w.plain}</dd>
+                </div>
+              ))}
+            </dl>
+            <p>
+              More words are in the{" "}
+              <a className="text-link" href="#glossary">
+                glossary
+              </a>
+              .
+            </p>
+          </section>
+
           {TOPICS.map((t) => {
             const r = t.example ? evaluateGift(t.example.gift, DEFAULT_PROFILE) : null;
+            const kept = r ? r.checkAfter >= r.checkBaseline : false;
             return (
               <section key={t.id} id={t.id} className="topic" aria-labelledby={`${t.id}-h`}>
                 <h2 id={`${t.id}-h`} className="topic-title">
@@ -177,7 +220,8 @@ export default function LearnPage() {
                   <div className="example" data-ui>
                     <p className="example-label">{t.example.label}</p>
                     <p className="example-figure tabular">
-                      June check: <strong>{usd(r.checkAfter)}</strong>
+                      Her check in {monthName(r.paymentMonth)}: <strong data-kept={kept ? "" : undefined}>{usd(r.checkAfter)}</strong>
+                      {!kept && <span className="example-full"> (full check {usd(r.checkBaseline)})</span>}
                     </p>
                     <p className="example-note">{r.explanation.plain}</p>
                   </div>
@@ -187,7 +231,7 @@ export default function LearnPage() {
                   {t.sources.map((k, i) => (
                     <span key={k}>
                       <a className="text-link" href={SRC[k].url} target="_blank" rel="noreferrer">
-                        {SRC[k].title.split(":")[0]}
+                        {sourceName(SRC[k].title)}
                       </a>
                       {i < t.sources.length - 1 ? ", " : ""}
                     </span>
@@ -219,16 +263,21 @@ export default function LearnPage() {
               Sources
             </h2>
             <p>Every rule, number and claim on this site comes from one of these documents.</p>
-            <ul className="source-list">
-              {Object.entries(SRC).map(([k, s]) => (
-                <li key={k}>
-                  <a className="text-link" href={s.url} target="_blank" rel="noreferrer">
-                    {s.title}
-                  </a>
-                  <span className="muted"> {s.publisher}</span>
-                </li>
-              ))}
-            </ul>
+            {SOURCES_GROUPED.map((grp) => (
+              <div key={grp.title} className="source-group">
+                <h3 className="source-h">{grp.title}</h3>
+                <ul className="source-list">
+                  {grp.items.map(([k, s]) => (
+                    <li key={k}>
+                      <a className="text-link" href={s.url} target="_blank" rel="noreferrer">
+                        {s.title}
+                      </a>
+                      <span className="muted"> {s.publisher}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
             <p className="muted">
               Giftwise gives guidance based on published rules, with sources, and is not legal advice. For complex situations, a benefits counselor can help.{" "}
               <Link href="/about" className="text-link">

@@ -15,25 +15,43 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: 14px;
 }
-.jp-n,
-.case-n {
-  font-size: 28px;
+/* On a phone the step number keeps a narrow gutter, so the text gets the width. */
+@media (max-width: 600px) {
+  .jp-step {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 10px;
+    padding: 16px;
+  }
+}
+.jp-n {
+  font-size: 1.75rem;
   font-weight: 500;
   line-height: 1;
   color: var(--accent);
   min-width: 1.2em;
 }
 .jp-link {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
   color: var(--ink);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
 }
+/* On touch, short text links get a 44px-tall hit area without moving the layout. */
+@media (pointer: coarse) {
+  .jp-link,
+  .jp-links .text-link,
+  .ad-link,
+  .rw .doc-table a {
+    display: inline-block;
+    padding-block: 10px;
+    margin-block: -10px;
+  }
+}
 .jp-step p {
   margin-top: 4px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .jp-intro {
   margin-bottom: 1.25rem;
@@ -48,7 +66,7 @@
 }
 .cases-note {
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .cases-note[data-tone="attention"] {
   color: var(--attention);
@@ -65,38 +83,37 @@
   border-radius: 14px;
   padding: 18px 20px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 6px 16px;
   align-items: start;
 }
 @media (max-width: 640px) {
   .case {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
   .case-state {
-    grid-column: 2;
     justify-self: start;
   }
 }
 .case-title {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 .case-expected {
   margin-top: 2px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .case-evidence {
   margin: 10px 0 0;
   padding-left: 1.1em;
   display: grid;
   gap: 4px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
 .case-state {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   padding: 4px 10px;
   border-radius: 5px;
@@ -132,7 +149,7 @@
   }
 }
 .jp-criterion dt {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 .jp-criterion dd {
@@ -166,7 +183,7 @@
   gap: 10px;
 }
 .jp-test-score {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -177,11 +194,11 @@
 }
 .jp-test-what {
   margin-top: 2px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .jp-test-cmd {
   margin-top: 6px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 
@@ -193,15 +210,97 @@
 .ev-basis {
   display: block;
   margin-top: 4px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
 }
 .ev-cases summary {
   cursor: pointer;
   color: var(--accent);
-  min-height: 32px;
+  min-height: 44px;
   display: flex;
   align-items: center;
+  border-radius: 6px;
+  transition: background-color var(--dur-press) var(--ease-out);
+}
+/* A row that opens acknowledges the press, without moving. */
+.ev-cases summary:active,
+.sx-case summary:active,
+.sx-rest > summary:active,
+.sx-out summary:active {
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface-2));
+}
+
+/* The two summary tables lead with the deciding column, tinted like the Giftwise column in How it compares. */
+.ev-table [data-ref] {
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+  font-weight: 500;
+}
+.ev-table thead th[data-ref] {
+  border-radius: 8px 8px 0 0;
+}
+.ev-table tbody tr:last-child td[data-ref] {
+  border-radius: 0 0 8px 8px;
+}
+/* On a phone each row is its own block: what is measured, then one line per setup, the referee's first and tinted. */
+@media (max-width: 600px) {
+  .ev .doc-table-wrap:has(.ev-table) {
+    overflow: visible;
+  }
+  .ev-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .ev-table,
+  .ev-table tbody,
+  .ev-table tr,
+  .ev-table th,
+  .ev-table td {
+    display: block;
+    width: auto;
+  }
+  .ev-table tr {
+    padding: 12px 14px;
+    border-top: 1px solid var(--surface-2);
+  }
+  .ev-table tbody tr:first-child {
+    border-top: 0;
+  }
+  .ev-table tbody th,
+  .ev-table td {
+    border: 0;
+    padding: 2px 0;
+    text-align: left;
+  }
+  .ev-table tbody th {
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .ev-table td {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 4px 0;
+  }
+  .ev-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .ev-table td[data-ref] {
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin: 2px -8px;
+  }
+  .ev-table td[data-ref]::before {
+    color: var(--tint-blue-ink);
+  }
+  .ev-table tbody tr:last-child td[data-ref] {
+    border-radius: 6px;
+  }
 }
 
 /* The nightly outside checks, filed by Render Workflows. */
@@ -223,7 +322,8 @@
 }
 .nc-meta {
   margin-top: 8px;
-  font-size: 15px;
+  font-size: 0.9375rem;
+  max-width: 72ch;
   overflow-wrap: anywhere;
 }
 .nc-bar {
@@ -234,7 +334,7 @@
   gap: 12px 18px;
 }
 .nc-note {
-  font-size: 15px;
+  font-size: 0.9375rem;
   max-width: 60ch;
   overflow-wrap: anywhere;
 }
@@ -259,7 +359,7 @@
   }
 }
 .nc-group h3 {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 .nc-group ul {
@@ -276,7 +376,7 @@
   align-items: baseline;
   padding: 7px 0;
   border-bottom: 1px solid var(--surface-2);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .nc-state {
   font-weight: 500;
@@ -286,11 +386,11 @@
   color: var(--positive);
 }
 .nc-ms {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .nc-detail {
   grid-column: 1 / -1;
-  font-size: 13px;
+  font-size: 0.8125rem;
   overflow-wrap: anywhere;
 }
 .nc .tech-only {
@@ -317,13 +417,20 @@
 .sx-score .tabular {
   color: var(--positive);
 }
+/* The sentence under a short score heading, so the heading stays a few words on a phone. */
+.sx-lead {
+  margin-top: 6px;
+  font-size: var(--step-lead);
+  line-height: 1.3;
+  max-width: 40ch;
+}
 .sx-vs {
   margin-top: 12px;
   max-width: 62ch;
 }
 .sx-meta {
   margin-top: 8px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   max-width: 68ch;
 }
 .sx-findings {
@@ -341,7 +448,7 @@
   background: var(--surface-2);
   border-radius: 6px;
   padding: 14px 16px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .sx-finding p + p {
   margin-top: 6px;
@@ -369,23 +476,33 @@
   list-style: none;
   min-height: 48px;
   padding: 10px 0;
+  border-radius: 6px;
+  transition: background-color var(--dur-press) var(--ease-out);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto 12px;
   align-items: center;
   gap: 6px 20px;
 }
-.sx-case summary::after {
+/* A plus that turns into a minus: two bars, the upright one folds away on open and grows back on close, so the two
+   mirror (the same drawing as the disclosures in components.css). */
+.sx-case summary::after,
+.sx-rest > summary::after {
   content: "";
+  flex: none;
   width: 12px;
   height: 12px;
   color: var(--muted);
-  background:
-    linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat,
-    linear-gradient(currentColor, currentColor) center / 1.5px 12px no-repeat;
-  transition: transform var(--dur-menu) var(--ease-out);
+  background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 12px 1.5px, 1.5px 12px;
+  transition:
+    transform var(--dur-menu) var(--ease-out),
+    background-size var(--dur-menu) var(--ease-out);
 }
-.sx-case[open] summary::after {
-  background: linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat;
+.sx-case[open] summary::after,
+.sx-rest[open] > summary::after {
+  background-size: 12px 1.5px, 1.5px 0;
   transform: rotate(180deg);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -409,7 +526,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sx-case summary::after {
+  .sx-case summary::after,
+  .sx-rest > summary::after {
     transition: none;
   }
 }
@@ -426,11 +544,11 @@
 .sx-sides {
   display: flex;
   gap: 18px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .sx-who {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 /* One width for Matches, Differs and Agrees, and one for the routed amount (kept even when a row has none),
    so each verdict sits in the same column on every row. */
@@ -455,18 +573,17 @@
   display: grid;
   gap: 10px;
   max-width: 72ch;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .sx-quote {
   margin: 0;
   padding: 10px 14px;
-  border-left: 3px solid var(--surface-2);
   background: var(--bg);
-  border-radius: 0 6px 6px 0;
+  border-radius: 6px;
 }
 .sx-quote footer {
   margin-top: 6px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .sx-answers {
   display: grid;
@@ -492,10 +609,10 @@
 .sx-reason,
 .sx-rules {
   margin-top: 6px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .sx-note {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 /* The rest of a long case list: a full-width row under the first six, the list continuing below it once open. */
 .sx-rest > summary {
@@ -507,18 +624,10 @@
   gap: 8px;
   font-weight: 500;
   border-bottom: 1px solid var(--surface-2);
+  transition: background-color var(--dur-press) var(--ease-out);
 }
 .sx-rest > summary::-webkit-details-marker {
   display: none;
-}
-.sx-rest > summary::after {
-  content: "";
-  width: 12px;
-  height: 12px;
-  background:
-    linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat,
-    linear-gradient(currentColor, currentColor) center / 1.5px 12px no-repeat;
-  color: var(--muted);
 }
 .sx-rest-open,
 .sx-rest[open] .sx-rest-closed {
@@ -527,22 +636,21 @@
 .sx-rest[open] .sx-rest-open {
   display: inline;
 }
-.sx-rest[open] > summary::after {
-  background: linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat;
-}
 .sx-list-rest {
   margin-top: 2px;
 }
 .sx-out {
   margin-top: 18px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .sx-out summary {
   cursor: pointer;
   color: var(--accent);
-  min-height: 32px;
+  min-height: 44px;
   display: flex;
   align-items: center;
+  border-radius: 6px;
+  transition: background-color var(--dur-press) var(--ease-out);
 }
 .sx-out ul {
   margin: 8px 0 0;
@@ -553,7 +661,7 @@
 }
 .sx-cmd {
   margin-top: 12px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   overflow-wrap: anywhere;
 }
 .sx .tech-only {
@@ -571,7 +679,7 @@
   gap: 4px 12px;
 }
 .jp-time {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .jp-login {
   margin-top: 12px;
@@ -585,9 +693,15 @@
 .jp-login-k {
   font-weight: 500;
 }
+/* For a judge with more time: three headed groups side by side on a wide screen, stacked on a phone. */
+.jp-more-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 2rem 2.5rem;
+  align-items: start;
+}
 .jp-more-h {
-  margin-top: 2rem;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 .jp-more {
@@ -604,7 +718,7 @@
 .jp-more-look {
   display: block;
   margin-top: 2px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 /* The one-wrong-reviewer stress test, under the evaluation table. */
@@ -614,7 +728,7 @@
   max-width: 52rem;
 }
 .ev-stress-h {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 .ev .tech-only {
@@ -632,7 +746,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  max-width: 68rem;
 }
 @media (max-width: 860px) {
   .jr {
@@ -667,14 +780,14 @@
   color: var(--positive);
 }
 .jr-what {
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 500;
   line-height: 1.35;
 }
 .jr-base {
   align-self: end;
   padding-top: 6px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 .jr-what {
@@ -682,7 +795,7 @@
   text-decoration-color: transparent;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-  transition: text-decoration-color 160ms ease;
+  transition: text-decoration-color 160ms var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .jr-link:hover .jr-what {
@@ -699,11 +812,12 @@
   font-size: var(--step-body);
   max-width: 60rem;
 }
+/* The answer's state is carried by a tint, not a bar on its edge. */
 .rw-status[data-state="current"] {
-  box-shadow: inset 4px 0 0 var(--positive);
+  background: color-mix(in srgb, var(--positive) 12%, var(--surface));
 }
 .rw-status[data-state="new_documents"] {
-  box-shadow: inset 4px 0 0 var(--attention);
+  background: color-mix(in srgb, var(--attention) 12%, var(--surface));
 }
 .rw-date {
   white-space: nowrap;
@@ -739,12 +853,12 @@
     border: 0;
   }
   .rw .rw-date {
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: var(--muted);
   }
 }
 
-/* Who runs it first: the value per family, then three groups that already help people on SSI with money. */
+/* Who runs it first: the value for each person, then three groups that already help people on SSI with money. */
 .ad-value {
   display: grid;
   grid-template-columns: minmax(0, auto) minmax(0, 1fr);
@@ -761,7 +875,7 @@
   }
 }
 .ad-value-n {
-  font-size: clamp(40px, 6vw, 64px);
+  font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -770,7 +884,7 @@
 .ad-value-unit {
   display: block;
   margin-top: 6px;
-  font-size: 16px;
+  font-size: 1rem;
   letter-spacing: 0;
   color: var(--ink);
 }
@@ -797,16 +911,16 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 .ad-n {
   color: var(--accent);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .ad-count {
   display: block;
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -814,14 +928,14 @@
 }
 .ad-size,
 .ad-use {
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .ad-use-k {
   font-weight: 500;
 }
 .ad-link {
   justify-self: start;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 /* How it compares: a table on wide screens; on a phone, each row becomes its own block. */
@@ -833,7 +947,7 @@
 .cmp {
   width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .cmp th,
 .cmp td {
@@ -846,7 +960,7 @@
 .cmp thead td {
   border-top: 0;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .cmp [data-gw] {
@@ -907,7 +1021,7 @@
   .cmp tbody th {
     width: auto;
     margin-bottom: 6px;
-    font-size: 16px;
+    font-size: 1rem;
   }
   .cmp td {
     display: grid;

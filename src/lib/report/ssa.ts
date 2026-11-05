@@ -144,6 +144,20 @@ export function currentReportMonth(today: string, monthsWithGifts: string[]): st
   return candidates.find((m) => monthsWithGifts.includes(m)) ?? [...monthsWithGifts].sort().at(-1) ?? last;
 }
 
+/** The rule table speaks of "the person"; the report speaks of the household by name and pronoun, every line the same way. */
+function personal(text: string, name: string, w: ReturnType<typeof pronounWords>) {
+  return text
+    .replace(/\bthe person's\b/g, w.poss)
+    .replace(/\bgiven to the person\b/g, `given to ${name}`)
+    .replace(/\bWhen the person lives\b/g, `When ${name} lives`)
+    .replace(/\bthat she receives\b/g, `that ${w.subj} ${w.subj === "they" ? "receive" : "receives"}`);
+}
+
+function describeLine(g: Gift & { giver: string; paidTo: string; need: string }, kind: TreatmentKind, ruleIds: string[], name: string, w: ReturnType<typeof pronounWords>) {
+  const d = describe(g, kind, ruleIds, name, w.poss);
+  return { ...d, why: personal(d.why, name, w) };
+}
+
 function describe(g: Gift & { giver: string; paidTo: string; need: string }, kind: TreatmentKind, ruleIds: string[], name: string, poss: string) {
   const words = CATEGORY_WORDS[g.category];
   if (g.delivery === "cash") {
@@ -192,7 +206,7 @@ export function buildReport(o: { name: string; profile: Profile; gifts: ReportGi
     .filter((g) => monthOf(g.date) === month)
     .map((g) => {
       const t = classify(g, profile);
-      const d = describe(g, t.kind, t.ruleIds, name, w.poss);
+      const d = describeLine(g, t.kind, t.ruleIds, name, w);
       const section: ReportLine["section"] = g.delivery === "cash" || t.kind === "ism_shelter" || t.kind === "unearned_in_kind" || t.kind === "not_possible" ? "tell" : "records";
       return {
         id: g.id,
@@ -245,8 +259,8 @@ export function buildReport(o: { name: string; profile: Profile; gifts: ReportGi
       id: "able-housing",
       text:
         monthOf(today) <= month
-          ? `Pay the ${what} from the ABLE account before ${monthName(month)} ends. Money taken out for housing and spent in the same month is not income; money left in the account after that counts toward savings.`
-          : `Check that the ${what} was paid from the ABLE account during ${monthName(month)}. Money taken out for housing and spent in the same month is not income; money kept into the next month counts toward savings.`,
+          ? `Pay the ${what} from the ABLE account before ${monthName(month)} ends. Money taken out for housing and spent in the same month is not income. If any of it is still not spent on the 1st of the next month, it counts toward savings.`
+          : `Check that the ${what} was paid from the ABLE account during ${monthName(month)}. Money taken out for housing and spent in the same month is not income. If any of it is still not spent on the 1st of the next month, it counts toward savings.`,
       ruleId: "R-ABLE-02",
     });
   }
@@ -261,7 +275,7 @@ export function buildReport(o: { name: string; profile: Profile; gifts: ReportGi
     );
   }
   if (lines.some((l) => l.section === "records")) {
-    todo.push({ id: "receipts", text: `Keep the receipts below. Each one shows PayPal paid the shop or the ABLE account, not ${name}. If Social Security asks about help from family, they are the answer.` });
+    todo.push({ id: "receipts", text: `Keep the receipts listed above, in “For your records.” Each one shows PayPal paid the shop or ${w.poss} ABLE account, not ${name}. If Social Security asks about help from family, they are the answer.` });
   }
 
   const script = tell.length

@@ -1,12 +1,13 @@
 "use client";
 
 import Papa from "papaparse";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Info } from "../Info";
 import { ResultCard } from "../ResultCard";
 import { MakeGiftPage } from "./MakeGiftPage";
 import { ReviewPanel } from "./ReviewPanel";
 import { usePrefs } from "../prefs";
+import { parseDollars, parseOptionalDollars } from "@/lib/parseDollars";
 import { DEFAULT_PROFILE, evaluateGift, monthName, planMonths, usd, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
 
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -44,60 +45,125 @@ export const CSV_TEMPLATE = `date,giver,amount,description,paid_to,category,recu
 
 const PAID_TO: Record<string, Delivery> = { person: "cash", cash: "cash", her: "cash", shop: "vendor", vendor: "vendor", store: "vendor", able: "able", item: "item" };
 
-function ProfileFields({ profile, onChange }: { profile: Profile; onChange: (p: Profile) => void }) {
+const NUMBER_HINT = "Type the amount as a number, like 1000";
+
+type MoneyKey = "otherUnearnedMonthly" | "earnedMonthly" | "savings";
+const MONEY_FIELDS: { key: MoneyKey; label: string }[] = [
+  { key: "otherUnearnedMonthly", label: "Other monthly income, not from work" },
+  { key: "earnedMonthly", label: "Monthly pay from work" },
+  { key: "savings", label: "Savings now" },
+];
+
+/**
+ * Her situation, kept as typed: the three money fields hold their text, so "1,240" stays on screen while she types,
+ * and `valid` is false while any of them has text with no number in it.
+ */
+function useProfileForm() {
+  const [flags, setFlags] = useState<Profile>(DEFAULT_PROFILE);
+  const [money, setMoney] = useState<Record<MoneyKey, string>>(() => ({
+    otherUnearnedMonthly: String(DEFAULT_PROFILE.otherUnearnedMonthly),
+    earnedMonthly: String(DEFAULT_PROFILE.earnedMonthly),
+    savings: String(DEFAULT_PROFILE.savings),
+  }));
+  const other = parseOptionalDollars(money.otherUnearnedMonthly);
+  const earned = parseOptionalDollars(money.earnedMonthly);
+  const savings = parseOptionalDollars(money.savings);
+  const profile = useMemo<Profile>(() => ({ ...flags, otherUnearnedMonthly: other ?? 0, earnedMonthly: earned ?? 0, savings: savings ?? 0 }), [flags, other, earned, savings]);
+  return { profile, valid: other !== null && earned !== null && savings !== null, flags, setFlags, money, setMoney };
+}
+
+type ProfileForm = ReturnType<typeof useProfileForm>;
+
+function ProfileFields({ form, idPrefix }: { form: ProfileForm; idPrefix: string }) {
+  const { flags, setFlags, money, setMoney } = form;
   return (
     <fieldset className="try-fieldset">
       <legend className="try-legend">
         Her situation <Info id="try.profile" label="" />
       </legend>
       <label className="try-check">
-        <input type="checkbox" checked={profile.livesInAnothersHousehold} onChange={(e) => onChange({ ...profile, livesInAnothersHousehold: e.target.checked })} />
+        <input type="checkbox" checked={flags.livesInAnothersHousehold} onChange={(e) => setFlags({ ...flags, livesInAnothersHousehold: e.target.checked })} />
         Lives in someone else&rsquo;s home and does not pay a share of housing
       </label>
       <label className="try-check">
-        <input type="checkbox" checked={profile.couple} onChange={(e) => onChange({ ...profile, couple: e.target.checked })} />
+        <input type="checkbox" checked={flags.couple} onChange={(e) => setFlags({ ...flags, couple: e.target.checked })} />
         Married, and both receive SSI
       </label>
       <label className="try-check">
-        <input type="checkbox" checked={profile.ableEligible} onChange={(e) => onChange({ ...profile, ableEligible: e.target.checked })} />
+        <input type="checkbox" checked={flags.ableEligible} onChange={(e) => setFlags({ ...flags, ableEligible: e.target.checked })} />
         Disability began before age 46 (can have an ABLE account)
       </label>
-      <div className="try-row">
-        <label className="try-field">
-          <span>Other monthly income, not from work</span>
-          <input inputMode="decimal" value={profile.otherUnearnedMonthly} onChange={(e) => onChange({ ...profile, otherUnearnedMonthly: Number(e.target.value) || 0 })} />
-        </label>
-        <label className="try-field">
-          <span>Monthly pay from work</span>
-          <input inputMode="decimal" value={profile.earnedMonthly} onChange={(e) => onChange({ ...profile, earnedMonthly: Number(e.target.value) || 0 })} />
-        </label>
-        <label className="try-field">
-          <span>Savings now</span>
-          <input inputMode="decimal" value={profile.savings} onChange={(e) => onChange({ ...profile, savings: Number(e.target.value) || 0 })} />
-        </label>
+      <div className="try-row try-row-top">
+        {MONEY_FIELDS.map(({ key, label }) => {
+          const id = `${idPrefix}-${key}`;
+          const bad = parseOptionalDollars(money[key]) === null;
+          return (
+            <div key={key} className="try-field">
+              <label htmlFor={id}>{label}</label>
+              <input
+                id={id}
+                inputMode="decimal"
+                value={money[key]}
+                onChange={(e) => setMoney({ ...money, [key]: e.target.value })}
+                aria-invalid={bad || undefined}
+                aria-describedby={bad ? `${id}-note` : undefined}
+              />
+              {bad && (
+                <p id={`${id}-note`} className="try-note" data-tone="attention">
+                  {NUMBER_HINT}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </fieldset>
   );
 }
 
+/** Where the result sits until every amount reads as a number: a quiet card in the same place, never a $0 answer. */
+function ResultWaiting() {
+  return (
+    <div className="result-card try-wait" data-ui role="status">
+      <p className="result-title">Her check shows here</p>
+      <p className="muted">Once each amount is a number, the result appears in this spot.</p>
+    </div>
+  );
+}
+
 function DescribeTab() {
-  const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
+  const form = useProfileForm();
+  const { profile } = form;
   const [amount, setAmount] = useState("300");
   const [category, setCategory] = useState<Category>("other");
   const [delivery, setDelivery] = useState<Delivery>("cash");
   const [recurring, setRecurring] = useState(false);
   const [date, setDate] = useState("2026-04-10");
-  const gift: Gift = { id: "try", date, amount: Number(amount) || 0, delivery, category, recurring, label: "Your gift" };
-  const result = useMemo(() => evaluateGift(gift, profile), [gift.amount, gift.delivery, gift.category, gift.recurring, gift.date, profile]); // eslint-disable-line react-hooks/exhaustive-deps
+  const dollars = parseDollars(amount);
+  const valid = form.valid;
+  const result = useMemo(
+    () => (dollars !== null && valid ? evaluateGift({ id: "try", date, amount: dollars, delivery, category, recurring, label: "Your gift" } satisfies Gift, profile) : null),
+    [valid, dollars, delivery, category, recurring, date, profile],
+  );
 
   return (
-    <div className="try-split">
-      <form className="try-form" onSubmit={(e) => e.preventDefault()}>
-        <div className="try-row">
-          <label className="try-field">
-            <span>Amount in dollars</span>
-            <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
-          </label>
+    <div className="try-split try-areas">
+      <form className="try-form try-area-form" onSubmit={(e) => e.preventDefault()}>
+        <div className="try-row try-row-top">
+          <div className="try-field">
+            <label htmlFor="try-amount">Amount in dollars</label>
+            <input
+              id="try-amount"
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              aria-invalid={dollars === null || undefined}
+              aria-describedby="try-amount-note"
+            />
+            <p id="try-amount-note" className="try-note tabular" data-tone={dollars === null ? "attention" : undefined}>
+              {dollars === null ? NUMBER_HINT : `Checking ${usd(dollars)}`}
+            </p>
+          </div>
           <label className="try-field">
             <span>Date it arrives</span>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value || "2026-04-10")} />
@@ -128,9 +194,11 @@ function DescribeTab() {
           <input type="checkbox" checked={recurring} onChange={(e) => setRecurring(e.target.checked)} />
           The same person gives this every month
         </label>
-        <ProfileFields profile={profile} onChange={setProfile} />
       </form>
-      <ResultCard result={result} />
+      <div className="try-area-result">{result ? <ResultCard result={result} /> : <ResultWaiting />}</div>
+      <div className="try-area-profile">
+        <ProfileFields form={form} idPrefix="try-describe" />
+      </div>
     </div>
   );
 }
@@ -139,13 +207,14 @@ type Row = { date: string; giver: string; amount: string; description: string; p
 
 function MonthTab() {
   const [csv, setCsv] = useState(CSV_TEMPLATE);
-  const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
+  const form = useProfileForm();
+  const { profile } = form;
   const parsed = useMemo(() => {
     const out = Papa.parse<Row>(csv.trim(), { header: true, skipEmptyLines: true });
     const gifts: Gift[] = [];
     const problems: string[] = [];
     out.data.slice(0, 500).forEach((r, i) => {
-      const amount = Number(String(r.amount ?? "").replace(/[^0-9.]/g, ""));
+      const amount = parseDollars(String(r.amount ?? ""));
       const delivery = PAID_TO[String(r.paid_to ?? "").trim().toLowerCase()];
       const category = (CATEGORIES.find((c) => c.value === String(r.category ?? "").trim().toLowerCase())?.value ?? "other") as Category;
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(r.date ?? "").trim())) problems.push(`Row ${i + 2}: the date should look like 2026-03-14.`);
@@ -165,11 +234,11 @@ function MonthTab() {
     });
     return { gifts, problems };
   }, [csv]);
-  const plan = useMemo(() => (parsed.gifts.length ? planMonths(parsed.gifts, profile) : null), [parsed.gifts, profile]);
+  const plan = useMemo(() => (parsed.gifts.length && form.valid ? planMonths(parsed.gifts, profile) : null), [parsed.gifts, profile, form.valid]);
 
   return (
-    <div className="try-split">
-      <div className="try-form">
+    <div className="try-split try-areas">
+      <div className="try-form try-area-form">
         <label className="try-field">
           <span>Gifts as CSV (edit here, or upload a file)</span>
           <textarea rows={9} value={csv} onChange={(e) => setCsv(e.target.value)} spellCheck={false} />
@@ -197,9 +266,13 @@ function MonthTab() {
             ))}
           </ul>
         )}
-        <ProfileFields profile={profile} onChange={setProfile} />
       </div>
-      <div className="month-results" data-ui>
+      {!form.valid && (
+        <div className="try-area-result">
+          <ResultWaiting />
+        </div>
+      )}
+      <div className="month-results try-area-result" data-ui hidden={!form.valid}>
         {plan?.months.map((m) => (
           <div key={m.month} className="month-row">
             <p className="month-name">
@@ -227,6 +300,9 @@ function MonthTab() {
           ))}
         </ul>
       </div>
+      <div className="try-area-profile">
+        <ProfileFields form={form} idPrefix="try-month" />
+      </div>
     </div>
   );
 }
@@ -234,6 +310,9 @@ function MonthTab() {
 function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
   const [state, setState] = useState<{ status: "idle" | "working" | "done" | "unavailable" | "error"; message?: string; data?: unknown }>({ status: "idle" });
   const [url, setUrl] = useState("");
+  // "Start a gift page" on the home page asks who it is for and passes it as ?name=, so the page it makes starts with that name.
+  // This tab only renders in the browser (the open tab comes from the address), so reading the address here is safe.
+  const [forName] = useState(() => (typeof window === "undefined" ? "" : (new URLSearchParams(window.location.search).get("name") ?? "").trim().slice(0, 40)));
   async function run(body: FormData | string) {
     setState({ status: "working" });
     try {
@@ -278,24 +357,30 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
               run(JSON.stringify({ url }));
             }}
           >
+            <p className="try-lede try-grow">
+              Giftwise builds {forName ? `${forName}’s` : "the"} gift page from a fundraiser&rsquo;s list of needs. Paste its link, or start from the sample.
+            </p>
             <label className="try-field try-grow">
               <span>Link to a public fundraising page</span>
               <input type="url" placeholder="https://" value={url} onChange={(e) => setUrl(e.target.value)} required />
             </label>
-            <button type="submit" className="btn btn-primary try-go">
-              Check it
-            </button>
-            <button
-              type="button"
-              className="btn btn-quiet try-go"
-              onClick={() => {
-                const sample = `${window.location.origin}/samples/fundraiser.html`;
-                setUrl(sample);
-                run(JSON.stringify({ url: sample }));
-              }}
-            >
-              Use the sample fundraiser
-            </button>
+            {/* With the field still empty, the sample is the step to take; once a link is typed, checking it is. */}
+            <div className="try-actions try-grow">
+              <button type="submit" className={`btn ${url.trim() ? "btn-primary" : "btn-quiet"} try-go`}>
+                Check it
+              </button>
+              <button
+                type="button"
+                className={`btn ${url.trim() ? "btn-quiet" : "btn-primary"} try-go`}
+                onClick={() => {
+                  const sample = `${window.location.origin}/samples/fundraiser.html`;
+                  setUrl(sample);
+                  run(JSON.stringify({ url: sample }));
+                }}
+              >
+                Use the sample fundraiser
+              </button>
+            </div>
           </form>
         )}
         <p className="muted try-privacy">What you upload is used only to show your result and is deleted within 7 days.</p>
@@ -308,7 +393,7 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
         )}
         {state.status === "error" && <p className="result-attention">{state.message}</p>}
         {state.status === "done" && kind === "bill" && <BillResult data={state.data as BillData} />}
-        {state.status === "done" && kind === "fundraiser" && <FundraiserResult data={state.data as FundraiserData} url={url} />}
+        {state.status === "done" && kind === "fundraiser" && <FundraiserResult data={state.data as FundraiserData} url={url} forName={forName} />}
       </div>
     </div>
   );
@@ -384,7 +469,7 @@ type FundraiserData = {
 
 const ROUTE_WORDS: Record<string, string> = { vendor: "Pay the shop", item: "Give the item", able: "To her ABLE account", cash: "Cash" };
 
-function FundraiserResult({ data, url }: { data: FundraiserData; url: string }) {
+function FundraiserResult({ data, url, forName }: { data: FundraiserData; url: string; forName: string }) {
   const { prefs } = usePrefs();
   return (
     <div className="ai-result">
@@ -409,7 +494,7 @@ function FundraiserResult({ data, url }: { data: FundraiserData; url: string }) 
           </p>
         )}
       </div>
-      <MakeGiftPage uses={data.plan.map((p) => ({ use: p.use, amount: p.amount, category: p.category, likely_vendor: p.likely_vendor }))} sourceUrl={url} />
+      <MakeGiftPage uses={data.plan.map((p) => ({ use: p.use, amount: p.amount, category: p.category, likely_vendor: p.likely_vendor }))} sourceUrl={url} initialName={forName} />
     </div>
   );
 }
@@ -433,15 +518,47 @@ export function TryTabs() {
   const hash = useSyncExternalStore(subscribeHash, readHash, () => "");
   const tab: TabId = TABS.some((t) => t.id === hash) ? (hash as TabId) : "describe";
   const setTab = (id: TabId) => {
-    window.history.replaceState(null, "", `#${id}`);
+    // Keep ?name= from "Start a gift page", so the fundraiser tab can still use it after switching tabs.
+    window.history.replaceState(null, "", `${window.location.search}#${id}`);
     window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
+  // Arriving at a tab from a link elsewhere (Start a gift page opens #fundraiser) can keep the old page's scroll,
+  // since no element carries that id. Bring the tabs into view: from the top when they fit there, else at the tabs.
+  useEffect(() => {
+    if (!TABS.some((t) => `#${t.id}` === window.location.hash)) return;
+    const tabs = document.querySelector<HTMLElement>(".try-tabs");
+    if (!tabs) return;
+    const top = tabs.getBoundingClientRect().top;
+    if (top >= 0 && top < window.innerHeight * 0.6) return;
+    const fromTop = top + window.scrollY;
+    if (fromTop < window.innerHeight * 0.5) window.scrollTo({ top: 0 });
+    else tabs.scrollIntoView({ block: "start" });
+  }, []);
+  // The tab pattern: one tab stop for the whole row, then Left, Right, Home and End move between tabs (and open them).
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const i = TABS.findIndex((t) => t.id === tab);
+    const next = e.key === "ArrowRight" ? (i + 1) % TABS.length : e.key === "ArrowLeft" ? (i - 1 + TABS.length) % TABS.length : e.key === "Home" ? 0 : e.key === "End" ? TABS.length - 1 : -1;
+    if (next < 0) return;
+    e.preventDefault();
+    setTab(TABS[next].id);
+    document.getElementById(`tab-${TABS[next].id}`)?.focus();
   };
   return (
     <div className="try-tabs">
       <div className="tabbar">
-        <div className="tablist" role="tablist" aria-label="Ways to try Giftwise">
+        <div className="tablist" role="tablist" aria-label="Ways to try Giftwise" onKeyDown={onKeyDown}>
           {TABS.map((t) => (
-            <button key={t.id} role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} aria-controls={`panel-${t.id}`} className="tab" onClick={() => setTab(t.id)}>
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              id={`tab-${t.id}`}
+              aria-selected={tab === t.id}
+              aria-controls={`panel-${t.id}`}
+              tabIndex={tab === t.id ? 0 : -1}
+              className="tab"
+              onClick={() => setTab(t.id)}
+            >
               {t.label}
             </button>
           ))}

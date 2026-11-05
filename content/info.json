@@ -73,7 +73,7 @@
   },
   "view.theme": {
     "title": "Theme",
-    "what": "Light is the default. Dark is easier on the eyes at night. System follows your device setting.",
+    "what": "System is the default: the site follows your device's light or dark setting. Light and Dark stay the same whatever the device says.",
     "why": "Choose whichever is most comfortable to read."
   },
   "view.text": {
@@ -253,7 +253,7 @@
     "what": "Every tool in Giftwise and the one job it does.",
     "why": "Each tool is visible in the product, not just listed.",
     "learnMore": {
-      "label": "Live status of every tool",
+      "label": "Where each tool lives in the code",
       "href": "/stack"
     }
   },
@@ -264,7 +264,7 @@
   },
   "cta.dialog": {
     "title": "Start a gift page",
-    "what": "Type who the page is for and choose your role. It opens a sample workspace you can explore right away.",
+    "what": "Type the first name of the person the page is for. Giftwise builds the page from a fundraiser's list of needs, or from the sample.",
     "why": "No sign-up is needed, and every payment runs in PayPal's sandbox."
   },
   "page.learn": {
@@ -329,7 +329,7 @@
   "page.gift": {
     "title": "About this page",
     "what": "This is a gift page. Each item is something Maya needs, and you pay for it straight to the shop with PayPal.",
-    "why": "Paying the shop directly is not counted as her income, so her SSI check stays $994.",
+    "why": "Paying the shop directly is not counted as her income, so her SSI check stays the same.",
     "technical": "Server creates a PayPal Orders v2 order with purchase_units[0].payee set to the shop's sandbox account, the PayPal JavaScript SDK v6 opens checkout, and the server captures it. Every step is written to the audit ledger.",
     "sponsor": [
       "PayPal"
@@ -362,7 +362,7 @@
   "gift.month": {
     "title": "Her month",
     "what": "Her SSI check and what has been given this month.",
-    "why": "Every gift on this page is counted as $0 income, so the check stays $994.",
+    "why": "Every gift on this page is counted as $0 income, so her check stays the same.",
     "technical": "Totals from captured payments in the database; counted income from the rules engine."
   },
   "gift.any": {
@@ -633,5 +633,41 @@
     "what": "SSI cases where SSA counted help from family or friends and a federal court reviewed the decision. Giftwise ran each one through its rules engine and compared the outcome with what SSA and the court held.",
     "why": "A benchmark Giftwise wrote proves the code does what was intended. Real decisions show the rules are right about the world, and what the same help would have kept if it had been routed differently.",
     "technical": "content/eval/field-cases.json holds 36 cases from GovInfo's USCOURTS collection (public domain, 17 U.S.C. 105), 14 scored. scripts/run-field-cases.ts runs each through planMonths() at 2026 rates and re-runs the help as Giftwise would route it (vendor, or ABLE only where the opinion shows disability before 46). Results in content/eval/field-cases-results.json. GoFundMe and Givebutter campaign pages were not used: their terms rule out automated reading."
+  },
+  "stack.render-jobs": {
+    "title": "Render Workflows",
+    "what": "Runs the background jobs: each monthly gift is planned on the 1st, and the rulebook's search index is rebuilt every week.",
+    "why": "Each giver's page already shows that month's split before anyone opens it.",
+    "technical": "monthlyRun fans out one planMonthly task per active monthly gift, each with its own retries; rulebookIndex rebuilds the Elastic index. A nightly Render cron starts them with the Render SDK."
+  },
+  "stack.channel3": {
+    "title": "Channel3",
+    "what": "The gift finder: real products for a need, each checked against the SSI rules before it can go on a page.",
+    "why": "The organizer can add a real item in a few taps, and gift cards that would count like cash are held back.",
+    "technical": "POST /v1/search with stock and price filters, from the organizer's view and the find_gift MCP tool. Without a key, a sample catalog stands in."
+  },
+  "stack.elastic": {
+    "title": "Elasticsearch",
+    "what": "Ask the rulebook: finds the passages from the regulations and Social Security's manual that answer a question.",
+    "why": "Every answer comes with the exact passages it was drawn from, and each quote is checked word for word.",
+    "technical": "Hybrid retrieval (multi_match plus semantic_text with jina-embeddings-v3), fused by reciprocal rank, then reranked by jina-reranker-v3. Without Elastic, an in-app BM25 ranking stands in."
+  },
+  "stack.postman": {
+    "title": "Postman",
+    "what": "The Giftwise API as a collection anyone can import and run, with tests on every request.",
+    "why": "A developer can try every endpoint in a minute, and the same collection runs in the test suite.",
+    "technical": "16 requests in five folders, run in the test suite with Newman."
+  },
+  "stack.zapier": {
+    "title": "Zapier",
+    "what": "Can text or email the family the moment a gift arrives.",
+    "why": "The organizer hears about each gift without opening the page.",
+    "technical": "Each PayPal capture posts a signed gift.received event to the organizer's webhook; a Zapier Catch Hook turns it into a text, an email or a spreadsheet row. HMAC-SHA256 signatures with a timestamp."
+  },
+  "stack.rules-watch": {
+    "title": "Federal Register watch",
+    "what": "Checks the Federal Register for new rules about SSI income and help with housing, and for each year's new SSI amounts.",
+    "why": "When Social Security changes a rule or an amount, Giftwise sees it, so the answers stay current.",
+    "technical": "Federal Register API queries for 20 CFR Part 416 rules that mention in-kind support and maintenance or unearned income, and SSA cost-of-living notices (src/lib/rules-watch.ts). Runs on the Status page and nightly in the outside checks."
   }
 }

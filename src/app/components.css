@@ -19,10 +19,18 @@
   min-height: 44px;
   padding: 6px 8px;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   cursor: pointer;
   color: var(--muted);
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease, transform var(--dur-press) var(--ease-out);
+}
+.checker-seg-opt:active {
+  transform: scale(0.98);
+}
+@media (hover: hover) and (pointer: fine) {
+  .checker-seg-opt:not([data-on]):hover {
+    color: var(--ink);
+  }
 }
 .checker-seg-opt[data-on] {
   background: var(--surface);
@@ -55,7 +63,7 @@
 }
 .result-title {
   font-weight: 500;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .result-figures {
   display: flex;
@@ -63,11 +71,11 @@
   gap: 1.5rem 2.5rem;
 }
 .result-k {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .result-v {
-  font-size: 48px;
+  font-size: 3rem;
   font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -76,28 +84,28 @@
   color: var(--positive);
 }
 .result-plain {
-  font-size: 16px;
+  font-size: 1rem;
 }
 .result-attention {
   color: var(--attention);
-  font-size: 16px;
+  font-size: 1rem;
 }
 .result-tech {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .result-rules summary {
   cursor: pointer;
   color: var(--accent);
-  font-size: 15px;
-  min-height: 32px;
+  font-size: 0.9375rem;
+  min-height: 44px;
   display: flex;
   align-items: center;
 }
 .result-rules ul {
   margin: 8px 0 0;
   padding-left: 1.1rem;
-  font-size: 14px;
+  font-size: 0.875rem;
   display: grid;
   gap: 4px;
 }
@@ -114,11 +122,11 @@
   gap: 16px;
 }
 .month-name {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .month-check {
-  font-size: 44px;
+  font-size: 2.75rem;
   font-weight: 500;
   letter-spacing: -0.03em;
 }
@@ -126,7 +134,7 @@
   color: var(--positive);
 }
 .month-detail {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .month-gifts {
   list-style: none;
@@ -140,11 +148,11 @@
   grid-template-columns: 1fr auto;
   gap: 2px 12px;
   padding: 8px 0;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .month-gift-note {
   grid-column: 1 / -1;
-  font-size: 13.5px;
+  font-size: 0.8438rem;
   color: var(--muted);
 }
 
@@ -198,16 +206,25 @@
   flex: none;
   width: 12px;
   height: 12px;
-  background:
-    linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat,
-    linear-gradient(currentColor, currentColor) center / 1.5px 12px no-repeat;
-  transition: transform var(--dur-menu, 180ms) var(--ease-out);
+  background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 12px 1.5px, 1.5px 12px;
+  /* background-size animates, so the upright bar folds away on open and grows back on close: the two mirror. */
+  transition: transform var(--dur-menu, 180ms) var(--ease-out), background-size var(--dur-menu, 180ms) var(--ease-out);
 }
 .gift-cash[open] summary::after,
 .gift-share-qr[open] summary::after,
 .rw-item[open] summary::after {
-  background: linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat;
+  background-size: 12px 1.5px, 1.5px 0;
   transform: rotate(180deg);
+}
+/* A row that opens acknowledges the press, without moving. */
+.gift-cash summary:active,
+.gift-share-qr summary:active,
+.rw-item summary:active,
+.result-rules summary:active {
+  background-color: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 .rw-item summary:focus-visible {
   outline: 2px solid var(--accent);
@@ -233,7 +250,9 @@
   color: var(--muted);
 }
 @media (prefers-reduced-motion: reduce) {
-  .rw-item summary::after {
+  .rw-item summary::after,
+  .gift-cash summary::after,
+  .gift-share-qr summary::after {
     transition: none;
   }
 }
@@ -273,7 +292,7 @@
   overflow-wrap: anywhere;
 }
 .sbl code {
-  font-size: 15px;
+  font-size: 0.9375rem;
   user-select: all;
 }
 
@@ -296,18 +315,18 @@
   }
 }
 .tour-k {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
 }
 .tour-title {
   margin-top: 4px;
-  font-size: 19px;
+  font-size: 1.1875rem;
   font-weight: 500;
   outline: none;
 }
 .tour-text {
   margin-top: 6px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.45;
 }
 .tour-actions {
@@ -318,14 +337,14 @@
   gap: 8px;
 }
 .tour-btn {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 16px;
   border: 0;
   border-radius: 10px;
   background: var(--ink);
   color: var(--surface);
   font: inherit;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
   transition: transform 160ms var(--ease-out);
@@ -352,11 +371,15 @@
   border: 0;
   padding: 6px 0;
   font: inherit;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 0.2em;
   cursor: pointer;
+  min-height: 44px;
+}
+.tour-end:active {
+  opacity: 0.6;
 }
 [data-tour-target] {
   outline: 3px solid var(--accent);
@@ -370,7 +393,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 14px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 @media (max-width: 560px) {
   .tour {
@@ -404,7 +427,7 @@
   min-height: 48px;
 }
 .pp-note {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .pp-slot {
@@ -413,7 +436,7 @@
   min-height: 48px;
   border-radius: var(--radius-btn);
   background: var(--surface-2);
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .pp-note[data-tone="attention"] {

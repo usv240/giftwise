@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Info } from "../Info";
 import { usePrefs } from "../prefs";
+import { parseDollars } from "@/lib/parseDollars";
 import { usd } from "@/lib/rules";
 
 export type OrgHousehold = { slug: string; name: string; open: number };
@@ -17,7 +18,17 @@ const ITEM_WORDS: Record<string, string> = { SUCCESS: "Paid", PENDING: "Sending"
 const REPORT_WORDS = { found: "In PayPal's transaction report", waiting: "Waiting for PayPal's report (the sandbox can take up to 3 hours)", unavailable: "Transaction report unavailable" };
 
 /** An organization chooses households and grant amounts; Giftwise routes each grant and sends one PayPal Payouts batch. */
-export function OrgPayouts({ households, limits, initialBatch }: { households: OrgHousehold[]; limits: { perHousehold: number; perBatch: number }; initialBatch?: string }) {
+export function OrgPayouts({
+  households,
+  limits,
+  initialBatch,
+  fund,
+}: {
+  households: OrgHousehold[];
+  limits: { perHousehold: number; perBatch: number };
+  initialBatch?: string;
+  fund?: React.ReactNode;
+}) {
   const { prefs } = usePrefs();
   const [amounts, setAmounts] = useState<Record<string, string>>(Object.fromEntries(households.map((h, i) => [h.slug, i === 0 ? "150" : ""])));
   const [plan, setPlan] = useState<{ households: HouseholdPlan[]; items: Planned[] } | null>(null);
@@ -26,7 +37,7 @@ export function OrgPayouts({ households, limits, initialBatch }: { households: O
   const [busy, setBusy] = useState<"preview" | "send" | null>(null);
   const [note, setNote] = useState("");
 
-  const grants = households.map((h) => ({ slug: h.slug, amount: Math.round(Number(amounts[h.slug] || 0) * 100) / 100 })).filter((g) => g.amount > 0);
+  const grants = households.map((h) => ({ slug: h.slug, amount: parseDollars(amounts[h.slug] ?? "") ?? 0 })).filter((g) => g.amount > 0);
   const total = grants.reduce((s, g) => s + g.amount, 0);
   const tooMuch = total > limits.perBatch || grants.some((g) => g.amount > limits.perHousehold);
 
@@ -70,58 +81,72 @@ export function OrgPayouts({ households, limits, initialBatch }: { households: O
 
   return (
     <div className="org">
-      <section className="page-section" aria-labelledby="grants-h">
-        <div className="title-row">
-          <h2 id="grants-h">Choose the grants</h2>
-          <Info id="org.grants" label="" />
+      <section className="page-section org-grants" aria-labelledby="grants-h">
+        {fund && <div className="org-fund-slot">{fund}</div>}
+        <div className="org-grants-list">
+          <div className="title-row">
+            <h2 id="grants-h">Choose the grants</h2>
+            <Info id="org.grants" label="" />
+          </div>
+          <ul className="org-households">
+            {households.map((h) => (
+              <li key={h.slug} className="org-household" data-ui>
+                <div>
+                  <p className="org-name">
+                    <Link className="text-link" href={`/g/${h.slug}`}>
+                      {h.name}
+                    </Link>
+                  </p>
+                  <p className="muted">{usd(h.open)} still needed</p>
+                </div>
+                <label className="try-field org-amount">
+                  <span>Grant</span>
+                  <span className="give-input-wrap">
+                    <span aria-hidden="true">$</span>
+                    <input
+                      inputMode="decimal"
+                      className="give-input tabular"
+                      aria-label={`Grant to ${h.name} in dollars`}
+                      value={amounts[h.slug] ?? ""}
+                      onChange={(e) => {
+                        setPlan(null);
+                        setAmounts((a) => ({ ...a, [h.slug]: e.target.value.replace(/[^0-9.]/g, "") }));
+                      }}
+                    />
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul className="org-households">
-          {households.map((h) => (
-            <li key={h.slug} className="org-household" data-ui>
-              <div>
-                <p className="org-name">
-                  <Link className="text-link" href={`/g/${h.slug}`}>
-                    {h.name}
-                  </Link>
-                </p>
-                <p className="muted">{usd(h.open)} still needed</p>
-              </div>
-              <label className="try-field org-amount">
-                <span>Grant</span>
-                <span className="give-input-wrap">
-                  <span aria-hidden="true">$</span>
-                  <input
-                    inputMode="decimal"
-                    className="give-input tabular"
-                    aria-label={`Grant to ${h.name} in dollars`}
-                    value={amounts[h.slug] ?? ""}
-                    onChange={(e) => {
-                      setPlan(null);
-                      setAmounts((a) => ({ ...a, [h.slug]: e.target.value.replace(/[^0-9.]/g, "") }));
-                    }}
-                  />
-                </span>
-              </label>
-            </li>
-          ))}
-        </ul>
-        <p className="muted org-limits">
-          Sandbox limits: up to {usd(limits.perHousehold)} for each household and {usd(limits.perBatch)} for each batch.
-        </p>
-        <div className="try-actions">
-          <button type="button" className="btn btn-quiet" onClick={() => call(true)} disabled={!!busy || grants.length === 0 || tooMuch}>
-            {busy === "preview" ? "Routing…" : "Show the routing"}
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => call(false)} disabled={!!busy || grants.length === 0 || tooMuch}>
-            {busy === "send" ? "Sending to PayPal…" : `Send ${usd(total)} as one PayPal payout batch`}
-          </button>
-        </div>
-        {tooMuch && <p className="result-attention">That is over the sandbox limit for one batch.</p>}
-        {note && (
-          <p className="result-attention" role="status">
-            {note}
+        {/* The batch beside the grants: what it adds up to, then preview, then send. Send opens once the preview has run for these grants. */}
+        <aside className="org-batch" data-ui aria-labelledby="org-batch-h">
+          <p className="result-k" id="org-batch-h">
+            This batch
           </p>
-        )}
+          <p className="org-batch-total tabular">{usd(total)}</p>
+          <p className="muted">
+            {grants.length === 0 ? "Type a grant beside a family to start." : `${grants.length} ${grants.length === 1 ? "family" : "families"}, in one PayPal payout.`}
+          </p>
+          <p className="muted org-limits">
+            Sandbox limits: up to {usd(limits.perHousehold)} for each household and {usd(limits.perBatch)} for each batch.
+          </p>
+          <div className="org-actions">
+            <button type="button" className={`btn ${plan ? "btn-quiet" : "btn-primary"}`} onClick={() => call(true)} disabled={!!busy || grants.length === 0 || tooMuch}>
+              {busy === "preview" ? "Routing…" : "Preview where each dollar goes"}
+            </button>
+            <button type="button" className={`btn ${plan ? "btn-primary" : "btn-quiet"}`} onClick={() => call(false)} disabled={!!busy || grants.length === 0 || tooMuch || !plan}>
+              {busy === "send" ? "Sending to PayPal…" : `Send ${usd(total)} as one PayPal payout batch`}
+            </button>
+          </div>
+          {!plan && grants.length > 0 && !tooMuch && <p className="muted org-hint">Send opens once the preview shows where each dollar goes.</p>}
+          {tooMuch && <p className="result-attention">That is over the sandbox limit for one batch.</p>}
+          {note && (
+            <p className="result-attention" role="status">
+              {note}
+            </p>
+          )}
+        </aside>
       </section>
 
       {plan && (

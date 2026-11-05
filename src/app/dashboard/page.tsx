@@ -5,7 +5,8 @@ import { Suspense } from "react";
 import { Info } from "@/components/Info";
 import { FamilyDashboard } from "@/components/dashboard/FamilyDashboard";
 import { dashboardData } from "@/lib/dashboard/data";
-import { usd } from "@/lib/rules";
+import { ROUTE_LABEL } from "@/lib/dashboard/labels";
+import { usd, type Delivery } from "@/lib/rules";
 import "../pages.css";
 import "./dashboard.css";
 
@@ -15,6 +16,14 @@ async function Dashboard() {
   await connection();
   const { gifts, months } = await dashboardData();
   const kept = months.reduce((s, m) => s + m.kept, 0);
+  const given = gifts.reduce((s, g) => s + g.amount, 0);
+  const checks = months.map((m) => m.checkWithGiftwise);
+  const lowest = Math.min(...checks);
+  const lowestCash = Math.min(...months.map((m) => m.checkIfCash));
+  const routes = (Object.keys(ROUTE_LABEL) as Delivery[])
+    .map((d) => ({ d, label: ROUTE_LABEL[d], amount: gifts.filter((g) => g.delivery === d).reduce((s, g) => s + g.amount, 0) }))
+    .filter((r) => r.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
   return (
     <>
       <p className="lede">
@@ -26,7 +35,53 @@ async function Dashboard() {
           Give to Maya
         </Link>
       </p>
-      <p className="fd-phone muted">This dashboard is laid out for a laptop or larger. On a phone, her report and benefit calendar show the same gifts in one column.</p>
+
+      {/* On a phone: the year's totals as a list, and the two pages that show the same gifts in one column. */}
+      <section className="fd-phone" aria-labelledby="fd-phone-h">
+        <h2 id="fd-phone-h" className="fd-phone-h">
+          The year at a glance
+        </h2>
+        <dl className="fd-list">
+          <div>
+            <dt>Given this year</dt>
+            <dd className="tabular">{usd(given)}</dd>
+          </div>
+          <div>
+            <dt>Kept in her checks by Giftwise</dt>
+            <dd className="tabular">{usd(kept)}</dd>
+          </div>
+          <div>
+            <dt>Her SSI check with Giftwise</dt>
+            <dd className="tabular" data-kept="">
+              {checks.every((c) => c === lowest) ? `${usd(lowest)} every month` : `${usd(lowest)} at the lowest`}
+            </dd>
+          </div>
+          <div>
+            <dt>Her lowest check, if every gift had been cash</dt>
+            <dd className="tabular">{usd(lowestCash)}</dd>
+          </div>
+        </dl>
+        <h3 className="fd-phone-k">How the money reached her</h3>
+        <ul className="fd-routes">
+          {routes.map((r) => (
+            <li key={r.d}>
+              <span className="gw-route gw-routes-dot" data-route={r.d} aria-hidden="true" />
+              <span>{r.label}</span>
+              <span className="tabular">{usd(r.amount)}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="fd-phone-links">
+          <Link className="text-link" href="/g/maya/report">
+            Her report to Social Security
+          </Link>
+          <Link className="text-link" href="/g/maya/calendar">
+            Her benefit calendar
+          </Link>
+        </p>
+        <p className="muted fd-phone-note">On a laptop or larger, this page shows the full dashboard.</p>
+      </section>
+
       <FamilyDashboard gifts={gifts} months={months} />
     </>
   );

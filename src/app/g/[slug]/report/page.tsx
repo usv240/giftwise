@@ -86,6 +86,16 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
 
   return (
     <>
+      {/* Other versions of the same report: plain links under the title, so the bar keeps only the month and the view. */}
+      <p className="rp-alt">
+        <Link className="text-link" href={`/g/${slug}/report/easy?month=${month}${view === "cash" ? "&view=cash" : ""}`}>
+          Easy Read
+        </Link>
+        <Link className="text-link" href={`/g/${slug}/report/easy?month=${month}&lang=es${view === "cash" ? "&view=cash" : ""}`} hrefLang="es" lang="es">
+          En español
+        </Link>
+      </p>
+
       <nav className="rp-bar" aria-label="Choose the month and the view">
         <div className="rp-months">
           {prev ? (
@@ -93,9 +103,7 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
               {monthName(prev)}
             </Link>
           ) : (
-            <span className="btn btn-quiet" aria-disabled="true">
-              Earlier
-            </span>
+            <span className="rp-month-none">No earlier month</span>
           )}
           <p className="rp-month tabular" aria-live="polite">
             {r.monthLabel}
@@ -105,9 +113,7 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
               {monthName(next)}
             </Link>
           ) : (
-            <span className="btn btn-quiet" aria-disabled="true">
-              Later
-            </span>
+            <span className="rp-month-none">No later month yet</span>
           )}
         </div>
         <div className="rp-views" role="group" aria-label="Which gifts">
@@ -119,16 +125,10 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
           </Link>
         </div>
         <div className="rp-actions">
-          <Link className="btn btn-quiet" href={`/g/${slug}/report/easy?month=${month}${view === "cash" ? "&view=cash" : ""}`}>
-            Easy Read
-          </Link>
-          <Link className="btn btn-quiet" href={`/g/${slug}/report/easy?month=${month}&lang=es${view === "cash" ? "&view=cash" : ""}`} hrefLang="es" lang="es">
-            En español
-          </Link>
-          <PrintButton />
-          <a className="btn btn-quiet" href={`/api/v1/ssa-report?page=${slug}&month=${month}${view === "cash" ? "&view=cash" : ""}&format=csv`} download>
+          <a className="text-link rp-csv" href={`/api/v1/ssa-report?page=${slug}&month=${month}${view === "cash" ? "&view=cash" : ""}&format=csv`} download>
             Download CSV
           </a>
+          <PrintButton />
         </div>
       </nav>
 
@@ -270,7 +270,7 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
             <Info id="report.how" label="" />
           </div>
           <p className="rp-phone">
-            Call <a className="text-link tabular" href={`tel:${r.how.phone}`}>{r.how.phone}</a>, TTY <a className="text-link tabular" href={`tel:${r.how.tty}`}>{r.how.tty}</a>. {r.how.office} Have {w.poss} Social Security number ready; Giftwise never asks for it.
+            Call <a className="text-link tabular" href={`tel:${r.how.phone}`}>{r.how.phone}</a>, TTY <a className="text-link tabular" href={`tel:${r.how.tty}`}>{r.how.tty}</a>. {r.how.office} Have {w.poss} Social Security number ready. Giftwise never asks for it.
           </p>
           {r.script.length > 0 ? (
             <div className="rp-script">
@@ -327,7 +327,7 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
             ))}
           </ul>
           <p className="rp-scope muted">
-            Written by Giftwise from the gifts made through it, with rules version {r.rulesVersion}. It covers gifts only; Giftwise does not know about other changes. It is not legal advice, and Giftwise never contacts Social Security for anyone.
+            Written by Giftwise from the gifts made through it, with rules version {r.rulesVersion}. It covers gifts only. Giftwise does not know about other changes. It is not legal advice, and Giftwise never contacts Social Security for anyone.
           </p>
         </footer>
       </article>

@@ -4,11 +4,22 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ENDPOINTS, type Endpoint } from "@/lib/api/endpoints";
 import { Info } from "../Info";
+import { CopyButton } from "./CopyButton";
 
 type Sent = { status: number; ms: number; requestId: string | null; remaining: string | null; body: string };
 type Lang = "curl" | "js" | "python";
 
 const PLAYABLE = ENDPOINTS.filter((e) => e.id !== "health");
+/** The endpoints by what they do. Any endpoint added later and not listed here joins the last row. */
+const ROWS: { label: string; ids: string[] }[] = [
+  { label: "Check", ids: ["check-gift", "plan-month", "review-bill", "ask-rules"] },
+  { label: "Read", ids: ["read-bill", "analyze-fundraiser"] },
+  { label: "Create", ids: ["gift-pages", "ssa-report", "presets", "ledger"] },
+];
+const EP_ROWS = ROWS.map((r, i) => ({
+  label: r.label,
+  items: PLAYABLE.filter((e) => r.ids.includes(e.id) || (i === ROWS.length - 1 && !ROWS.some((x) => x.ids.includes(e.id)))),
+}));
 const SAMPLE_BILL = "/samples/northside-electric-bill.png";
 const pretty = (v: unknown) => JSON.stringify(v, null, 2);
 const pathFor = (e: Endpoint) => {
@@ -101,7 +112,8 @@ export function DevConsole() {
             onUse={() => {
               setKey(fresh);
               choose(PLAYABLE[0]);
-              playground.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+              playground.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
             }}
           />
         ) : (
@@ -118,14 +130,25 @@ export function DevConsole() {
         <div className="dev-grid">
           <div className="dev-pane" data-ui>
             <div className="dev-eps" role="radiogroup" aria-label="Endpoint">
-              {PLAYABLE.map((e) => (
-                <button key={e.id} type="button" role="radio" aria-checked={endpoint.id === e.id} className="dev-ep" onClick={() => choose(e)}>
-                  {e.title}
-                </button>
+              {EP_ROWS.map((row) => (
+                <div key={row.label} className="dev-ep-row">
+                  <span className="dev-ep-k" aria-hidden="true">
+                    {row.label}
+                  </span>
+                  <div className="dev-ep-chips">
+                    {row.items.map((e) => (
+                      <button key={e.id} type="button" role="radio" aria-checked={endpoint.id === e.id} className="dev-ep" onClick={() => choose(e)}>
+                        {e.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
             <p className="dev-route tabular">
-              <span className="dev-method">{endpoint.method}</span> {pathFor(endpoint)}
+              <code>
+                <span className="dev-method">{endpoint.method}</span> {pathFor(endpoint)}
+              </code>
               {endpoint.ai && <span className="dev-tag">Claude</span>}
             </p>
             <p className="dev-summary">{endpoint.summary}</p>
@@ -264,27 +287,6 @@ function KeyReveal({ value, onUse }: { value: string; onUse: () => void }) {
         </a>
       </div>
     </div>
-  );
-}
-
-function CopyButton({ text, label }: { text: string; label: string }) {
-  const [done, setDone] = useState(false);
-  return (
-    <button
-      type="button"
-      className="btn btn-quiet dev-copy"
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          setDone(true);
-          setTimeout(() => setDone(false), 1600);
-        } catch {
-          /* clipboard blocked: the text stays visible to select by hand */
-        }
-      }}
-    >
-      {done ? "Copied" : label}
-    </button>
   );
 }
 

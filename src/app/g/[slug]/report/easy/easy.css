@@ -1,8 +1,14 @@
 /*
- * The Easy Read report: one idea per line, a picture beside each, large type, plenty of space between lines
- * (ASAN, "One Idea Per Line", 2021). The sheet is the same paper as the full report so the two read as one product.
+ * The Easy Read report: one idea per line, a picture on the left of each idea, large type, plenty of space between
+ * lines (NHS England, "Make it easy" 2018; Inclusion Europe, "Information for all"; ASAN, "One Idea Per Line" 2021).
+ * Every line is at least 19px on screen and 14pt on paper, set left, never hyphenated, never in italics or capitals.
+ * The sheet is the same paper as the full report so the two read as one product.
  */
 .er-bar {
+  margin-top: clamp(1.25rem, 0.75rem + 1.5vw, 2rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   max-width: 46rem;
 }
 
@@ -17,6 +23,9 @@
     0 12px 32px -18px color-mix(in srgb, var(--ink) 22%, transparent);
   font-size: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
   line-height: 1.45;
+  text-align: left;
+  hyphens: manual;
+  overflow-wrap: normal;
 }
 
 .er-title {
@@ -57,15 +66,15 @@
   gap: 20px;
 }
 
-/* A picture column, then the words. A line without a picture keeps the column, so the sentences stay aligned. */
+/* A picture column, then the words. A line without a picture continues the idea above it: it keeps the column, so
+   the sentences stay aligned, and sits closer, so the space between ideas stays larger than the space within one. */
 .er-line {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
-/* The picture hangs from the first line without setting the row's height, so the line that continues the same
-   idea sits close under it and the space between ideas stays larger than the space within one. */
+/* The picture hangs from the first line without setting the row's height. */
 .er-pic-cell {
   display: flex;
   justify-content: center;
@@ -86,13 +95,13 @@
   height: 44px;
   color: var(--ink);
 }
+/* A gift's line, then what it was for, as a second sentence at the same size and in the same ink. */
 .er-words {
   display: grid;
-  gap: 2px;
+  gap: 4px;
 }
 .er-note {
-  font-size: 0.8em;
-  color: var(--muted);
+  color: var(--ink);
 }
 
 .er-script {
@@ -109,14 +118,24 @@
   margin-top: 16px;
 }
 
+/* Who wrote the sheet: still reader text, so it keeps the 19px floor; only its color steps back. */
 .er-foot {
   margin-top: clamp(32px, 2rem + 1vw, 48px);
   padding-top: 20px;
   border-top: 1px solid var(--surface-2);
   display: grid;
-  gap: 4px;
-  font-size: 0.8em;
+  gap: 6px;
+  font-size: max(1.1875rem, 0.85em);
   color: var(--muted);
+}
+
+/* After the sheet: the other language, the reminder, print, and the full report. */
+.er-more {
+  margin-top: 20px;
+  max-width: 46rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 @media (max-width: 30rem) {
@@ -128,28 +147,18 @@
     width: 36px;
     height: 36px;
   }
-}
-
-@media print {
-  .er-bar {
-    display: none;
-  }
-  .er-sheet {
-    margin: 0;
-    max-width: none;
-    padding: 0;
-    box-shadow: none;
-    border-radius: 0;
-    background: none;
-  }
-  .er-part,
-  .er-line {
-    break-inside: avoid;
+  .er-more .btn {
+    flex: 1 1 auto;
   }
 }
 
 .er-whatif {
   margin-top: 18px;
+  color: var(--attention);
+  font-weight: 500;
+}
+.er-whatif .er-pic {
+  color: var(--attention);
 }
 
 .er-listen {
@@ -160,4 +169,45 @@
 .er-listen[aria-pressed="true"] {
   background: var(--tint-blue);
   color: var(--tint-blue-ink);
+}
+
+/* On paper: 14pt at the least (NHS England), and no idea or sentence split across two pages. */
+@media print {
+  .er-bar,
+  .er-more {
+    display: none;
+  }
+  .er-sheet {
+    margin: 0;
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: none;
+    font-size: 14pt;
+  }
+  .er-answer {
+    font-size: 18pt;
+  }
+  .er-title {
+    font-size: 26pt;
+  }
+  .er-part-title {
+    font-size: 18pt;
+  }
+  .er-foot {
+    font-size: 14pt;
+  }
+  .er-part-title {
+    break-after: avoid;
+  }
+  .er-line,
+  .er-script li,
+  .er-foot p {
+    break-inside: avoid;
+  }
+  /* A line that continues the idea above it stays on the same page as it. */
+  .er-line:not([data-pic]) {
+    break-before: avoid;
+  }
 }

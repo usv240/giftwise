@@ -17,10 +17,10 @@ const PRONOUNS = [
 ] as const;
 
 /** Turn what a fundraiser asks for into a live gift page, where every dollar goes straight to the shop or the ABLE account. */
-export function MakeGiftPage({ uses, sourceUrl }: { uses: FundraiserUse[]; sourceUrl: string }) {
+export function MakeGiftPage({ uses, sourceUrl, initialName = "" }: { uses: FundraiserUse[]; sourceUrl: string; initialName?: string }) {
   const router = useRouter();
   const usable = uses.filter((u) => u.amount > 0).slice(0, 8);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialName);
   const [pronoun, setPronoun] = useState<"she" | "he" | "they">("they");
   const [organizer, setOrganizer] = useState("");
   const [picked, setPicked] = useState<boolean[]>(usable.map(() => true));

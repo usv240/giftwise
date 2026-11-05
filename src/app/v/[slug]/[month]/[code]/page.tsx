@@ -55,12 +55,12 @@ async function Check({ params }: { params: Promise<Params> }) {
   return (
     <>
       <section className="vf-verdict" data-state={v.verdict} aria-labelledby="vf-h">
-        <p className="vf-k">
-          Report code <span className="tabular">{v.code}</span>, {v.name}, {v.monthLabel}
-        </p>
         <h2 id="vf-h" className="vf-head">
           {head}
         </h2>
+        <p className="vf-k">
+          Report code <span className="tabular">{v.code}</span>, {v.name}, {v.monthLabel}
+        </p>
         {v.verdict === "changed" && (
           <p className="vf-sub">
             The report below is the current one, code <span className="tabular">{v.currentCode}</span>. A report printed earlier in the month lists the gifts up to that day.
@@ -132,11 +132,11 @@ async function Check({ params }: { params: Promise<Params> }) {
           fingerprint of the one before it, so an edited entry would stop matching.
         </p>
         <p className="page-prose">
-          <Link className="text-link" href={`/g/${v.slug}/report?month=${v.month}`}>
+          <Link className="text-link vf-link" href={`/g/${v.slug}/report?month=${v.month}`}>
             Open the report itself
           </Link>
           {" · "}
-          <Link className="text-link" href="/learn#timing">
+          <Link className="text-link vf-link" href="/learn#timing">
             Why a month&rsquo;s gifts change a later check
           </Link>
         </p>

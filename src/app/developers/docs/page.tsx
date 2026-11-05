@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Info } from "@/components/Info";
+import { Toc } from "@/components/learn/Toc";
 import { ENDPOINTS, ERRORS } from "@/lib/api/endpoints";
 import { LIMITS } from "@/lib/api/keys";
 import { openapi } from "@/lib/api/openapi";
+import { RECORDED_ON, docExamples } from "./examples";
 import "../../pages.css";
+import "../../learn/toc.css";
 import "../dev.css";
 
 export const metadata: Metadata = { title: "API docs", description: "Every Giftwise endpoint, its fields, errors and limits." };
@@ -32,6 +35,8 @@ function fields(s: JsonSchema, prefix = ""): { name: string; type: string; requi
 
 export default function DocsPage() {
   const spec = openapi("");
+  const examples = docExamples();
+  const contents = [{ id: "keys", title: "Keys and limits" }, ...ENDPOINTS.map((e) => ({ id: e.id, title: e.title })), { id: "errors", title: "Errors" }];
   return (
     <div className="page frame dev-docs">
       <header className="page-head">
@@ -59,88 +64,126 @@ export default function DocsPage() {
         </p>
       </header>
 
-      <section className="page-section" aria-labelledby="auth-h">
-        <h2 id="auth-h">Keys and limits</h2>
-        <div className="page-prose">
-          <p>
-            Send your key as <code>Authorization: Bearer gw_test_…</code>. A key is optional. With one: {LIMITS.keyPerMinute} requests a minute and {LIMITS.keyPerDay.toLocaleString("en-US")} a day, and every call shows on your usage page. Without one: {LIMITS.demoPerMinute} a minute.
-          </p>
-          <p>
-            Every response has the same shape: <code>{"{ data, meta, error }"}</code>. <code>meta</code> carries <code>request_id</code>, <code>version</code>, <code>rules_version</code> and <code>latency_ms</code>. Rate-limit headers: <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, and <code>Retry-After</code> on a 429.
-          </p>
-          <p>
-            <Link className="text-link" href="/developers#key-h">
-              Get a free key
-            </Link>
-          </p>
-        </div>
-      </section>
+      <div className="doc-body">
+        <Toc className="doc-toc" items={contents} />
 
-      {ENDPOINTS.map((e) => {
-        const op = (spec.paths[e.path] as Record<string, { requestBody?: { content?: Record<string, { schema?: JsonSchema }> } }>)[e.method.toLowerCase()];
-        const schema = op?.requestBody?.content?.["application/json"]?.schema ?? op?.requestBody?.content?.["multipart/form-data"]?.schema;
-        const rows = schema ? fields(schema) : [];
-        return (
-          <section key={e.id} id={e.id} className="page-section doc-ep" aria-labelledby={`${e.id}-h`}>
-            <div className="title-row">
-              <h2 id={`${e.id}-h`}>{e.title}</h2>
-              {e.ai && <span className="dev-tag">Claude</span>}
-            </div>
-            <p className="dev-route tabular">
-              <span className="dev-method">{e.method}</span> {e.path}
-            </p>
-            <p className="page-prose">{e.summary}</p>
-            {rows.length > 0 && (
-              <div className="doc-table-wrap" tabIndex={0} role="region" aria-label={`${e.title} fields`}>
-                <table className="doc-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Field</th>
-                      <th scope="col">Type</th>
-                      <th scope="col">About</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((r) => (
-                      <tr key={r.name}>
-                        <td className="tabular">
-                          {r.name}
-                          {r.required && <span className="doc-req"> required</span>}
-                        </td>
-                        <td className="tabular doc-type">{r.type}</td>
-                        <td>{r.about}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {e.example !== undefined && <pre className="dev-pre tabular doc-example" tabIndex={0} aria-label={`${e.title} example request`}>{JSON.stringify(e.example, null, 2)}</pre>}
-            {e.id !== "health" && (
+        <div className="doc-main">
+          <section id="keys" className="page-section doc-sec" aria-labelledby="auth-h">
+            <h2 id="auth-h">Keys and limits</h2>
+            <div className="page-prose">
               <p>
-                <Link className="text-link" href={`/developers?endpoint=${e.id}#playground`}>
-                  Try it in the playground
+                Send your key as <code>Authorization: Bearer gw_test_…</code>. A key is optional. With one: {LIMITS.keyPerMinute} requests a minute and {LIMITS.keyPerDay.toLocaleString("en-US")} a day, and every call shows on your usage page. Without one: {LIMITS.demoPerMinute} a minute.
+              </p>
+              <p>
+                Every response has the same shape: <code>{"{ data, meta, error }"}</code>. <code>meta</code> carries <code>request_id</code>, <code>version</code>, <code>rules_version</code> and <code>latency_ms</code>. Rate-limit headers: <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, and <code>Retry-After</code> on a 429.
+              </p>
+              <p>
+                <Link className="text-link" href="/developers#key-h">
+                  Get a free key
                 </Link>
               </p>
-            )}
-          </section>
-        );
-      })}
-
-      <section className="page-section" aria-labelledby="errors-h">
-        <h2 id="errors-h">Errors</h2>
-        <p className="page-prose">Every error has a code you can branch on and a plain message you can show to people.</p>
-        <dl className="doc-errors">
-          {ERRORS.map((x) => (
-            <div key={x.code} id={`errors-${x.code}`} className="doc-error">
-              <dt className="tabular">
-                {x.code} <span className="muted">{x.status}</span>
-              </dt>
-              <dd>{x.plain}</dd>
             </div>
-          ))}
-        </dl>
-      </section>
+          </section>
+
+          {ENDPOINTS.map((e) => {
+            const op = (spec.paths[e.path] as Record<string, { requestBody?: { content?: Record<string, { schema?: JsonSchema }> } }>)[e.method.toLowerCase()];
+            const schema = op?.requestBody?.content?.["application/json"]?.schema ?? op?.requestBody?.content?.["multipart/form-data"]?.schema;
+            const rows = schema ? fields(schema) : [];
+            const ex = examples[e.id];
+            return (
+              <section key={e.id} id={e.id} className="page-section doc-ep doc-sec" aria-labelledby={`${e.id}-h`}>
+                <div className="title-row">
+                  <h2 id={`${e.id}-h`}>{e.title}</h2>
+                  {e.ai && <span className="dev-tag">Claude</span>}
+                </div>
+                <p className="dev-route tabular">
+                  <code>
+                    <span className="dev-method">{e.method}</span> {e.path}
+                  </code>
+                </p>
+                <p className="page-prose">{e.summary}</p>
+                {rows.length > 0 && (
+                  <div className="doc-table-wrap" tabIndex={0} role="region" aria-label={`${e.title} fields`}>
+                    <table className="doc-table doc-fields">
+                      <thead>
+                        <tr>
+                          <th scope="col">Field</th>
+                          <th scope="col">Type</th>
+                          <th scope="col">About</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((r) => (
+                          <tr key={r.name}>
+                            <td className="doc-name">
+                              <code>{r.name}</code>
+                              {r.required && <span className="doc-req"> required</span>}
+                            </td>
+                            <td className="doc-type">
+                              <code>{r.type}</code>
+                            </td>
+                            <td>{r.about}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {ex && (
+                  <div className="doc-examples">
+                    <figure className="doc-example">
+                      <figcaption className="doc-cap">
+                        Example request
+                        {ex.sampleBill && (
+                          <>
+                            , with the{" "}
+                            <a className="text-link" href={ex.sampleBill}>
+                              sample electric bill
+                            </a>
+                          </>
+                        )}
+                      </figcaption>
+                      <pre className="dev-pre tabular" tabIndex={0} aria-label={`${e.title}: example request`}>
+                        {ex.request}
+                      </pre>
+                    </figure>
+                    <figure className="doc-example">
+                      <figcaption className="doc-cap">
+                        Example response <span className="muted">{ex.how === "computed" ? "Computed by the rules engine when this page was built." : `Recorded from the live API on ${RECORDED_ON}.`}</span>
+                      </figcaption>
+                      <pre className="dev-pre tabular doc-response" tabIndex={0} aria-label={`${e.title}: example response`}>
+                        {ex.response}
+                      </pre>
+                    </figure>
+                  </div>
+                )}
+                {e.id !== "health" && (
+                  <p>
+                    <Link className="text-link" href={`/developers?endpoint=${e.id}#playground`}>
+                      Try it in the playground
+                    </Link>
+                  </p>
+                )}
+              </section>
+            );
+          })}
+
+          <section id="errors" className="page-section doc-sec" aria-labelledby="errors-h">
+            <h2 id="errors-h">Errors</h2>
+            <p className="page-prose">Every error has a code you can branch on and a plain message you can show to people.</p>
+            <dl className="doc-errors">
+              {ERRORS.map((x) => (
+                <div key={x.code} id={`errors-${x.code}`} className="doc-error">
+                  <dt>
+                    <code>{x.code}</code> <span className="muted tabular">{x.status}</span>
+                  </dt>
+                  <dd>{x.plain}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }

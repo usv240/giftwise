@@ -1,15 +1,17 @@
-/* Read mode: one comfortable column, a sticky contents list on wide screens. */
+/* Read mode: one comfortable column, with the contents beside it (see toc.css). */
 .learn {
   padding-top: clamp(2rem, 1rem + 4vw, 5rem);
 }
 .learn-head {
   max-width: 46rem;
 }
-.learn-title {
-  font-size: var(--step-head);
-}
 .learn-head .lede {
   margin-top: 1rem;
+}
+.learn-mode {
+  margin-top: 0.75rem;
+  font-size: var(--step-small);
+  color: var(--muted);
 }
 .learn-body {
   margin-top: clamp(3rem, 2rem + 4vw, 6rem);
@@ -19,43 +21,6 @@
 }
 .learn-toc {
   grid-column: 1 / span 3;
-  position: sticky;
-  top: 1.5rem;
-  align-self: start;
-  font-size: var(--step-small);
-}
-.learn-toc ul {
-  list-style: none;
-  padding: 0;
-  margin: 0.75rem 0 0;
-  display: grid;
-  gap: 0.15rem;
-}
-.learn-toc a {
-  display: block;
-  padding: 0.4rem 0;
-  text-decoration: none;
-}
-/* The section being read, marked by the contents list. */
-.learn-toc a[aria-current] {
-  color: var(--ink);
-  font-weight: 500;
-  box-shadow: inset 2px 0 var(--accent);
-  padding-left: 0.6rem;
-}
-.learn-toc a {
-  transition: padding-left var(--dur-tip) var(--ease-out);
-}
-@media (prefers-reduced-motion: reduce) {
-  .learn-toc a {
-    transition: none;
-  }
-}
-@media (hover: hover) and (pointer: fine) {
-  .learn-toc a:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
 }
 .learn-main {
   grid-column: 4 / span 7;
@@ -67,6 +32,11 @@
   gap: 1rem;
   max-width: 68ch;
   scroll-margin-top: 1.5rem;
+}
+/* About 70 characters a line for reading; the example cards and source lines keep the full column. */
+.topic > p:not(.topic-sources),
+.topic > .glossary:not(.words) {
+  max-width: 36rem;
 }
 .topic-title {
   font-size: var(--step-lead);
@@ -96,9 +66,17 @@
   font-weight: 500;
 }
 .example-figure strong {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.02em;
+}
+/* The full check kept: the figure reads as good news. */
+.example-figure strong[data-kept] {
+  color: var(--positive);
+}
+.example-full {
+  color: var(--muted);
+  white-space: nowrap;
 }
 .example-note {
   color: var(--muted);
@@ -108,11 +86,23 @@
   gap: 1.25rem;
   margin: 0;
 }
+.words {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1.25rem 2rem;
+}
 .gloss-row dt {
   font-weight: 500;
 }
 .gloss-row dd {
   margin: 0.25rem 0 0;
+}
+.source-group + .source-group {
+  margin-top: 0.75rem;
+}
+.source-h {
+  font-size: var(--step-body);
+  font-weight: 500;
+  margin-bottom: 0.6rem;
 }
 .source-list {
   list-style: none;
@@ -122,29 +112,12 @@
   gap: 0.6rem;
 }
 @media (max-width: 900px) {
-  .learn-toc {
-    position: static;
-    grid-column: 1 / -1;
-    margin-bottom: 3rem;
+  /* A block, not a grid, so the Contents menu can stay at the top of the screen through every section. */
+  .learn-body {
+    display: block;
   }
-  /* On a phone the contents wrap as a short run of links, a few lines instead of a screen. */
-  .learn-toc ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 1.1rem;
-  }
-  .learn-toc a {
-    padding: 0.35rem 0;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-  }
-  .learn-toc a[aria-current] {
-    box-shadow: none;
-    padding-left: 0;
-  }
-  .learn-main {
-    grid-column: 1 / -1;
+  .topic {
+    scroll-margin-top: 4.5rem;
   }
 }
 
@@ -162,7 +135,7 @@
 }
 .ask-sub {
   margin-top: 4px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--muted);
 }
 .ask-form {
@@ -176,14 +149,17 @@
 }
 .ask-field input {
   width: 100%;
-  min-height: 48px;
+  min-height: 3rem;
   font: inherit;
-  font-size: 17px;
+  font-size: 1.0625rem;
   color: var(--ink);
   background: var(--surface);
   border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
   border-radius: 10px;
   padding: 0 14px;
+}
+.ask-field input[aria-invalid="true"] {
+  border-color: var(--attention);
 }
 .ask-field input:focus-visible {
   outline: 2px solid var(--accent);
@@ -196,14 +172,14 @@
   gap: 8px;
 }
 .ask-chip {
-  min-height: 36px;
+  min-height: 2.25rem;
   padding: 0 12px;
   border: 0;
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--ink);
   font: inherit;
-  font-size: 14px;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: transform 160ms var(--ease-out);
 }
@@ -216,7 +192,7 @@
 }
 .ask-note {
   margin-top: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--attention);
 }
 .ask-result {
@@ -225,8 +201,23 @@
   padding-top: 14px;
 }
 .ask-answer {
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.45;
+  max-width: 40rem;
+}
+/* Nothing in the rulebook settles it: the next step, a person who can. */
+.ask-next {
+  margin-top: 12px;
+  max-width: 40rem;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+  font-size: 0.9375rem;
+}
+.ask-next .text-link {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
 }
 .ask-quotes {
   list-style: none;
@@ -239,14 +230,10 @@
   padding: 10px 14px;
   border-radius: 10px;
   background: var(--surface-2);
-  box-shadow: inset 3px 0 0 var(--muted);
-}
-.ask-quotes li[data-found] {
-  box-shadow: inset 3px 0 0 var(--positive);
 }
 .ask-quotes blockquote {
   margin: 0;
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.45;
 }
 .ask-quote-meta {
@@ -254,7 +241,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 .ask-check {
   color: var(--positive);
@@ -264,12 +251,17 @@
 }
 .ask-passages {
   margin-top: 14px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .ask-passages summary {
   cursor: pointer;
   font-weight: 500;
-  min-height: 32px;
+  min-height: 2rem;
+  border-radius: 6px;
+  transition: background-color 160ms var(--ease-out);
+}
+.ask-passages summary:active {
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface-2));
 }
 .ask-passages ol {
   margin: 8px 0 0;
@@ -278,10 +270,10 @@
   gap: 10px;
 }
 .ask-p-head {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .ask-kind {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   padding: 1px 6px;
   border-radius: 4px;
@@ -289,12 +281,22 @@
 }
 .ask-p-text {
   margin-top: 2px;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.45;
   color: var(--muted);
 }
+@media (pointer: coarse) {
+  .ask-chip,
+  .ask-passages summary {
+    min-height: 44px;
+  }
+  .ask-passages summary {
+    padding-block: 0.6rem;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .ask-chip {
+  .ask-chip,
+  .ask-passages summary {
     transition: none;
   }
 }

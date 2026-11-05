@@ -11,10 +11,10 @@ export type Prefs = {
 };
 
 const KEY = "gw-prefs";
-const DEFAULTS: Prefs = { mode: "plain", labels: "off", theme: "light", text: "standard" };
+const DEFAULTS: Prefs = { mode: "plain", labels: "off", theme: "system", text: "standard" };
 
 /** Runs before paint so the theme, text size and labels never flash. */
-export const PREFS_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('${KEY}')||'{}');var d=document.documentElement;d.dataset.theme=p.theme||'light';d.dataset.text=p.text||'standard';d.dataset.labels=p.labels||'off';d.dataset.mode=p.mode||'plain';var q=new URLSearchParams(location.search);['theme','mode','text','labels'].forEach(function(k){var v=q.get(k);if(v)d.dataset[k]=v;});}catch(e){}})();`;
+export const PREFS_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('${KEY}')||'{}');var d=document.documentElement;d.dataset.theme=p.theme||'system';d.dataset.text=p.text||'standard';d.dataset.labels=p.labels||'off';d.dataset.mode=p.mode||'plain';var q=new URLSearchParams(location.search);['theme','mode','text','labels'].forEach(function(k){var v=q.get(k);if(v)d.dataset[k]=v;});}catch(e){}})();`;
 
 type Ctx = { prefs: Prefs; set: <K extends keyof Prefs>(key: K, value: Prefs[K]) => void };
 const PrefsContext = createContext<Ctx>({ prefs: DEFAULTS, set: () => {} });

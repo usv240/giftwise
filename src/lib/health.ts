@@ -58,7 +58,7 @@ async function timed(fn: () => Promise<string>): Promise<{ ok: boolean; detail: 
 export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {}): Promise<Check[]> {
   const [pp, database, mcp, fr] = await Promise.all([
     paypalConfigured() ? timed(async () => (await accessToken()) && "Sandbox token issued") : Promise.resolve(null),
-    dbConfigured() ? timed(async () => (await db().execute(sql`select 1`)) && "Query ok") : Promise.resolve(null),
+    dbConfigured() ? timed(async () => (await db().execute(sql`select 1`)) && "Postgres answered a test query") : Promise.resolve(null),
     paypalConfigured() && probeMcp ? paypalMcp() : Promise.resolve(mcpCache),
     probeMcp ? rulesWatch() : Promise.resolve(null),
   ]);

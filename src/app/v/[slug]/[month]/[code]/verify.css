@@ -1,26 +1,27 @@
 /* The verdict first, then three checks, then every gift with what PayPal says about it now. */
 .vf-verdict {
+  /* A tint says how the check came out: green when everything matches, blue when there is something to read. */
+  --vf-bg: color-mix(in oklab, var(--positive) 10%, var(--surface));
   margin-top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
   max-width: 68rem;
-  background: var(--surface);
+  background: var(--vf-bg);
   border-radius: 20px;
   padding: clamp(20px, 1rem + 1.5vw, 32px);
-  box-shadow: inset 6px 0 0 var(--positive);
 }
 .vf-verdict[data-state="changed"],
 .vf-verdict[data-state="unconfirmed"] {
-  box-shadow: inset 6px 0 0 var(--accent);
-}
-.vf-k {
-  font-size: var(--step-small);
-  color: var(--muted);
+  --vf-bg: color-mix(in oklab, var(--accent) 8%, var(--surface));
 }
 .vf-head {
-  margin-top: 8px;
   font-size: var(--step-lead);
   font-weight: 500;
   line-height: 1.25;
   max-width: 40rem;
+}
+.vf-k {
+  margin-top: 6px;
+  font-size: var(--step-small);
+  color: var(--muted);
 }
 .vf-sub {
   margin-top: 8px;
@@ -38,7 +39,7 @@
   grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
   gap: 4px 1.5rem;
   padding: 12px 0 0 28px;
-  border-top: 1px solid var(--surface-2);
+  border-top: 1px solid color-mix(in oklab, var(--ink) 10%, var(--vf-bg));
   position: relative;
 }
 .vf-checks li::before {
@@ -54,7 +55,7 @@
 .vf-checks li[data-ok]::before {
   border-color: var(--positive);
   background: var(--positive);
-  box-shadow: inset 0 0 0 3px var(--surface);
+  box-shadow: inset 0 0 0 3px var(--vf-bg);
 }
 .vf-check-k {
   font-weight: 500;
@@ -71,7 +72,7 @@
   gap: 4px 10px;
 }
 .vf-badge {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   padding: 2px 8px;
   border-radius: 5px;
@@ -83,12 +84,12 @@
 }
 .vf-id,
 .vf-payee {
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 .vf-why {
   display: block;
   margin-top: 2px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .vf-nowrap {
@@ -96,4 +97,12 @@
 }
 .vf-total {
   margin-top: 1rem;
+}
+/* Touch: the two links under "What this check shows" are at least 44px tall. */
+@media (pointer: coarse) {
+  .vf-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }

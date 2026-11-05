@@ -3,8 +3,10 @@ import Link from "next/link";
 import credits from "../../../public/images/credits.json";
 import videoCredits from "../../../public/media/credits.json";
 import { Info } from "@/components/Info";
+import Image from "next/image";
 import { RealWorld } from "@/components/RealWorld";
 import "../pages.css";
+import "./about.css";
 
 export const metadata: Metadata = { title: "About", description: "What Giftwise is, what it is not, how it handles data, and credits." };
 
@@ -13,7 +15,7 @@ const ALL = [...(credits as Credit[]), ...(videoCredits as Credit[])];
 
 export default function AboutPage() {
   return (
-    <div className="page frame">
+    <div className="page frame about">
       <header className="page-head">
         <div className="title-row">
           <h1 className="page-title">About Giftwise</h1>
@@ -22,13 +24,25 @@ export default function AboutPage() {
         <p className="lede">Giftwise helps friends and family give to someone who receives SSI in the way that keeps her full benefits.</p>
       </header>
 
-      <section className="page-section page-prose" aria-labelledby="what-h">
-        <h2 id="what-h">What it does</h2>
-        <p>
-          Social Security counts cash gifts as income, but not payments made straight to a shop for her needs. Giftwise checks every gift against those rules and pays the
-          shop directly through PayPal, so the help arrives and her check stays the same.
-        </p>
-        <p>Every answer shows the rule it comes from. Fixed rules do the money math; AI reads documents and explains.</p>
+      <section className="page-section about-what" aria-labelledby="what-h">
+        <div className="page-prose">
+          <h2 id="what-h">What it does</h2>
+          <p>
+            Social Security counts cash gifts as income, but not payments made straight to a shop for her needs. Giftwise checks every gift against those rules and pays the
+            shop directly through PayPal, so the help arrives and her check stays the same.
+          </p>
+          <p>Every answer shows the rule it comes from. Fixed rules do the money math; AI reads documents and explains.</p>
+        </div>
+        <figure className="about-photo">
+          <Image
+            src="/images/paralympic-wheelchair-tyre-inflation.jpg"
+            alt="Two technicians repairing a wheelchair tyre"
+            width={768}
+            height={1024}
+            sizes="(max-width: 900px) 100vw, 30vw"
+          />
+          <figcaption className="muted">A wheelchair repair paid straight to the shop is not counted as income.</figcaption>
+        </figure>
       </section>
 
       <section className="page-section page-prose" aria-labelledby="scope-h">
@@ -50,14 +64,14 @@ export default function AboutPage() {
         <ul className="about-list">
           <li>Bills and pages you try are used only to show your result. Images are re-encoded to remove location data before they are read.</li>
           <li>Giftwise never holds money. Donors pay the shop or the ABLE account directly through PayPal.</li>
-          <li>Every payment step is recorded in an append-only ledger with a hash chain, so the record cannot be quietly changed.</li>
+          <li>Every payment step is written down in order and can&rsquo;t be changed later (an append-only ledger with a hash chain).</li>
         </ul>
       </section>
 
       <section className="page-section page-prose" aria-labelledby="open-h">
         <h2 id="open-h">Open source</h2>
         <p>
-          Giftwise is open source under the MIT licence:{" "}
+          Giftwise is open source under the MIT license:{" "}
           <a className="text-link" href="https://github.com/usv240/giftwise">
             github.com/usv240/giftwise
           </a>

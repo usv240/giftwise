@@ -36,29 +36,52 @@ const PATH = [
   { href: "/g/maya/calendar?month=2026-10", label: "Her benefit calendar", time: "40 s", look: "Press As cash and drag Aunt June's $150 from October 28 to November 2. A different check drops: SSI counts income by calendar month." },
 ];
 
-/** Everything else, for a judge with more time. */
+/** The federal court cases where a benefit-safe route exists: what routing keeps a month, in all and for each person. */
+const ROUTED = fieldResults.summary.dollars.as_shown_in_the_opinions;
+const PER_PERSON = Math.round(ROUTED.kept_per_month_2026 / ROUTED.cases_where_routing_keeps_money);
+
+/** Everything else, for a judge with more time, in three groups of at most five. */
 const MORE = [
-  { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
-  { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answers; Claude alone, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
-  { href: "#field-cases", label: "Real cases from federal courts", look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did; routed through Giftwise, the same help keeps $${fieldResults.summary.dollars.as_shown_in_the_opinions.kept_per_month_2026.toLocaleString("en-US", { minimumFractionDigits: 2 })} a month.` },
-  { href: "/g/maya/report?month=2026-11#rp-verify-h", label: "A report anyone can check", look: "After the gift in step 2, November's report carries a QR code. Open it: Giftwise rebuilds the report, asks PayPal for each payment live and checks the audit ledger, with no login." },
-  { href: "#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, look: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
-  { href: "#rules-watch", label: "The rules watch the Federal Register", look: "Asked live: every change to SSI's income rules and amounts since 2022, each with what Giftwise does. The 2027 amounts, published October 26, are in use." },
-  { href: "/manage/maya-sample-organizer", label: "The organizer's side", look: "Add or change a need and watch Giftwise choose where it is paid, find a product with Channel3 (a gift card is held back), see gifts as they arrive, and send each one to a Zapier webhook." },
-  { href: "/learn", label: "Ask the rulebook", look: "A question in plain words: Elasticsearch finds the passages, Claude answers only from them, and every quote is checked word for word." },
-  { href: "/g/maya/calendar?month=2026-10", label: "The calendar's planner", look: "Press As cash, then Plan the cash dates: the planner moves gifts on the Bryntum calendar itself and compares the result with paying the shop." },
-  { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
-  { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
-  { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
-  { href: "#failure-cases", label: "Eight failure cases", look: "Declined card, double click, a browser changing the amount, refunds and more, run live." },
-  { href: "/stack#paypal-apis", label: "Every PayPal API it calls", look: "13 PayPal APIs and tools, each with its job and file." },
+  {
+    title: "The rules, checked",
+    items: [
+      { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
+      { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answers; Claude alone, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
+      {
+        href: "#field-cases",
+        label: "Real cases from federal courts",
+        look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did. In the ${ROUTED.cases_where_routing_keeps_money} cases with a benefit-safe route, the same help keeps about $${PER_PERSON} a month for each person.`,
+      },
+      { href: "#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, look: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
+      { href: "#rules-watch", label: "The rules watch the Federal Register", look: "Asked live: every change to SSI's income rules and amounts since 2022, each with what Giftwise does. The 2027 amounts, published October 26, are in use." },
+    ],
+  },
+  {
+    title: "Paying and reporting",
+    items: [
+      { href: "#failure-cases", label: "Eight failure cases", look: "Declined card, double click, a browser changing the amount, refunds and more, run live." },
+      { href: "/g/maya/report?month=2026-11#rp-verify-h", label: "A report anyone can check", look: "After the gift in step 2, November's report carries a QR code. Open it: Giftwise rebuilds the report, asks PayPal for each payment live and checks the audit ledger, with no login." },
+      { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
+      { href: "/g/maya/calendar?month=2026-10", label: "The calendar's planner", look: "Press As cash, then Plan the cash dates: the planner moves gifts on the Bryntum calendar itself and compares the result with paying the shop." },
+      { href: "/stack#paypal-apis", label: "Every PayPal API it calls", look: "13 PayPal APIs and tools, each with its job and file." },
+    ],
+  },
+  {
+    title: "For organizations and agents",
+    items: [
+      { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
+      { href: "/manage/maya-sample-organizer", label: "The organizer's side", look: "Add or change a need and watch Giftwise choose where it is paid, find a product with Channel3 (a gift card is held back), see gifts as they arrive, and send each one to a Zapier webhook." },
+      { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
+      { href: "/learn", label: "Ask the rulebook", look: "A question in plain words: Elasticsearch finds the passages, Claude answers only from them, and every quote is checked word for word." },
+    ],
+  },
 ];
 
 const CRITERIA = [
   { name: "Technological implementation", where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, PayPal's own MCP server, and Claude structured outputs checked by a deterministic rules engine that keeps twelve promises across 100,000 random gifts.", links: [["/status", "Status"], ["/stack", "Stack"], ["#invariants", "100,000 gifts"]] },
   {
     name: "Design",
-    where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA on 108 page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.",
+    where: "Built to published research for the people who use it: W3C's guidance for cognitive and learning disabilities, the NHS England and Inclusion Europe Easy Read standards, GOV.UK confirmation patterns and Baymard's checkout research, so the total sits beside the PayPal button and every tap target is 44 pixels. Light and dark that follow the device, Large text that reaches every part, plain and technical views, accessible to WCAG 2.2 AA on 108 page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.",
     links: [
       ["/g/maya", "Gift page"],
       ["/g/maya?lang=es", "En español"],
@@ -69,7 +92,7 @@ const CRITERIA = [
   },
   {
     name: "Potential impact",
-    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). In January 2022 SSA lowered the check of 793,000 of them for food or housing someone else provided (88 FR 9779), and about 14 million people can now open an ABLE account, which more than 246,000 have (ABLE National Resource Center). In the federal court cases where a benefit-safe route exists, routing keeps about $414 a month for each family, and benefits counselors, state ABLE programs and organizations that manage SSI money can each run it as it is. Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
+    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). In January 2022 SSA lowered the check of 793,000 of them for food or housing someone else provided (88 FR 9779), and about 14 million people can now open an ABLE account, which more than 246,000 have (ABLE National Resource Center). In the federal court cases where a benefit-safe route exists, routing keeps about $${PER_PERSON} a month for each person, and benefits counselors, state ABLE programs and organizations that manage SSI money can each run it as it is. Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
     links: [
       ["#adoption", "Who runs it first"],
       ["/learn", "The rules, explained"],
@@ -133,17 +156,50 @@ export default function JudgesPage() {
             <SandboxLogin />
           </Suspense>
         </div>
-        <h3 className="jp-more-h">If you have more time</h3>
-        <ul className="jp-more">
-          {MORE.map((m) => (
-            <li key={m.label}>
-              <Link className="text-link jp-more-link" href={m.href}>
-                {m.label}
-              </Link>
-              <span className="jp-more-look muted">{m.look}</span>
-            </li>
+      </section>
+
+      <section className="page-section" aria-labelledby="crit-h">
+        <h2 id="crit-h">Where each criterion shows</h2>
+        <dl className="jp-criteria">
+          {CRITERIA.map((c) => (
+            <div key={c.name} className="jp-criterion">
+              <dt>{c.name}</dt>
+              <dd>
+                <p>{c.where}</p>
+                <p className="jp-links">
+                  {c.links.map(([href, label]) => (
+                    <Link key={href + label} className="text-link" href={href}>
+                      {label}
+                    </Link>
+                  ))}
+                </p>
+              </dd>
+            </div>
           ))}
-        </ul>
+        </dl>
+      </section>
+
+      <section className="page-section" aria-labelledby="more-h">
+        <h2 id="more-h">If you have more time</h2>
+        <div className="jp-more-groups">
+          {MORE.map((g, gi) => (
+            <section key={g.title} className="jp-more-group" aria-labelledby={`more-h-${gi}`}>
+              <h3 id={`more-h-${gi}`} className="jp-more-h">
+                {g.title}
+              </h3>
+              <ul className="jp-more">
+                {g.items.map((m) => (
+                  <li key={m.label}>
+                    <Link className="text-link jp-more-link" href={m.href}>
+                      {m.label}
+                    </Link>
+                    <span className="jp-more-look muted">{m.look}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
       </section>
 
       <section id="nightly" className="page-section" aria-labelledby="nightly-h">
@@ -233,27 +289,6 @@ export default function JudgesPage() {
         <h2 id="ad-h">Who runs it first</h2>
         <p className="page-prose jp-intro">Three groups already help people on SSI with money every month. Each can run Giftwise as it is today.</p>
         <Adoption />
-      </section>
-
-      <section className="page-section" aria-labelledby="crit-h">
-        <h2 id="crit-h">Where each criterion shows</h2>
-        <dl className="jp-criteria">
-          {CRITERIA.map((c) => (
-            <div key={c.name} className="jp-criterion">
-              <dt>{c.name}</dt>
-              <dd>
-                <p>{c.where}</p>
-                <p className="jp-links">
-                  {c.links.map(([href, label]) => (
-                    <Link key={href + label} className="text-link" href={href}>
-                      {label}
-                    </Link>
-                  ))}
-                </p>
-              </dd>
-            </div>
-          ))}
-        </dl>
       </section>
 
       <section className="page-section" aria-labelledby="tests-h">

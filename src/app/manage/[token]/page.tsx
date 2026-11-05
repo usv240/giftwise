@@ -88,6 +88,7 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
         <p className="mg-sample muted">This is the sample page&rsquo;s organizer view, open to everyone so you can try it. Reset the sample on {h.name}&rsquo;s page to put everything back.</p>
       )}
 
+      {/* One panel split by hairlines, not four tiles: the four figures are read together. */}
       <section className="mg-summary" aria-label="The page at a glance" data-ui>
         <div>
           <p className="mg-k">Given so far</p>
@@ -105,82 +106,92 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
         </div>
         <div>
           <p className="mg-k">The page</p>
-          <p className="mg-fig mg-state" data-state={h.status}>
+          <p className="mg-fig" data-state={h.status}>
             {h.status === "closed" ? "Closed" : "Taking gifts"}
           </p>
         </div>
       </section>
 
-      <section className="page-section" aria-labelledby="mg-needs-h">
-        <div className="title-row">
-          <h2 id="mg-needs-h">What the page asks for</h2>
-          <Info id="manage.needs" label="" />
+      {/* The needs and the gifts are the work; sharing, notifications and the page's settings sit beside them on a wide screen. */}
+      <div className="mg-cols">
+        <div className="mg-main">
+          <section className="page-section" aria-labelledby="mg-needs-h">
+            <div className="title-row">
+              <h2 id="mg-needs-h">What the page asks for</h2>
+              <Info id="manage.needs" label="" />
+            </div>
+            <ManageNeeds token={token} needs={needs} w={{ subj: w.subj, poss: w.poss, Poss: w.Poss }} />
+          </section>
+
+          <section className="page-section" aria-labelledby="mg-gifts-h">
+            <h2 id="mg-gifts-h">Gifts received</h2>
+            {v.payments.length ? (
+              <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Gifts received">
+                <table className="doc-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Date</th>
+                      <th scope="col">From</th>
+                      <th scope="col">Paid to</th>
+                      <th scope="col" className="num">
+                        Amount
+                      </th>
+                      <th scope="col">Receipt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {v.payments.map((p) => (
+                      <tr key={p.id}>
+                        <td className="tabular">{when(p.capturedAt)}</td>
+                        <td>{p.payerName?.split(" ")[0] ?? "A giver"}</td>
+                        <td>{p.payeeName}</td>
+                        <td className="tabular num">{usd(Number(p.amount))}</td>
+                        <td>
+                          <Link className="text-link" href={`/r/${p.orderId}`}>
+                            Receipt
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="page-prose muted">No gifts yet. Share the page and each one shows up here the moment PayPal completes it.</p>
+            )}
+          </section>
         </div>
-        <ManageNeeds token={token} needs={needs} />
-      </section>
 
-      <section className="page-section" aria-labelledby="mg-gifts-h">
-        <h2 id="mg-gifts-h">Gifts received</h2>
-        {v.payments.length ? (
-          <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Gifts received">
-            <table className="doc-table">
-              <thead>
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">From</th>
-                  <th scope="col">Paid to</th>
-                  <th scope="col">Amount</th>
-                  <th scope="col">Receipt</th>
-                </tr>
-              </thead>
-              <tbody>
-                {v.payments.map((p) => (
-                  <tr key={p.id}>
-                    <td className="tabular">{when(p.capturedAt)}</td>
-                    <td>{p.payerName?.split(" ")[0] ?? "A giver"}</td>
-                    <td>{p.payeeName}</td>
-                    <td className="tabular">{usd(Number(p.amount))}</td>
-                    <td>
-                      <Link className="text-link" href={`/r/${p.orderId}`}>
-                        Receipt
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="page-prose muted">No gifts yet. Share the page and each one shows up here the moment PayPal completes it.</p>
-        )}
-      </section>
+        <div className="mg-side">
+          <section className="page-section" aria-labelledby="mg-share-h">
+            <h2 id="mg-share-h">Share the page</h2>
+            <div className="mg-share">
+              <ShareGift url={pageUrl} title={`Help ${h.name}`} text={`Help ${h.name}: every gift is paid straight to the shop through PayPal, so ${w.poss} SSI check stays whole.`} qrSvg={qrSvg} />
+            </div>
+          </section>
 
-      <section className="page-section" aria-labelledby="mg-share-h">
-        <h2 id="mg-share-h">Share the page</h2>
-        <div className="mg-share">
-          <ShareGift url={pageUrl} title={`Help ${h.name}`} text={`Help ${h.name}: every gift is paid straight to the shop through PayPal, so ${w.poss} SSI check stays whole.`} qrSvg={qrSvg} />
+          <section className="page-section" aria-labelledby="mg-notify-h">
+            <div className="title-row">
+              <h2 id="mg-notify-h">Get a text or email when a gift arrives</h2>
+              <Info id="manage.notify" label="" />
+            </div>
+            <p className="page-prose">
+              Paste the web address{" "}
+              <a className="text-link" href="https://zapier.com/apps/webhook/integrations" target="_blank" rel="noreferrer">
+                Zapier
+              </a>{" "}
+              gives you, and Zapier can text or email you each gift.
+            </p>
+            <p className="page-prose mg-tech">Each gift event is signed with the page&rsquo;s secret, so the receiving end can check it came from Giftwise.</p>
+            <Notifications token={token} url={h.webhookUrl} />
+          </section>
+
+          <section className="page-section" aria-labelledby="mg-page-h">
+            <h2 id="mg-page-h">The page</h2>
+            <PageStatus token={token} status={h.status} note={h.note} />
+          </section>
         </div>
-      </section>
-
-      <section className="page-section" aria-labelledby="mg-notify-h">
-        <div className="title-row">
-          <h2 id="mg-notify-h">Get told when a gift arrives</h2>
-          <Info id="manage.notify" label="" />
-        </div>
-        <p className="page-prose">
-          Giftwise can send each gift, the moment PayPal completes it, to a web address you choose. With{" "}
-          <a className="text-link" href="https://zapier.com/apps/webhook/integrations" target="_blank" rel="noreferrer">
-            Zapier
-          </a>
-          &rsquo;s Catch Hook, that becomes a text message, an email, a Slack message or a row in a spreadsheet, with no code. Each event is signed, so the receiving end can check it came from Giftwise.
-        </p>
-        <Notifications token={token} url={h.webhookUrl} />
-      </section>
-
-      <section className="page-section" aria-labelledby="mg-page-h">
-        <h2 id="mg-page-h">The page</h2>
-        <PageStatus token={token} status={h.status} note={h.note} />
-      </section>
+      </div>
     </>
   );
 }

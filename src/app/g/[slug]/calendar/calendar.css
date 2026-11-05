@@ -30,14 +30,25 @@
   font: inherit;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 160ms ease, transform 160ms var(--ease-out);
+  color: var(--muted);
+  transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .bc-view:not([aria-pressed="true"]):hover {
+    color: var(--ink);
+  }
 }
 .bc-view:active {
   transform: scale(0.97);
 }
 .bc-view[aria-pressed="true"] {
   background: var(--surface);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+  color: var(--ink);
+}
+@media (pointer: coarse) {
+  .bc-view {
+    min-height: 44px;
+  }
 }
 .bc-view:focus-visible {
   outline: 2px solid var(--accent);
@@ -50,7 +61,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px 16px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .bc-legend li {
   display: inline-flex;
@@ -75,7 +86,16 @@
   border: 0;
   font: inherit;
   cursor: pointer;
-  min-height: 40px;
+  min-height: 2.5rem;
+  transition: opacity 120ms var(--ease-out);
+}
+.bc-reset:active {
+  opacity: 0.6;
+}
+@media (pointer: coarse) {
+  .bc-reset {
+    min-height: 44px;
+  }
 }
 .bc-hint {
   margin-top: 10px;
@@ -124,7 +144,7 @@
 .bc-move label {
   display: grid;
   gap: 4px;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .bc-move select,
 .bc-move input {
@@ -148,7 +168,7 @@
   padding-left: 1.1rem;
   display: grid;
   gap: 8px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   max-width: 70ch;
 }
 
@@ -173,6 +193,25 @@
   color: var(--ink) !important;
 }
 
+/* On a phone the month is a list, one day per row. Every gift is a whole-day event, so the "All day" label says nothing;
+   without it each title gets the row's full width and reads in full. */
+.bc-cal[data-mode="list"] .b-cal-event-list-event-time {
+  display: none !important;
+}
+.bc-cal[data-mode="list"] .b-cal-agenda-event-row {
+  width: 100%;
+}
+.bc-cal[data-mode="list"] .b-cal-event-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+.bc-cal[data-mode="list"] .b-cal-event-desc {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
 /* The planner: what it does in one line, and the button that lets it move the cash on the calendar. */
 .bc-planner {
   margin-top: 16px;
@@ -183,15 +222,14 @@
   gap: 12px 24px;
   padding: 16px 18px;
   border-radius: 14px;
-  background: var(--surface);
-  box-shadow: inset 4px 0 0 var(--accent);
+  background: var(--tint-blue);
 }
 .bc-planner > div {
   flex: 1 1 28rem;
 }
 .bc-planner-text {
   margin-top: 4px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.45;
 }
 .bc-plan-btn {

@@ -4,10 +4,12 @@ import type { ReportLine, SsaReport } from "./ssa";
 /**
  * The month's report for the person themselves, in Easy Read, in English or Spanish.
  *
- * Written to the Autistic Self Advocacy Network's Easy Read guide, "One Idea Per Line" (2021): one idea per sentence,
- * about 10 to 15 words, a picture beside each idea, key words explained. Every sentence comes from the same
- * deterministic report as the full version (buildReport), so the numbers cannot drift, and a unit test holds every
- * sentence to 15 words or fewer in both languages. No model writes or translates any of it.
+ * Written to the Easy Read guides of NHS England (2018), Inclusion Europe ("Information for all") and the Autistic Self
+ * Advocacy Network ("One Idea Per Line", 2021): one idea per line, about 15 words a sentence, each new sentence on a new
+ * line, a matching picture on the left of each idea, key words explained, numerals, the same word for the same thing,
+ * and no colons, semicolons or brackets. Every sentence comes from the same deterministic report as the full version
+ * (buildReport), so the numbers cannot drift, and unit tests hold every sentence to these rules in both languages.
+ * No model writes or translates any of it.
  */
 
 export type EasyLang = "en" | "es";
@@ -19,8 +21,8 @@ export type EasyRead = {
   title: string;
   label: string;
   month: string;
-  /** In the cash view: the line that says this is a what-if, not the real report. */
-  whatIf?: string;
+  /** In the cash view: the lines that say this is a what-if, not the real report. */
+  whatIf?: EasyLine[];
   answer: EasyLine[];
   sections: EasySection[];
   script: string[];
@@ -54,20 +56,38 @@ export const CATEGORY_ES: Record<Category, string> = {
   other: "sus ahorros",
 };
 
-/** One gift, as one short sentence about where the money went. */
+/** What a gift paid for, as its own short sentence under the gift: "It is for the phone bill." */
+function forNote(lang: EasyLang, l: ReportLine): string | undefined {
+  if (lang === "es") return `Es para ${CATEGORY_ES[l.category]}.`;
+  const what = l.need.replace(/,.*$/, "").trim();
+  if (!what || /\bable\b/i.test(what)) return undefined;
+  return `It is for the ${lowerFirst(what)}.`;
+}
+
+/** One gift, as one short sentence about where the money went, and what it was for. */
 function giftSentence(lang: EasyLang, l: ReportLine, name: string): EasyLine {
   const amount = usd(l.amount);
   const when = dateIn(lang, l.date);
   if (lang === "en") {
     if (l.delivery === "cash") return { picture: "cash", text: `On ${when}, ${l.giver} gave you ${amount} in cash.` };
-    if (l.delivery === "able") return { picture: "able", text: `On ${when}, ${l.giver} put ${amount} in your ABLE account.` };
+    if (l.delivery === "able") return { picture: "able", text: `On ${when}, ${l.giver} put ${amount} in your ABLE account.`, note: forNote(lang, l) };
     if (l.delivery === "item") return { picture: "shop", text: `On ${when}, ${l.giver} gave you ${lowerFirst(l.need)}, worth ${amount}.` };
-    return { picture: "shop", text: `On ${when}, ${l.giver} paid ${l.paidTo === name ? "you" : l.paidTo} ${amount}.`, note: `For: ${l.need}` };
+    return { picture: "shop", text: `On ${when}, ${l.giver} paid ${l.paidTo === name ? "you" : l.paidTo} ${amount}.`, note: forNote(lang, l) };
   }
   if (l.delivery === "cash") return { picture: "cash", text: `El ${when}, ${l.giver} le dio ${amount} en efectivo.` };
-  if (l.delivery === "able") return { picture: "able", text: `El ${when}, ${l.giver} puso ${amount} en su cuenta ABLE.` };
-  if (l.delivery === "item") return { picture: "shop", text: `El ${when}, ${l.giver} le regaló ${CATEGORY_ES[l.category]}, con valor de ${amount}.`, note: l.need };
-  return { picture: "shop", text: `El ${when}, ${l.giver} le pagó ${amount} a ${l.paidTo}.`, note: `Para: ${CATEGORY_ES[l.category]} (${l.need})` };
+  if (l.delivery === "able") return { picture: "able", text: `El ${when}, ${l.giver} puso ${amount} en su cuenta ABLE.`, note: forNote(lang, l) };
+  if (l.delivery === "item") return { picture: "shop", text: `El ${when}, ${l.giver} le regaló ${CATEGORY_ES[l.category]}, con valor de ${amount}.` };
+  return { picture: "shop", text: `El ${when}, ${l.giver} le pagó ${amount} a ${l.paidTo}.`, note: forNote(lang, l) };
+}
+
+/** The first time the page says "ABLE account", the next line says what one is. */
+function explainAble(lang: EasyLang, groups: EasyLine[][]) {
+  for (const lines of groups) {
+    const at = lines.findIndex((l) => /\bABLE\b/.test(l.text));
+    if (at === -1) continue;
+    lines.splice(at + 1, 0, { text: lang === "en" ? "An ABLE account is a savings account for people with disabilities." : "Una cuenta ABLE es una cuenta de ahorros para personas con discapacidad." });
+    return;
+  }
 }
 
 export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
@@ -103,9 +123,9 @@ export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
       title: en ? "Gifts that do not count" : "Regalos que no cuentan",
       lines: [
         ...records.map((l) => giftSentence(lang, l, r.name)),
-        { picture: "ok", text: en ? "This money went to a shop or your ABLE account." : "Este dinero fue a una tienda o a su cuenta ABLE." },
+        { picture: "shop", text: en ? "This money went to a shop or your ABLE account." : "Este dinero fue a una tienda o a su cuenta ABLE." },
         { text: en ? "It did not go to you, so it is not income." : "No le llegó a usted, así que no es ingreso." },
-        { text: en ? "You do not need to report these gifts." : "No tiene que reportar estos regalos." },
+        { picture: "ok", text: en ? "You do not need to report these gifts." : "No tiene que reportar estos regalos." },
       ],
     });
   }
@@ -129,7 +149,7 @@ export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
       en
         ? { picture: "able", text: inProgress ? `Pay the ${lowerFirst(housingToAble.need)} from your ABLE account in ${m}.` : `Check that you paid the ${lowerFirst(housingToAble.need)} from your ABLE account in ${m}.` }
         : { picture: "able", text: inProgress ? `Pague ${CATEGORY_ES[housingToAble.category]} con su cuenta ABLE en ${m}.` : `Revise que pagó ${CATEGORY_ES[housingToAble.category]} con su cuenta ABLE en ${m}.` },
-      { text: en ? "Spend it the same month, or it counts as savings." : "Gástelo el mismo mes, o cuenta como ahorros." },
+      { text: en ? "Money not spent by the 1st of next month counts as savings." : "El dinero que no gaste antes del día 1 del mes siguiente cuenta como ahorros." },
     );
   }
   if (r.savings) {
@@ -141,13 +161,16 @@ export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
       todo.push(
         { picture: "savings", text: en ? `On ${first}, your savings would be ${amount}.` : `El ${first}, sus ahorros serían ${amount}.` },
         { text: en ? `That is over the ${limit} limit.` : `Eso pasa el límite de ${limit}.` },
-        { text: en ? `Before ${first}, spend some or move it to your ABLE account.` : `Antes del ${first}, gaste algo o páselo a su cuenta ABLE.` },
+        { picture: "able", text: en ? `Before ${first}, spend some or move it to your ABLE account.` : `Antes del ${first}, gaste algo o páselo a su cuenta ABLE.` },
       );
     } else {
-      todo.push({ picture: "savings", text: en ? `On ${first}, your savings will be ${amount}. That is under ${limit}.` : `El ${first}, sus ahorros serán ${amount}. Está bajo ${limit}.` });
+      todo.push(
+        { picture: "savings", text: en ? `On ${first}, your savings will be ${amount}.` : `El ${first}, sus ahorros serán ${amount}.` },
+        { text: en ? `That is under the ${limit} limit.` : `Eso está debajo del límite de ${limit}.` },
+      );
     }
   }
-  if (records.length) todo.push({ picture: "paper", text: en ? "Keep this page. It shows where each gift went." : "Guarde esta hoja. Muestra a dónde fue cada regalo." });
+  if (records.length) todo.push({ picture: "paper", text: en ? "Keep this page." : "Guarde esta hoja." }, { text: en ? "It shows where each gift went." : "Muestra a dónde fue cada regalo." });
   if (todo.length) sections.push({ id: "todo", title: en ? "Things to do" : "Qué hacer", lines: todo });
 
   sections.push({
@@ -168,6 +191,15 @@ export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
     ],
   });
 
+  const whatIf: EasyLine[] | undefined =
+    r.view === "cash"
+      ? [
+          { picture: "cash", text: en ? "What if every gift had been cash?" : "¿Y si cada regalo hubiera sido en efectivo?" },
+          { text: en ? "This page shows that report." : "Esta hoja muestra ese reporte." },
+        ]
+      : undefined;
+  explainAble(lang, [...(whatIf ? [whatIf] : []), answer, ...sections.map((s) => s.lines)]);
+
   const script = tell.length
     ? [
         en ? `Hello. My name is ${r.name}.` : `Hola. Me llamo ${r.name}.`,
@@ -187,22 +219,27 @@ export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
     title: en ? `Your gifts in ${monthYearIn(lang, r.month)}` : `Sus regalos de ${monthYearIn(lang, r.month)}`,
     label: en ? "Easy Read" : "Lectura fácil",
     month: r.month,
-    whatIf: r.view === "cash" ? (en ? "What if every gift had been cash? This is that report." : "¿Y si cada regalo hubiera sido en efectivo? Este es ese reporte.") : undefined,
+    whatIf,
     answer,
     sections,
     script,
     footer: en
-      ? ["Giftwise wrote this from the gifts made through it.", "It is about gifts only. It is not legal advice.", "Giftwise never talks to Social Security for you."]
-      : ["Giftwise escribió esto con los regalos hechos por Giftwise.", "Solo habla de regalos. No es consejo legal.", "Giftwise nunca habla con el Seguro Social por usted."],
+      ? ["Giftwise wrote this from the gifts made through it.", "It is about gifts only.", "It is not legal advice.", "Giftwise never talks to Social Security for you."]
+      : ["Giftwise escribió esto con los regalos hechos por Giftwise.", "Solo habla de regalos.", "No es consejo legal.", "Giftwise nunca habla con el Seguro Social por usted."],
     ui: en
-      ? { full: "The full report", other: "En español", remind: "Remind me by the 10th", print: "Print", say: "What to say on the call", copy: "Copy what to say", copied: "Copied", failed: "Select the words to copy them", back: "Back to the gift page", nav: "Report options", heading: "Easy Read report", lede: "The same report, written for the person who gets SSI: one idea per line, a picture beside each.", answerLabel: "The answer", listen: "Listen", stop: "Stop" }
-      : { full: "El reporte completo (en inglés)", other: "In English", remind: "Recordarme antes del día 10", print: "Imprimir", say: "Qué decir en la llamada", copy: "Copiar qué decir", copied: "Copiado", failed: "Seleccione el texto para copiarlo", back: "Volver a la página de regalos", nav: "Opciones del reporte", heading: "Reporte en lectura fácil", lede: "El mismo reporte, escrito para la persona que recibe SSI: una idea por línea, con un dibujo al lado.", answerLabel: "La respuesta", listen: "Escuchar", stop: "Parar" },
+      ? { full: "The full report", other: "En español", remind: "Remind me by the 10th", print: "Print", say: "What to say on the call", copy: "Copy what to say", copied: "Copied", failed: "Select the words to copy them", back: "Back to the gift page", nav: "Report options", heading: "Easy Read report", lede: "This page is about your gifts. One idea on each line, with a picture.", answerLabel: "The answer", listen: "Listen", stop: "Stop" }
+      : { full: "El reporte completo, en inglés", other: "In English", remind: "Recordarme antes del día 10", print: "Imprimir", say: "Qué decir en la llamada", copy: "Copiar qué decir", copied: "Copiado", failed: "Seleccione el texto para copiarlo", back: "Volver a la página de regalos", nav: "Opciones del reporte", heading: "Reporte en lectura fácil", lede: "Esta página habla de sus regalos. Una idea en cada línea, con un dibujo.", answerLabel: "La respuesta", listen: "Escuchar", stop: "Parar" },
   };
+}
+
+/** Every line a reader sees on the sheet, notes included, in reading order. */
+export function easyLines(e: EasyRead): string[] {
+  return [...(e.whatIf ?? []), ...e.answer, ...e.sections.flatMap((s) => s.lines)].flatMap((l) => (l.note ? [l.text, l.note] : [l.text])).concat(e.script).concat(e.footer);
 }
 
 /** Every sentence a reader sees, for the word-count test. */
 export function easySentences(e: EasyRead): string[] {
-  return [...(e.whatIf ? [{ text: e.whatIf }] : []), ...e.answer, ...e.sections.flatMap((s) => s.lines)].map((l) => l.text).concat(e.script).concat(e.footer).flatMap((t) => t.split(/(?<=[.?!])\s+/));
+  return easyLines(e).flatMap((t) => t.split(/(?<=[.?!])\s+/));
 }
 
 const ics = (s: string) => s.replace(/[\\,;]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");

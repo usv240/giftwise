@@ -3,12 +3,27 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PayPalPay, requestOrder } from "./PayPalPay";
+import { usd } from "@/lib/rules";
 import { giftText, type Lang } from "@/lib/i18n/gift";
 
-/** Approve one month of a monthly gift in PayPal. The server routes the month again before it creates the order. */
-export function PayMonth({ token, month }: { token: string; month: string }) {
+/**
+ * Approve one month of a monthly gift in PayPal. The server routes the month again before it creates the order. The
+ * month's total and who is paid sit right above the button.
+ */
+export function PayMonth({ token, month, total, payees }: { token: string; month: string; total: number; payees: string[] }) {
+  const t = giftText("en");
   const router = useRouter();
-  return <PayPalPay createOrder={() => requestOrder(`/api/monthly/${token}/order`, { month })} onPaid={() => router.refresh()} />;
+  const payId = `mo-pay-${month}`;
+  return (
+    <>
+      {payees.length > 0 && (
+        <p id={payId} className="mo-pay">
+          {t.payYou} <strong className="tabular">{usd(total)}</strong> {t.payRest(payees.length, payees[0])}
+        </p>
+      )}
+      <PayPalPay describedBy={payees.length > 0 ? payId : undefined} createOrder={() => requestOrder(`/api/monthly/${token}/order`, { month })} onPaid={() => router.refresh()} />
+    </>
+  );
 }
 
 /** Sandbox only: plan the next month now, so the rules can be seen routing the same gift again. */

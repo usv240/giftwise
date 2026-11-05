@@ -10,6 +10,7 @@ import { GiftChecker } from "@/components/GiftChecker";
 import { Info } from "@/components/Info";
 import { CtaDialog } from "@/components/landing/CtaDialog";
 import { Faq } from "@/components/landing/Faq";
+import { LoopVideo } from "@/components/landing/LoopVideo";
 import { ShowcaseBoard } from "@/components/landing/ShowcaseBoard";
 import { usd } from "@/lib/rules";
 import "./landing.css";
@@ -27,17 +28,19 @@ const RULE_ROWS = [
   { id: "rules.able-balance", name: "ABLE balance not counted toward savings", value: `first ${usd(V.able_resource_exclusion.value)}`, href: "/learn#able" },
 ];
 
+/** `tech` is the citation, shown in the technical view only. */
 const HOW = [
-  { clause: "First a need arrives.", card: { title: "Wheelchair repair", meta: "$420 to Riverside Mobility (sample)", status: "Reading the quote" } },
-  { clause: "Then the rule is checked.", card: { title: "Wheelchair repair", meta: "Paid to the shop: not counted. POMS SI 00815.400", status: "Rule found" } },
-  { clause: "Then PayPal pays the shop.", card: { title: "Wheelchair repair", meta: "Dan paid $420 with PayPal. Sandbox ID 8RT41...", status: "Paid" } },
-  { clause: "Her month stays steady.", card: { title: "June check", meta: "$994. Savings on July 1: $1,240 of $2,000", status: "Steady" } },
+  { clause: "First a need arrives.", card: { title: "Wheelchair repair", meta: "$420 to Riverside Mobility (sample)", tech: "", status: "Reading the quote" } },
+  { clause: "Then the rule is checked.", card: { title: "Wheelchair repair", meta: "Paid to the shop: not counted.", tech: "POMS SI 00815.400", status: "Rule found" } },
+  { clause: "Then PayPal pays the shop.", card: { title: "Wheelchair repair", meta: "Dan paid $420 with PayPal. Sandbox ID 8RT41...", tech: "", status: "Paid" } },
+  { clause: "Her month stays steady.", card: { title: "June check", meta: "$994. Savings on July 1: $1,240 of $2,000", tech: "", status: "Steady" } },
 ];
 
 const BUILT = [
   { id: "paypal", tool: "PayPal", job: "Pays the shop directly, and keeps the month's ledger" },
   { id: "claude", tool: "Claude Opus 5.5", job: "Reads bills and runs the two reviewers" },
   { id: "ag-studio", tool: "AG Studio", job: "The dashboard of Maya's year, with a rules-engine widget" },
+  { id: "bryntum", tool: "Bryntum", job: "Her benefit calendar, where gifts can be dragged between months" },
   { id: "render", tool: "Render", job: "Hosts the site and its database" },
   { id: "apimatic", tool: "APIMatic", job: "Generated the PayPal SDK Giftwise builds with" },
 ];
@@ -79,18 +82,15 @@ export default function Home() {
       {/* Hero: "Column on one line" beside the live Gift Checker */}
       <section className="hero frame grid-12" aria-labelledby="hero-title">
         <div className="hero-col">
-          <div className="title-row">
-            <h1 id="hero-title" className="hero-title">
-              Give so she keeps <br />
-              her full check
-            </h1>
-            <Info id="page.home" />
-          </div>
+          <h1 id="hero-title" className="hero-title">
+            Give so she keeps <br />
+            her full check
+          </h1>
           <p className="hero-sub">
             For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules and pays the shop directly through PayPal. Claude reads the bills and fundraiser pages; the rules do the math.
           </p>
           <div className="hero-actions">
-            <Link href="/app" className="btn btn-primary">
+            <Link href="/try#fundraiser" className="btn btn-primary">
               Start a gift page
             </Link>
             <Link href="/judges" className="text-link">
@@ -133,14 +133,16 @@ export default function Home() {
         {HOW.map((h, i) => (
           <div key={h.clause} className="how-field" data-field={i}>
             {i === 0 && (
-              <div className="title-row how-heading">
+              <div className="how-heading">
                 <h2 id="how-title">How it works</h2>
-                <Info id="how.steps" />
               </div>
             )}
             <div className="how-card" data-ui data-reveal style={{ ["--reveal-i" as string]: i }}>
               <p className="how-card-title">{h.card.title}</p>
-              <p className="how-card-meta tabular">{h.card.meta}</p>
+              <p className="how-card-meta tabular">
+                {h.card.meta}
+                {h.card.tech && <span className="how-tech"> {h.card.tech}</span>}
+              </p>
               <p className="how-card-status" data-step={i}>
                 {h.card.status}
               </p>
@@ -154,18 +156,13 @@ export default function Home() {
       <section className="showcase" aria-labelledby="showcase-title">
         <div className="frame showcase-head">
           <div className="showcase-copy">
-            <div className="title-row">
-              <h2 id="showcase-title" className="section-title">
-                Every request, routed
-              </h2>
-              <Info id="showcase.board" />
-            </div>
+            <h2 id="showcase-title" className="section-title">
+              Every request, routed
+            </h2>
             <p className="lede">Repairs, school costs, bills and birthdays. Each need has a best way to arrive, and Giftwise picks it.</p>
           </div>
           <figure className="showcase-photo">
-            <video className="loop-video" autoPlay muted loop playsInline preload="metadata" poster="/media/wheelchair-basketball-poster.jpg" aria-hidden="true" width={854} height={480}>
-              <source src="/media/wheelchair-basketball.webm" type="video/webm" />
-            </video>
+            <LoopVideo src="/media/wheelchair-basketball.webm" poster="/media/wheelchair-basketball-poster.jpg" width={854} height={480} />
             <Image className="loop-poster" src="/media/wheelchair-basketball-poster.jpg" alt="" width={854} height={480} aria-hidden="true" />
             <figcaption className="muted">Life, uninterrupted. Wheelchair basketball at the University of Worcester.</figcaption>
           </figure>
@@ -176,12 +173,9 @@ export default function Home() {
       {/* The rules, simply: two-ended rows */}
       <section className="section frame rules" aria-labelledby="rules-title">
         <div className="rules-col">
-          <div className="title-row">
-            <h2 id="rules-title" className="rules-title">
-              Seven numbers
-            </h2>
-            <Info id="rules.list" />
-          </div>
+          <h2 id="rules-title" className="rules-title">
+            Seven numbers
+          </h2>
           <p className="muted rules-sub">Most of the rules come down to these. Each links to its source.</p>
           <ul className="rules-list">
             {RULE_ROWS.map((r, i) => (
@@ -215,12 +209,9 @@ export default function Home() {
           <p className="stats-figure tabular" aria-hidden="true">
             $0
           </p>
-          <div className="title-row">
-            <h2 id="stats-title" className="stats-claim">
-              counted against her all year
-            </h2>
-            <Info id="stats.example" />
-          </div>
+          <h2 id="stats-title" className="stats-claim">
+            counted against her all year
+          </h2>
           <p className="stats-sub">
             Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {new Set(sampleYear.gifts.map((g) => g.giver)).size} people, every gift through Giftwise. Her check stayed $994 every month.
           </p>
@@ -247,12 +238,9 @@ export default function Home() {
 
       {/* Who it reaches: published counts, each linked to its source */}
       <section className="section frame reach" aria-labelledby="reach-title">
-        <div className="title-row">
-          <h2 id="reach-title" className="section-title">
-            Who it reaches
-          </h2>
-          <Info id="reach.row" />
-        </div>
+        <h2 id="reach-title" className="section-title">
+          Who it reaches
+        </h2>
         <ul className="reach-list">
           {REACH.map((r) => (
             <li key={r.fig} className="reach-row">
@@ -290,8 +278,7 @@ export default function Home() {
                 </a>
                 {i < RESEARCH.length - 2 ? ", " : i === RESEARCH.length - 2 ? " and " : "."}
               </span>
-            ))}{" "}
-            <Info id="research.row" />
+            ))}
           </p>
           <ul className="research-proof" aria-label="How the rules were checked">
             <li>
@@ -325,12 +312,9 @@ export default function Home() {
       {/* For developers */}
       <section className="section frame dev grid-12" aria-labelledby="dev-title">
         <div className="dev-copy">
-          <div className="title-row">
-            <h2 id="dev-title" className="section-title">
-              Make any gift benefit-safe
-            </h2>
-            <Info id="dev.teaser" />
-          </div>
+          <h2 id="dev-title" className="section-title">
+            Make any gift benefit-safe
+          </h2>
           <p className="lede">One API call, or add the Giftwise MCP server to your AI agent.</p>
           <div className="hero-actions">
             <Link href="/developers" className="btn btn-primary">
@@ -360,12 +344,9 @@ Authorization: Bearer gw_test_...
 
       {/* How it is built */}
       <section className="section frame built" aria-labelledby="built-title">
-        <div className="title-row">
-          <h2 id="built-title" className="section-title">
-            How it is built
-          </h2>
-          <Info id="built.list" />
-        </div>
+        <h2 id="built-title" className="section-title">
+          How it is built
+        </h2>
         <ul className="built-list">
           {BUILT.map((b) => (
             <li key={b.id} className="built-row">
@@ -373,7 +354,6 @@ Authorization: Bearer gw_test_...
                 <Link href={`/stack#${b.id}`} className="rules-link">
                   {b.tool}
                 </Link>
-                <Info id={`stack.${b.id}`} label="" />
               </span>
               <span className="built-job">{b.job}</span>
             </li>
@@ -383,13 +363,10 @@ Authorization: Bearer gw_test_...
 
       {/* FAQ: question index, one answer */}
       <section className="section frame" aria-labelledby="faq-title">
-        <div className="title-row">
-          <h2 id="faq-title" className="section-title">
-            Plain answers
-          </h2>
-          <Info id="faq.list" />
-        </div>
-        <Faq />
+        <h2 id="faq-title" className="section-title">
+          Plain answers
+        </h2>
+        <Faq bills={billResults.summary.referee.all_cases} billsKeptWhole={billResults.summary.referee.check_kept_whole} />
       </section>
 
       {/* CTA: first step, already open */}
@@ -399,7 +376,7 @@ Authorization: Bearer gw_test_...
             Start with <br />
             one gift
           </h2>
-          <p className="cta-sub">Your gift page is ready in a minute. Share the link, and every gift arrives the benefit-safe way.</p>
+          <p className="cta-sub">Paste a fundraiser&rsquo;s link, or start from the sample. Giftwise turns each need into a gift that arrives the <span className="cta-keep">benefit-safe way</span>.</p>
         </div>
         <CtaDialog />
       </section>

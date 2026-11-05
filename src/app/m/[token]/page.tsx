@@ -7,7 +7,7 @@ import { Info } from "@/components/Info";
 import { PayMonth, PlanNext } from "@/components/gift/MonthlyActions";
 import { today } from "@/lib/api/envelope";
 import { monthlyView } from "@/lib/monthly";
-import { monthName, pronounWords, usd } from "@/lib/rules";
+import { P, addMonths, monthName, pronounWords, usd } from "@/lib/rules";
 import "../../pages.css";
 import "./monthly.css";
 
@@ -28,10 +28,7 @@ async function Monthly({ params }: { params: Promise<{ token: string }> }) {
   return (
     <>
       <header className="page-head">
-        <div className="title-row">
-          <h1 className="page-title">Your monthly gift to {name}</h1>
-          <Info id="page.monthly" />
-        </div>
+        <h1 className="page-title">Your monthly gift to {name}</h1>
         <p className="lede">
           {usd(v.amount)} every month. Each month the rules route it again for that month&rsquo;s needs, and you approve it in PayPal. It goes straight to each shop and {w.poss} ABLE account.
         </p>
@@ -60,7 +57,8 @@ async function Monthly({ params }: { params: Promise<{ token: string }> }) {
               </ul>
               {r.plan.baseline > 0 && (
                 <p className="mo-check">
-                  {w.Poss} check stays <span className="tabular">{usd(r.plan.checkWithRouting)}</span>. As cash it would be <span className="tabular">{usd(r.plan.checkIfCash)}</span>.
+                  {w.Poss} {monthName(addMonths(r.month, P.rmaLagMonths))} check {r.plan.checkWithRouting === r.plan.baseline ? "stays" : "is"} <span className="tabular">{usd(r.plan.checkWithRouting)}</span>. As cash it
+                  would be <span className="tabular">{usd(r.plan.checkIfCash)}</span>.
                 </p>
               )}
               {r.changes.length > 0 && prev && (
@@ -79,9 +77,9 @@ async function Monthly({ params }: { params: Promise<{ token: string }> }) {
                 </div>
               )}
               {r.changes.length === 0 && prev && <p className="mo-same muted">The same split as {monthName(prev.month)}.</p>}
-              {!r.paid && <PayMonth token={v.token} month={r.month} />}
+              {!r.paid && <PayMonth token={v.token} month={r.month} total={r.plan.lines.reduce((s, l) => s + l.amount, 0)} payees={r.plan.lines.map((l) => l.payeeName)} />}
               {r.paid && r.orderId && (
-                <Link className="text-link" href={`/r/${r.orderId}`}>
+                <Link className="text-link mo-receipt" href={`/r/${r.orderId}`}>
                   See the receipt
                 </Link>
               )}
@@ -101,7 +99,7 @@ async function Monthly({ params }: { params: Promise<{ token: string }> }) {
       <section className="page-section" aria-labelledby="mo-why-h">
         <div className="title-row">
           <h2 id="mo-why-h">Why you approve each month</h2>
-          <Info id="monthly.why" label="" />
+          <Info id="monthly.why" label="" topic="Why you approve each month" />
         </div>
         <p className="page-prose">
           A gift that goes straight to each shop has to be approved by you, in PayPal, each time. PayPal can save a payment method for a platform&rsquo;s own account, but not to pay other accounts on
@@ -110,7 +108,7 @@ async function Monthly({ params }: { params: Promise<{ token: string }> }) {
       </section>
 
       <p className="mo-back">
-        <Link className="text-link" href={`/g/${v.household.slug}`}>
+        <Link className="text-link mo-back-link" href={`/g/${v.household.slug}`}>
           Back to {name}&rsquo;s page
         </Link>
       </p>

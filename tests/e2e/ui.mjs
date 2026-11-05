@@ -38,7 +38,8 @@ await page.getByRole("button", { name: "Show the rule" }).click();
 ok("Show the rule lists source links", (await page.locator(".checker-rules a").count()) > 0);
 
 // 2. Info toggletip: hover, click to pin, Escape closes
-const firstInfo = page.locator('[data-info-id="page.home"]');
+// Info buttons sit beside the rules they explain (not on titles); the route choice in the Gift Checker has one.
+const firstInfo = page.locator('[data-info-id="gift-checker.route"]');
 await firstInfo.hover();
 await page.waitForTimeout(450);
 ok("Info opens on hover", await page.locator(".info-pop").isVisible());
@@ -50,12 +51,12 @@ await page.keyboard.press("Escape");
 await page.waitForTimeout(200);
 ok("Info closes on Escape", !(await page.locator(".info-pop").isVisible()));
 const infoCount = await page.locator("[data-info-id]").count();
-ok("landing has an Info button on each part", infoCount >= 25, `${infoCount}`);
-const missing = await page.$$eval("[data-info-id]", (els) => els.filter((e) => !e.querySelector(".info-dot") || !e.getAttribute("aria-label")?.startsWith("info:")).length);
+ok("landing has an Info button beside each rule it explains", infoCount >= 10, `${infoCount}`);
+const missing = await page.$$eval("[data-info-id]", (els) => els.filter((e) => !e.querySelector(".info-dot") || !/^(About|Acerca de) \S/.test(e.getAttribute("aria-label") ?? "")).length);
 ok("every Info button renders", missing === 0);
 
 // 3. View menu: Technical mode + Dark theme persist across navigation
-await page.getByRole("button", { name: "View", exact: true }).click();
+await page.getByRole("button", { name: "Display", exact: true }).click();
 await page.locator("label", { hasText: "Technical" }).click();
 await page.locator("label", { hasText: "Dark" }).click();
 await page.keyboard.press("Escape");
@@ -72,6 +73,11 @@ await page.evaluate(() => localStorage.removeItem("gw-prefs"));
 await page.goto(B + "/try", { waitUntil: "networkidle" });
 await page.getByLabel("Amount in dollars").fill("300");
 ok("Try describe: $300 cash -> $774", (await page.locator(".result-v").first().textContent()) === "$774");
+await page.getByLabel("Amount in dollars").fill("1,000");
+ok("Try describe: \"1,000\" is read as $1,000 and shown back", (await page.locator(".result-v").first().textContent()) === "$74" && (await page.locator("#try-amount-note").textContent()) === "Checking $1,000", await page.locator("#try-amount-note").textContent());
+await page.getByLabel("Amount in dollars").fill("abc");
+ok("Try describe: text with no number asks for a number and shows no result", (await page.locator(".result-v").count()) === 0 && /like 1000/.test((await page.locator("#try-amount-note").textContent()) ?? ""));
+await page.getByLabel("Amount in dollars").fill("300");
 await page.locator("select").selectOption("rent");
 await page.getByRole("radio", { name: "Pay the shop" }).check();
 await page.getByText("The same person gives this every month").click();
@@ -152,7 +158,8 @@ await page.goto(B + "/organizations", { waitUntil: "load" });
 await page.locator(".org-household").first().waitFor({ timeout: 60000 });
 ok("organizations page shows the fund's PayPal balance", /\$[\d,]+/.test((await page.locator(".org-balance").textContent()) ?? ""));
 await page.getByLabel("Grant to Maya in dollars").fill("120");
-await page.getByRole("button", { name: "Show the routing" }).click();
+ok("Send stays closed until the preview has shown where each dollar goes", await page.getByRole("button", { name: /^Send .* as one PayPal payout batch$/ }).isDisabled());
+await page.getByRole("button", { name: "Preview where each dollar goes" }).click();
 await page.locator(".org-plans").waitFor({ timeout: 30000 });
 ok(`a $120 grant is routed so her check stays $${FULL}`, new RegExp(`Check stays \\$${FULL.toLocaleString("en-US")}`).test((await page.locator(".org-plans").innerText()) ?? ""));
 

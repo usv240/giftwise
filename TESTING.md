@@ -159,7 +159,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 120 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 158 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
@@ -168,7 +168,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | API end to end | `npm run e2e:api` | 98 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
 | The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 assertions |
-| Browser end to end | `npm run e2e:ui` | 61 passed |
+| Browser end to end | `npm run e2e:ui` | 64 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 108 page views pass |
 | Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 26 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |

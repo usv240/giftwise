@@ -10,6 +10,10 @@ const min = (id: string) => ({ id, aggregation: "min" as const });
 // Whole dollars, like the rest of the site.
 const USD = { format: "currencyFormat" as const, formatOptions: { format: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }) } };
 const legend = { style: { theme: { common: { legend: { enabled: true } } } } };
+// Dates the way the rest of the site writes them: "Oct 5", not "10/05/2026". The dates are calendar days, so read in UTC.
+const DAY = { format: "dateFormat" as const, formatOptions: { format: new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }) } };
+// The two headline figures at one size and weight, matching the check widget beside them.
+const figure = { style: { typography: { fontSize: 40 }, verticalAlign: "center" as const, textScaling: { enabled: false } } };
 
 export function studioData(gifts: GiftRow[], months: MonthRow[]): AgDataSourcesDefinition<GiftwiseRegistry> {
   const dates = gifts.map((g) => g.date).sort();
@@ -19,7 +23,7 @@ export function studioData(gifts: GiftRow[], months: MonthRow[]): AgDataSourcesD
         id: "gifts",
         data: gifts,
         fields: [
-          { id: "date", name: "Date", format: "dateFormat" },
+          { id: "date", name: "Date", ...DAY },
           { id: "giver", name: "Giver", format: "textFormat" },
           { id: "need", name: "For", format: "textFormat" },
           { id: "paidTo", name: "Paid to", format: "textFormat" },
@@ -69,8 +73,8 @@ export const initialReport: AgReportState<GiftwiseRegistry> = {
           dataMapping: { value: [{ id: "gifts.giver" }] },
           format: { ...title("Giver"), style: { selection: { type: "single" }, dimensions: { height: 30, minWidth: 64 } } },
         },
-        given: { type: "value", dataMapping: { value: [sum("gifts.amount")] }, format: { ...title("Given this year") } },
-        kept: { type: "value", dataMapping: { value: [sum("months.kept")] }, format: { ...title("Kept in her checks by Giftwise") } },
+        given: { type: "value", dataMapping: { value: [sum("gifts.amount")] }, format: { ...title("Given this year"), ...figure } },
+        kept: { type: "value", dataMapping: { value: [sum("months.kept")] }, format: { ...title("Kept in her checks by Giftwise"), ...figure } },
         check: {
           type: "giftwiseCheck",
           dataMapping: {
@@ -87,7 +91,7 @@ export const initialReport: AgReportState<GiftwiseRegistry> = {
           dataMapping: { categoryKey: [{ id: "calendar::month" }], valueKey: [min("months.checkWithGiftwise"), min("months.checkIfCash")] },
           format: { ...title("Her check each month: with Giftwise, and if every gift had been cash"), ...legend },
         },
-        route: { type: "donut-chart", dataMapping: { categoryKey: [{ id: "gifts.route" }], valueKey: [sum("gifts.amount")] }, format: { ...title("How the money reached her"), ...legend } },
+        route: { type: "giftwiseRoutes", dataMapping: { route: [{ id: "gifts.route" }], amount: [sum("gifts.amount")] }, format: { ...title("How the money reached her") } },
         byNeed: { type: "bar-chart-grouped", dataMapping: { categoryKey: [{ id: "gifts.whatFor" }], valueKey: [sum("gifts.amount")] }, format: { ...title("What it paid for") } },
         list: {
           type: "grid",
@@ -95,15 +99,16 @@ export const initialReport: AgReportState<GiftwiseRegistry> = {
           format: { ...title("Every gift") },
         },
       },
+      // The giver buttons carry one label, so their row is 6 tracks; every row below moves up by 2.
       widgetLayout: {
-        giver: at(0, 0, 24, 8),
-        given: at(0, 8, 6, 9),
-        kept: at(6, 8, 6, 9),
-        check: at(12, 8, 12, 9),
-        checks: at(0, 17, 24, 16),
-        route: at(0, 33, 10, 16),
-        byNeed: at(10, 33, 14, 16),
-        list: at(0, 49, 24, 22),
+        giver: at(0, 0, 24, 6),
+        given: at(0, 6, 6, 9),
+        kept: at(6, 6, 6, 9),
+        check: at(12, 6, 12, 9),
+        checks: at(0, 15, 24, 16),
+        route: at(0, 31, 10, 16),
+        byNeed: at(10, 31, 14, 16),
+        list: at(0, 47, 24, 22),
       },
     },
   ],

@@ -14,7 +14,7 @@ export const BillSchema = z.object({
   is_shelter_cost: z.boolean().describe("True for rent, mortgage, property tax or utilities."),
   confidence: z.number().min(0).max(1),
   explanation: z.object({
-    plain: z.string().describe("Under 40 words, everyday language, positive tone, no jargon."),
+    plain: z.string().describe("Under 40 words, everyday language, positive tone, no jargon. Say what the bill is, who sent it, the total and the due date. Do not say how it should be paid."),
     technical: z.string().describe("Which fields were read and how the category was chosen."),
   }),
 });
@@ -22,7 +22,7 @@ export type Bill = z.infer<typeof BillSchema>;
 
 const BILL_SYSTEM = `You read bills, invoices and quotes for Giftwise, a tool that helps families pay a shop directly for someone who receives SSI.
 Extract only what is visible. If a value is not shown, use null. Choose the category from what the bill is for, not from the vendor's name alone.
-Write explanation.plain in warm, plain words. Never give legal advice and never compute benefit amounts: Giftwise's rules engine does that.`;
+Write explanation.plain in warm, plain words: what the bill is, who sent it, the total and when it is due. Never say how to pay it or whether paying it directly is safe, never give legal advice and never compute benefit amounts: Giftwise's rules engine chooses the route (rent and utilities paid straight to the company can count against SSI, so the engine sends those to her ABLE account).`;
 
 export async function readBill(file: { base64: string; mediaType: string }) {
   const block =

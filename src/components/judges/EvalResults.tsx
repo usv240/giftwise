@@ -52,6 +52,8 @@ const SETUP: readonly (readonly [Setup, string])[] = [
 ];
 /** Column headings, short enough that all four setups fit at phone width. */
 const SHORT: Record<Setup, string> = { baseline: "Claude, no rulebook", regs: "Regulations alone", poms: "Manual alone", referee: "Both reviewers, referee" };
+/** The summary tables lead with the deciding column, the referee, then the setups it is measured against. */
+const COLS = [SETUP[3], SETUP[0], SETUP[1], SETUP[2]] as const;
 const NAME: Record<Setup, string> = { baseline: "Claude with no rulebook", regs: "the regulations reviewer alone", poms: "the manual reviewer alone", referee: "the referee" };
 const WORD: Record<string, string> = { shelter: "Housing", not_shelter: "Not housing", unclear: "Not settled", unsure: "Not settled", contested: "Contested" };
 const ROUTE: Record<string, string> = { vendor: "Pay the business", able: "ABLE account" };
@@ -165,12 +167,12 @@ export function EvalResults() {
         would lower her check under the true reading; for a contested bill, under either reading.
       </p>
       <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Evaluation summary, all bills">
-        <table className="doc-table">
+        <table className="doc-table ev-table">
           <thead>
             <tr>
               <th scope="col">All {R.cases.length} bills</th>
-              {SETUP.map(([key, label]) => (
-                <th key={key} scope="col" title={label}>
+              {COLS.map(([key, label]) => (
+                <th key={key} scope="col" title={label} data-ref={key === "referee" ? "" : undefined}>
                   {SHORT[key]}
                 </th>
               ))}
@@ -179,32 +181,32 @@ export function EvalResults() {
           <tbody>
             <tr>
               <th scope="row">Wrong routes accepted</th>
-              {SETUP.map(([key]) => (
-                <td key={key} className="tabular">
+              {COLS.map(([key]) => (
+                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
                   {NC.wrong_routes_accepted[key]} of {NC.bills}
                 </td>
               ))}
             </tr>
             <tr>
               <th scope="row">Right, clear bills</th>
-              {SETUP.map(([key]) => (
-                <td key={key} className="tabular">
+              {COLS.map(([key]) => (
+                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
                   {s[key].correct} of {s[key].clear_cases}
                 </td>
               ))}
             </tr>
             <tr>
               <th scope="row">Wrong, clear bills</th>
-              {SETUP.map(([key]) => (
-                <td key={key} className="tabular">
+              {COLS.map(([key]) => (
+                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
                   {s[key].wrong}
                 </td>
               ))}
             </tr>
             <tr>
               <th scope="row">Sent to the either-reading route</th>
-              {SETUP.map(([key]) => (
-                <td key={key} className="tabular">
+              {COLS.map(([key]) => (
+                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
                   {s[key].abstained}
                 </td>
               ))}
@@ -214,12 +216,12 @@ export function EvalResults() {
       </div>
       <p className="page-prose">{headline()}</p>
       <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Wrong routes accepted, by set">
-        <table className="doc-table">
+        <table className="doc-table ev-table">
           <thead>
             <tr>
               <th scope="col">Wrong routes accepted</th>
-              {SETUP.map(([key, label]) => (
-                <th key={key} scope="col" title={label}>
+              {COLS.map(([key, label]) => (
+                <th key={key} scope="col" title={label} data-ref={key === "referee" ? "" : undefined}>
                   {SHORT[key]}
                 </th>
               ))}
@@ -231,8 +233,8 @@ export function EvalResults() {
                 <th scope="row">
                   {label} ({R.sets[id].bills})
                 </th>
-                {SETUP.map(([key]) => (
-                  <td key={key} className="tabular">
+                {COLS.map(([key]) => (
+                  <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
                     {R.sets[id].negative_control.wrong_routes_accepted[key]}
                   </td>
                 ))}

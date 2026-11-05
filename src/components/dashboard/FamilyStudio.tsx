@@ -4,12 +4,19 @@ import { AgStudioAiModule, enableStudioDevValidations, type AgDefaultRegistry, t
 import { AgStudio, AgStudioProvider, createWidgets } from "ag-studio-react";
 import { useEffect, useMemo, useState } from "react";
 import CheckWidget, { type GiftwiseRegistry } from "./CheckWidget";
+import RoutesWidget from "./RoutesWidget";
 import { initialReport, studioData } from "./report";
 import { studioAi } from "./studioAi";
 import { giftwiseTheme } from "./theme";
 import type { GiftRow, MonthRow } from "@/lib/dashboard/data";
 
 if (process.env.NODE_ENV !== "production") enableStudioDevValidations();
+
+/**
+ * Studio's own words, in the site's voice: a field keeps its plain name ("Amount", not "Amount (sum)"), the giver
+ * buttons need no second "Filter by" label under the widget's title, and a chart still drawing says so.
+ */
+const LOCALE = { aggregationSumFieldName: "${name}", aggregationMinFieldName: "${name}", filterWidgetFilterBy: "", widgetOverlayLoading: "Drawing the chart" };
 
 /** The family dashboard in AG Studio: the sample year plus real gifts, a Giftwise check widget, and the site's theme. */
 export default function FamilyStudio({ gifts, months }: { gifts: GiftRow[]; months: MonthRow[] }) {
@@ -44,8 +51,27 @@ export default function FamilyStudio({ gifts, months }: { gifts: GiftRow[]; mont
             minSize: { width: 260, height: 160 },
             ai: { description: "Runs the Giftwise rules engine on the gifts in view: her SSI check with Giftwise, the lowest it would have been as cash, and the amount kept." },
           },
+          {
+            id: "giftwiseRoutes",
+            label: "How the money reached her",
+            dataMapping: {
+              route: { type: "field", supportedRoles: ["category"], requires: { cardinality: "one" }, required: true },
+              amount: { type: "field", supportedRoles: ["numeric"], requires: { cardinality: "one" }, required: true },
+            },
+            form: (params) =>
+              params.createDefaults({
+                dataMappingItems: [
+                  { key: "route", label: "How it reached her" },
+                  { key: "amount", label: "Amount" },
+                ],
+              }),
+            comp: RoutesWidget,
+            defaultSize: { width: 420, height: 220 },
+            minSize: { width: 260, height: 160 },
+            ai: { description: "One bar split by how each gift reached her, with the amount and share of each route. Each route keeps its color: the shop green, the ABLE account blue, the item itself deep blue, cash orange." },
+          },
         ],
-        menu: [...defaults.menu, { label: "Giftwise", widgetIds: ["giftwiseCheck"] }],
+        menu: [...defaults.menu, { label: "Giftwise", widgetIds: ["giftwiseCheck", "giftwiseRoutes"] }],
       }),
     [],
   );
@@ -70,7 +96,7 @@ export default function FamilyStudio({ gifts, months }: { gifts: GiftRow[]; mont
       </div>
       <div className="fd-studio">
         <AgStudioProvider licenseKey={process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY || undefined} modules={[AgStudioAiModule]}>
-          <AgStudio<GiftwiseRegistry> style={{ height: "100%", width: "100%" }} data={data} initialState={initialReport} widgets={widgets} mode={mode} theme={giftwiseTheme} ai={studioAi} />
+          <AgStudio<GiftwiseRegistry> style={{ height: "100%", width: "100%" }} data={data} initialState={initialReport} widgets={widgets} mode={mode} theme={giftwiseTheme} ai={studioAi} localeText={LOCALE} />
         </AgStudioProvider>
       </div>
     </div>

@@ -33,7 +33,7 @@ const STATUS_WORDS: Record<string, string> = {
 };
 
 /** The order as PayPal reports it, as a small card instead of raw JSON. */
-function PayPalOrderCard({ text }: { text: string }) {
+function PayPalOrderCard({ text, technical }: { text: string; technical: boolean }) {
   let o: PayPalRecord | null = null;
   try {
     o = JSON.parse(text) as PayPalRecord;
@@ -58,10 +58,14 @@ function PayPalOrderCard({ text }: { text: string }) {
       </ul>
       <p className="muted ag-record-src">
         {viaMcp
-          ? local
-            ? "Read with get_order on PayPal's own MCP server, the @paypal/mcp package, which Giftwise runs."
-            : "Read with get_order on PayPal's hosted MCP server."
-          : "Read from PayPal's Orders API. PayPal's MCP server was asked first and could not run get_order this time."}
+          ? technical
+            ? local
+              ? "Read with get_order on PayPal's own MCP server, the @paypal/mcp package, which Giftwise runs."
+              : "Read with get_order on PayPal's hosted MCP server."
+            : "Read from PayPal's own MCP server."
+          : technical
+            ? "Read from PayPal's Orders API. PayPal's MCP server was asked first and could not run get_order this time."
+            : "Read from PayPal's Orders API."}
       </p>
     </div>
   );
@@ -154,7 +158,7 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
             );
           return (
             <li key={i} className="ag-step ag-result" data-error={s.isError ? "" : undefined}>
-              {s.tool === "paypal_get_order" && !s.isError ? <PayPalOrderCard text={s.text} /> : <p className="ag-result-text">{tidy(s.text)}</p>}
+              {s.tool === "paypal_get_order" && !s.isError ? <PayPalOrderCard text={s.text} technical={prefs.mode === "technical"} /> : <p className="ag-result-text">{tidy(s.text)}</p>}
             </li>
           );
         })}

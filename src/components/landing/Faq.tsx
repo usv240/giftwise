@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-export const FAQS = [
+/** The bill counts come from content/eval-results.json (passed in by the page), so this answer matches For judges. */
+const faqs = (bills: number, kept: number) => [
   {
     q: "Is this legal advice?",
     a: "Giftwise explains Social Security's published rules and shows the source for every answer. For complex situations, such as couples or state programs, tap Ask a counselor to share the case with a benefits counselor.",
@@ -29,7 +30,7 @@ export const FAQS = [
   },
   {
     q: "How do I know an answer is right?",
-    a: "Every answer cites the rule. When a bill might be a housing cost, two AI reviewers each check it against a different rulebook and must quote it word for word, and fixed rules, not AI, do the money math. On 20 labeled bills, both reviewers were right on every clear case; the results are on the For judges page.",
+    a: `Every answer cites the rule. When a bill might be a housing cost, two AI reviewers each check it against a different rulebook and must quote it word for word, and fixed rules, not AI, do the money math. On ${bills} labeled bills, the two reviewers and the referee kept her check whole on ${kept === bills ? `all ${bills}` : kept}; every bill and answer is on the For judges page.`,
   },
   {
     q: "Can my app use this?",
@@ -38,7 +39,8 @@ export const FAQS = [
 ];
 
 /** "Question index, one answer" from the direction sheet. On phones, answers open under their question. */
-export function Faq() {
+export function Faq({ bills, billsKeptWhole }: { bills: number; billsKeptWhole: number }) {
+  const FAQS = faqs(bills, billsKeptWhole);
   const [sel, setSel] = useState(0);
   return (
     <div className="faq">
@@ -53,7 +55,6 @@ export function Faq() {
               aria-controls="faq-answer"
               data-on={sel === i ? "" : undefined}
               onClick={() => setSel(i)}
-              onMouseEnter={() => setSel(i)}
               onFocus={() => setSel(i)}
             >
               <span className="faq-dot" aria-hidden="true" />
