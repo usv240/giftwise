@@ -3,5 +3,6 @@ import path from "node:path";
 
 export default defineConfig({
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
-  test: { include: ["tests/**/*.test.ts"], environment: "node" },
+  // The Easy Read check writes every month in both languages and views, about 5 s on its own; give each test room on a busy machine.
+  test: { include: ["tests/**/*.test.ts"], environment: "node", testTimeout: 30_000 },
 });
