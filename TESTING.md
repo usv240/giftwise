@@ -31,13 +31,13 @@ Use this login in the PayPal window that opens when you press a PayPal button on
    | Northside Physical Therapy | Therapy co-pay | $90 |
    | Maya's ABLE account | Savings for later | $203 |
 
-   Her SSI check stays $994 this way. The same $1,500 given as cash would bring it to $0.
+   Her January check (set by gifts in November) stays $1,029 this way, the 2027 amount. The same $1,500 given as cash would bring it to $0.
 3. Press the PayPal button under the preview. In the PayPal window, log in with the sandbox login above and press **Complete Purchase**. PayPal asks for no shipping address, because nothing is shipped to you.
 4. The box thanks you and lists all five payments. The need cards update to **Paid by John**, and **Still needed** drops to $0.
 5. Press **See the receipt**. It lists every payee with its PayPal capture ID, the rules that applied, and their sources.
 6. On the receipt, press **Check with PayPal now** to ask PayPal for the order live, then **Verify the ledger** to recompute the audit trail's hash chain.
 
-To pay for a single need instead, press **Pay with PayPal** on its card. You can reset the sample page at any time; PayPal keeps its own sandbox records.
+To pay for a single need instead, press the PayPal button on its card. You can reset the sample page at any time; PayPal keeps its own sandbox records.
 
 ### Who receives the money
 
@@ -53,7 +53,7 @@ Each payment in the order names its own payee, and PayPal captures each one sepa
 On `/judges`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 24 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and six public API promises (status, ledger, the SSA report, the MCP tools, the OpenAPI address and PayPal's return link).
 
 1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
-2. In about a minute the run files its results and the panel refreshes with the new time and count. Set **View** to Technical to see what each check found.
+2. In about a minute the run files its results and the panel refreshes with the new time and count. Open **All 24 checks, with each result**, or set **Display** to Technical to see what each check found.
 3. `/status` shows the same run under **Outside checks**.
 
 A run can start every 10 minutes. The nightly run starts from a Render cron job at 09:00 UTC.
@@ -93,21 +93,21 @@ Open `/g/maya/calendar`. Gifts are green when they do not count and orange when 
 3. Press **Edit the dashboard** to move widgets, change fields, or add another Giftwise check from the widget menu.
 4. In edit mode, open **AI Assistant** and choose **What if it were cash?**. AG Studio's agents, running on Claude, call the Giftwise rules engine and answer with the check figure and the rules behind it. **Add a chart by giver** builds a new widget.
 
-Without an AG Studio licence key the dashboard shows AG Studio's trial watermark; add `NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY` to remove it.
+Without an AG Studio license key the dashboard shows AG Studio's trial watermark; add `NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY` to remove it.
 
 ## Maya's report to Social Security
 
 1. Open `/g/maya/report`. It opens on the month whose report is due next, with the deadline (10 days after the month ends).
 2. The verdict for the gifts as given: nothing counts as income. Each gift is listed with the rule that says why, a link to the regulation or SSA manual section, and its PayPal capture or payout as proof. Gifts from the fictional sample year say they have no PayPal record; gifts you pay on Maya's page appear with their PayPal capture id and a link to the receipt.
 3. Press **As cash**. The same month becomes the report Maya would have had to file: every gift to tell SSA about, what counts, her lower check two months later, and a call script.
-4. **Print or save as PDF** keeps just the report; **Download CSV** gives the same lines as a spreadsheet. Set **View** to Technical to see the rule ids.
+4. **Print or save as PDF** keeps just the report; **Download CSV** gives the same lines as a spreadsheet. Set **Display** to Technical to see the rule ids.
 
 The same report is at `GET /api/v1/ssa-report?page=maya&month=2026-10` and as the MCP tool `get_ssa_report`.
 
 ## For organizations: one payout batch
 
 1. Open `/organizations`. The sample fund's balance comes live from PayPal's Balances API.
-2. Enter a grant for Maya, for example `150`, and press **Show the routing**. Giftwise splits it across her open needs and her ABLE account, and shows her check with the grant and as cash.
+2. Enter a grant for Maya, for example `150`, and press **Preview where each dollar goes**. Giftwise splits it across her open needs and her ABLE account, and shows her check with the grant and as cash. **Send** stays off until the preview matches the grants.
 3. Press **Send**. One PayPal Payouts batch pays each shop and her ABLE account directly. The page follows the batch until PayPal reports every item paid, with its PayPal transaction id.
 4. Each paid item is then looked up in PayPal's Transaction Search report. In the sandbox a new transaction can take up to three hours to appear there, so it reads "Waiting for PayPal's report" until then.
 
