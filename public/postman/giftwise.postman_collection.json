@@ -1,0 +1,665 @@
+{
+  "info": {
+    "name": "Giftwise API",
+    "_postman_id": "8f3b1a52-6d0e-4c1b-9b7e-7a1f0c2e5d41",
+    "description": "Benefit-safe giving for people on SSI. Check a gift against Social Security's rules, plan a month, read a person's report to SSA and check it against PayPal, ask the rulebook, and talk to the MCP server. Sandbox only: no real money moves. Each request has tests; run the whole collection in Postman or with Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{apiKey}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://giftwise-405i.onrender.com"
+    }
+  ],
+  "item": [
+    {
+      "name": "Rules",
+      "item": [
+        {
+          "name": "Check a gift: $1,000 in cash",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gift\": {\n    \"amount\": 1000,\n    \"delivery\": \"cash\",\n    \"date\": \"2026-04-10\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/check-gift",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "check-gift"
+              ],
+              "query": []
+            },
+            "description": "Cash counts as income: two months later the $994 check drops to $74."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 with the standard envelope\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().meta.request_id).to.be.a(\"string\"); });",
+                  "pm.test(\"cash leaves a $74 check\", () => pm.expect(pm.response.json().data.check_after).to.eql(74));",
+                  "pm.test(\"every citation has a source link\", () => pm.response.json().data.citations.forEach((c) => pm.expect(c.url).to.match(/^https:/)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Check a gift: the same $420 paid to the shop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gift\": {\n    \"amount\": 420,\n    \"delivery\": \"vendor\",\n    \"category\": \"equipment\",\n    \"date\": \"2026-04-10\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/check-gift",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "check-gift"
+              ],
+              "query": []
+            },
+            "description": "Paid straight to the shop, the check stays $994."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"the check stays $994\", () => pm.expect(pm.response.json().data.check_after).to.eql(994));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Check a gift: rent paid to the landlord",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gift\": {\n    \"amount\": 800,\n    \"delivery\": \"vendor\",\n    \"category\": \"rent\",\n    \"recurring\": true,\n    \"date\": \"2026-04-10\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/check-gift",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "check-gift"
+              ],
+              "query": []
+            },
+            "description": "Housing paid by someone else counts even when paid straight to the landlord."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"rent lowers the check to $662.67\", () => pm.expect(pm.response.json().data.check_after).to.eql(662.67));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Plan a quarter: two cash gifts share one $60",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gifts\": [\n    {\n      \"date\": \"2026-04-05\",\n      \"amount\": 50,\n      \"delivery\": \"cash\",\n      \"giver\": \"Ana\"\n    },\n    {\n      \"date\": \"2026-06-25\",\n      \"amount\": 50,\n      \"delivery\": \"cash\",\n      \"giver\": \"Ben\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/plan-month",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "plan-month"
+              ],
+              "query": []
+            },
+            "description": "The $60 exclusion for one-time gifts is per calendar quarter."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const m = pm.response.json().data.months;",
+                  "pm.test(\"the first gift takes $50 of the exclusion, the second the last $10\", () => { pm.expect(m[0].infrequentExcluded).to.eql(50); pm.expect(m[1].infrequentExcluded).to.eql(10); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "A bad request gets a plain answer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gift\": {\n    \"amount\": -5,\n    \"delivery\": \"cash\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/check-gift",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "check-gift"
+              ],
+              "query": []
+            },
+            "description": "Errors carry a code, a message in plain words and a link to the docs."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 invalid_request\", () => { pm.response.to.have.status(400); pm.expect(pm.response.json().error.code).to.eql(\"invalid_request\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Maya's October report to Social Security",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ssa-report?page=maya&month=2026-10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ssa-report"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "maya"
+                },
+                {
+                  "key": "month",
+                  "value": "2026-10"
+                }
+              ]
+            },
+            "description": "Written from the gifts themselves. The answer names a code anyone can use to check it."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json().data;",
+                  "pm.test(\"nothing counts and the check stays $994\", () => { pm.expect(d.status).to.eql(\"nothing_counts\"); pm.expect(d.totals.check).to.eql(994); });",
+                  "pm.test(\"the report carries its check code\", () => pm.expect(d.verify.code).to.match(/^[0-9A-Z]{5}-[0-9A-Z]{5}$/));",
+                  "pm.collectionVariables.set(\"verifyPath\", \"/\" + d.verify.url.split(\"/\").slice(3).join(\"/\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Check that report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{verifyPath}}",
+              "host": [
+                "{{baseUrl}}{{verifyPath}}"
+              ]
+            },
+            "description": "Giftwise rebuilds the report, asks PayPal for each payment and checks the audit ledger."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"the report matches\", () => { pm.response.to.have.status(200); pm.expect(pm.response.text()).to.include(\"This report matches\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The audit ledger",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ledger/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ledger",
+                "verify"
+              ],
+              "query": []
+            },
+            "description": "Every entry's fingerprint includes the one before it."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"the hash chain verifies\", () => pm.expect(pm.response.json().data.ok).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rulebook",
+      "item": [
+        {
+          "name": "Ask the rulebook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Does it count if my sister pays my phone bill?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ask-rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ask-rules"
+              ],
+              "query": []
+            },
+            "description": "Elasticsearch (or the in-app search) finds the passages; the answer uses only them; every quote is checked."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json().data;",
+                  "pm.test(\"passages from SSA's own text\", () => pm.expect(d.passages.length).to.be.above(0));",
+                  "pm.test(\"every quote shown is checked against its passage\", () => d.quotes.forEach((q) => pm.expect(q.found_word_for_word).to.be.a(\"boolean\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "The rules watch the Federal Register",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rules-watch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rules-watch"
+              ],
+              "query": []
+            },
+            "description": "Every Federal Register change to SSI's income rules and amounts, with what Giftwise does with it."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"the Federal Register documents are all reviewed\", () => pm.expect([\"current\", \"unreachable\"]).to.include(pm.response.json().data.status));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AI agents",
+      "item": [
+        {
+          "name": "MCP: list the tools",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"tools/list\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "mcp"
+              ],
+              "query": []
+            },
+            "description": "The MCP server over streamable HTTP."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const names = pm.response.json().result.tools.map((t) => t.name);",
+                  "pm.test(\"nine tools, including checkout and the report\", () => { pm.expect(names.length).to.eql(9); [\"check_gift\", \"start_gift_checkout\", \"get_ssa_report\", \"ask_rulebook\", \"find_gift\"].forEach((n) => pm.expect(names).to.include(n)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "MCP: check a gift",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"check_gift\",\n    \"arguments\": {\n      \"amount\": 1000,\n      \"delivery\": \"cash\",\n      \"date\": \"2026-04-10\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "mcp"
+              ],
+              "query": []
+            },
+            "description": "The same rules engine, called as a tool."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"the tool answers with the check\", () => pm.expect(pm.response.json().result.structuredContent.check_after).to.eql(74));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Discovery: the AI Catalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/ai-catalog.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".well-known",
+                "ai-catalog.json"
+              ],
+              "query": []
+            },
+            "description": "SEP-2127: the domain lists its MCP Server Card."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const e = pm.response.json().entries.find((x) => x.type === \"application/mcp-server-card+json\");",
+                  "pm.test(\"an entry for the MCP Server Card\", () => pm.expect(e.url).to.include(\"/api/mcp/server-card\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Discovery: the MCP Server Card",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/mcp/server-card",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "mcp",
+                "server-card"
+              ],
+              "query": []
+            },
+            "description": "Identity and connection details, before connecting."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"names the streamable HTTP endpoint\", () => pm.expect(pm.response.json().remotes[0].url).to.include(\"/api/mcp\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "OpenAPI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/openapi.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "openapi.json"
+              ],
+              "query": []
+            },
+            "description": "The REST API, described."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"describes check-gift\", () => pm.expect(Object.keys(pm.response.json().paths)).to.include(\"/api/v1/check-gift\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Service",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ],
+              "query": []
+            },
+            "description": "Every integration and whether it is live."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"lists the integrations\", () => pm.expect(pm.response.json().checks.length).to.be.above(5));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

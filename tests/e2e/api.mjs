@@ -211,6 +211,20 @@ ok("checks: filing a run with the wrong secret -> 401 (or 503 if the server has 
 if (process.env.CHECKS_SECRET && /localhost|127\.0\.0\.1/.test(B)) {
   r = await post("/api/checks", { source: "local", appUrl: B, startedAt: "not a date", results: [] }, { "Content-Type": "application/json", Authorization: `Bearer ${process.env.CHECKS_SECRET}` });
   ok("checks: a malformed run with the right secret -> 400 with details", r.status === 400 && (await r.json()).error?.code === "invalid_request");
+  // The Render Workflow's background jobs: list the active monthly gifts, plan one month for one, rebuild the rulebook index.
+  const secret = { Authorization: `Bearer ${process.env.CHECKS_SECRET}`, "Content-Type": "application/json" };
+  const started = await post("/api/monthly", { slug: "maya", amount: 120, giver_name: "E2E" });
+  r = await fetch(B + "/api/ops/monthly", { headers: secret });
+  j = await r.json();
+  const ids = j.data?.ids ?? [];
+  const planned = ids.length ? await post(`/api/ops/monthly/${ids.at(-1)}/plan`, { month: new Date().toISOString().slice(0, 7) }, secret) : null;
+  const pj = planned ? await planned.json() : null;
+  ok("workflow jobs: the active monthly gifts are listed by id and one month is planned ahead, with its split", started.status === 200 && r.status === 200 && ids.length >= 1 && planned?.status === 200 && pj?.data?.lines >= 1, `${ids.length} active, ${pj?.data?.lines} lines`);
+  r = await fetch(B + "/api/ops/monthly", { headers: { Authorization: "Bearer not-the-secret" } });
+  ok("workflow jobs: listing monthly gifts without the secret -> 401", r.status === 401);
+  r = await post("/api/ops/rulebook", {}, secret);
+  j = await r.json();
+  ok("workflow jobs: the rulebook index rebuilds on Elastic, or reports Elastic is not connected", r.status === 200 && (j.data?.skipped === true || j.data?.docs > 100), JSON.stringify(j.data).slice(0, 100));
 }
 r = await fetch(B + "/api/checks/latest");
 j = await r.json();

@@ -87,6 +87,16 @@ export function ensureIndex() {
   return ready;
 }
 
+/** Rebuild the index from the rule files: delete it, then create and load it again. Used by the Render Workflow. */
+export async function reindexRulebook() {
+  if (!elasticConfigured()) return { ok: false as const, reason: "Elastic is not connected on this server." };
+  await es(`/${INDEX}`, { method: "DELETE" });
+  ready = null;
+  const idx = await ensureIndex();
+  const count = await es<{ count?: number }>(`/${INDEX}/_count`);
+  return { ok: true as const, docs: count.body.count ?? 0, semantic: idx.semantic, model: idx.model };
+}
+
 // ---------- The in-app fallback: BM25 over the same documents ----------
 
 const tokens = (s: string) =>

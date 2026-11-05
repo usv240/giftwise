@@ -158,6 +158,34 @@ export async function runAll(e: Env, runner: Runner): Promise<CheckResult[]> {
   ]);
 }
 
+// ---------- Background jobs: monthly gifts planned on the 1st, the rulebook index rebuilt ----------
+
+const authed = (e: Env) => ({ Authorization: `Bearer ${e.secret}`, "Content-Type": "application/json" });
+
+export async function listMonthly(e: Env): Promise<number[]> {
+  const r = await call(`${e.app}/api/ops/monthly`, { headers: authed(e) });
+  const j = (await r.json()) as { data?: { ids: number[] }; error?: { message: string } };
+  if (!j.data) throw new Error(j.error?.message ?? `HTTP ${r.status}`);
+  return j.data.ids;
+}
+
+export async function planMonthly(e: Env, id: number, month: string) {
+  const r = await call(`${e.app}/api/ops/monthly/${id}/plan`, { method: "POST", headers: authed(e), body: JSON.stringify({ month }) });
+  const j = (await r.json()) as { data?: { id: number; month: string; lines: number; changes: number }; error?: { message: string } };
+  if (!j.data) throw new Error(j.error?.message ?? `HTTP ${r.status}`);
+  return j.data;
+}
+
+export async function reindexRulebook(e: Env) {
+  const r = await call(`${e.app}/api/ops/rulebook`, { method: "POST", headers: authed(e) }, 180_000);
+  const j = (await r.json()) as { data?: Record<string, unknown>; error?: { message: string } };
+  if (!j.data) throw new Error(j.error?.message ?? `HTTP ${r.status}`);
+  return j.data;
+}
+
+/** This month, YYYY-MM, in UTC: the month the workflow plans. */
+export const thisMonth = (d = new Date()) => d.toISOString().slice(0, 7);
+
 export async function fileRun(e: Env, run: { source: "render-workflow" | "local"; runId: string; startedAt: string; results: CheckResult[] }) {
   const res = await call(`${e.app}/api/checks`, {
     method: "POST",

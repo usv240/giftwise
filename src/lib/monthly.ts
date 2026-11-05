@@ -135,6 +135,20 @@ export async function planMonth(token: string, month: string) {
   return run ?? (await db().select().from(schema.monthlyRuns).where(and(eq(schema.monthlyRuns.monthlyGiftId, s.gift.id), eq(schema.monthlyRuns.month, month))).limit(1))[0];
 }
 
+/** The monthly gifts still active, for the Render Workflow that plans each one on the 1st. */
+export async function activeMonthlyIds() {
+  const rows = await db().select({ id: schema.monthlyGifts.id }).from(schema.monthlyGifts).where(eq(schema.monthlyGifts.status, "active"));
+  return rows.map((r) => r.id);
+}
+
+/** Plan one monthly gift's month by its id (the workflow never handles a giver's private link). */
+export async function planMonthById(id: number, month: string) {
+  const [g] = await db().select({ token: schema.monthlyGifts.token }).from(schema.monthlyGifts).where(eq(schema.monthlyGifts.id, id)).limit(1);
+  if (!g) return null;
+  const run = await planMonth(g.token, month);
+  return run ? { id, month, lines: ((run.plan as RoutedGift).lines ?? []).length, changes: ((run.changes as unknown[]) ?? []).length } : null;
+}
+
 /** Start a monthly gift, optionally recording the gift the giver just paid as its first month. */
 export async function startMonthly(o: { slug: string; amount: number; giverName?: string; firstOrderId?: string; month: string }) {
   const data = await getHousehold(o.slug);

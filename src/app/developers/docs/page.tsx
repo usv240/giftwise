@@ -46,6 +46,17 @@ export default function DocsPage() {
           </a>{" "}
           for Postman, SDK generators and AI agents.
         </p>
+        <p className="page-prose">
+          Or start from the{" "}
+          <a className="text-link" href="/postman/giftwise.postman_collection.json" download>
+            Giftwise Postman collection
+          </a>{" "}
+          and its{" "}
+          <a className="text-link" href="/postman/giftwise.postman_environment.json" download>
+            environment
+          </a>
+          : 16 requests in five folders, each with tests, from checking a gift to calling the MCP server. The same collection runs in our test suite with Newman.
+        </p>
       </header>
 
       <section className="page-section" aria-labelledby="auth-h">
