@@ -1,0 +1,90 @@
+# Every push and pull request: the dependency audit, types, lint, unit tests, fresh random gifts through the router,
+# the ssi-gift-rules package, then a production build served against an empty Postgres with no service keys, where
+# every page must answer and pass axe (WCAG 2.2 AA) on desktop and phone, in light and dark.
+#
+# The checks that move real sandbox money (PayPal checkout, payouts, the agent's checkout) need keys and run from a
+# machine that has them; see TESTING.md. The nightly Render Workflow runs the outside checks against the hosted site.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Audit, types, lint, unit tests, invariants, package
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Dependency audit (every severity, dev tools included)
+        run: npm audit --audit-level=low
+      - run: npm run typecheck
+      - run: npm run lint
+      - name: Unit tests
+        run: npm test
+      - name: 20,000 random gifts held to every routing promise, a new set each run
+        run: npx tsx scripts/run-invariants.ts 20000 --seed=${{ github.run_number }} --dry
+      - name: The ssi-gift-rules package builds from the app's own rules and passes SSA's worked examples
+        working-directory: packages/ssi-gift-rules
+        run: npm run build && npm test
+
+  app:
+    name: Build, serve, smoke and accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: giftwise
+          POSTGRES_PASSWORD: giftwise
+          POSTGRES_DB: giftwise
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U giftwise"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgres://giftwise:giftwise@localhost:5432/giftwise
+      PORT: "3100"
+      BASE_URL: http://localhost:3100
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Create the tables in the empty database
+        run: npx drizzle-kit push --force
+      - name: Start the app
+        run: |
+          npm start > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf "$BASE_URL/api/health" -o /dev/null && exit 0; sleep 1; done
+          echo "The app did not start"; cat server.log; exit 1
+      - name: Every page and public endpoint answers, each integration on its fallback
+        run: npm run e2e:smoke
+      - name: axe (WCAG 2.2 AA) and sideways scroll on every page, desktop and phone, light and dark
+        run: npm run e2e:a11y
+      - name: Server log
+        if: failure()
+        run: cat server.log

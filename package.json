@@ -18,6 +18,7 @@
     "e2e:paypal": "node --env-file-if-exists=.env.local tests/e2e/paypal-button.mjs",
     "e2e:monthly": "node --env-file-if-exists=.env.local tests/e2e/monthly.mjs",
     "e2e:a11y": "node tests/e2e/pages-a11y.mjs",
+    "e2e:smoke": "node tests/e2e/smoke.mjs",
     "e2e:routed": "tsx --env-file=.env.local scripts/routed-gift-e2e.ts",
     "e2e:agent": "node --env-file-if-exists=.env.local tests/e2e/agent-checkout.mjs",
     "e2e:manage": "tsx --env-file=.env.local scripts/manage-e2e.ts",
@@ -66,5 +67,20 @@
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "@paypal/agent-toolkit": {
+      "@langchain/core": "1.3.4",
+      "ai": "7.0.163",
+      "openai": "7.51.0",
+      "mathjs": "15.2.0",
+      "zod": "4.6.7"
+    },
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.4"
+    }
   }
 }
