@@ -42,7 +42,9 @@ const MORE = [
   { href: "/g/maya/report?month=2026-11#rp-verify-h", label: "A report anyone can check", look: "After the gift in step 2, November's report carries a QR code. Open it: Giftwise rebuilds the report, asks PayPal for each payment live and checks the audit ledger, with no login." },
   { href: "#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, look: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
   { href: "#rules-watch", label: "The rules watch the Federal Register", look: "Asked live: every change to SSI's income rules and amounts since 2022, each with what Giftwise does. The 2027 amounts, published October 26, are in use." },
-  { href: "/manage/maya-sample-organizer", label: "The organizer's side", look: "Add or change a need and watch Giftwise choose where it is paid, see gifts as they arrive, share the page, and send each gift to a Zapier webhook." },
+  { href: "/manage/maya-sample-organizer", label: "The organizer's side", look: "Add or change a need and watch Giftwise choose where it is paid, find a product with Channel3 (a gift card is held back), see gifts as they arrive, and send each one to a Zapier webhook." },
+  { href: "/learn", label: "Ask the rulebook", look: "A question in plain words: Elasticsearch finds the passages, Claude answers only from them, and every quote is checked word for word." },
+  { href: "/g/maya/calendar?month=2026-10", label: "The calendar's planner", look: "Press As cash, then Plan the cash dates: the planner moves gifts on the Bryntum calendar itself and compares the result with paying the shop." },
   { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
   { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
   { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
@@ -54,7 +56,7 @@ const CRITERIA = [
   { name: "Technological implementation", where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, PayPal's own MCP server, and Claude structured outputs checked by a deterministic rules engine that keeps twelve promises across 100,000 random gifts.", links: [["/status", "Status"], ["/stack", "Stack"], ["#invariants", "100,000 gifts"]] },
   {
     name: "Design",
-    where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA on 104 page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.",
+    where: "Light and dark, phone and desktop, an Info button on everything, plain and technical views, accessible to WCAG 2.2 AA on 108 page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.",
     links: [
       ["/g/maya", "Gift page"],
       ["/g/maya?lang=es", "En español"],

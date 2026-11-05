@@ -51,6 +51,11 @@ export async function captureAndRecord(orderId: string, opts: { mock?: "INSTRUME
     res = await capture();
   }
   const body = res.body;
+  // Still a 5xx after the retries: the other click is usually finishing this very capture, so wait for its record.
+  if (res.status >= 500) {
+    const done = await waitForCaptured(orderId);
+    if (done) return { kind: "captured", captures: lines(done), payerFirstName: done.find((r) => r.payerName)?.payerName?.split(" ")[0] ?? null, status: "COMPLETED" };
+  }
   if (res.status >= 400 || body.status !== "COMPLETED") {
     const issue = body.details?.[0]?.issue ?? body.name ?? body.status ?? "PAYPAL_ERROR";
     // Captured elsewhere already (for example by a webhook a moment earlier): record from PayPal's copy instead.
@@ -127,6 +132,8 @@ async function record(orderId: string, rows: PaymentRow[], body: PayPalOrder, ac
       after = await d.select().from(schema.payments).where(eq(schema.payments.orderId, orderId));
     }
   }
+  // A repeated answer that arrived before the first call wrote its captures: wait for them rather than report none.
+  if (!after.some((r) => r.status === "captured")) after = (await waitForCaptured(orderId)) ?? after;
   const captures = lines(after.filter((r) => r.status === "captured"));
   // The ledger gets one entry per capture, from whichever call recorded it.
   if (flippedHere.length) {
@@ -135,6 +142,16 @@ async function record(orderId: string, rows: PaymentRow[], body: PayPalOrder, ac
     void notifyGift(orderId, publicOrigin()).catch(() => undefined);
   }
   return { kind: "captured", captures, payerFirstName: g?.given_name ?? null, status: body.status ?? "COMPLETED" };
+}
+
+/** Read this order's payments until another call has recorded them as captured, for up to about three seconds. */
+async function waitForCaptured(orderId: string, tries = 6, everyMs = 500) {
+  for (let i = 0; i < tries; i++) {
+    await new Promise((r) => setTimeout(r, everyMs));
+    const rows = await db().select().from(schema.payments).where(eq(schema.payments.orderId, orderId));
+    if (rows.length && rows.every((r) => r.status === "captured")) return rows;
+  }
+  return null;
 }
 
 const lines = (rows: PaymentRow[]): CaptureLine[] => rows.map((r) => ({ reference_id: r.referenceId, capture_id: r.captureId, amount: r.amount, payee: r.payeeName }));

@@ -157,15 +157,17 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences and 1,000 random gifts | `npm test` | 98 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts | `npm test` | 114 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
 | The rules watch, asked live | `GET /api/rules-watch` | Every Federal Register document reviewed; 2026 and 2027 amounts in use |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
-| API end to end | `npm run e2e:api` | 92 passed |
-| Browser end to end | `npm run e2e:ui` | 60 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 104 page views pass |
+| API end to end | `npm run e2e:api` | 98 passed |
+| The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
+| The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 assertions |
+| Browser end to end | `npm run e2e:ui` | 61 passed |
+| Accessibility and layout | `npm run e2e:a11y` | All 108 page views pass |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |

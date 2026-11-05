@@ -6,33 +6,33 @@
       "id": "unit",
       "name": "Rules engine, routing, the SSA report, the checks workflow and the cited answers",
       "command": "npm test",
-      "passed": 98,
-      "total": 98,
+      "passed": 114,
+      "total": 114,
       "what": "Every rule row, the 2026 values and the 2027 values for January and February checks, 1,000 random gifts held to twelve promises, the report code that lets anyone check a report, the Spanish rule sentences, the $60 quarterly exclusion in the order gifts arrive, shelter and the one-third reduction's meals test, prepaid housing bills, ABLE, gift routing, monthly gifts month by month, the Easy Read report in English and Spanish (every sentence 15 words or fewer) and its calendar reminder, pronouns, the reviewers' referee and what it does when one reviewer is wrong, the monthly report to Social Security, the checks workflow's fan-out and retries, the AG Studio to Claude translation, a known source behind every real-world answer, Social Security's own worked examples, and the benefit calendar"
     },
     {
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 92,
-      "total": 92,
+      "passed": 98,
+      "total": 98,
       "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the monthly SSA report and its CSV, the MCP server and its seven tools, a monthly gift started by an agent, the rules watch asked live, the report check page, the MCP Server Card and AI Catalog, llms.txt, security headers, share images, the outside checks and their shared secret, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path"
     },
     {
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 60,
-      "total": 60,
-      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page and its real-world answers, the benefit calendar, the gift page in Spanish, the guided tour, keyboard use, and the developer flow"
+      "passed": 61,
+      "total": 61,
+      "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page and its real-world answers, the benefit calendar, the gift page in Spanish, the guided tour, the calendar planner, keyboard use, and the developer flow"
     },
     {
       "id": "a11y",
       "name": "Accessibility and layout",
       "command": "npm run e2e:a11y",
-      "passed": 104,
-      "total": 104,
-      "what": "axe WCAG 2.2 AA on 26 pages, including the gift page and receipt in Spanish and the page that checks a report, including the SSA report as given and as cash, its Easy Read version in English and Spanish, a giver's monthly gift page, the benefit calendar, a generated gift page, For agents, the AG Studio dashboard and For organizations, at desktop and phone widths, light and dark, with no sideways scroll"
+      "passed": 108,
+      "total": 108,
+      "what": "axe WCAG 2.2 AA on 27 pages, including the organizer's manage page, including the gift page and receipt in Spanish and the page that checks a report, including the SSA report as given and as cash, its Easy Read version in English and Spanish, a giver's monthly gift page, the benefit calendar, a generated gift page, For agents, the AG Studio dashboard and For organizations, at desktop and phone widths, light and dark, with no sideways scroll"
     },
     {
       "id": "paypal",
@@ -65,6 +65,22 @@
       "passed": 24,
       "total": 24,
       "what": "Every failure case against the PayPal sandbox, every page on the judges' path (now with the Easy Read report in Spanish) and seven public API promises, including the Federal Register watch, all at once, the same list the nightly Render Workflow runs"
+    },
+    {
+      "id": "manage",
+      "name": "The organizer's side, end to end",
+      "command": "npm run e2e:manage",
+      "passed": 21,
+      "total": 21,
+      "what": "The sample's manage link; a need added, edited and removed with the rules choosing its route; the gift finder with a gift card held back and a product added with its link; closing and reopening the page; a webhook that refuses private addresses, receives a signed test event, then a signed gift.received from a real sandbox capture; a new page's own manage link"
+    },
+    {
+      "id": "postman",
+      "name": "The Postman collection, with Newman",
+      "command": "npm run test:postman",
+      "passed": 20,
+      "total": 20,
+      "what": "16 requests in five folders: gift checks, a quarter's exclusions, a bad request, the report and the page that checks it, the ledger, the rulebook, the rules watch, the MCP server and its discovery documents, OpenAPI and health"
     },
     {
       "id": "invariants",
