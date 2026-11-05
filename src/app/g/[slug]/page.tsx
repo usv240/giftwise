@@ -71,7 +71,8 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
       payeeName: n.payeeName,
       route: n.route,
       status: n.status,
-      rulePlain: lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain,
+      // The card already says where the money goes on the line above, so the rule line starts with what it means.
+      rulePlain: lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain.replace(/^Paid straight to the shop, so it is not counted\./, "Not counted as income."),
       ruleIds: r.ruleIds,
       checkAfter: r.checkAfter,
       paidBy: p?.payerName?.split(" ")[0] ?? null,
@@ -111,7 +112,14 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
           </p>
         )}
       </header>
+      {/* Reading order is the phone order: give, the needs, her month and the sandbox, then the questions about real
+          money. On a wide screen the grid sets the first and third in the right-hand column. */}
       <div className="gift-layout" lang={lang}>
+        {household.status !== "closed" && (
+          <div className="gift-give">
+            <GiveAny slug={slug} name={household.name} needs={openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }))} date={today()} profile={profile} lang={lang} />
+          </div>
+        )}
         <div className="gift-needs">
           <div className="title-row">
             <h2 className="gift-h2">{t.needsH(household.name)}</h2>
@@ -122,17 +130,8 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
               <NeedCard key={v.id} need={v} name={household.name} lang={lang} closed={household.status === "closed"} />
             ))}
           </div>
-          <div className="gift-real" lang="en">
-            {lang === "es" && (
-              <p className="gift-real-note muted" lang="es">
-                {t.realWorldNote}
-              </p>
-            )}
-            <RealWorld />
-          </div>
         </div>
         <aside className="gift-aside" aria-labelledby="month-h">
-          {household.status !== "closed" && <GiveAny slug={slug} name={household.name} needs={openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }))} date={today()} profile={profile} lang={lang} />}
           <div className="gift-month" data-ui>
             <div className="title-row">
               <h2 id="month-h" className="gift-month-title">
@@ -211,6 +210,14 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
             {household.isSample && <ResetSample slug={slug} lang={lang} />}
           </div>
         </aside>
+        <div className="gift-real" lang="en">
+          {lang === "es" && (
+            <p className="gift-real-note muted" lang="es">
+              {t.realWorldNote}
+            </p>
+          )}
+          <RealWorld />
+        </div>
       </div>
     </>
   );
@@ -220,7 +227,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
 export default function Page({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Search> }) {
   return (
     <div className="gift frame">
-      <Suspense fallback={<p className="gift-empty">Loading the gift page…</p>}>
+      <Suspense fallback={<p className="gift-empty page-loading">Loading the gift page…</p>}>
         <GiftPage params={params} searchParams={searchParams} />
       </Suspense>
     </div>

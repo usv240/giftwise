@@ -20,15 +20,38 @@
   margin-top: clamp(2.5rem, 2rem + 2vw, 4rem);
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 2rem;
+  grid-template-areas:
+    "needs give"
+    "needs aside"
+    "real aside";
+  /* The last row is flexible, so the tall right column grows into it instead of pushing the left column apart:
+     each column flows on its own. */
+  grid-template-rows: auto auto 1fr;
+  gap: 12px 2rem;
   align-items: start;
+}
+.gift-give {
+  grid-area: give;
+}
+.gift-needs {
+  grid-area: needs;
+}
+.gift-aside {
+  grid-area: aside;
+}
+.gift-real {
+  grid-area: real;
+  margin-top: clamp(1.75rem, 1rem + 2vw, 2.75rem);
 }
 @media (max-width: 1000px) {
   .gift-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "give" "needs" "aside" "real";
+    grid-template-rows: none;
+    row-gap: 2rem;
   }
-  .gift-aside {
-    order: -1;
+  .gift-real {
+    margin-top: 0.5rem;
   }
 }
 .gift-h2 {
@@ -41,9 +64,6 @@
 }
 .gift-empty {
   margin-top: 2rem;
-}
-.gift-real {
-  margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
 }
 
 /* One need: what, where the money goes, the rule, then the PayPal button. */
@@ -119,36 +139,12 @@
   font-size: 13px;
   color: var(--muted);
 }
-.pp-wrap {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 6px;
-}
-.pp-button {
-  display: block;
-  width: 100%;
-  min-height: 48px;
-}
-.pp-note {
-  font-size: 14px;
-  color: var(--muted);
-}
-.pp-note[data-tone="attention"] {
-  color: var(--attention);
-}
 
 /* Aside: her month, cash note, sandbox help */
 .gift-aside {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
-  position: sticky;
-  top: 1rem;
-}
-@media (max-width: 1000px) {
-  .gift-aside {
-    position: static;
-  }
 }
 .gift-month {
   background: var(--surface);
@@ -237,10 +233,6 @@
 }
 .need-receipt-link {
   font-size: 15px;
-}
-.pp-button[data-disabled] {
-  opacity: 0.45;
-  pointer-events: none;
 }
 
 /* Give any amount: the number, where it goes, her check either way, one checkout. */

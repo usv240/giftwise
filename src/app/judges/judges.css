@@ -497,6 +497,42 @@
 .sx-note {
   font-size: 14px;
 }
+/* The rest of a long case list: a full-width row under the first six, the list continuing below it once open. */
+.sx-rest > summary {
+  cursor: pointer;
+  list-style: none;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--surface-2);
+}
+.sx-rest > summary::-webkit-details-marker {
+  display: none;
+}
+.sx-rest > summary::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  background:
+    linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 1.5px 12px no-repeat;
+  color: var(--muted);
+}
+.sx-rest-open,
+.sx-rest[open] .sx-rest-closed {
+  display: none;
+}
+.sx-rest[open] .sx-rest-open {
+  display: inline;
+}
+.sx-rest[open] > summary::after {
+  background: linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat;
+}
+.sx-list-rest {
+  margin-top: 2px;
+}
 .sx-out {
   margin-top: 18px;
   font-size: 15px;
@@ -558,8 +594,17 @@
   margin: 10px 0 0;
   padding-left: 1.1rem;
   display: grid;
-  gap: 8px;
+  gap: 12px;
   max-width: 72ch;
+}
+/* The link on its own line, what to look for under it, so the two never run together. */
+.jp-more-link {
+  font-weight: 500;
+}
+.jp-more-look {
+  display: block;
+  margin-top: 2px;
+  font-size: 15px;
 }
 
 /* The one-wrong-reviewer stress test, under the evaluation table. */
@@ -696,5 +741,200 @@
   .rw .rw-date {
     font-size: 13px;
     color: var(--muted);
+  }
+}
+
+/* Who runs it first: the value per family, then three groups that already help people on SSI with money. */
+.ad-value {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 32px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: var(--surface);
+  margin-bottom: 8px;
+}
+@media (max-width: 720px) {
+  .ad-value {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.ad-value-n {
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--positive);
+}
+.ad-value-unit {
+  display: block;
+  margin-top: 6px;
+  font-size: 16px;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.ad-value-what {
+  max-width: 62ch;
+}
+.ad-routes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 8px;
+}
+.ad-route {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+.ad-who {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 500;
+}
+.ad-n {
+  color: var(--accent);
+  font-size: 15px;
+}
+.ad-count {
+  display: block;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.ad-size,
+.ad-use {
+  font-size: 15px;
+}
+.ad-use-k {
+  font-weight: 500;
+}
+.ad-link {
+  justify-self: start;
+  font-size: 15px;
+}
+
+/* How it compares: a table on wide screens; on a phone, each row becomes its own block. */
+.cmp-wrap {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 8px 20px 12px;
+}
+.cmp {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.cmp th,
+.cmp td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px 12px 12px 0;
+  border-top: 1px solid var(--surface-2);
+}
+.cmp thead th,
+.cmp thead td {
+  border-top: 0;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--muted);
+}
+.cmp [data-gw] {
+  background: var(--tint-blue);
+  padding-left: 12px;
+}
+.cmp [data-gw] + * {
+  padding-left: 14px;
+}
+.cmp thead th[data-gw] {
+  color: var(--tint-blue-ink);
+  border-radius: 8px 8px 0 0;
+}
+.cmp tbody tr:last-child td[data-gw] {
+  border-radius: 0 0 8px 8px;
+}
+.cmp tbody th {
+  font-weight: 500;
+  width: 18%;
+}
+.cmp td[data-gw] {
+  font-weight: 500;
+  color: var(--ink);
+}
+.cmp-none {
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--muted);
+  opacity: 0.5;
+  vertical-align: middle;
+}
+@media (max-width: 860px) {
+  .cmp thead {
+    display: none;
+  }
+  .cmp,
+  .cmp tbody,
+  .cmp tr,
+  .cmp th,
+  .cmp td {
+    display: block;
+    width: auto;
+  }
+  .cmp tr {
+    padding: 14px 0;
+    border-top: 1px solid var(--surface-2);
+  }
+  .cmp tbody tr:first-child {
+    border-top: 0;
+  }
+  .cmp th,
+  .cmp td {
+    border: 0;
+    padding: 2px 0;
+  }
+  .cmp tbody th {
+    width: auto;
+    margin-bottom: 6px;
+    font-size: 16px;
+  }
+  .cmp td {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 3px 0;
+  }
+  .cmp td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .cmp [data-gw] {
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin: 2px -8px;
+  }
+  .cmp [data-gw] + * {
+    padding-left: 0;
+  }
+  .cmp td[data-gw]::before {
+    color: var(--tint-blue-ink);
+  }
+  .cmp tbody tr:last-child td[data-gw] {
+    border-radius: 6px;
+  }
+  .cmp td[data-empty] {
+    display: none;
   }
 }

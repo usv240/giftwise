@@ -313,9 +313,9 @@ export default function Home() {
             <li>
               <Link className="research-proof-link" href="/judges#evaluation">
                 <span className="research-proof-fig tabular">
-                  {billResults.summary.referee.wrong_routes_accepted} of {billResults.summary.referee.all_cases}
+                  {billResults.summary.referee.check_kept_whole} of {billResults.summary.referee.all_cases}
                 </span>
-                <span>bills where Giftwise accepted a route that lowers her check</span>
+                <span>labeled bills routed so her check stays whole</span>
               </Link>
             </li>
           </ul>

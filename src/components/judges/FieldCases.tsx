@@ -1,3 +1,4 @@
+import { ShowSome } from "./ShowSome";
 import data from "../../../content/eval/field-cases.json";
 import results from "../../../content/eval/field-cases-results.json";
 import { usd } from "@/lib/rules";
@@ -59,8 +60,7 @@ export function FieldCases() {
         </div>
       </div>
 
-      <ol className="sx-list">
-        {ROWS.filter((r) => byId.get(r.id)?.status === "scored").map((r) => {
+      <ShowSome rows={ROWS.filter((r) => byId.get(r.id)?.status === "scored")} noun="cases" render={(r) => {
           const c = byId.get(r.id)!;
           const kept = r.dollars?.computed ? (r.dollars.kept_per_month ?? 0) : null;
           return (
@@ -99,8 +99,7 @@ export function FieldCases() {
               </details>
             </li>
           );
-        })}
-      </ol>
+        }} />
 
       <details className="sx-out">
         <summary>

@@ -153,11 +153,13 @@ The sponsor tools listed in `.env.example` are optional. `/status` shows whether
 
 ## Run the tests
 
+Every push to GitHub runs [CI](.github/workflows/ci.yml): the dependency audit, types, lint, the unit tests, 20,000 random gifts drawn fresh for each run, the `ssi-gift-rules` package, then a production build against an empty Postgres with no service keys, checked by the smoke and accessibility suites. The suites below that move sandbox money need keys, so they run from a machine that has them.
+
 Start the app on port 3100 first. Run `npm run test:clean` and reset the sample page before the API and card-approved suites, because they expect her needs to be open and the daily limits for new keys and pages to be clear; the PayPal checkout suite resets it on its own. The browser suites drive Chrome; if Chrome is not at `C:/Program Files/Google/Chrome/Application/chrome.exe`, set `CHROME_PATH`.
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts | `npm test` | 114 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 120 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
@@ -168,11 +170,13 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 assertions |
 | Browser end to end | `npm run e2e:ui` | 61 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 108 page views pass |
+| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 26 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |
 | Audit ledger | `npm run verify-ledger` | "Ledger verified" |
 | Types and lint | `npm run typecheck`, `npm run lint` | No errors |
+| Dependency audit, every severity | `npm audit` | 0 vulnerabilities |
 
 - The API and browser suites read a sample bill with Claude, so they need `ANTHROPIC_API_KEY`.
 - The API and browser suites each create a developer key. With five new keys a day per address, a third full run on the same day reports that limit in the key checks; they pass again the next day.

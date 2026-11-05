@@ -40,11 +40,11 @@ export function Results() {
       <li className="jr-item">
         <a className="jr-link" href="#evaluation">
           <span className="jr-fig tabular">
-            {b.referee.wrong_routes_accepted} of {bills_n}
+            {b.referee.check_kept_whole} of {bills_n}
           </span>
-          <span className="jr-what">bills where Giftwise accepted a route that lowers her check.</span>
+          <span className="jr-what">labeled bills routed so her check stays whole.</span>
           <span className="jr-base">
-            Claude with no rulebook accepted <span className="tabular">{b.baseline.wrong_routes_accepted}</span>.
+            Claude with no rulebook: <span className="tabular">{b.baseline.check_kept_whole}</span> of {bills_n}.
           </span>
         </a>
       </li>

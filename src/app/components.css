@@ -178,10 +178,21 @@
   font-weight: 500;
   border-radius: 6px;
 }
-.rw-item summary::-webkit-details-marker {
+.rw-item summary::-webkit-details-marker,
+.gift-cash summary::-webkit-details-marker,
+.gift-share-qr summary::-webkit-details-marker {
   display: none;
 }
+/* The same plus on the gift page's other disclosures, so every row that opens says so the same way. */
+.gift-cash summary,
+.gift-share-qr summary {
+  list-style: none;
+  justify-content: space-between;
+  gap: 16px;
+}
 /* A plus that turns into a minus: two bars, the upright one folds away. */
+.gift-cash summary::after,
+.gift-share-qr summary::after,
 .rw-item summary::after {
   content: "";
   flex: none;
@@ -192,6 +203,8 @@
     linear-gradient(currentColor, currentColor) center / 1.5px 12px no-repeat;
   transition: transform var(--dur-menu, 180ms) var(--ease-out);
 }
+.gift-cash[open] summary::after,
+.gift-share-qr[open] summary::after,
 .rw-item[open] summary::after {
   background: linear-gradient(currentColor, currentColor) center / 12px 1.5px no-repeat;
   transform: rotate(180deg);
@@ -377,4 +390,42 @@
   .tour {
     display: none;
   }
+}
+
+/* The PayPal button, wherever a gift is paid: gift pages, monthly gifts, the organizer's page. */
+.pp-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+.pp-button {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+}
+.pp-note {
+  font-size: 14px;
+  color: var(--muted);
+}
+.pp-slot {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  border-radius: var(--radius-btn);
+  background: var(--surface-2);
+  font-size: 14px;
+  color: var(--muted);
+}
+.pp-note[data-tone="attention"] {
+  color: var(--attention);
+}
+.pp-button[data-disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* A page's loading line holds a screen's height while the page streams in, so the footer starts below the fold and
+   nothing jumps when the content arrives. */
+.page-loading {
+  min-height: 100svh;
 }

@@ -129,6 +129,7 @@ const toBody = (d: Draft) => ({
 export function ManageNeeds({ token, needs }: { token: string; needs: ManageNeed[] }) {
   const router = useRouter();
   const [editing, setEditing] = useState<number | null>(null);
+  const [removing, setRemoving] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
   const [note, setNote] = useState("");
   const base = `/api/manage/${encodeURIComponent(token)}`;
@@ -155,33 +156,51 @@ export function ManageNeeds({ token, needs }: { token: string; needs: ManageNeed
                   <p className="mg-need-to">
                     Paid straight to <strong>{n.paidTo}</strong>
                   </p>
-                  <p className="mg-need-rule">{n.rule}</p>
+                  {/* The line above already says where it is paid, so the rule starts with what it means. */}
+                  <p className="mg-need-rule">{n.rule.replace(/^Paid straight to the shop, so it is not counted\./, "Not counted as income.")}</p>
                 </div>
                 <div className="mg-need-side">
                   <p className="mg-need-amount tabular">{usd(n.amount)}</p>
                   <p className="mg-need-funded tabular">{n.status === "paid" ? "Paid in full" : n.funded > 0 ? `${usd(n.funded)} given` : "Nothing given yet"}</p>
-                  <div className="mg-need-actions">
-                    <button type="button" className="mg-link" onClick={() => setEditing(n.id)}>
-                      Edit
-                    </button>
-                    {n.removable && (
-                      <button
-                        type="button"
-                        className="mg-link"
-                        onClick={async () => {
-                          setNote("");
-                          try {
-                            await send(`${base}/needs/${n.id}`, "DELETE");
-                            router.refresh();
-                          } catch (err) {
-                            setNote((err as Error).message);
-                          }
-                        }}
-                      >
-                        Remove
+                  {removing === n.id ? (
+                    // Removing is one more press, next to the need it names, so a slip of the thumb changes nothing.
+                    <div className="mg-need-confirm" role="group" aria-label={`Remove ${n.title}?`}>
+                      <p>Remove {n.title}?</p>
+                      <div className="mg-need-actions">
+                        <button
+                          type="button"
+                          className="mg-link mg-link-strong"
+                          onClick={async () => {
+                            setNote("");
+                            try {
+                              await send(`${base}/needs/${n.id}`, "DELETE");
+                              setRemoving(null);
+                              router.refresh();
+                            } catch (err) {
+                              setNote((err as Error).message);
+                            }
+                          }}
+                        >
+                          Remove
+                        </button>
+                        {/* Focus lands on the safe choice, where the Remove button was. */}
+                        <button type="button" className="mg-link" autoFocus onClick={() => setRemoving(null)}>
+                          Keep it
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mg-need-actions">
+                      <button type="button" className="mg-link" onClick={() => setEditing(n.id)}>
+                        Edit
                       </button>
-                    )}
-                  </div>
+                      {n.removable && (
+                        <button type="button" className="mg-link" onClick={() => setRemoving(n.id)}>
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -245,18 +264,21 @@ export function PageStatus({ token, status, note: initialNote }: { token: string
         <button type="button" className="btn btn-ink" disabled={busy} onClick={() => run({ note }, "Note saved.")}>
           Save the note
         </button>
-        {status === "closed" ? (
-          <button type="button" className="btn btn-quiet" disabled={busy} onClick={() => run({ status: "open" }, "The page takes gifts again.")}>
-            Reopen the page
-          </button>
-        ) : (
-          <button type="button" className="btn btn-quiet" disabled={busy} onClick={() => run({ status: "closed" }, "The page is closed. Its receipts stay public.")}>
-            Close the page
-          </button>
-        )}
         <span className="mg-note" role="status">
           {msg}
         </span>
+      </div>
+      <div className="mg-status-gifts">
+        <p className="mg-status-k">{status === "closed" ? "The page is not taking gifts. Its receipts stay public." : "When every need is met, the page can stop taking gifts. Its receipts stay public."}</p>
+        {status === "closed" ? (
+          <button type="button" className="btn btn-quiet" disabled={busy} onClick={() => run({ status: "open" }, "The page takes gifts again.")}>
+            Take gifts again
+          </button>
+        ) : (
+          <button type="button" className="btn btn-quiet" disabled={busy} onClick={() => run({ status: "closed" }, "The page has stopped taking gifts. Its receipts stay public.")}>
+            Stop taking gifts
+          </button>
+        )}
       </div>
     </div>
   );

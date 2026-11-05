@@ -1,5 +1,7 @@
 # Giftwise
 
+[![CI](https://github.com/usv240/giftwise/actions/workflows/ci.yml/badge.svg)](https://github.com/usv240/giftwise/actions/workflows/ci.yml)
+
 Benefit-safe giving for people on SSI. Family and friends give through PayPal, and Giftwise pays the shop, the clinic or the person's ABLE account directly, so the monthly check stays whole.
 
 - **Live demo:** [giftwise-405i.onrender.com](https://giftwise-405i.onrender.com) (PayPal sandbox, no Giftwise login needed)
@@ -15,8 +17,8 @@ Help from others changes the check for many people: in January 2022 SSA lowered 
 ## Results
 
 - **40 of 40 of Social Security's own worked examples** from its operating manual match SSA's answer. Claude with no rulebook, asked the same questions: 32 of 40.
-- **14 of 14 real SSI cases from federal courts** reach the outcome SSA and the court did. In the 4 where the facts allow a benefit-safe route, the same help routed through Giftwise keeps **$1,656.66 a month** at 2026 rates. The run added a finer rule the engine now follows: who provides the meals.
-- **0 of 59 labeled bills** where Giftwise accepted a route that would lower the check. Claude with no rulebook accepted 3.
+- **14 of 14 real SSI cases from federal courts** reach the outcome SSA and the court did. In the 4 where the facts allow a benefit-safe route, the same help routed through Giftwise keeps **$1,656.66 a month** at 2026 rates: about $414 for each family, every month. The run added a finer rule the engine now follows: who provides the meals.
+- **59 of 59 labeled bills** routed so the check stays whole. Claude with no rulebook: 56 of 59.
 - **100,000 random gifts, every promise kept.** A seeded generator makes up gifts from one cent to $20,000, up to twelve open needs and people in every living arrangement, and checks each answer against twelve promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit, at most 10 PayPal recipients, and more.
 
 All four are on [`/judges`](https://giftwise-405i.onrender.com/judges), case by case, with the sources.
@@ -31,7 +33,7 @@ All four are on [`/judges`](https://giftwise-405i.onrender.com/judges), case by 
 | **Her own copy, in Easy Read and Spanish** | **Give every month: the rules route it again, and say why** |
 | ![Maya's October report in Spanish Easy Read: no call needed, her December check stays $994, each gift in one sentence with a picture](docs/img/8-easy-read-spanish.png) | ![A monthly gift of $300: November paid the wheelchair repair; December finished it with $120 and sent $180 to the laptop, with the reason for each change](docs/img/10-monthly.png) |
 | **The results, first thing on the judges' page** | **Real SSI cases from federal courts** |
-| ![40 of 40 SSA worked examples; 14 of 14 federal court cases; 0 of 59 wrong routes accepted; 100,000 random gifts keep every promise](docs/img/7-results.png) | ![14 of 14 federal court cases reach SSA's and the court's outcome, and the meals rule the cases added](docs/img/9-field-cases.png) |
+| ![40 of 40 SSA worked examples; 14 of 14 federal court cases; 59 of 59 labeled bills routed so the check stays whole; 100,000 random gifts keep every promise](docs/img/7-results.png) | ![14 of 14 federal court cases reach SSA's and the court's outcome, and the meals rule the cases added](docs/img/9-field-cases.png) |
 
 ## How it works
 
@@ -49,6 +51,14 @@ The demo runs in PayPal's sandbox. Here is what changes when real money moves. T
 - **ABLE gifts go through the plan's own gift page.** ABLEnow and IAble use [Ugift codes](https://www.iable.gov/resources/give-a-gift), paid by bank transfer or check. [STABLE](https://stableaccount.com/benefits/gifting), [CalABLE](https://calable.ca.gov/how-it-works/gifting) and [ABLE United](https://www.ableunited.com/usage/gifting) give each account its own gift link. In the demo the ABLE account is a sandbox PayPal account; for real, Giftwise works out the ABLE amount the same way and sends the giver to the plan's page for that part.
 - **Timing matters for rent help.** STABLE and CalABLE hold gifts made through a gift page for 10 business days before they can be withdrawn. Housing money taken out of an ABLE account should be spent that month ([POMS SI 01130.740](https://secure.ssa.gov/poms.nsf/lnx/0501130740)), so rent help through ABLE works best about two weeks before the bill is due.
 - **Fees:** US buyers pay [no PayPal fee](https://www.paypal.com/us/digital-wallet/paypal-consumer-fees) when no currency conversion is involved, and the shop pays PayPal's usual [merchant fee](https://www.paypal.com/us/business/paypal-business-fees). The demo adds nothing on top. On PayPal's partner program, a platform fee can be set per order (`payment_instruction.platform_fees`, shown to the shop as partner commissions), so Giftwise could cover its costs without charging the giver or the person on SSI ([multiparty](https://developer.paypal.com/docs/multiparty/)).
+
+## Who runs it first
+
+Three groups already help people on SSI with money every month, and each can run Giftwise as it is today. The comparison with fundraising sites, PayPal.me, ABLE gift pages and paying the shop yourself is on [`/judges#compare`](https://giftwise-405i.onrender.com/judges#compare).
+
+- **Benefits counselors.** Social Security funds free benefits counseling nationwide through its Work Incentives Planning and Assistance projects; its current round planned 75 projects and $20 million ([WIPA-WIP-21-001](https://www.highergov.com/grant-opportunity/ssa-work-incentives-planning-and-assistance-program-wipa-331605/)). A counselor makes the gift page with the family, and each month the family has the report to file by the 10th.
+- **State ABLE programs.** 46 states and DC run one, and 31 plans accept people from any state ([ABLE National Resource Center](https://www.ablenrc.org/choose-plan/)). The ABLE share of each gift goes to the plan's own gift link; needs better paid to a shop are paid there through PayPal.
+- **Payee organizations.** About 1 in 10 of the 7.7 million people with a representative payee are served by an organization ([CRS IF13018](https://www.congress.gov/crs_external_products/IF/PDF/IF13018/IF13018.2.pdf), FY2024). One PayPal Payouts batch pays shops and ABLE accounts for many people, with each person's ledger and report.
 
 ## What is inside
 
@@ -105,9 +115,11 @@ To host your own copy, [`render.yaml`](render.yaml) creates the web service, its
 
 ## Tests
 
+Every push runs [CI](.github/workflows/ci.yml): `npm audit` at every severity (0 advisories, dev tools included), types, lint, the unit tests, 20,000 random gifts drawn fresh for each run, the `ssi-gift-rules` package build, then a production build served against an empty Postgres with no service keys, where every page must answer and pass axe on desktop and phone, in light and dark. The suites that move sandbox money need keys and run from a machine that has them.
+
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts | `npm test` | 114 of 114 |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 120 of 120 |
 | Social Security's own worked examples (rules engine, and Claude alone as the baseline) | `npm run eval:ssa` | 40 of 40 (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 |
 | 59 labeled bills: wrong routes accepted (referee; Claude with no rulebook) | `npx tsx --env-file=.env.local scripts/run-eval.ts` | 0 (3) |
@@ -116,6 +128,7 @@ To host your own copy, [`render.yaml`](render.yaml) creates the web service, its
 | The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 of 20 assertions |
 | Browser end to end, including the Spanish gift page, the guided tour and the calendar planner | `npm run e2e:ui` | 61 of 61 |
 | Accessibility, 27 pages in light and dark, phone and desktop | `npm run e2e:a11y` | 108 of 108 page views |
+| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 26 of 26 |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 of 5 |

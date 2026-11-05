@@ -50,7 +50,7 @@ export function AskRulebook() {
       >
         <label className="ask-field">
           <span className="sr-only">Your question</span>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Does it count if my sister pays my phone bill?" maxLength={300} />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type a question in your own words" maxLength={300} />
         </label>
         <button type="submit" className="btn btn-ink" disabled={busy}>
           {busy ? "Looking…" : "Ask"}

@@ -1,3 +1,4 @@
+import { ShowSome } from "./ShowSome";
 import data from "../../../content/eval/ssa-examples.json";
 import results from "../../../content/eval/ssa-examples-results.json";
 import sources from "../../../content/sources.json";
@@ -98,10 +99,8 @@ export function SsaExamples() {
         ))}
       </div>
 
-      <ol className="sx-list">
-        {data.cases.map((c) => {
-          const r = ROWS.get(c.id);
-          if (!r) return null;
+      <ShowSome rows={data.cases.filter((c) => ROWS.has(c.id))} noun="examples" render={(c) => {
+          const r = ROWS.get(c.id)!;
           return (
             <li key={c.id}>
               <details className="sx-case">
@@ -149,8 +148,7 @@ export function SsaExamples() {
               </details>
             </li>
           );
-        })}
-      </ol>
+        }} />
 
       <details className="sx-out">
         <summary>Examples on other questions, and what each is about</summary>

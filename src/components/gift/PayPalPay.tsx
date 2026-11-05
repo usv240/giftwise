@@ -29,6 +29,32 @@ declare module "react" {
 }
 
 const SDK_SRC = "https://www.sandbox.paypal.com/web-sdk/v6/core";
+
+/**
+ * PayPal's SDK is about 300 ms of script on a mid-range phone, and no one pays before touching the page. So it loads at
+ * the first sign of a person (a touch, a key, a scroll, the pointer moving, focus) or, failing that, once the browser has
+ * been idle a few seconds after the page loaded, so someone using a screen reader finds a ready button without pressing
+ * anything first. The page itself is interactive sooner on a phone.
+ */
+let wanted: Promise<void> | null = null;
+const INTENT = ["pointerdown", "pointermove", "touchstart", "keydown", "wheel", "scroll", "focusin"] as const;
+function whenWanted() {
+  wanted ??= new Promise<void>((resolve) => {
+    let timer: number | undefined;
+    const go = () => {
+      for (const e of INTENT) window.removeEventListener(e, go, true);
+      window.clearTimeout(timer);
+      resolve();
+    };
+    for (const e of INTENT) window.addEventListener(e, go, { capture: true, passive: true });
+    const afterLoad = () => {
+      timer = window.setTimeout(() => ("requestIdleCallback" in window ? window.requestIdleCallback(go, { timeout: 2000 }) : go()), 3000);
+    };
+    if (document.readyState === "complete") afterLoad();
+    else window.addEventListener("load", afterLoad, { once: true });
+  });
+  return wanted;
+}
 /** One SDK instance per language: PayPal draws its button and checkout in the page's language. */
 const instances = new Map<Lang, Promise<{ sdk: SdkInstance; eligible: boolean }>>();
 let scriptPromise: Promise<void> | null = null;
@@ -72,7 +98,7 @@ export function PayPalPay({ createOrder, onPaid, disabled, lang = "en" }: { crea
   const ref = useRef<HTMLElement>(null);
   const createRef = useRef(createOrder);
   const paidRef = useRef(onPaid);
-  const [state, setState] = useState<"loading" | "ready" | "working" | "unavailable" | "error">("loading");
+  const [state, setState] = useState<"waiting" | "loading" | "ready" | "working" | "unavailable" | "error">("waiting");
   const [message, setMessage] = useState("");
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
@@ -89,7 +115,11 @@ export function PayPalPay({ createOrder, onPaid, disabled, lang = "en" }: { crea
       return;
     }
     let cancelled = false;
-    loadSdk(clientId, lang)
+    whenWanted()
+      .then(() => {
+        if (!cancelled) setState("loading");
+        return loadSdk(clientId, lang);
+      })
       .then(({ sdk, eligible }) => {
         if (cancelled || !ref.current) return;
         if (!eligible) {
@@ -149,7 +179,12 @@ export function PayPalPay({ createOrder, onPaid, disabled, lang = "en" }: { crea
   return (
     <div className="pp-wrap">
       <paypal-button ref={ref} type="pay" hidden className="pp-button" aria-disabled={disabled ? "true" : undefined} data-disabled={disabled ? "" : undefined} />
-      {state === "loading" && <p className="pp-note">{t.ppLoading}</p>}
+      {/* Holds the button's place until PayPal draws it, so nothing below moves. */}
+      {(state === "waiting" || state === "loading") && (
+        <p className="pp-slot" data-loading={state === "loading" ? "" : undefined}>
+          {t.ppLoading}
+        </p>
+      )}
       {state === "unavailable" && <p className="pp-note">{t.ppUnavailable}</p>}
       {message && (
         <p className="pp-note" data-tone={state === "error" ? "attention" : undefined} role="status">

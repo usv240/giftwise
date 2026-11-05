@@ -36,6 +36,21 @@
   padding: 0.4rem 0;
   text-decoration: none;
 }
+/* The section being read, marked by the contents list. */
+.learn-toc a[aria-current] {
+  color: var(--ink);
+  font-weight: 500;
+  box-shadow: inset 2px 0 var(--accent);
+  padding-left: 0.6rem;
+}
+.learn-toc a {
+  transition: padding-left var(--dur-tip) var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .learn-toc a {
+    transition: none;
+  }
+}
 @media (hover: hover) and (pointer: fine) {
   .learn-toc a:hover {
     text-decoration: underline;
@@ -111,6 +126,22 @@
     position: static;
     grid-column: 1 / -1;
     margin-bottom: 3rem;
+  }
+  /* On a phone the contents wrap as a short run of links, a few lines instead of a screen. */
+  .learn-toc ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.1rem;
+  }
+  .learn-toc a {
+    padding: 0.35rem 0;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  .learn-toc a[aria-current] {
+    box-shadow: none;
+    padding-left: 0;
   }
   .learn-main {
     grid-column: 1 / -1;

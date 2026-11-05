@@ -38,8 +38,9 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       const v = q.get(k);
       if (v) (stored as Record<string, string>)[k] = v;
     }
+    // A first visit has nothing stored: keep the same object, so nothing that reads the preferences renders twice.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPrefs(stored);
+    setPrefs((prev) => ((Object.keys(DEFAULTS) as (keyof Prefs)[]).every((k) => prev[k] === stored[k]) ? prev : stored));
   }, []);
 
   const set = useCallback(<K extends keyof Prefs>(key: K, value: Prefs[K]) => {

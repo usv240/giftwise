@@ -7,7 +7,9 @@ import fieldResults from "../../../content/eval/field-cases-results.json";
 import ssaResults from "../../../content/eval/ssa-examples-results.json";
 import invResults from "../../../content/eval/invariants-results.json";
 import { Info } from "@/components/Info";
+import { Adoption } from "@/components/judges/Adoption";
 import { CaseRunner } from "@/components/judges/CaseRunner";
+import { Compare } from "@/components/judges/Compare";
 import { EvalResults } from "@/components/judges/EvalResults";
 import { FieldCases } from "@/components/judges/FieldCases";
 import { Invariants } from "@/components/judges/Invariants";
@@ -67,8 +69,9 @@ const CRITERIA = [
   },
   {
     name: "Potential impact",
-    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). In January 2022 SSA lowered the check of 793,000 of them for food or housing someone else provided (88 FR 9779), and about 14 million people can now open an ABLE account, which more than 246,000 have (ABLE National Resource Center). Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
+    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). In January 2022 SSA lowered the check of 793,000 of them for food or housing someone else provided (88 FR 9779), and about 14 million people can now open an ABLE account, which more than 246,000 have (ABLE National Resource Center). In the federal court cases where a benefit-safe route exists, routing keeps about $414 a month for each family, and benefits counselors, state ABLE programs and organizations that manage SSI money can each run it as it is. Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
     links: [
+      ["#adoption", "Who runs it first"],
       ["/learn", "The rules, explained"],
       ["/about#real", "How this works for real"],
     ],
@@ -78,6 +81,7 @@ const CRITERIA = [
     where:
       "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt. AI assistants can ask Giftwise first over MCP, two reviewers with different rulebooks must quote their source word for word, the rules check the Federal Register for their own updates, and every report carries a code anyone can check against PayPal and the ledger.",
     links: [
+      ["#compare", "How it compares"],
       ["/g/maya", "Give any amount"],
       ["/agents", "For AI agents"],
       ["/try/presets/electric-bill", "The two reviewers"],
@@ -133,10 +137,10 @@ export default function JudgesPage() {
         <ul className="jp-more">
           {MORE.map((m) => (
             <li key={m.label}>
-              <Link className="text-link" href={m.href}>
+              <Link className="text-link jp-more-link" href={m.href}>
                 {m.label}
               </Link>
-              <span className="muted"> {m.look}</span>
+              <span className="jp-more-look muted">{m.look}</span>
             </li>
           ))}
         </ul>
@@ -215,6 +219,20 @@ export default function JudgesPage() {
         <Suspense fallback={<p className="page-loading">Asking the Federal Register…</p>}>
           <RulesWatch />
         </Suspense>
+      </section>
+
+      <section id="compare" className="page-section" aria-labelledby="cmp-h">
+        <h2 id="cmp-h">How it compares</h2>
+        <p className="page-prose jp-intro">
+          Each of these does its own job well. Giftwise is built for the moment before a gift to someone on SSI, and works alongside them: the ABLE share goes to the plan&rsquo;s own gift page, and shops are paid through PayPal.
+        </p>
+        <Compare />
+      </section>
+
+      <section id="adoption" className="page-section" aria-labelledby="ad-h">
+        <h2 id="ad-h">Who runs it first</h2>
+        <p className="page-prose jp-intro">Three groups already help people on SSI with money every month. Each can run Giftwise as it is today.</p>
+        <Adoption />
       </section>
 
       <section className="page-section" aria-labelledby="crit-h">

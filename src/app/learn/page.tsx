@@ -1,3 +1,4 @@
+import { TocSpy } from "@/components/learn/TocSpy";
 import type { Metadata } from "next";
 import Link from "next/link";
 import glossary from "../../../content/glossary.json";
@@ -157,6 +158,7 @@ export default function LearnPage() {
               <a href="#sources">Sources</a>
             </li>
           </ul>
+          <TocSpy nav=".learn-toc" />
         </nav>
 
         <div className="learn-main">

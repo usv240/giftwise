@@ -9,12 +9,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 16px;
+  gap: 12px;
   max-width: 68rem;
 }
+/* Sized so the month, the view and the four actions fit one row at the sheet's width. */
 .rp-bar .btn {
   min-height: 40px;
-  padding: 0.5rem 0.95rem;
+  padding: 0.5rem 0.8rem;
   font-size: 16px;
 }
 .rp-months {
@@ -97,7 +98,7 @@
   max-width: 68rem;
   background: var(--surface);
   border-radius: 20px;
-  padding: clamp(22px, 2rem + 1vw, 56px);
+  padding: clamp(18px, 0.75rem + 2.5vw, 56px);
   box-shadow:
     0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent),
     0 12px 32px -18px color-mix(in srgb, var(--ink) 22%, transparent);
