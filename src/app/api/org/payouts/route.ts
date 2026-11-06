@@ -6,6 +6,7 @@ import { db, dbConfigured, schema } from "@/lib/db";
 import { paypalConfigured } from "@/lib/paypal/client";
 import { LIMITS, planGrants, sendBatch } from "@/lib/paypal/payouts";
 import { fundBalance } from "@/lib/paypal/reporting";
+import { api } from "@/lib/api/handler";
 
 const Body = z.object({
   grants: z
@@ -19,7 +20,7 @@ const Body = z.object({
  * POST /api/org/payouts: route each household's grant with the rules engine and send one PayPal Payouts batch.
  * With preview: true, only the routing comes back. Sandbox caps keep the fund's balance usable over many runs.
  */
-export async function POST(req: Request) {
+async function postRoute(req: Request) {
   const started = Date.now();
   if (!dbConfigured() || !paypalConfigured()) return fail("upstream_unavailable", "Payouts need PayPal and the database, which are not connected on this server.", 503);
   const parsed = Body.safeParse(await req.json().catch(() => null));
@@ -44,3 +45,5 @@ export async function POST(req: Request) {
   if (!sent.ok) return fail("upstream_unavailable", sent.message, 502, { issue: sent.issue, debug_id: sent.debugId });
   return ok({ batch_id: sent.batchId, status: sent.status, households: plan.households, items: plan.items, balance: await fundBalance() }, started);
 }
+
+export const POST = api("/api/org/payouts", postRoute);

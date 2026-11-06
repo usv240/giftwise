@@ -1,11 +1,13 @@
 import { guard } from "@/lib/api/keys";
 import { fail, ok, today } from "@/lib/api/envelope";
+import { log } from "@/lib/log";
 import { AnalyzeFundraiserRequest } from "@/lib/api/schemas";
 import { AiRefusedError, AiUnavailableError, aiAvailable } from "@/lib/ai/claude";
 import { readFundraiser } from "@/lib/ai/tasks";
 import { DEFAULT_PROFILE, evaluateGift, usd, type Category } from "@/lib/rules";
 import { readBundledSample, readPage, safePublicUrl } from "@/lib/sponsors/kernel";
 import { publicOrigin } from "@/lib/origin";
+import { api } from "@/lib/api/handler";
 
 const SHELTER: Category[] = ["rent", "mortgage", "property_tax", "utility"];
 
@@ -57,9 +59,11 @@ async function handle(req: Request) {
   } catch (e) {
     if (e instanceof AiUnavailableError) return fail("upstream_unavailable", `${e.message} Open the Accessible van fundraiser example to see the full result.`, 503);
     if (e instanceof AiRefusedError) return fail("upstream_unavailable", "The AI could not read this page.", 422);
-    console.error("analyze-fundraiser failed", e);
+    log.error("analyze-fundraiser failed", { err: e });
     return fail("internal", "Something went wrong while reading the page. Please try again.", 500);
   }
 }
 
-export const POST = (req: Request) => guard(req, "analyze-fundraiser", () => handle(req));
+const postRoute = (req: Request) => guard(req, "analyze-fundraiser", () => handle(req));
+
+export const POST = api("/api/v1/analyze-fundraiser", postRoute);

@@ -12,6 +12,7 @@ const NAV = [
   { href: "/evidence", label: "Evidence" },
   { href: "/stack", label: "How it is built" },
   { href: "/status", label: "Status" },
+  { href: "/ops", label: "Operations" },
   { href: "/about", label: "About" },
 ];
 
@@ -56,6 +57,11 @@ function QuietFooter() {
           <li>
             <Link href="/status" className="text-link">
               Status
+            </Link>
+          </li>
+          <li>
+            <Link href="/ops" className="text-link">
+              Operations
             </Link>
           </li>
         </ul>

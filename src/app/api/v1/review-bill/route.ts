@@ -1,9 +1,11 @@
 import { guard } from "@/lib/api/keys";
 import { fail, ok, today } from "@/lib/api/envelope";
+import { log } from "@/lib/log";
 import { ReviewBillRequest } from "@/lib/api/schemas";
 import { AiRefusedError, AiUnavailableError, aiAvailable } from "@/lib/ai/claude";
 import { reviewPayload, runReviewers } from "@/lib/ai/reviewers";
 import { DEFAULT_PROFILE, type Profile } from "@/lib/rules";
+import { api } from "@/lib/api/handler";
 
 /** POST /api/v1/review-bill: two reviewers with different authorities, a quote-checking referee, then the rules engine. */
 async function handle(req: Request) {
@@ -21,9 +23,11 @@ async function handle(req: Request) {
   } catch (e) {
     if (e instanceof AiUnavailableError) return fail("upstream_unavailable", `${e.message} Open the Electric bill example to see a recorded review.`, 503);
     if (e instanceof AiRefusedError) return fail("upstream_unavailable", "The reviewers could not answer this one. Try describing the bill in other words.", 422);
-    console.error("review-bill failed", e);
+    log.error("review-bill failed", { err: e });
     return fail("internal", "Something went wrong while the reviewers worked. Please try again.", 500);
   }
 }
 
-export const POST = (req: Request) => guard(req, "review-bill", () => handle(req));
+const postRoute = (req: Request) => guard(req, "review-bill", () => handle(req));
+
+export const POST = api("/api/v1/review-bill", postRoute);

@@ -2,6 +2,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { today } from "@/lib/api/envelope";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
+import { log } from "@/lib/log";
 import { getHousehold, openNeeds, payeeEmail } from "@/lib/households";
 import { paypalRest } from "@/lib/paypal/client";
 import { routeGift } from "@/lib/routing";
@@ -72,11 +73,13 @@ export async function sendBatch(items: PlannedItem[]) {
   const batchId = res.body.batch_header?.payout_batch_id;
   if (res.status >= 400 || !batchId) {
     const issue = res.body.details?.[0]?.issue ?? res.body.name ?? "PAYOUT_FAILED";
+    log.warn("payout batch not started", { issue, debugId: res.debugId, status: res.status, items: items.length });
     return { ok: false as const, issue, message: issue === "INSUFFICIENT_FUNDS" ? "The fund's sandbox balance is too low for this batch." : "PayPal could not start the payout. Please try again.", debugId: res.debugId };
   }
   await db()
     .insert(schema.payouts)
     .values(items.map((i) => ({ batchId, senderItemId: i.senderItemId, funder: FUNDER, householdId: i.householdId, needId: i.needId, title: i.title, payeeName: i.payeeName, payeeEmail: i.payeeEmail, route: i.route, amount: i.amount.toFixed(2) })));
+  log.info("payout batch created", { batchId, items: items.length, batchStatus: res.body.batch_header?.batch_status ?? "PENDING" });
   await audit("person", "paypal.payout_batch.created", `payout:${batchId}`, {
     funder: FUNDER,
     total: items.reduce((s, i) => s + i.amount, 0),

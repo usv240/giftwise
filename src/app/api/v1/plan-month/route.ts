@@ -2,6 +2,7 @@ import { guard } from "@/lib/api/keys";
 import { fail, ok } from "@/lib/api/envelope";
 import { PlanMonthRequest } from "@/lib/api/schemas";
 import { DEFAULT_PROFILE, planMonths } from "@/lib/rules";
+import { api } from "@/lib/api/handler";
 
 /** POST /api/v1/plan-month: a list of gifts, the check for each affected month, and suggestions. */
 async function handle(req: Request) {
@@ -30,4 +31,6 @@ async function handle(req: Request) {
   );
 }
 
-export const POST = (req: Request) => guard(req, "plan-month", () => handle(req));
+const postRoute = (req: Request) => guard(req, "plan-month", () => handle(req));
+
+export const POST = api("/api/v1/plan-month", postRoute);

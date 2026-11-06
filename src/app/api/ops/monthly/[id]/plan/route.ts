@@ -4,11 +4,12 @@ import { checksAuth } from "@/lib/checks";
 import { dbConfigured } from "@/lib/db";
 import { z } from "zod";
 import { planMonthById } from "@/lib/monthly";
+import { api } from "@/lib/api/handler";
 
 const Body = z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) });
 
 /** POST /api/ops/monthly/{id}/plan: plan one monthly gift's month ahead of time. Only callers with CHECKS_SECRET. */
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function postRoute(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await connection();
   const started = Date.now();
   const a = checksAuth(req);
@@ -21,3 +22,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!r) return fail("not_found", "No monthly gift with that id.", 404);
   return ok(r, started);
 }
+
+export const POST = api("/api/ops/monthly/[id]/plan", postRoute);

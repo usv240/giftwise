@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { fail, ok, today } from "@/lib/api/envelope";
+import { log } from "@/lib/log";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
 import { getNeed, payeeEmail } from "@/lib/households";
 import { createPayeeOrder, describePayPalError } from "@/lib/paypal/orders";
 import { eq } from "drizzle-orm";
 import { DEFAULT_PROFILE, evaluateGift, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { api } from "@/lib/api/handler";
 
 const Body = z.object({ needId: z.number().int().positive() });
 
@@ -13,7 +15,7 @@ const Body = z.object({ needId: z.number().int().positive() });
  * Create a sandbox PayPal order for one need. The server decides the amount and the payee
  * (the shop or her ABLE account) from the need record; the browser only says which need.
  */
-export async function POST(req: Request) {
+async function postRoute(req: Request) {
   const started = Date.now();
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail("invalid_request", "Choose which need to pay for.", 400);
@@ -60,7 +62,9 @@ export async function POST(req: Request) {
     return ok({ id: order.id, status: order.status, rule_ids: check.ruleIds, check_after: check.checkAfter }, started);
   } catch (e) {
     const d = describePayPalError(e);
-    console.error("create order failed", d.issue, d.debugId);
+    log.error("create order failed", { issue: d.issue, debugId: d.debugId, status: d.status });
     return fail("upstream_unavailable", d.plain, d.status >= 400 && d.status < 600 ? d.status : 502, { issue: d.issue, debug_id: d.debugId });
   }
 }
+
+export const POST = api("/api/paypal/orders", postRoute);

@@ -3,9 +3,10 @@ import { fail, ok } from "@/lib/api/envelope";
 import { clientId, issueKey, ownedKeyId } from "@/lib/api/keys";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
+import { api } from "@/lib/api/handler";
 
 /** POST /api/keys/{id}/rotate: issue a new key and revoke the old one in the same step. */
-export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function postRoute(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const started = Date.now();
   const owned = await ownedKeyId(ctx.params);
   if (!owned) return fail("not_found", "That key was not found in this browser.", 404);
@@ -19,3 +20,5 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   await audit("person", "developer.key.rotated", `key:${row.id}`, { from: old.prefix, to: row.prefix });
   return ok({ id: row.id, key, prefix: row.prefix, replaced: old.prefix }, started);
 }
+
+export const POST = api("/api/keys/[id]/rotate", postRoute);

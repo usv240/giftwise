@@ -3,6 +3,7 @@ import { fail, ok, today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { startMonthly } from "@/lib/monthly";
 import { monthOf } from "@/lib/rules";
+import { api } from "@/lib/api/handler";
 
 const Body = z.object({
   slug: z.string().min(1).max(60),
@@ -13,7 +14,7 @@ const Body = z.object({
 });
 
 /** Start a monthly gift. Returns the giver's own link, where each month's split is shown and approved. */
-export async function POST(req: Request) {
+async function postRoute(req: Request) {
   const started = Date.now();
   if (!dbConfigured()) return fail("upstream_unavailable", "Monthly gifts need the database, which is not connected here.", 503);
   const parsed = Body.safeParse(await req.json().catch(() => null));
@@ -22,3 +23,5 @@ export async function POST(req: Request) {
   if (!r) return fail("not_found", "That gift page was not found.", 404);
   return ok({ token: r.token, url: `/m/${r.token}` }, started);
 }
+
+export const POST = api("/api/monthly", postRoute);

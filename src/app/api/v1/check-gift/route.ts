@@ -3,6 +3,7 @@ import { fail, ok, today } from "@/lib/api/envelope";
 import { CheckGiftRequest } from "@/lib/api/schemas";
 import { DEFAULT_PROFILE, evaluateGift } from "@/lib/rules";
 import sources from "../../../../../content/sources.json";
+import { api } from "@/lib/api/handler";
 
 const SRC = sources as Record<string, { title: string; url: string }>;
 
@@ -47,4 +48,6 @@ async function handle(req: Request) {
   );
 }
 
-export const POST = (req: Request) => guard(req, "check-gift", () => handle(req));
+const postRoute = (req: Request) => guard(req, "check-gift", () => handle(req));
+
+export const POST = api("/api/v1/check-gift", postRoute);

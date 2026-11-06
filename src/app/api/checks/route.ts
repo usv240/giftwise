@@ -3,9 +3,10 @@ import { fail, ok } from "@/lib/api/envelope";
 import { audit } from "@/lib/audit";
 import { CheckRunBody, checksAuth, saveRun } from "@/lib/checks";
 import { dbConfigured } from "@/lib/db";
+import { api } from "@/lib/api/handler";
 
 /** POST /api/checks: the checks workflow files one finished run. Only callers with CHECKS_SECRET. */
-export async function POST(req: Request) {
+async function postRoute(req: Request) {
   await connection();
   const started = Date.now();
   const auth = checksAuth(req);
@@ -18,3 +19,5 @@ export async function POST(req: Request) {
   await audit("system", "checks.run", `checks:${row.id}`, { source: row.source, runId: row.runId, passed: row.passed, total: row.total });
   return ok({ id: row.id, passed: row.passed, total: row.total }, started);
 }
+
+export const POST = api("/api/checks", postRoute);

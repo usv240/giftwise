@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { asc, desc, sql } from "drizzle-orm";
 import { db, schema } from "./db";
+import { requestId } from "./log";
 
 const GENESIS = "0".repeat(64);
 
@@ -25,8 +26,11 @@ const LEDGER_LOCK = 4_147_201;
  * Appends take a transaction-scoped advisory lock, so two at once (a webhook arriving while the return route
  * captures, or checks running in parallel) cannot both chain from the same entry. Without it, 25 parallel
  * appends broke the chain; scripts/ledger-race.ts checks this.
+ * An entry made during an API request carries that request's id in its detail, so /ops can trace one id to its entries.
  */
 export async function audit(actor: "person" | "agent" | "system" | "webhook", action: string, ref: string, detail: Record<string, unknown> = {}) {
+  const rid = requestId();
+  if (rid && detail.request_id === undefined) detail = { ...detail, request_id: rid };
   return db().transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(${LEDGER_LOCK})`);
     const [last] = await tx.select({ hash: schema.auditEvents.hash }).from(schema.auditEvents).orderBy(desc(schema.auditEvents.id)).limit(1);

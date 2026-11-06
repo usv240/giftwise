@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   poweredByHeader: false,
+  // Error tracking is on only when SENTRY_DSN is set. The browser gets the same DSN at build time; the git commit
+  // (Render sets RENDER_GIT_COMMIT) names the release on both sides.
+  env: {
+    NEXT_PUBLIC_SENTRY_DSN: process.env.SENTRY_DSN ?? "",
+    NEXT_PUBLIC_GIT_COMMIT: process.env.RENDER_GIT_COMMIT ?? "",
+  },
+  serverExternalPackages: ["@sentry/nextjs"],
   // Headers that hold with PayPal's checkout popup, AG Studio and Bryntum: no framing by other sites, no plugins,
   // no MIME sniffing, HTTPS remembered for two years, and popups (PayPal's) keep their link back to this page.
   // The domain's AI Catalog lives at the well-known path (SEP-2127 discovery); the route serves it.

@@ -25,6 +25,7 @@ const pages = [
   ["/developers", "API"],
   ["/developers/docs", "API"],
   ["/status", "PayPal"],
+  ["/ops", "Operations"],
   ["/stack", "PayPal"],
   ["/about", "Giftwise"],
 ];
@@ -55,6 +56,19 @@ check("discovery: llms.txt", llms.status === 200 && (await llms.text()).includes
 const ask = await fetch(`${B}/api/v1/ask-rules`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: "Can my mom pay my rent?" }) });
 const askJ = await ask.json().catch(() => null);
 check("rulebook: answers with passages (Elasticsearch, or keyword search without it)", ask.status === 200 && (askJ?.data?.passages?.length ?? 0) > 0, `${ask.status} ${askJ?.data?.retrieval?.engine ?? ""}`);
+
+// Every API answer carries a request id, in the header, in meta, and at the end of an error message; /ops can trace it.
+const rid = gift.headers.get("x-request-id");
+check("observability: x-request-id header matches meta.request_id", Boolean(rid) && giftJ?.meta?.request_id === rid, rid ?? "");
+const bad = await fetch(`${B}/api/v1/check-gift`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+const badJ = await bad.json().catch(() => null);
+check("observability: an error message ends with its request id", bad.status === 400 && badJ?.error?.message?.endsWith(`Request id: ${badJ?.meta?.request_id}`), badJ?.error?.message);
+const traced = await (await fetch(`${B}/api/ops/trace?id=${rid}`)).json().catch(() => null);
+check("observability: /api/ops/trace finds the request's log line", traced?.data?.requests?.some((r) => r.route === "/api/v1/check-gift"), JSON.stringify(traced?.data?.requests ?? "").slice(0, 120));
+const feed = await (await fetch(`${B}/api/ops/feed`)).json().catch(() => null);
+check("observability: /api/ops/feed carries no email or payee", Array.isArray(feed?.data?.events) && !/@|payee/i.test(JSON.stringify(feed.data.events)), `${feed?.data?.events?.length ?? 0} events`);
+const errors = health.checks?.find((c) => c.id === "errors");
+check("health: error tracking reports live or not connected", errors && ["live", "not_connected"].includes(errors.mode), errors?.detail);
 
 const head = await fetch(B + "/");
 check("security headers", Boolean(head.headers.get("strict-transport-security") && head.headers.get("x-content-type-options") && head.headers.get("content-security-policy")));

@@ -3,9 +3,10 @@ import { fail, ok } from "@/lib/api/envelope";
 import { ownedKeyId } from "@/lib/api/keys";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
+import { api } from "@/lib/api/handler";
 
 /** POST /api/keys/{id}/revoke: stop a key working at once. Only the browser that created it can revoke it. */
-export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function postRoute(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const started = Date.now();
   const owned = await ownedKeyId(ctx.params);
   if (!owned) return fail("not_found", "That key was not found in this browser.", 404);
@@ -18,3 +19,5 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
   await audit("person", "developer.key.revoked", `key:${row.id}`, { prefix: row.prefix });
   return ok({ id: row.id, revoked: true }, started);
 }
+
+export const POST = api("/api/keys/[id]/revoke", postRoute);

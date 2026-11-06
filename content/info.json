@@ -669,5 +669,65 @@
     "what": "Checks the Federal Register for new rules about SSI income and help with housing, and for each year's new SSI amounts.",
     "why": "When Social Security changes a rule or an amount, Giftwise sees it, so the answers stay current.",
     "technical": "Federal Register API queries for 20 CFR Part 416 rules that mention in-kind support and maintenance or unearned income, and SSA cost-of-living notices (src/lib/rules-watch.ts). Runs on the Status page and nightly in the outside checks."
+  },
+  "stack.errors": {
+    "title": "Error tracking",
+    "what": "When a Sentry key is set, every server, edge and browser error is reported with personal data masked. Without one, the same events are written as JSON log lines.",
+    "why": "Errors are found the moment they happen, with the request id that ties them to the API call and the ledger entries it made.",
+    "technical": "@sentry/nextjs, enabled only when SENTRY_DSN is set. sendDefaultPii is off and beforeSend runs the same masking as src/lib/log.ts (emails, phones, photo bytes, payees). Release is the git commit, environment comes from Render."
+  },
+  "page.ops": {
+    "title": "About this page",
+    "what": "How Giftwise is running, read live from the tables it already writes: every service, requests and errors by route, payments and webhooks by status, a stream of events, a week of history, and the alert conditions it watches.",
+    "why": "Anyone can see the demo is healthy without a login, and a judge can paste a request id from any API answer to see what that request did.",
+    "technical": "Reads request_log (route, status, ms, request id; kept seven days), audit_events, payments, payouts, ai_usage and check_runs. No addresses, bodies, keys or names are stored in request_log, and ids are shortened before they leave the server."
+  },
+  "ops.now": {
+    "title": "Right now",
+    "what": "Every service checked live, requests in the last hour, and the day's AI spend against its cap.",
+    "why": "The same checks as the Status page, with the two figures that change fastest beside them.",
+    "technical": "runChecks() from src/lib/health.ts; ai_usage rows since midnight Pacific, priced at Claude Opus 5.5 list rates; request_log rows in the last hour. AI_DAILY_CAP_USD sets the cap (default $2)."
+  },
+  "ops.day": {
+    "title": "Last 24 hours",
+    "what": "Requests by route with median and 95th percentile latency and the share that failed, payments by status, webhooks counted once, and AI calls with their cost.",
+    "why": "Latency and errors per route show where to look; counting webhooks once shows duplicates were seen and not reapplied.",
+    "technical": "percentile_cont over request_log.ms by route; payments and payouts grouped by status and folded into five words; audit_events whose action starts with paypal.webhook, counted by distinct event id; ai_usage grouped by route."
+  },
+  "ops.stream": {
+    "title": "Live stream",
+    "what": "The last 50 events from the audit ledger and the request log as one feed, newest first, updating every two seconds.",
+    "why": "A gift, a webhook or an API call shows here the moment it is recorded, so the ledger is seen to be written as things happen.",
+    "technical": "GET /api/ops/stream is a server-sent events stream that sends the feed every 2 s when it changed; GET /api/ops/feed returns it once. Visitors with prefers-reduced-motion get the Refresh button only. Ids are shortened and no payee, name or amount is sent."
+  },
+  "ops.chart": {
+    "title": "Reliability over time",
+    "what": "Requests and errors per hour for the last seven days.",
+    "why": "A week shows whether errors are a moment or a pattern.",
+    "technical": "request_log grouped by date_trunc('hour'), 168 points, drawn as inline SVG with the site's color tokens, so it follows the light and dark themes with no chart library."
+  },
+  "ops.trace": {
+    "title": "Trace a request",
+    "what": "Paste a request id from any API response and see that request's log line, the ledger entries it made and the AI calls it paid for.",
+    "why": "One id ties a judge's call to everything it caused, with nothing private in the answer.",
+    "technical": "The id comes from meta.request_id (or the end of any error message); api() in src/lib/api/handler.ts gives each request one, reusing an incoming x-request-id. audit() stores it in each ledger entry's detail. GET /api/ops/trace?id=."
+  },
+  "ops.alerts": {
+    "title": "Alerts",
+    "what": "The conditions Giftwise watches, each computed live: the error rate, AI spend, webhook signatures, failed payouts and the nightly outside checks.",
+    "why": "These are the same checks a pager would get. Showing them here means a problem is visible before anyone has to be paged.",
+    "technical": "Each rule is one SQL query in src/lib/ops.ts over request_log, ai_usage, audit_events, payouts and check_runs. There is no external pager; the nightly Render Workflow is the outside check."
+  },
+  "evidence.load": {
+    "title": "Under load",
+    "what": "A hundred visitors at once, each checking a gift and opening a gift page, with the time each request took and how many failed.",
+    "why": "The two paths every visitor uses must hold up when a link is shared. The numbers say how fast, and on what machine.",
+    "technical": "scripts/load-test.mjs: 100 concurrent runs for 3 rounds against the local production build, each run its own visitor (x-forwarded-for in 198.51.100.0/24), p50, p95 and p99 measured by the client. Written to content/public/load-test.json. npm run test:ledger-race fires 60 ledger appends at once for the hash chain."
+  },
+  "evidence.real": {
+    "title": "Running it for real",
+    "what": "What the demo runs on today, and what a real deployment changes.",
+    "why": "Saying the operating range plainly is part of being ready: the demo's limits are chosen for a sandbox and each one has a known next step.",
+    "technical": "One Render Starter instance (0.5 CPU, 512 MB), a 256 MB Postgres with a 1 GB disk, a $2 daily AI cap, no login on the organizer pages beyond the private manage link. render.yaml holds the current shape."
   }
 }

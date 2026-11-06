@@ -3,9 +3,10 @@ import { fail, ok } from "@/lib/api/envelope";
 import { checksAuth } from "@/lib/checks";
 import { dbConfigured } from "@/lib/db";
 import { activeMonthlyIds } from "@/lib/monthly";
+import { api } from "@/lib/api/handler";
 
 /** GET /api/ops/monthly: the active monthly gifts' ids, for the Render Workflow. Only callers with CHECKS_SECRET. */
-export async function GET(req: Request) {
+async function getRoute(req: Request) {
   await connection();
   const started = Date.now();
   const a = checksAuth(req);
@@ -14,3 +15,5 @@ export async function GET(req: Request) {
   if (!dbConfigured()) return fail("upstream_unavailable", "This needs the database.", 503);
   return ok({ ids: await activeMonthlyIds() }, started);
 }
+
+export const GET = api("/api/ops/monthly", getRoute);

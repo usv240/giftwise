@@ -1,8 +1,9 @@
 import { fail, ok } from "@/lib/api/envelope";
 import { captureAndRecord } from "@/lib/paypal/capture";
+import { api } from "@/lib/api/handler";
 
 /** Capture an approved sandbox order and record every payee's capture. Safe to call twice. */
-export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function postRoute(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const started = Date.now();
   const { id } = await ctx.params;
   if (!/^[A-Z0-9]{10,24}$/.test(id)) return fail("invalid_request", "That order id does not look right.", 400);
@@ -21,3 +22,5 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
 }
 
 const total = (c: { amount: string | null }[]) => c.reduce((s, x) => s + Number(x.amount ?? 0), 0).toFixed(2);
+
+export const POST = api("/api/paypal/orders/[id]/capture", postRoute);

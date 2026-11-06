@@ -1248,3 +1248,34 @@
     display: none;
   }
 }
+
+/* Under load, and running it for real. The load figures wrap on a phone; the two-column table wraps its text. */
+.jp-load-score {
+  white-space: normal;
+  text-align: right;
+}
+.jp-real {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+.jp-real th,
+.jp-real td {
+  padding: 10px 12px 10px 0;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--surface-2);
+}
+.jp-real thead th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+.jp-real td:first-child {
+  font-weight: 500;
+  width: 45%;
+}
+.jp-real td,
+.jp-real th {
+  overflow-wrap: anywhere;
+}

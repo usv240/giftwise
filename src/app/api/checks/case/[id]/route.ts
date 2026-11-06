@@ -5,14 +5,15 @@ import { dbConfigured } from "@/lib/db";
 import { CASES } from "@/lib/cases/list";
 import { runScenario } from "@/lib/cases/scenarios";
 import { paypalConfigured } from "@/lib/paypal/client";
+import { api } from "@/lib/api/handler";
 
 /** GET /api/checks/case/{any}: the failure cases the workflow fans out over. Public: titles only. */
-export async function GET() {
+async function getRoute() {
   return Response.json({ data: CASES.map((c) => ({ id: c.id, title: c.title })), error: null });
 }
 
 /** POST /api/checks/case/{id}: run one failure case live against the PayPal sandbox. Only the checks workflow may call it. */
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function postRoute(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await connection();
   const started = Date.now();
   const auth = checksAuth(req);
@@ -24,3 +25,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!r) return fail("not_found", "There is no failure case with that id.", 404);
   return ok(r, started);
 }
+
+export const GET = api("/api/checks/case/[id]", getRoute);
+export const POST = api("/api/checks/case/[id]", postRoute);

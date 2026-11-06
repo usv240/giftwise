@@ -1,9 +1,11 @@
 import { guard } from "@/lib/api/keys";
+import { log } from "@/lib/log";
 import sharp from "sharp";
 import { fail, ok, today } from "@/lib/api/envelope";
 import { AiRefusedError, AiUnavailableError, aiAvailable } from "@/lib/ai/claude";
 import { readBill } from "@/lib/ai/tasks";
 import { DEFAULT_PROFILE, evaluateGift } from "@/lib/rules";
+import { api } from "@/lib/api/handler";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -56,9 +58,11 @@ async function handle(req: Request) {
   } catch (e) {
     if (e instanceof AiUnavailableError) return fail("upstream_unavailable", `${e.message} Open the Wheelchair repair or Electric bill example to see the full result.`, 503);
     if (e instanceof AiRefusedError) return fail("upstream_unavailable", "The AI could not read this document. Try a clearer photo.", 422);
-    console.error("read-bill failed", e);
+    log.error("read-bill failed", { err: e });
     return fail("internal", "Something went wrong while reading the bill. Please try again.", 500);
   }
 }
 
-export const POST = (req: Request) => guard(req, "read-bill", () => handle(req));
+const postRoute = (req: Request) => guard(req, "read-bill", () => handle(req));
+
+export const POST = api("/api/v1/read-bill", postRoute);

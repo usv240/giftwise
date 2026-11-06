@@ -2,9 +2,10 @@ import { connection } from "next/server";
 import { fail, ok } from "@/lib/api/envelope";
 import { checksAuth } from "@/lib/checks";
 import { reindexRulebook } from "@/lib/rulebook";
+import { api } from "@/lib/api/handler";
 
 /** POST /api/ops/rulebook: rebuild the Elastic rulebook index from the rule files. Only callers with CHECKS_SECRET. */
-export async function POST(req: Request) {
+async function postRoute(req: Request) {
   await connection();
   const started = Date.now();
   const a = checksAuth(req);
@@ -14,3 +15,5 @@ export async function POST(req: Request) {
   if (!r.ok) return ok({ skipped: true, reason: r.reason }, started);
   return ok(r, started);
 }
+
+export const POST = api("/api/ops/rulebook", postRoute);

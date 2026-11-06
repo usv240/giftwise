@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { guard } from "@/lib/api/keys";
+import { log } from "@/lib/log";
 import { INSTRUCTIONS, SERVER_INFO, TOOLS, type ToolResult } from "@/lib/mcp/tools";
 import { publicOrigin } from "@/lib/origin";
 import { SUPPORTED_VERSIONS } from "@/lib/mcp/card";
+import { api } from "@/lib/api/handler";
 
 /**
  * The Giftwise MCP server: Model Context Protocol over Streamable HTTP, stateless, answering each JSON-RPC request with
@@ -58,7 +60,7 @@ async function handle(msg: Rpc, req: Request) {
         const r = await run(parsed.data, { origin: origin(req) });
         return reply(id, { content: [{ type: "text", text: r.text }], ...(r.data ? { structuredContent: r.data } : {}), isError: Boolean(r.isError) });
       } catch (e) {
-        console.error("mcp tool failed", t.name, e);
+        log.error("mcp tool failed", { tool: t.name, err: e });
         return reply(id, { content: [{ type: "text", text: "Giftwise could not complete that just now. Please try again." }], isError: true });
       }
     }
@@ -84,13 +86,16 @@ async function post(req: Request) {
   return Response.json(Array.isArray(body) ? out : out[0], { headers: CORS });
 }
 
-export const POST = (req: Request) => guard(req, "mcp", () => post(req));
+const postRoute = (req: Request) => guard(req, "mcp", () => post(req));
 
 /** This server does not open a server-to-client event stream. */
-export function GET() {
+function getRoute() {
   return new Response("Giftwise MCP server. Send JSON-RPC requests with POST.", { status: 405, headers: { ...CORS, Allow: "POST, OPTIONS" } });
 }
 
 export function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS });
 }
+
+export const GET = api("/api/mcp", getRoute);
+export const POST = api("/api/mcp", postRoute);

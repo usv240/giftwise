@@ -7,6 +7,7 @@ import { connectPayPalMcp, type PayPalMcpClient } from "./agent/paypal-mcp";
 import { rulesWatch } from "./rules-watch";
 import { channel3Configured } from "./channel3";
 import { elasticConfigured } from "./rulebook";
+import { RELEASE, sentryEnabled } from "./sentry";
 import pkg from "../../package.json";
 
 /** Versions as the project pins them; "npm:@bryntum/calendar-trial@7.3.7" reads as 7.3.7. */
@@ -107,6 +108,12 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       detail: elasticConfigured() ? "Hybrid keyword and semantic search with jina-embeddings-v3, reranked by jina-reranker-v3, over the regulations, SSA's manual and its worked examples" : "Ask the rulebook uses the in-app keyword search until ELASTIC_URL and ELASTIC_API_KEY are set",
     },
     { id: "database", name: "Postgres", mode: database?.ok ? "live" : "not_connected", detail: database ? database.detail : "DATABASE_URL not set", ms: database?.ms },
+    {
+      id: "errors",
+      name: "Error tracking",
+      mode: sentryEnabled() ? "live" : "not_connected",
+      detail: sentryEnabled() ? `Sentry receives server, edge and browser errors with personal data masked${RELEASE ? `, release ${RELEASE.slice(0, 7)}` : ""}` : "SENTRY_DSN not set; every event is still written as a JSON log line with its request id",
+    },
     {
       id: "checks",
       name: "Outside checks",

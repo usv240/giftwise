@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
@@ -57,6 +58,13 @@ export default function StatusPage() {
           <Info id="page.status" />
         </div>
         <p className="lede">Every service Giftwise uses, checked live when you open this page. When a service is not reachable, Giftwise switches to its fallback so nothing breaks.</p>
+        <p className="page-prose">
+          For requests, errors, payments and a live event stream, see{" "}
+          <Link className="text-link" href="/ops">
+            Operations
+          </Link>
+          .
+        </p>
       </header>
       <Suspense fallback={<p className="page-loading">Checking every service…</p>}>
         <Rows />

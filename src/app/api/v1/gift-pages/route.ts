@@ -5,6 +5,7 @@ import { clientId, guard } from "@/lib/api/keys";
 import { GiftPageRequest } from "@/lib/api/schemas";
 import { db, dbConfigured, schema } from "@/lib/db";
 import { createGiftPage } from "@/lib/households";
+import { api } from "@/lib/api/handler";
 
 const PER_DAY = 5;
 
@@ -29,4 +30,6 @@ async function handle(req: Request) {
   return ok({ slug: page.slug, url: `/g/${page.slug}`, manage_url: `/manage/${page.manageToken}`, needs: page.needs }, started);
 }
 
-export const POST = (req: Request) => guard(req, "gift-pages", () => handle(req));
+const postRoute = (req: Request) => guard(req, "gift-pages", () => handle(req));
+
+export const POST = api("/api/v1/gift-pages", postRoute);

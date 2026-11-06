@@ -1,6 +1,7 @@
 import { and, eq, ne, sql } from "drizzle-orm";
 import { audit } from "../audit";
 import { db, schema } from "../db";
+import { log } from "../log";
 import { paypalRest } from "./client";
 import { notifyGift } from "../manage";
 import { publicOrigin } from "../origin";
@@ -68,6 +69,7 @@ export async function captureAndRecord(orderId: string, opts: { mock?: "INSTRUME
       .set({ status: declined ? "declined" : "failed", debugId: info.debugId })
       .where(and(eq(schema.payments.orderId, orderId), ne(schema.payments.status, "captured")));
     await audit(actor, declined ? "paypal.payment.declined" : "paypal.capture.failed", `order:${orderId}`, { issue });
+    log.warn(declined ? "payment declined" : "capture failed", { orderId, issue, debugId: info.debugId, status: info.status, actor });
     return { kind: declined ? "declined" : "failed", plain: PLAIN[issue] ?? "PayPal could not complete this step. Please try again.", ...info };
   }
   return record(orderId, rows, body, actor);
@@ -138,6 +140,7 @@ async function record(orderId: string, rows: PaymentRow[], body: PayPalOrder, ac
   // The ledger gets one entry per capture, from whichever call recorded it.
   if (flippedHere.length) {
     await audit(actor, "paypal.order.captured", `order:${orderId}`, { captures: flippedHere.map((c) => ({ ref: c.reference_id, capture: c.capture_id, amount: c.amount })) });
+    log.info("order captured", { orderId, captures: flippedHere.map((c) => c.capture_id), actor });
     // Tell the organizer's webhook (a Zapier Catch Hook, say) without holding up the giver's thank-you.
     void notifyGift(orderId, publicOrigin()).catch(() => undefined);
   }

@@ -1,8 +1,9 @@
 import { fail } from "@/lib/api/envelope";
 import { getPreset, presetCsv, runPreset } from "@/lib/presets";
+import { api } from "@/lib/api/handler";
 
 /** GET /api/presets/:id downloads a preset's input and the engine's current answer. ?format=csv for gift lists. */
-export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function getRoute(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const p = getPreset(id);
   if (!p) return fail("not_found", "No preset with that id. See /developers/docs for the list.", 404);
@@ -22,3 +23,5 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     headers: { "Content-Type": "application/json; charset=utf-8", "Content-Disposition": `attachment; filename="giftwise-${id}.json"` },
   });
 }
+
+export const GET = api("/api/presets/[id]", getRoute);

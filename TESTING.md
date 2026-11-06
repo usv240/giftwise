@@ -175,6 +175,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |
 | Audit ledger | `npm run verify-ledger` | "Ledger verified" |
+| Under load, 100 visitors at once on the free paths (writes `content/public/load-test.json`) | `npm run test:load` | Error rate 0% on both paths |
 | Types and lint | `npm run typecheck`, `npm run lint` | No errors |
 | Dependency audit, every severity | `npm audit` | 0 vulnerabilities |
 

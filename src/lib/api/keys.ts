@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
-import { and, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { db, dbConfigured, schema } from "../db";
+import { hit } from "../rate-limit";
 import { fail } from "./envelope";
 
 const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -35,14 +36,6 @@ function bearer(req: Request) {
   return req.headers.get("x-api-key")?.trim() || null;
 }
 
-async function countSince(where: ReturnType<typeof eq>, seconds: number) {
-  const [r] = await db()
-    .select({ n: sql<number>`count(*)::int` })
-    .from(schema.apiRequests)
-    .where(and(where, gte(schema.apiRequests.at, new Date(Date.now() - seconds * 1000))));
-  return r?.n ?? 0;
-}
-
 function withHeaders(res: Response, headers: Record<string, string>) {
   const h = new Headers(res.headers);
   for (const [k, v] of Object.entries(headers)) h.set(k, v);
@@ -52,7 +45,8 @@ function withHeaders(res: Response, headers: Record<string, string>) {
 /**
  * Every public API call goes through here. A key is optional: without one, calls use the demo tier
  * (20 a minute per client), which is what this site's own pages use. With a key: 60 a minute and
- * 1,000 a day, and the call shows up on the key's usage page.
+ * 1,000 a day, and the call shows up on the key's usage page. The counts live in the rate_limit table
+ * (src/lib/rate-limit.ts), so they hold across instances and deploys; api_requests keeps the usage page's rows.
  */
 export async function guard(req: Request, endpoint: string, handler: () => Promise<Response>) {
   if (!dbConfigured()) return handler();
@@ -72,16 +66,16 @@ export async function guard(req: Request, endpoint: string, handler: () => Promi
     if (!key) return fail("unauthorized", "That API key is not valid or was revoked. Create a new one on the Developers page.", 401);
     keyId = key.id;
     limit = LIMITS.keyPerMinute;
-    const [minute, day] = await Promise.all([countSince(eq(schema.apiRequests.keyId, key.id), 60), countSince(eq(schema.apiRequests.keyId, key.id), 86400)]);
-    if (day >= LIMITS.keyPerDay) return withHeaders(fail("rate_limited", "This key has made 1,000 requests today. The limit resets over the next 24 hours.", 429), { "Retry-After": "3600" });
-    if (minute >= limit) return withHeaders(fail("rate_limited", "Too many requests this minute. Please wait a moment and try again.", 429), { "Retry-After": "60" });
-    remaining = limit - minute - 1;
+    const [minute, day] = await Promise.all([hit(`key:${key.id}:minute`, 60, limit), hit(`key:${key.id}:day`, 86400, LIMITS.keyPerDay)]);
+    if (!day.allowed) return withHeaders(fail("rate_limited", "This key has made 1,000 requests today. The limit resets over the next 24 hours.", 429), { "Retry-After": "3600" });
+    if (!minute.allowed) return withHeaders(fail("rate_limited", "Too many requests this minute. Please wait a moment and try again.", 429), { "Retry-After": "60" });
+    remaining = minute.remaining;
   } else {
-    const minute = await countSince(eq(schema.apiRequests.client, client), 60);
-    if (minute >= limit) {
+    const minute = await hit(`client:${client}:minute`, 60, limit);
+    if (!minute.allowed) {
       return withHeaders(fail("rate_limited", "Too many requests this minute. Wait a moment, or use a free API key for higher limits.", 429), { "Retry-After": "60" });
     }
-    remaining = limit - minute - 1;
+    remaining = minute.remaining;
   }
 
   const res = await handler();

@@ -11,10 +11,12 @@ export function dbConfigured() {
 }
 
 function pool() {
-  // One pool per server process, reused across hot reloads in development.
+  // One pool per server process, reused across hot reloads in development. Ten connections: every API request now
+  // makes two or three short queries (the rate limit, the usage row, the request log), and a hundred visitors at once
+  // queue behind five. Render's 256 MB Postgres allows about 97, so one instance at ten leaves room for the workflow.
   globalThis.__giftwisePool ??= new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 5,
+    max: Number(process.env.PG_POOL_MAX) || 10,
     ssl: process.env.DATABASE_URL?.includes("render.com") ? { rejectUnauthorized: false } : undefined,
   });
   return globalThis.__giftwisePool;

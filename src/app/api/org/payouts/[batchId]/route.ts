@@ -1,12 +1,13 @@
 import { fail, ok } from "@/lib/api/envelope";
 import { batchRows, syncBatch } from "@/lib/paypal/payouts";
 import { reportedTransactions } from "@/lib/paypal/reporting";
+import { api } from "@/lib/api/handler";
 
 /**
  * GET /api/org/payouts/{batchId}: the batch as PayPal reports it now, each item's status, and whether each paid item
  * already appears in PayPal's Transaction Search report.
  */
-export async function GET(_req: Request, { params }: { params: Promise<{ batchId: string }> }) {
+async function getRoute(_req: Request, { params }: { params: Promise<{ batchId: string }> }) {
   const started = Date.now();
   const { batchId } = await params;
   if (!/^[A-Z0-9]{8,30}$/.test(batchId)) return fail("invalid_request", "That is not a PayPal payout batch id.", 400);
@@ -34,3 +35,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ batchId
     { source: "PayPal Payouts and Transaction Search, live" },
   );
 }
+
+export const GET = api("/api/org/payouts/[batchId]", getRoute);

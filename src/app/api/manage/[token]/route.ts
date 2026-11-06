@@ -2,13 +2,14 @@ import { fail, ok } from "@/lib/api/envelope";
 import { ManagePageRequest } from "@/lib/api/schemas";
 import { dbConfigured } from "@/lib/db";
 import { manageView, updatePage } from "@/lib/manage";
+import { api } from "@/lib/api/handler";
 
 type Ctx = { params: Promise<{ token: string }> };
 const noDb = () => fail("upstream_unavailable", "Managing a page needs the database, which is not connected on this server.", 503);
 const notFound = () => fail("not_found", "That manage link does not match any page.", 404);
 
 /** GET /api/manage/{token}: the page, its needs and the gifts received, for the organizer. */
-export async function GET(_req: Request, { params }: Ctx) {
+async function getRoute(_req: Request, { params }: Ctx) {
   const started = Date.now();
   if (!dbConfigured()) return noDb();
   const v = await manageView((await params).token);
@@ -37,7 +38,7 @@ export async function GET(_req: Request, { params }: Ctx) {
 }
 
 /** PATCH /api/manage/{token}: change the note, or close and reopen the page. */
-export async function PATCH(req: Request, { params }: Ctx) {
+async function patchRoute(req: Request, { params }: Ctx) {
   const started = Date.now();
   if (!dbConfigured()) return noDb();
   const parsed = ManagePageRequest.safeParse(await req.json().catch(() => null));
@@ -46,3 +47,6 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (!row) return notFound();
   return ok({ status: row.status, note: row.note }, started);
 }
+
+export const GET = api("/api/manage/[token]", getRoute);
+export const PATCH = api("/api/manage/[token]", patchRoute);

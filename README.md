@@ -52,6 +52,22 @@ The demo runs in PayPal's sandbox. Here is what changes when real money moves. T
 - **Timing matters for rent help.** STABLE and CalABLE hold gifts made through a gift page for 10 business days before they can be withdrawn. Housing money taken out of an ABLE account should be spent that month ([POMS SI 01130.740](https://secure.ssa.gov/poms.nsf/lnx/0501130740)), so rent help through ABLE works best about two weeks before the bill is due.
 - **Fees:** US buyers pay [no PayPal fee](https://www.paypal.com/us/digital-wallet/paypal-consumer-fees) when no currency conversion is involved, and the shop pays PayPal's usual [merchant fee](https://www.paypal.com/us/business/paypal-business-fees). The demo adds nothing on top. On PayPal's partner program, a platform fee can be set per order (`payment_instruction.platform_fees`, shown to the shop as partner commissions), so Giftwise could cover its costs without charging the giver or the person on SSI ([multiparty](https://developer.paypal.com/docs/multiparty/)).
 
+### Running it for real
+
+The hosted demo is sized for a sandbox and says so on [`/evidence#real`](https://giftwise-405i.onrender.com/evidence#real). Each limit is an operating range with a known next step:
+
+| The demo runs on | A real deployment changes it to |
+|---|---|
+| One Render Starter web instance (0.5 CPU, 512 MB), always on | Several instances behind Render's load balancer with autoscaling; the rate limits and request log already live in Postgres, so nothing is per-instance |
+| One 256 MB Postgres with a 1 GB disk, no pooler | A larger Postgres with a connection pooler (PgBouncer or Render's), point-in-time recovery, and a restore tested on a schedule |
+| Share images rendered on request; no uploads kept | Object storage with signed URLs for anything a family uploads (bills, photos), never the database |
+| About $2 of Claude a day, capped and shown on `/ops` | A budget per organization, with the same per-call accounting |
+| No login: the organizer's page is a private link shown once and stored as a hash; the organizations page is a sample fund | Login and roles for organizations (who can send a batch, who can only view), with the manage link kept for families |
+| One PayPal sandbox app and one webhook | A registered webhook per environment (sandbox, staging, production), each with its own `PAYPAL_WEBHOOK_ID` |
+| Nightly outside checks on Render Workflows | The same checks on every deploy, plus Sentry (`SENTRY_DSN`) wired for server, edge and browser with personal data masked |
+
+What stays the same: structured JSON logs with a request id on every line, limits and logs in Postgres, the audit ledger, the public `/ops` page, and the Render Workflows fan-out for anything that runs in the background (the nightly checks, `monthlyRun` on the 1st, `rulebookIndex` weekly): one task per unit of work, in parallel, with retries, started by cron or the Render SDK.
+
 ## Who runs it first
 
 Three groups already help people on SSI with money every month, and each can run Giftwise as it is today. The comparison with fundraising sites, PayPal.me, ABLE gift pages and paying the shop yourself is on [`/judges#compare`](https://giftwise-405i.onrender.com/judges#compare).
@@ -102,6 +118,7 @@ Each page follows published research for its readers, and a design review with t
 - **For organizations:** `/organizations` lets a fund that already holds money for families (a disability foundation, a mutual-aid fund, a church) pay many households' needs in one PayPal Payouts batch. The rules engine routes each grant, **Preview where each dollar goes** shows the split before anything can be sent, every item goes straight to the shop or the ABLE account, and Transaction Search confirms each payout in PayPal's own report.
 - **Developer API:** free sandbox keys stored only as hashes, rate limits, OpenAPI 3.1 at `/openapi.json`, a live playground at `/developers`, and docs at `/developers/docs` with every field described and an example request and response for each endpoint (computed from the real handlers, or recorded from the live API).
 - **The rules engine as a package:** [`packages/ssi-gift-rules`](packages/ssi-gift-rules) builds the same engine into a dependency-free npm package with ESM, CommonJS and types, and its test checks the build gives the same answer as the published results on every SSA worked example.
+- **Observable, and safe to run on more than one instance:** every API request gets a request id (an incoming `x-request-id` is kept), one JSON log line per event with secrets, payees, photo bytes and emails masked, and every error message ends with "Request id: …". Rate limits live in a Postgres `rate_limit` table (one upsert decides), so they hold across instances and deploys. [`/ops`](https://giftwise-405i.onrender.com/ops) shows it all to anyone: services, latency and error rate by route, payments and webhooks by status, a live event stream, a week of history, a box to trace any request id, and the alert conditions it watches. Set `SENTRY_DSN` and server, edge and browser errors go to Sentry with the same masking.
 - **Design:** light by default with dark and system themes, phone and desktop, Plain and Technical explanations, Info buttons beside each rule and decision (in Spanish on the Spanish pages), and WCAG 2.2 AA checked with axe on 108 page views.
 
 Built with Next.js 16, React 19, TypeScript, Postgres 17, Drizzle, AG Studio 3.0, Bryntum Calendar 7.3, Channel3, Elasticsearch, Postman and Zapier webhooks, hosted on Render with Render Workflows.
@@ -145,6 +162,7 @@ Every push runs [CI](.github/workflows/ci.yml): `npm audit` at every severity (0
 | Outside checks, as the nightly Render Workflow runs them | `npm run checks:local` | 24 of 24 |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | 100,000 of 100,000 keep all twelve promises |
 | 60 ledger appends at once keep the hash chain whole | `npm run test:ledger-race` | Chain verifies |
+| Under load: 100 visitors at once, each a gift check and the gift page, 3 rounds | `npm run test:load` | p50, p95, p99 and the error rate on [`/evidence#load`](https://giftwise-405i.onrender.com/evidence#load) |
 
 Set `BASE_URL` to run the end-to-end suites against a deployed copy.
 

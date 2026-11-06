@@ -1,8 +1,9 @@
 import { fail, ok } from "@/lib/api/envelope";
 import { describePayPalError, getOrder } from "@/lib/paypal/orders";
+import { api } from "@/lib/api/handler";
 
 /** GET /api/paypal/orders/{id}: the order as PayPal sees it right now (status, each payee, each capture). */
-export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function getRoute(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const started = Date.now();
   const { id } = await ctx.params;
   if (!/^[A-Z0-9]{10,24}$/.test(id)) return fail("invalid_request", "That order id does not look right.", 400);
@@ -27,3 +28,5 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     return fail("upstream_unavailable", d.plain, d.status >= 400 && d.status < 600 ? d.status : 502, { issue: d.issue });
   }
 }
+
+export const GET = api("/api/paypal/orders/[id]", getRoute);

@@ -1,4 +1,4 @@
-import { boolean, integer, jsonb, numeric, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, numeric, pgTable, primaryKey, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const households = pgTable(
   "households",
@@ -191,4 +191,45 @@ export const monthlyRuns = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("monthly_runs_gift_month_idx").on(t.monthlyGiftId, t.month)],
+);
+
+/**
+ * Rate limits that hold across instances: one row per bucket and window, bumped by one upsert (src/lib/rate-limit.ts).
+ * Rows older than a day are pruned from the same code path.
+ */
+export const rateLimit = pgTable("rate_limit", { bucket: text("bucket").notNull(), windowStart: timestamp("window_start", { withTimezone: true }).notNull(), count: integer("count").notNull().default(0) }, (t) => [primaryKey({ columns: [t.bucket, t.windowStart] })]);
+
+/** One row per API request: route pattern, status and duration, with the request id the envelope returned. No addresses, bodies or keys. Kept seven days. */
+export const requestLog = pgTable(
+  "request_log",
+  {
+    id: serial("id").primaryKey(),
+    requestId: text("request_id").notNull(),
+    route: text("route").notNull(),
+    method: text("method").notNull().default("GET"),
+    status: integer("status").notNull(),
+    ms: integer("ms").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("request_log_created_idx").on(t.createdAt), index("request_log_request_idx").on(t.requestId)],
+);
+
+/** One row per Claude call: tokens and the cost they imply, by route, so /ops can show the day's spend against its cap. Never the prompt or the answer. */
+export const aiUsage = pgTable(
+  "ai_usage",
+  {
+    id: serial("id").primaryKey(),
+    requestId: text("request_id"),
+    route: text("route").notNull().default(""),
+    model: text("model").notNull(),
+    inputTokens: integer("input_tokens").notNull().default(0),
+    outputTokens: integer("output_tokens").notNull().default(0),
+    cacheReadTokens: integer("cache_read_tokens").notNull().default(0),
+    costUsd: numeric("cost_usd", { precision: 10, scale: 6 }).notNull().default("0"),
+    ms: integer("ms").notNull().default(0),
+    /** True when a local test replayed a saved answer from AI_CACHE_DIR, so nothing was paid. */
+    replayed: boolean("replayed").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("ai_usage_created_idx").on(t.createdAt)],
 );

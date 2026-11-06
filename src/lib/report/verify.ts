@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import { ledgerRows, verifyChain } from "../audit";
 import { db, dbConfigured, schema } from "../db";
+import { log } from "../log";
 import { paypalConfigured, paypalRest } from "../paypal/client";
 import { buildReport, type ReportLine, type SsaReport } from "./ssa";
 import { giftSubject } from "./data";
@@ -157,6 +158,7 @@ export async function verifyReport(slug: string, month: string, code: string, to
   const reachable = !live ? false : [...orders.values(), ...batches.values()].every((v) => v !== null);
   const codeMatches = code.toUpperCase() === currentCode;
   const verdict = !codeMatches ? "changed" : confirmed === paypalLines.length && chain.ok ? "matches" : "unconfirmed";
+  log.info("report verified", { slug, month, verdict, codeMatches, paypalAsked: paypalLines.length, confirmed, ledgerOk: chain.ok, orders: orderIds.length, batches: batchIds.length });
   return {
     slug,
     name: subject.name,

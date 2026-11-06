@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
 import { audit } from "@/lib/audit";
 import { db, dbConfigured, schema } from "@/lib/db";
+import { log } from "@/lib/log";
 import { captureAndRecord, syncFromPayPal } from "@/lib/paypal/capture";
 import { paypalConfigured, paypalRest } from "@/lib/paypal/client";
 import { syncBatch } from "@/lib/paypal/payouts";
+import { api } from "@/lib/api/handler";
 
 /**
  * POST /api/paypal/webhook: PayPal tells Giftwise when a checkout is approved, a payment completes, or one is
@@ -37,13 +39,17 @@ async function verified(req: Request, event: unknown) {
   return r.status === 200 && r.body.verification_status === "SUCCESS";
 }
 
-export async function POST(req: Request) {
+async function postRoute(req: Request) {
   if (!process.env.PAYPAL_WEBHOOK_ID?.trim() || !paypalConfigured() || !dbConfigured()) {
     return Response.json({ received: false, reason: "Webhooks are not configured on this server." }, { status: 503 });
   }
   const event = (await req.json().catch(() => null)) as Event | null;
   if (!event?.id || !event.event_type) return Response.json({ received: false, reason: "Not a PayPal event." }, { status: 400 });
-  if (!(await verified(req, event))) return Response.json({ received: false, reason: "Signature not verified." }, { status: 400 });
+  if (!(await verified(req, event))) {
+    log.warn("webhook not verified", { eventId: event.id, type: event.event_type });
+    await audit("webhook", "paypal.webhook.unverified", `event:${event.id}`, { eventId: event.id, type: event.event_type });
+    return Response.json({ received: false, reason: "Signature not verified." }, { status: 400 });
+  }
 
   const type = event.event_type;
   const r = event.resource ?? {};
@@ -67,5 +73,8 @@ export async function POST(req: Request) {
   }
 
   await audit("webhook", `paypal.webhook.${type.toLowerCase()}`, orderId ? `order:${orderId}` : `capture:${captureId ?? event.id}`, { eventId: event.id, captureId, orderId, status: r.status ?? null, result });
+  log.info("webhook handled", { eventId: event.id, type, orderId, captureId, result });
   return Response.json({ received: true });
 }
+
+export const POST = api("/api/paypal/webhook", postRoute);

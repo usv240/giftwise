@@ -59,6 +59,9 @@ services:
         sync: false
       - key: NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY
         sync: false
+      # Optional: error tracking. Unset, the app logs JSON lines only; set, Sentry gets masked server, edge and browser errors.
+      - key: SENTRY_DSN
+        sync: false
       # Optional: each has a working fallback until it is set (sample products; the in-app rulebook search).
       - key: CHANNEL3_API_KEY
         sync: false

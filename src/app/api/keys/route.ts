@@ -5,6 +5,7 @@ import { fail, ok } from "@/lib/api/envelope";
 import { LIMITS, OWNER_COOKIE, clientId, issueKey, newOwnerId } from "@/lib/api/keys";
 import { audit } from "@/lib/audit";
 import { db, dbConfigured, schema } from "@/lib/db";
+import { api } from "@/lib/api/handler";
 
 const Body = z.object({
   name: z.string().trim().min(1).max(80),
@@ -16,7 +17,7 @@ const Body = z.object({
 const count = sql<number>`count(*)::int`;
 
 /** POST /api/keys: create a free sandbox key. The full key is returned once and never stored. */
-export async function POST(req: Request) {
+async function postRoute(req: Request) {
   const started = Date.now();
   if (!dbConfigured()) return fail("upstream_unavailable", "API keys need the database, which is not connected on this server.", 503);
   const parsed = Body.safeParse(await req.json().catch(() => null));
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
 }
 
 /** GET /api/keys: keys created in this browser, with usage. */
-export async function GET() {
+async function getRoute() {
   const started = Date.now();
   const empty = { keys: [], requests: [], days: [] };
   if (!dbConfigured()) return ok(empty, started);
@@ -84,3 +85,6 @@ export async function GET() {
     started,
   );
 }
+
+export const GET = api("/api/keys", getRoute);
+export const POST = api("/api/keys", postRoute);

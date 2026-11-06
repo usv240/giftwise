@@ -4,8 +4,48 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import { db, dbConfigured, schema } from "../db";
+import { log, requestContext } from "../log";
 
 export const MODEL = "claude-opus-5-5";
+
+/** Claude Opus 5.5 list prices per million tokens (input, output, cache read), used to put a dollar figure on each call. */
+const PRICE = { input: 4, output: 20, cacheRead: 0.2 } as const;
+/** The demo's daily AI budget; /ops shows spend against it. */
+export const AI_DAILY_CAP_USD = Number(process.env.AI_DAILY_CAP_USD) || 2;
+
+type Usage = { input_tokens?: number | null; output_tokens?: number | null; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null } | null | undefined;
+
+export function costOf(usage: Usage) {
+  const inTok = usage?.input_tokens ?? 0;
+  const outTok = usage?.output_tokens ?? 0;
+  const cached = usage?.cache_read_input_tokens ?? 0;
+  const written = usage?.cache_creation_input_tokens ?? 0;
+  return (inTok * PRICE.input + written * PRICE.input * 1.25 + cached * PRICE.cacheRead + outTok * PRICE.output) / 1_000_000;
+}
+
+/** One row per call: tokens, cost and the route it served. A replayed answer from AI_CACHE_DIR costs nothing and says so. */
+export async function recordAiUsage(o: { model: string; usage: Usage; ms: number; replayed: boolean }) {
+  const ctx = requestContext();
+  const cost = o.replayed ? 0 : costOf(o.usage);
+  log.info("ai call", { model: o.model, inputTokens: o.usage?.input_tokens ?? 0, outputTokens: o.usage?.output_tokens ?? 0, cacheReadTokens: o.usage?.cache_read_input_tokens ?? 0, costUsd: Number(cost.toFixed(6)), ms: o.ms, replayed: o.replayed });
+  if (!dbConfigured()) return;
+  try {
+    await db().insert(schema.aiUsage).values({
+      requestId: ctx?.requestId ?? null,
+      route: ctx?.route ?? "",
+      model: o.model,
+      inputTokens: o.usage?.input_tokens ?? 0,
+      outputTokens: o.usage?.output_tokens ?? 0,
+      cacheReadTokens: o.usage?.cache_read_input_tokens ?? 0,
+      costUsd: cost.toFixed(6),
+      ms: o.ms,
+      replayed: o.replayed,
+    });
+  } catch (err) {
+    log.warn("ai usage write failed", { err });
+  }
+}
 const FALLBACK_BETA = "server-side-fallback-2026-07-01";
 
 let client: Anthropic | null = null;
@@ -46,7 +86,7 @@ export function aiError(e: unknown): unknown {
   const account = e.status === 401 || e.status === 403 || (e.status === 400 && /credit balance|billing|plans? & billing/i.test(e.message));
   if (account) {
     pausedUntil = Date.now() + PAUSE_MS;
-    console.error(`Claude API turned the account away (${e.status}); AI features use their fallbacks for three minutes.`);
+    log.error("Claude API turned the account away; AI features use their fallbacks for three minutes", { status: e.status });
     return new AiUnavailableError("The AI service is not available on this server just now, so the ready-made examples are shown.");
   }
   if (e.status === 429 || (e.status !== undefined && e.status >= 500)) return new AiUnavailableError("The AI service is busy just now. Please try again in a minute.");
@@ -60,18 +100,23 @@ export function aiError(e: unknown): unknown {
  * set AI_CACHE_DIR, so they always call Claude live.
  */
 export async function replayable<T>(params: unknown, call: () => Promise<T>): Promise<T> {
+  return (await replayableWithSource(params, call)).value;
+}
+
+/** replayable, and whether the answer came from disk. */
+export async function replayableWithSource<T>(params: unknown, call: () => Promise<T>): Promise<{ value: T; replayed: boolean }> {
   const dir = process.env.AI_CACHE_DIR;
-  if (!dir) return call();
+  if (!dir) return { value: await call(), replayed: false };
   const file = path.join(dir, `${createHash("sha256").update(JSON.stringify(params)).digest("hex")}.json`);
   try {
-    return JSON.parse(await readFile(file, "utf8")) as T;
+    return { value: JSON.parse(await readFile(file, "utf8")) as T, replayed: true };
   } catch {
     /* not stored yet */
   }
-  const res = await call();
+  const value = await call();
   await mkdir(dir, { recursive: true });
-  await writeFile(file, JSON.stringify(res));
-  return res;
+  await writeFile(file, JSON.stringify(value));
+  return { value, replayed: false };
 }
 
 /**
@@ -96,12 +141,15 @@ export async function structured<S extends z.ZodType>(opts: {
     output_config: { effort: opts.effort ?? "medium", format: betaZodOutputFormat(opts.schema) },
     messages: [{ role: "user" as const, content: opts.content }],
   };
-  const res = await replayable(params, async () => {
+  const t = Date.now();
+  const { value: res, replayed } = await replayableWithSource(params, async () => {
     const r = await c.beta.messages.parse(params).catch((e: unknown) => {
+      log.warn("ai call failed", { model: MODEL, err: e, ms: Date.now() - t });
       throw aiError(e);
     });
     return { parsed_output: r.parsed_output, usage: r.usage, model: r.model, stop_reason: r.stop_reason };
   });
+  await recordAiUsage({ model: res.model ?? MODEL, usage: res.usage as Usage, ms: Date.now() - t, replayed });
   if (res.stop_reason === "refusal" || !res.parsed_output) {
     throw new AiRefusedError("The AI could not complete this request.");
   }

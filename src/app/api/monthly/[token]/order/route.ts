@@ -2,6 +2,7 @@ import { z } from "zod";
 import { fail, ok, today } from "@/lib/api/envelope";
 import { attachOrder, monthlyView, needsForMonth, orderMonths, planFor } from "@/lib/monthly";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
+import { api } from "@/lib/api/handler";
 
 const Body = z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) });
 
@@ -9,7 +10,7 @@ const Body = z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) });
  * Create the PayPal order for one month of a monthly gift. The rules run again at this moment, on the needs as they
  * stand now, so the order matches what PayPal is about to pay even if someone else gave since the month was planned.
  */
-export async function POST(req: Request, ctx: { params: Promise<{ token: string }> }) {
+async function postRoute(req: Request, ctx: { params: Promise<{ token: string }> }) {
   const started = Date.now();
   const { token } = await ctx.params;
   const parsed = Body.safeParse(await req.json().catch(() => null));
@@ -31,3 +32,5 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
   await attachOrder(token, month, r.orderId);
   return ok({ id: r.orderId, status: r.status, plan: r.plan }, started);
 }
+
+export const POST = api("/api/monthly/[token]/order", postRoute);

@@ -6,6 +6,7 @@ import billResults from "../../../content/eval-results.json";
 import fieldResults from "../../../content/eval/field-cases-results.json";
 import ssaResults from "../../../content/eval/ssa-examples-results.json";
 import invResults from "../../../content/eval/invariants-results.json";
+import loadTest from "../../../content/public/load-test.json";
 import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
 import { Adoption } from "@/components/judges/Adoption";
@@ -90,7 +91,7 @@ const PARTS: Part[] = [
     line: "One PayPal order pays several payees, and Claude's structured outputs are checked by a deterministic rules engine.",
     more: "Every part, from capture to webhooks",
     where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, PayPal's own MCP server, and Claude structured outputs checked by a deterministic rules engine that keeps twelve promises across 100,000 random gifts.",
-    links: [["/status", "Status"], ["/stack", "Stack"], ["#invariants", "100,000 gifts"]],
+    links: [["/status", "Status"], ["/ops", "Operations"], ["/stack", "Stack"], ["#invariants", "100,000 gifts"], ["#load", "Under load"]],
   },
 
   {
@@ -153,7 +154,20 @@ const TOC = [
   ["#compare", "How it compares"],
   ["#adoption", "Who runs it first"],
   ["#tests", "Test results"],
+  ["#load", "Under load"],
+  ["#real", "Running it for real"],
 ] as const;
+
+/** What the demo runs on, and what a real deployment changes. Each row is an operating range with a known next step. */
+const REAL: [string, string][] = [
+  ["One Render Starter web instance (0.5 CPU, 512 MB), always on", "Several instances with autoscaling; rate limits and the request log already live in Postgres, so nothing is per instance"],
+  ["One 256 MB Postgres with a 1 GB disk, no pooler", "A larger Postgres with a connection pooler, point-in-time recovery, and a restore tested on a schedule"],
+  ["Share images rendered on request; no uploads kept", "Object storage with signed URLs for anything a family uploads, never the database"],
+  ["About $2 of Claude a day, capped and shown on the Operations page", "A budget per organization, with the same per-call accounting"],
+  ["No login: the organizer's page is a private link shown once and stored as a hash; the organizations page is a sample fund", "Login and roles for organizations, with the manage link kept for families"],
+  ["One PayPal sandbox app and one webhook", "A registered webhook per environment, each with its own webhook id"],
+  ["Nightly outside checks on Render Workflows; errors as JSON log lines", "The same checks on every deploy, plus Sentry for server, edge and browser errors with personal data masked"],
+];
 
 export default function EvidencePage() {
   return (
@@ -470,6 +484,77 @@ export default function EvidencePage() {
             </div>
           </details>
         </div>
+      </section>
+
+      <section id="load" className="page-section" aria-labelledby="load-h">
+        <div className="title-row">
+          <h2 id="load-h">Under load</h2>
+
+          <Info id="evidence.load" label="" />
+
+        </div>
+        <p className="page-prose jp-intro">
+          {loadTest.concurrency} visitors at once, each checking a gift and opening Maya&rsquo;s page, {loadTest.rounds} rounds: {loadTest.total_requests.toLocaleString("en-US")} requests in {(loadTest.total_ms / 1000).toFixed(1)} seconds, {loadTest.requests_per_second} a second. Beside it, the ledger race test fires 60 appends at once and the hash chain verifies.
+        </p>
+        <ul className="jp-tests" aria-label="Each path, with its latency and error rate">
+
+          {loadTest.paths.map((p) => (
+            <li key={p.id} className="jp-test">
+              <span className="jp-test-name">{p.label}</span>
+              <span className="jp-test-score jp-load-score tabular">
+                p50 {p.p50_ms} ms, p95 {p.p95_ms} ms, p99 {p.p99_ms} ms, {p.errors} of {p.requests} failed
+              </span>
+            </li>
+          ))}
+
+        </ul>
+        <div className="jx-more">
+          <details className="jx-disc">
+            <summary>The exact method and machine</summary>
+            <div className="jx-body">
+              <p className="jp-test-what">{loadTest.method}</p>
+              <p className="jp-test-what">Machine: {loadTest.machine}.</p>
+              <p className="jp-test-cmd tabular">
+                npm run test:load, {new Date(loadTest.ran_at).toLocaleDateString("en-US", { dateStyle: "long" })}
+              </p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section id="real" className="page-section" aria-labelledby="real-h">
+        <div className="title-row">
+          <h2 id="real-h">Running it for real</h2>
+
+          <Info id="evidence.real" label="" />
+
+        </div>
+        <p className="page-prose jp-intro">What the demo runs on today, and what a real deployment changes. Each row is an operating range with a known next step.</p>
+        <table className="jp-real">
+          <thead>
+            <tr>
+              <th scope="col">The demo runs on</th>
+              <th scope="col">A real deployment changes it to</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            {REAL.map(([now, real]) => (
+              <tr key={now}>
+                <td>{now}</td>
+                <td>{real}</td>
+              </tr>
+            ))}
+
+          </tbody>
+        </table>
+        <p className="page-prose jp-intro">
+          What stays the same: JSON logs with a request id on every line, limits and logs in Postgres, the audit ledger, the{" "}
+          <Link className="text-link" href="/ops">
+            Operations page
+          </Link>
+          , and the Render Workflows fan-out for anything that runs in the background: one task per unit of work, in parallel, with retries.
+        </p>
       </section>
     </div>
   );

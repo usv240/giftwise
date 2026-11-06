@@ -3,13 +3,14 @@ import { ManageWebhookRequest } from "@/lib/api/schemas";
 import { dbConfigured } from "@/lib/db";
 import { sendTest, setWebhook } from "@/lib/manage";
 import { publicOrigin } from "@/lib/origin";
+import { api } from "@/lib/api/handler";
 
 type Ctx = { params: Promise<{ token: string }> };
 const noDb = () => fail("upstream_unavailable", "Managing a page needs the database, which is not connected on this server.", 503);
 const notFound = () => fail("not_found", "That manage link does not match any page.", 404);
 
 /** PUT /api/manage/{token}/webhook: set (or with null, remove) where gift events are sent. Returns the signing secret. */
-export async function PUT(req: Request, { params }: Ctx) {
+async function putRoute(req: Request, { params }: Ctx) {
   const started = Date.now();
   if (!dbConfigured()) return noDb();
   const parsed = ManageWebhookRequest.safeParse(await req.json().catch(() => null));
@@ -21,7 +22,7 @@ export async function PUT(req: Request, { params }: Ctx) {
 }
 
 /** POST /api/manage/{token}/webhook: send a test event to the webhook. */
-export async function POST(req: Request, { params }: Ctx) {
+async function postRoute(req: Request, { params }: Ctx) {
   const started = Date.now();
   if (!dbConfigured()) return noDb();
   const r = await sendTest((await params).token, publicOrigin(req));
@@ -30,3 +31,6 @@ export async function POST(req: Request, { params }: Ctx) {
   const why = "reason" in r && typeof r.reason === "string" ? r.reason : `The webhook answered ${"status" in r && r.status ? r.status : "nothing"}.`;
   return fail("upstream_unavailable", why, 502);
 }
+
+export const POST = api("/api/manage/[token]/webhook", postRoute);
+export const PUT = api("/api/manage/[token]/webhook", putRoute);

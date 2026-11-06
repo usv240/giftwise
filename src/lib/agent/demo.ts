@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { AiUnavailableError, MODEL, aiError, claude, replayable } from "@/lib/ai/claude";
+import { AiUnavailableError, MODEL, aiError, claude, recordAiUsage, replayableWithSource } from "@/lib/ai/claude";
 import { paypalRest } from "@/lib/paypal/client";
 import { connectPayPalMcp, type PayPalMcpClient } from "./paypal-mcp";
 
@@ -113,11 +113,13 @@ export async function runAgentDemo(origin: string, asks = DEMO_ASKS) {
 async function converse(c: Anthropic, tools: Anthropic.Tool[], messages: Anthropic.MessageParam[], steps: Step[], mcp: McpClient, paypal: { mcp?: PayPalMcpClient | null }) {
   for (let turn = 0; turn < 8; turn++) {
     const params = { model: MODEL, max_tokens: 8000, system: SYSTEM, tools, messages, thinking: { type: "adaptive" as const } };
-    const res = await replayable(params, () =>
+    const t = Date.now();
+    const { value: res, replayed } = await replayableWithSource(params, () =>
       c.messages.create(params).catch((e: unknown) => {
         throw aiError(e);
       }),
     );
+    await recordAiUsage({ model: res.model ?? MODEL, usage: res.usage, ms: Date.now() - t, replayed });
     for (const b of res.content) if (b.type === "text" && b.text.trim()) steps.push({ kind: "say", text: b.text.trim() });
     messages.push({ role: "assistant", content: res.content });
     if (res.stop_reason !== "tool_use") return;

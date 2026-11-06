@@ -1,5 +1,6 @@
 import { today } from "@/lib/api/envelope";
 import { audit } from "@/lib/audit";
+import { log } from "@/lib/log";
 import { db, schema } from "@/lib/db";
 import { getHousehold, openNeeds, payeeEmail } from "@/lib/households";
 import { createRoutedOrder, describePayPalError } from "@/lib/paypal/orders";
@@ -65,7 +66,7 @@ export async function startRoutedGift(
     return { ok: true, orderId: order.id!, status: String(order.status), approveUrl, plan, name: data.household.name };
   } catch (e) {
     const d = describePayPalError(e);
-    console.error("routed order failed", d.issue, d.debugId);
+    log.error("routed order failed", { issue: d.issue, debugId: d.debugId, status: d.status });
     return { ok: false, code: "upstream_unavailable", message: d.plain, status: d.status >= 400 && d.status < 600 ? d.status : 502, details: { issue: d.issue, debug_id: d.debugId } };
   }
 }
