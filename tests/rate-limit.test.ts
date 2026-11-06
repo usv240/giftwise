@@ -14,7 +14,14 @@ describe("rate limit decisions", () => {
 });
 
 /** The table itself, when a database is reachable (DATABASE_URL in .env.local; CI's Postgres has it too). */
-const url = process.env.DATABASE_URL || readFileSync(".env.local", "utf8").match(/^DATABASE_URL=(.+)$/m)?.[1];
+const localEnv = (() => {
+  try {
+    return readFileSync(".env.local", "utf8");
+  } catch {
+    return "";
+  }
+})();
+const url = process.env.DATABASE_URL || localEnv.match(/^DATABASE_URL=(.+)$/m)?.[1];
 describe.skipIf(!url)("the rate_limit table", () => {
   const bucket = `test:${Date.now()}`;
   beforeAll(() => {
