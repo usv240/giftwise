@@ -1,5 +1,5 @@
 /**
- * The outside checks for Giftwise. Each one calls the public site over HTTPS, the way a judge would, so nothing
+ * The outside checks for Giftwise. Each one calls the public site over HTTPS, the way a visitor would, so nothing
  * here imports app code. main.ts runs every check as its own Render Workflows task; local.ts runs the same list
  * in one process for development.
  */
@@ -55,14 +55,14 @@ export async function runCase(e: Env, id: string, title: string): Promise<Omit<C
   return { id: `case:${id}`, group: "case", title, ...r };
 }
 
-// ---------- The judges' path: every page a judge opens, with the words that prove it rendered ----------
+// ---------- The product path: every page a visitor opens, with the words that prove it rendered ----------
 
 export const PATH = [
   { id: "home", path: "/", title: "Home page", expect: "Give so she keeps" },
   { id: "gift-page", path: "/g/maya", title: "Maya's gift page", expect: "Help Maya" },
   { id: "report", path: "/g/maya/report?month=2026-10", title: "Maya's report to Social Security", expect: "Nothing here counts as income." },
   { id: "easy-read", path: "/g/maya/report/easy?month=2026-10&lang=es", title: "Her report in Easy Read, in Spanish", expect: "No tiene que llamar al Seguro Social" },
-  { id: "judges", path: "/judges", title: "For judges", expect: "The five-minute path" },
+  { id: "evidence", path: "/evidence", title: "Evidence", expect: "The five-minute path" },
   { id: "agents", path: "/agents", title: "For AI agents", expect: "For AI agents" },
   { id: "organizations", path: "/organizations", title: "For organizations", expect: "For organizations" },
   { id: "dashboard", path: "/dashboard", title: "Maya's year in AG Studio", expect: "year" },

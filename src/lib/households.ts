@@ -97,7 +97,7 @@ export function payeeEmail(account: string) {
   return email.trim();
 }
 
-/** Reset the sample so every judge sees the same starting state. */
+/** Reset the sample so every visitor sees the same starting state. */
 export async function resetSample() {
   const d = db();
   const [h] = await d.select().from(schema.households).where(eq(schema.households.slug, SAMPLE.slug)).limit(1);

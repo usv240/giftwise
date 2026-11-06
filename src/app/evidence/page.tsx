@@ -23,9 +23,9 @@ import { SandboxLogin } from "@/components/SandboxLogin";
 import { Suspense } from "react";
 import "../pages.css";
 import "../developers/dev.css";
-import "./judges.css";
+import "./evidence.css";
 
-export const metadata: Metadata = { title: "For judges", description: "The five-minute path through Giftwise, every failure case run live, and the test results." };
+export const metadata: Metadata = { title: "Evidence", description: "Every number on this site, where it comes from, and a five-minute path through the product." };
 
 /** The five-minute path: six steps, under a minute and a half each, in the order the story runs. */
 const PATH = [
@@ -41,7 +41,7 @@ const PATH = [
 const ROUTED = fieldResults.summary.dollars.as_shown_in_the_opinions;
 const PER_PERSON = Math.round(ROUTED.kept_per_month_2026 / ROUTED.cases_where_routing_keeps_money);
 
-/** Everything else, for a judge with more time, in three groups of at most five. */
+/** Everything else, for a visitor with more time, in three groups of at most five. */
 const MORE = [
   {
     title: "The rules, checked",
@@ -80,13 +80,13 @@ const MORE = [
 
 const MORE_COUNT = MORE.reduce((n, g) => n + g.items.length, 0);
 
-/** Each criterion: one line and its links in view, the full account one press away. */
-type Criterion = { name: string; line: string; where?: string; more?: string; links: readonly (readonly [string, string])[] };
+/** Each part of the product: one line and its links in view, the full account one press away. */
+type Part = { name: string; line: string; where?: string; more?: string; links: readonly (readonly [string, string])[] };
 
-const CRITERIA: Criterion[] = [
+const PARTS: Part[] = [
 
   {
-    name: "Technological implementation",
+    name: "How it is built",
     line: "One PayPal order pays several payees, and Claude's structured outputs are checked by a deterministic rules engine.",
     more: "Every part, from capture to webhooks",
     where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, PayPal's own MCP server, and Claude structured outputs checked by a deterministic rules engine that keeps twelve promises across 100,000 random gifts.",
@@ -108,7 +108,7 @@ const CRITERIA: Criterion[] = [
   },
 
   {
-    name: "Potential impact",
+    name: "Who it helps",
     line: `About ${facts.audience.ssi_recipients.value} people receive SSI. In the federal court cases where a benefit-safe route exists, routing keeps about $${PER_PERSON} a month for each person.`,
     more: "The numbers and how it runs for real",
     where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). In January 2022 SSA lowered the check of 793,000 of them for food or housing someone else provided (88 FR 9779), and about 14 million people can now open an ABLE account, which more than 246,000 have (ABLE National Resource Center). In the federal court cases where a benefit-safe route exists, routing keeps about $${PER_PERSON} a month for each person, and benefits counselors, state ABLE programs and organizations that manage SSI money can each run it as it is. Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
@@ -120,7 +120,7 @@ const CRITERIA: Criterion[] = [
   },
 
   {
-    name: "Innovation",
+    name: "What is new",
     line: "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt.",
     more: "Four more, from MCP to checkable reports",
     where:
@@ -134,14 +134,14 @@ const CRITERIA: Criterion[] = [
     ],
   },
 
-  { name: "Presentation", line: "This page and its guided tour, the demo video, and a sample household you can reset to the same starting point at any time.", links: [["/about", "About"]] },
+  { name: "Seeing it work", line: "This page and its guided tour, and a sample household you can reset to the same starting point at any time.", links: [["/about", "About"]] },
 
 ];
 
-/** One row of jump links under the results, in page order, so a judge can go straight to any section. */
+/** One row of jump links under the results, in page order, so a visitor can go straight to any section. */
 const TOC = [
   ["#path", "Five-minute path"],
-  ["#criteria", "Criteria"],
+  ["#parts", "Where to see each part"],
   ["#more", "More to try"],
   ["#nightly", "Nightly checks"],
   ["#failure-cases", "Failure cases"],
@@ -155,18 +155,18 @@ const TOC = [
   ["#tests", "Test results"],
 ] as const;
 
-export default function JudgesPage() {
+export default function EvidencePage() {
   return (
-    <div className="page frame judges">
+    <div className="page frame evidence">
       <OpenOnHash />
       <header className="page-head">
         <div className="title-row">
-          <h1 className="page-title">For judges</h1>
+          <h1 className="page-title">Evidence</h1>
 
-          <Info id="page.judges" />
+          <Info id="page.evidence" />
 
         </div>
-        <p className="lede">The five-minute path through Giftwise, every failure case run live against PayPal, and the test results.</p>
+        <p className="lede">Every number on this site, where it comes from, and a five-minute path through the product.</p>
         <p className="jp-tour">
 
           <TourStart /> <span className="muted">Eight stops in this tab, about five minutes. Escape ends it.</span>
@@ -223,15 +223,15 @@ export default function JudgesPage() {
         </div>
       </section>
 
-      <section id="criteria" className="page-section" aria-labelledby="crit-h">
-        <h2 id="crit-h">Where each criterion shows</h2>
-        <dl className="jp-criteria">
+      <section id="parts" className="page-section" aria-labelledby="parts-h">
+        <h2 id="parts-h">Where to see each part</h2>
+        <dl className="jp-parts">
 
-          {CRITERIA.map((c) => (
-            <div key={c.name} className="jp-criterion">
+          {PARTS.map((c) => (
+            <div key={c.name} className="jp-part">
               <dt>{c.name}</dt>
               <dd>
-                <p className="jp-crit-line">{c.line}</p>
+                <p className="jp-part-line">{c.line}</p>
                 <p className="jp-links">
                   {c.links.map(([href, label]) => (
                     <Link key={href + label} className="text-link" href={href}>
@@ -293,7 +293,7 @@ export default function JudgesPage() {
           <div className="title-row">
             <h2 id="nightly-h">Checked every night, from outside</h2>
 
-            <Info id="judges.nightly" label="" />
+            <Info id="evidence.nightly" label="" />
 
           </div>
           <p className="page-prose jp-intro">
@@ -312,7 +312,7 @@ export default function JudgesPage() {
           <div className="title-row">
             <h2 id="cases-h">Failure cases, run live</h2>
 
-            <Info id="judges.cases" label="" />
+            <Info id="evidence.cases" label="" />
 
           </div>
           <p className="page-prose jp-intro">Payments fail in ordinary ways: a declined card, a double click, a browser that sends the wrong amount. Each check below runs the real code against the PayPal sandbox.</p>
@@ -327,7 +327,7 @@ export default function JudgesPage() {
           <div className="title-row">
             <h2 id="eval-h">The two reviewers, measured</h2>
 
-            <Info id="judges.eval" label="" />
+            <Info id="evidence.eval" label="" />
 
           </div>
           <EvalIntro />
@@ -342,7 +342,7 @@ export default function JudgesPage() {
           <div className="title-row">
             <h2 id="ssa-ex-h">Checked against Social Security&rsquo;s own examples</h2>
 
-            <Info id="judges.ssa_examples" label="" />
+            <Info id="evidence.ssa_examples" label="" />
 
           </div>
           <p className="page-prose jp-intro">
@@ -360,7 +360,7 @@ export default function JudgesPage() {
           <div className="title-row">
             <h2 id="field-h">Real cases, from federal courts</h2>
 
-            <Info id="judges.field_cases" label="" />
+            <Info id="evidence.field_cases" label="" />
 
           </div>
           <p className="page-prose jp-intro">
@@ -377,7 +377,7 @@ export default function JudgesPage() {
           <div className="title-row">
             <h2 id="inv-h">{invResults.gifts.toLocaleString("en-US")} random gifts, every promise kept</h2>
 
-            <Info id="judges.invariants" label="" />
+            <Info id="evidence.invariants" label="" />
 
           </div>
           <InvariantsIntro />
@@ -392,7 +392,7 @@ export default function JudgesPage() {
           <div className="title-row">
             <h2 id="rw-h">The rules watch the Federal Register</h2>
 
-            <Info id="judges.rules_watch" label="" />
+            <Info id="evidence.rules_watch" label="" />
 
           </div>
           <p className="page-prose jp-intro">
@@ -429,7 +429,7 @@ export default function JudgesPage() {
         <div className="title-row">
           <h2 id="tests-h">Test results</h2>
 
-          <Info id="judges.tests" label="" />
+          <Info id="evidence.tests" label="" />
 
         </div>
         <p className="page-prose jp-intro">

@@ -2,8 +2,8 @@ import { connection } from "next/server";
 import { fail, ok } from "@/lib/api/envelope";
 import { checksAuth } from "@/lib/checks";
 import { dbConfigured } from "@/lib/db";
-import { CASES } from "@/lib/judges/list";
-import { runScenario } from "@/lib/judges/scenarios";
+import { CASES } from "@/lib/cases/list";
+import { runScenario } from "@/lib/cases/scenarios";
 import { paypalConfigured } from "@/lib/paypal/client";
 
 /** GET /api/checks/case/{any}: the failure cases the workflow fans out over. Public: titles only. */

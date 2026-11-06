@@ -5,8 +5,8 @@
     "why": "Try the Gift Checker beside the headline, or take the 2-minute tour for a guided walk through every part.",
     "technical": "Landing page. The Gift Checker runs the same rules engine (v2026.1) in the browser that the API runs on the server.",
     "learnMore": {
-      "label": "Open the judge guide",
-      "href": "/judges"
+      "label": "Open the evidence page",
+      "href": "/evidence"
     }
   },
   "hero.who": {
@@ -64,7 +64,7 @@
   "view.mode": {
     "title": "Plain or Technical",
     "what": "Plain shows short explanations in everyday words. Technical adds rule numbers, API calls and the tools used.",
-    "why": "Families and judges can read the same page at the level that suits them."
+    "why": "Families and developers can read the same page at the level that suits them."
   },
   "view.labels": {
     "title": "Info labels",
@@ -117,7 +117,7 @@
   "stack.render": {
     "title": "Render",
     "what": "Hosts the site and its Postgres database, and checks the live demo from outside every night.",
-    "why": "A demo that is checked every night keeps working through judging, and any failure is found before a judge finds it.",
+    "why": "A demo that is checked every night keeps working, and any failure is found before a visitor finds it.",
     "technical": "render.yaml defines the web service, managed Postgres, the giftwise-checks Render Workflow (one task per check, run in parallel with retries) and a nightly cron job that starts it with the Render SDK's workflows.startTask. Tables are created by a pre-deploy command on every release."
   },
   "stack.bryntum": {
@@ -226,13 +226,13 @@
     "why": "Help with housing changes the check for hundreds of thousands of people on SSI, and many more people can now open an ABLE account than have one.",
     "technical": "793,000 and its split (358,000 under the one-third reduction, 434,000 under the presumed maximum value) are SSA's estimate for January 2022 in 88 FR 9779. $0.41 billion is SSA's estimate of SSI overpayments from in-kind support and maintenance in FY 2024, as charted by the Inspector General (report 152601, Figure 5). ABLE counts are ABLE NRC's: more than 246,000 accounts and over $3.2 billion as of March 31, 2026; about 8 million eligible under the original law and an estimated 6 million more from January 1, 2026."
   },
-  "judges.invariants": {
+  "evidence.invariants": {
     "title": "Random gifts, every promise kept",
     "what": "A program makes up gifts, needs and people at random, routes each gift, and checks every answer against twelve promises.",
     "why": "Hand-written tests cover the cases someone thought of. Random ones cover the rest: odd amounts, many small needs, ABLE accounts near the limit, people with wages and other income.",
     "technical": "src/lib/invariants.ts: a seeded mulberry32 generator, so the same seed gives the same cases. routeGift() is checked for cent conservation, check equal to the no-gift check, never below cash, need caps, ABLE yearly limit and eligibility, at most 10 PayPal purchase units, whole cents, rule ids from the rule table, checks within the federal rate, recomputation and determinism."
   },
-  "judges.rules_watch": {
+  "evidence.rules_watch": {
     "title": "The rules watch",
     "what": "Giftwise asks the Federal Register for every change to SSI's income rules and yearly amounts, and lists what it does with each one.",
     "why": "Rules and amounts change. SSA published the 2027 amounts on October 26, 2026, and January's checks already use them.",
@@ -407,13 +407,13 @@
     "what": "What Giftwise is, what it is not, how it handles your data, and credits.",
     "why": "So you know exactly what to expect before you use it."
   },
-  "page.judges": {
+  "page.evidence": {
     "title": "About this page",
-    "what": "A short path through Giftwise for judges, the failure cases run live, and the latest test results.",
+    "what": "Every number on this site and where it comes from, a five-minute path through the product, the failure cases run live, and the latest test results.",
     "why": "So you can check every claim yourself in a few minutes.",
-    "technical": "The failure-case runner is POST /api/judges/run. It creates small PayPal sandbox orders and runs the same capture and order code the gift page uses."
+    "technical": "The failure-case runner is POST /api/cases/run. It creates small PayPal sandbox orders and runs the same capture and order code the gift page uses."
   },
-  "judges.cases": {
+  "evidence.cases": {
     "title": "Failure cases",
     "what": "Eight ways a gift can go wrong: seven run live against the PayPal sandbox, and one where an AI reviewer gets the rule wrong.",
     "why": "A payment product is only as good as what it does when something fails.",
@@ -422,7 +422,7 @@
       "PayPal"
     ]
   },
-  "judges.tests": {
+  "evidence.tests": {
     "title": "Test results",
     "what": "Each automated test suite, how many checks passed, and the command that runs it.",
     "why": "You can run the same commands from the repository and get the same results.",
@@ -498,13 +498,13 @@
     "why": "Any assistant can then check a gift before it gives.",
     "technical": "Streamable HTTP, protocol versions 2025-03-26 to 2025-11-25, JSON responses, no session. Rate limit 20 requests a minute per client."
   },
-  "judges.eval": {
+  "evidence.eval": {
     "title": "The two reviewers, measured",
     "what": "59 bills paid by someone else, each labeled from the rule text, run through Claude with no rulebook, each reviewer alone, and the two reviewers with the referee. The table shows how often each was right, and how often it accepted a route that would lower the check.",
     "why": "A claim about AI should come with a measurement. These numbers come from one recorded run, not from a description.",
     "technical": "scripts/run-eval.ts over content/eval/bills.json (20) and content/eval/bills-hard.json (39); results in content/eval-results.json. Accuracy counts only the 52 clear bills; a wrong route is one that lowers the check under the true reading, and for the 7 contested bills under either reading. --rescore re-scores the recorded answers without API calls."
   },
-  "judges.ssa_examples": {
+  "evidence.ssa_examples": {
     "title": "Social Security's own examples",
     "what": "Worked examples from Social Security's operating manual, each with SSA's answer, run through Giftwise and through Claude with no rulebook.",
     "why": "Our own labeled bills show the code does what we meant. SSA's examples show whether it agrees with SSA.",
@@ -600,10 +600,10 @@
     "why": "The script is written from the gifts, so nothing is left out and nothing extra is said.",
     "technical": "Phone numbers and wording are quoted from SSA pages and 20 CFR 416.708, 416.714 and 416.724, stored word for word in content/reporting.json."
   },
-  "judges.nightly": {
+  "evidence.nightly": {
     "title": "Checked every night",
-    "what": "Every night a Render Workflow checks the hosted demo from outside: each page a judge opens, each public API promise, and each failure case against the PayPal sandbox.",
-    "why": "A demo that is checked every night stays working through judging. If something breaks, the run says what and where before anyone else finds it.",
+    "what": "Every night a Render Workflow checks the hosted demo from outside: each page on the product path, each public API promise, and each failure case against the PayPal sandbox.",
+    "why": "A demo that is checked every night stays working. If something breaks, the run says what and where before anyone else finds it.",
     "technical": "workflows/src/main.ts: nightlyCheck fans out one Render Workflows task per check (runCase, checkPage, checkApi) with ctx.run, each with 2 retries (5 s, then 10 s), and files the run with POST /api/checks using a shared CHECKS_SECRET. A Render cron job starts it nightly with the Render SDK's workflows.startTask; Run the checks now does the same from POST /api/checks/start.",
     "sponsor": [
       "Render",
@@ -628,7 +628,7 @@
     "why": "Giftwise never holds the money. An automatic charge would have to pay Giftwise first and pass it on.",
     "technical": "Tested in PayPal's sandbox on 2026-11-04: a PayPal wallet saved with Vault (store_in_vault ON_SUCCESS) on a multi-payee order works, but a later order with payment_source.paypal.vault_id and a third-party payee returns 422 BILLING_AGREEMENT_NOT_FOUND, and several third-party purchase units return VALIDATION_ERROR. A vaulted charge succeeds only when the platform is the payee. Signed in to PayPal, a giver approves a new multi-payee order in two clicks."
   },
-  "judges.field_cases": {
+  "evidence.field_cases": {
     "title": "Real cases, from federal courts",
     "what": "SSI cases where SSA counted help from family or friends and a federal court reviewed the decision. Giftwise ran each one through its rules engine and compared the outcome with what SSA and the court held.",
     "why": "A benchmark Giftwise wrote proves the code does what was intended. Real decisions show the rules are right about the world, and what the same help would have kept if it had been routed differently.",

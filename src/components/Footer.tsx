@@ -9,7 +9,7 @@ const NAV = [
   { href: "/try#fundraiser", label: "Make a gift page" },
   { href: "/learn", label: "The rules, explained" },
   { href: "/developers", label: "Developers" },
-  { href: "/judges", label: "For judges" },
+  { href: "/evidence", label: "Evidence" },
   { href: "/stack", label: "How it is built" },
   { href: "/status", label: "Status" },
   { href: "/about", label: "About" },
@@ -60,7 +60,7 @@ function QuietFooter() {
           </li>
         </ul>
       </nav>
-      <p className="tile-legal">Sandbox demonstration, built for the PayPal AI Hackathon. Guidance based on published Social Security rules, with sources for every answer.</p>
+      <p className="tile-legal">Sandbox demonstration. Guidance based on published Social Security rules, with sources for every answer.</p>
     </footer>
   );
 }
@@ -84,13 +84,13 @@ function TileFooter() {
         </ul>
       </nav>
       <div className="tile tile-made">
-        <p>Built for the PayPal AI Hackathon</p>
-        <p className="tile-muted">November 2026</p>
+        <p>Runs in the PayPal sandbox</p>
+        <p className="tile-muted">No real money moves</p>
       </div>
       <div className="tile tile-repo">
-        <a className="tile-email text-link" href="https://github.com/usv240/giftwise">
-          github.com/usv240/giftwise
-        </a>
+        <Link className="tile-email text-link" href="/">
+          giftwise-405i.onrender.com
+        </Link>
         <p className="tile-muted">Open source, MIT license</p>
       </div>
       <div className="tile tile-wordmark" aria-hidden="true">

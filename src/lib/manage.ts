@@ -14,7 +14,7 @@ import { DEFAULT_PROFILE, SHELTER_CATEGORIES, computeMonth, evaluateGift, monthN
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
 export const newToken = () => randomBytes(18).toString("base64url");
 
-/** The sample page has a fixed, public manage link so judges can try the organizer's side; a reset restores it. */
+/** The sample page has a fixed, public manage link so visitors can try the organizer's side; a reset restores it. */
 export const SAMPLE_MANAGE_TOKEN = "maya-sample-organizer";
 
 export type NeedInput = { title: string; detail?: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean; link?: string | null };
@@ -239,7 +239,7 @@ export async function deliver(householdId: number, ev: GiftEvent, fetcher: typeo
   return { sent: status >= 200 && status < 300, status };
 }
 
-/** Restore the sample's manage link and clear its webhook, so every judge starts from the same organizer view. */
+/** Restore the sample's manage link and clear its webhook, so every visitor starts from the same organizer view. */
 export async function resetSampleManage() {
   await db().update(schema.households).set({ manageTokenHash: hashToken(SAMPLE_MANAGE_TOKEN), status: "open", webhookUrl: null, webhookSecret: null }).where(eq(schema.households.slug, "maya"));
 }

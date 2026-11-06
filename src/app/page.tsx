@@ -110,8 +110,8 @@ export default function Home() {
             <Link href="/try#fundraiser" className="btn btn-primary">
               Start a gift page
             </Link>
-            <Link href="/judges" className="text-link">
-              The five-minute path for judges
+            <Link href="/evidence" className="text-link">
+              The five-minute path
             </Link>
           </div>
           <p className="hero-note muted">
@@ -237,7 +237,7 @@ export default function Home() {
           <h3 className="ev-sub">How the rules were checked</h3>
           <ul className="research-proof">
             <li>
-              <Link className="research-proof-link" href="/judges#ssa-examples">
+              <Link className="research-proof-link" href="/evidence#ssa-examples">
                 <span className="research-proof-fig tabular">
                   {ssaResults.summary.engine_matches} of {ssaResults.summary.cases}
                 </span>
@@ -245,7 +245,7 @@ export default function Home() {
               </Link>
             </li>
             <li>
-              <Link className="research-proof-link" href="/judges#field-cases">
+              <Link className="research-proof-link" href="/evidence#field-cases">
                 <span className="research-proof-fig tabular">
                   {fieldResults.summary.agreed} of {fieldResults.summary.scored}
                 </span>
@@ -253,7 +253,7 @@ export default function Home() {
               </Link>
             </li>
             <li>
-              <Link className="research-proof-link" href="/judges#evaluation">
+              <Link className="research-proof-link" href="/evidence#evaluation">
                 <span className="research-proof-fig tabular">
                   {billResults.summary.referee.check_kept_whole} of {billResults.summary.referee.all_cases}
                 </span>

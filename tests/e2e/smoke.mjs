@@ -18,7 +18,7 @@ const pages = [
   ["/g/maya/report/easy?month=2026-10", "Easy Read"],
   ["/g/maya/calendar", "Maya"],
   ["/manage/maya-sample-organizer", "Maya"],
-  ["/judges", "Giftwise"],
+  ["/evidence", "Giftwise"],
   ["/agents", "MCP"],
   ["/dashboard", "Giftwise"],
   ["/organizations", "Giftwise"],

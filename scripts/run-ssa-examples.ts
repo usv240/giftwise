@@ -1,7 +1,7 @@
 // Social Security's own worked examples (content/eval/ssa-examples.json), answered two ways:
 //   1. the Giftwise rules engine, from the gifts as entered;
 //   2. Claude alone, from the situation in words, with no rulebook and no engine (the obvious alternative).
-// Both are scored against SSA's answer. Writes content/eval/ssa-examples-results.json, shown on /judges.
+// Both are scored against SSA's answer. Writes content/eval/ssa-examples-results.json, shown on /evidence.
 // Usage: npx tsx --env-file=.env.local scripts/run-ssa-examples.ts            (engine and Claude)
 //        npx tsx --env-file=.env.local scripts/run-ssa-examples.ts --engine   (engine only, no API calls)
 import { readFileSync, writeFileSync } from "node:fs";

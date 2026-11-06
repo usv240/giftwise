@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-/** The bill counts come from content/eval-results.json (passed in by the page), so this answer matches For judges. */
+/** The bill counts come from content/eval-results.json (passed in by the page), so this answer matches the Evidence page. */
 const faqs = (bills: number, kept: number) => [
   {
     q: "Is this legal advice?",
@@ -30,7 +30,7 @@ const faqs = (bills: number, kept: number) => [
   },
   {
     q: "How do I know an answer is right?",
-    a: `Every answer cites the rule. When a bill might be a housing cost, two AI reviewers each check it against a different rulebook and must quote it word for word, and fixed rules, not AI, do the money math. On ${bills} labeled bills, the two reviewers and the referee kept her check whole on ${kept === bills ? `all ${bills}` : kept}; every bill and answer is on the For judges page.`,
+    a: `Every answer cites the rule. When a bill might be a housing cost, two AI reviewers each check it against a different rulebook and must quote it word for word, and fixed rules, not AI, do the money math. On ${bills} labeled bills, the two reviewers and the referee kept her check whole on ${kept === bills ? `all ${bills}` : kept}; every bill and answer is on the Evidence page.`,
   },
   {
     q: "Can my app use this?",

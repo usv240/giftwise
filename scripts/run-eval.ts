@@ -4,7 +4,7 @@
 //   2. each reviewer alone, reading only its own rulebook and quoting it;
 //   3. both reviewers and the referee.
 // Scored on (a) accuracy where the rules are clear and (b) the negative control: a route accepted that lowers her check
-// under the true reading. Writes content/eval-results.json, which the For judges page shows.
+// under the true reading. Writes content/eval-results.json, which the Evidence page shows.
 // Usage: npx tsx --env-file=.env.local scripts/run-eval.ts             (all calls; set EVAL_CACHE=<file> to resume a run)
 //        npx tsx --env-file=.env.local scripts/run-eval.ts --rescore   (no API calls: re-score the recorded answers)
 import { readFileSync, writeFileSync } from "node:fs";

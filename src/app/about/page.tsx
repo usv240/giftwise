@@ -71,11 +71,7 @@ export default function AboutPage() {
       <section className="page-section page-prose" aria-labelledby="open-h">
         <h2 id="open-h">Open source</h2>
         <p>
-          Giftwise is open source under the MIT license:{" "}
-          <a className="text-link" href="https://github.com/usv240/giftwise">
-            github.com/usv240/giftwise
-          </a>
-          . Built for the PayPal AI Hackathon, November 2026. See{" "}
+          Giftwise is open source under the MIT license. See{" "}
           <Link className="text-link" href="/stack">
             how it is built
           </Link>{" "}

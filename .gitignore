@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Bryntum Calendar UMD, copied from node_modules by scripts/vendor-bryntum.mjs
 /public/bryntum/
+
+# Local replay of identical Claude requests during test runs (AI_CACHE_DIR)
+.ai-cache/

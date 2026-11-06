@@ -20,8 +20,8 @@ export async function POST() {
   if (wait > 0) return fail("rate_limited", `A run started ${Math.round((started - lastStart) / 60_000)} minutes ago. The next one can start in ${Math.ceil(wait / 60_000)} minutes.`, 429);
   lastStart = started;
   try {
-    const run = await new Render().workflows.startTask(slug, [{ trigger: "judges-page" }]);
-    await audit("system", "checks.started", `render-task-run:${run.taskRunId}`, { trigger: "judges-page" });
+    const run = await new Render().workflows.startTask(slug, [{ trigger: "evidence-page" }]);
+    await audit("system", "checks.started", `render-task-run:${run.taskRunId}`, { trigger: "evidence-page" });
     return ok({ task_run_id: run.taskRunId }, started);
   } catch (e) {
     lastStart = 0;

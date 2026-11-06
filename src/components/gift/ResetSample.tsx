@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { giftText, type Lang } from "@/lib/i18n/gift";
 
-/** Lets a judge replay the demo from the start. Only works on the sample household. */
+/** Lets a visitor replay the demo from the start. Only works on the sample household. */
 export function ResetSample({ slug, lang = "en" }: { slug: string; lang?: Lang }) {
   const t = giftText(lang);
   const router = useRouter();

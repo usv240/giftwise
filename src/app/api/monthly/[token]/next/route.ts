@@ -3,7 +3,7 @@ import { monthlyView, planMonth } from "@/lib/monthly";
 import { addMonths, monthOf } from "@/lib/rules";
 
 /**
- * Plan the next month now. In real use each month is planned when it begins; in the sandbox this lets a judge see the
+ * Plan the next month now. In real use each month is planned when it begins; in the sandbox this lets a visitor see the
  * rules route the same gift again for the month after, up to a year ahead.
  */
 export async function POST(_req: Request, ctx: { params: Promise<{ token: string }> }) {

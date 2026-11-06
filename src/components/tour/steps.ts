@@ -1,4 +1,4 @@
-/** The guided tour: the five-minute path on /judges, one stop per thing to look at. */
+/** The guided tour: the five-minute path on /evidence, one stop per thing to look at. */
 export type TourStep = { path: string; target: string; title: string; text: string };
 
 export const TOUR: TourStep[] = [
@@ -45,7 +45,7 @@ export const TOUR: TourStep[] = [
     text: "Press As cash, then drag Aunt June's $150 from October 28 to November 2. A different check drops, because SSI counts income by calendar month.",
   },
   {
-    path: "/judges",
+    path: "/evidence",
     target: ".jr",
     title: "Checked four ways",
     text: "Each result opens its cases: Social Security's own examples, federal court cases, labeled bills and 100,000 random gifts. Further down: failure cases run live against PayPal, and the rules watching the Federal Register.",

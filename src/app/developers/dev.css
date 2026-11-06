@@ -1,4 +1,4 @@
-/* Developers: uses, key request and reveal, playground, docs and usage. Also used by /agents, /stack, /judges,
+/* Developers: uses, key request and reveal, playground, docs and usage. Also used by /agents, /stack, /evidence,
    /manage, /organizations and the report check page for .doc-table and .dev-pre. */
 .dev-hero {
   display: grid;
@@ -70,6 +70,11 @@
 }
 .dev-limits {
   background: var(--surface-2);
+}
+/* One small link to the code, last on the page. */
+.dev-source {
+  margin-top: 2rem;
+  font-size: 0.875rem;
 }
 .dev-intro {
   margin-bottom: 1.25rem;

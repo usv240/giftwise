@@ -197,8 +197,8 @@ ok(
   es.slice(0, 120),
 );
 
-// 8d. The guided tour from /judges: eight stops across six pages, each with its element ringed, and Finish closes it.
-await page.goto(B + "/judges", { waitUntil: "networkidle" });
+// 8d. The guided tour from /evidence: eight stops across six pages, each with its element ringed, and Finish closes it.
+await page.goto(B + "/evidence", { waitUntil: "networkidle" });
 await page.getByRole("button", { name: "Take the guided tour" }).click();
 const stops = [];
 for (let i = 0; i < 8; i++) {

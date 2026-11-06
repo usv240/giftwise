@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db, dbConfigured, schema } from "./db";
 
 /**
- * The outside checks. A Render Workflow (workflows/ in this repo) runs every failure case, every step of the judges'
+ * The outside checks. A Render Workflow (workflows/ in this repo) runs every failure case, every step of the product's
  * path and the public API from outside the app, each as its own task with retries, and files the results here.
  */
 

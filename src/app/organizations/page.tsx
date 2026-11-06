@@ -18,7 +18,7 @@ import "../g/[slug]/gift.css";
 import "../developers/dev.css";
 import "./org.css";
 
-/** The organization's case: the same facts and source as the Payee organizations card on For judges. */
+/** The organization's case: the same facts and source as the Payee organizations card on the Evidence page. */
 const PAYEES = ADOPTION_ROUTES.find((r) => r.who === "Payee organizations");
 
 export const metadata: Metadata = { title: "For organizations", description: "Foundations and mutual-aid funds pay many families' needs in one PayPal payout batch, each grant routed so the SSI check stays whole." };

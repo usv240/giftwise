@@ -1,6 +1,6 @@
 /**
- * Lighthouse on the pages a judge opens first, phone (Lighthouse's mobile preset) and desktop, written to
- * content/lighthouse.json for /judges. BASE_URL=https://giftwise-405i.onrender.com node scripts/run-lighthouse.mjs
+ * Lighthouse on the pages a visitor opens first, phone (Lighthouse's mobile preset) and desktop, written to
+ * content/lighthouse.json for /evidence. BASE_URL=https://giftwise-405i.onrender.com node scripts/run-lighthouse.mjs
  * measures the hosted demo; without it, the local production build on port 3100.
  * Runs Lighthouse through npx so it is not a project dependency.
  */
@@ -16,7 +16,7 @@ const PAGES = [
   { path: "/g/maya", name: "Maya's gift page" },
   { path: "/g/maya/report?month=2026-10", name: "Her report to Social Security" },
   { path: "/g/maya/report/easy?month=2026-10&lang=es", name: "Her Easy Read report, in Spanish" },
-  { path: "/judges", name: "For judges" },
+  { path: "/evidence", name: "Evidence" },
 ];
 const CATS = ["performance", "accessibility", "best-practices", "seo"];
 const dir = mkdtempSync(join(tmpdir(), "lh-"));

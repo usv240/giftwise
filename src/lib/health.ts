@@ -87,7 +87,7 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       mode: agKey ? "live" : "fallback",
       detail: agKey ? `ag-studio-react ${pinned("ag-studio-react")}, licensed` : `ag-studio-react ${pinned("ag-studio-react")} on the trial; it shows a licence notice until a key is set`,
     },
-    { id: "bryntum", name: "Bryntum Calendar", mode: "live", detail: `@bryntum/calendar ${pinned("@bryntum/calendar")}, the hackathon trial, which shows a trial watermark` },
+    { id: "bryntum", name: "Bryntum Calendar", mode: "live", detail: `@bryntum/calendar ${pinned("@bryntum/calendar")}, the trial build, which shows a trial watermark` },
     {
       id: "rules-watch",
       name: "Federal Register watch",

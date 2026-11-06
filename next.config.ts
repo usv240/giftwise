@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [{ source: "/.well-known/ai-catalog.json", destination: "/api/ai-catalog" }];
   },
+  // The evidence page used to live at /judges; old links keep working, and a fragment stays with the browser.
+  async redirects() {
+    return [{ source: "/judges", destination: "/evidence", permanent: true }];
+  },
   async headers() {
     return [
       {

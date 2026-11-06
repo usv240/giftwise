@@ -730,7 +730,7 @@
           "id": "bryntum",
           "name": "Bryntum Calendar",
           "mode": "live",
-          "detail": "@bryntum/calendar 7.3.7, the hackathon trial, which shows a trial watermark"
+          "detail": "@bryntum/calendar 7.3.7, the trial build, which shows a trial watermark"
         },
         {
           "id": "rules-watch",

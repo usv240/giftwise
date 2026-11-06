@@ -28,7 +28,7 @@ ${tools}
 
 - [For AI agents](${o}/agents): install steps for Claude, Cursor and VS Code, and a live demo
 - [The rules, explained](${o}/learn): each rule with its source
-- [For judges](${o}/judges): results, live failure cases and test runs
+- [Evidence](${o}/evidence): results, live failure cases and test runs
 `;
   return new Response(text, { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" } });
 }

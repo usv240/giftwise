@@ -1,4 +1,4 @@
-/** The failure cases the judges' runner checks live. Client-safe: titles and expectations only. */
+/** The failure cases the Evidence page's runner checks live. Client-safe: titles and expectations only. */
 export const CASES = [
   { id: "declined", title: "The donor's card is declined", expected: "Nothing is charged, nothing is marked paid, and the donor sees a plain next step." },
   { id: "double", title: "The donor clicks Pay twice", expected: "PayPal charges once. Both clicks get the same capture." },

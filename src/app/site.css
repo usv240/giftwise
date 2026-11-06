@@ -372,7 +372,7 @@
   .tile-repo {
     grid-column: 1 / -1;
   }
-  /* On a phone the hackathon line and the repository share one tile's worth of height. */
+  /* On a phone the sandbox line and the address share one tile's worth of height. */
   .tile-made {
     flex-direction: row;
     flex-wrap: wrap;

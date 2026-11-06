@@ -60,7 +60,7 @@ export function makeCase(r: () => number): Case {
 const c = (n: number) => Math.round(n * 100);
 const RULE_IDS = new Set(Object.keys(RULES));
 
-/** The promises, in the words /judges shows. Each returns true when the answer keeps it. */
+/** The promises, in the words /evidence shows. Each returns true when the answer keeps it. */
 export const INVARIANTS: { id: string; promise: string; holds: (k: Case, g: RoutedGift) => boolean }[] = [
   {
     id: "to-the-cent",

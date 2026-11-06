@@ -1,22 +1,22 @@
-/* For judges: the results, the path and criteria, then each piece of evidence: its result in view, the full table or
+/* Evidence: the results, the path and where each part shows, then each piece of evidence: its result in view, the full table or
    list one press away. */
 
 /* Sections share the results band's width, so grids and tables use the room and rows stay short. Prose keeps its own
    measure. The gap between sections is tighter than on read pages: each section is now a heading, a result and a row. */
-.judges .page-section {
+.evidence .page-section {
   margin-top: clamp(2.5rem, 1.75rem + 2vw, 3.75rem);
   max-width: 86rem;
 }
-.judges [id] {
+.evidence [id] {
   scroll-margin-top: 16px;
 }
 .jp-intro {
   margin-bottom: 1rem;
 }
-.judges .tech-only {
+.evidence .tech-only {
   display: none;
 }
-:root[data-mode="technical"] .judges .tech-only {
+:root[data-mode="technical"] .evidence .tech-only {
   display: block;
 }
 
@@ -176,44 +176,44 @@
   font-weight: 500;
 }
 
-/* Criteria: one line and its links in view, the full account one press away. Three to a row on a wide screen. */
-.jp-criteria {
+/* Each part: one line and its links in view, the full account one press away. Three to a row on a wide screen. */
+.jp-parts {
   margin: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0 40px;
 }
 @media (max-width: 1100px) {
-  .jp-criteria {
+  .jp-parts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 720px) {
-  .jp-criteria {
+  .jp-parts {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-.jp-criterion {
+.jp-part {
   display: grid;
   align-content: start;
   gap: 6px;
   padding: 16px 0 6px;
   border-top: 1px solid var(--surface-2);
 }
-.jp-criterion dt {
+.jp-part dt {
   font-size: 1.125rem;
   font-weight: 500;
 }
-.jp-criterion dd {
+.jp-part dd {
   margin: 0;
   display: grid;
   gap: 8px;
   max-width: 68ch;
 }
-.judges .jp-criterion dd > * {
+.evidence .jp-part dd > * {
   margin: 0;
 }
-.jp-crit-line {
+.jp-part-line {
   font-size: 1rem;
 }
 .jp-links {
@@ -334,7 +334,7 @@
   gap: 16px;
   min-width: 0;
 }
-.judges .jx-body > * {
+.evidence .jx-body > * {
   margin: 0;
 }
 @media (max-width: 600px) {
@@ -354,7 +354,7 @@
   font-size: 0.9375rem;
 }
 
-/* The criteria's own disclosure: a quieter line under the links. */
+/* Each part's own disclosure: a quieter line under the links. */
 .jp-disc > summary {
   min-height: 44px;
   display: inline-flex;
@@ -413,7 +413,7 @@
     margin-top: 16px;
   }
 }
-.judges .jx-result > * + * {
+.evidence .jx-result > * + * {
   margin-top: 10px;
 }
 
@@ -841,7 +841,7 @@
   max-width: 72ch;
   font-size: 0.9375rem;
 }
-.judges .sx-body > * {
+.evidence .sx-body > * {
   margin: 0;
 }
 .sx-quote {
@@ -907,7 +907,7 @@
   overflow-wrap: anywhere;
 }
 
-/* For a judge with more time: three headed groups side by side on a wide screen, stacked on a phone. */
+/* For a visitor with more time: three headed groups side by side on a wide screen, stacked on a phone. */
 .jp-more-groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));

@@ -27,7 +27,7 @@ type Actor = "person" | "webhook";
 /**
  * Capture an approved order and record it. An order can pay several recipients (one purchase unit each);
  * every unit's capture is matched back to its payment row and its need.
- * `mock` sends PayPal's sandbox negative-testing header, used only by the judges' failure-case runner.
+ * `mock` sends PayPal's sandbox negative-testing header, used only by the Evidence page's failure-case runner.
  */
 export async function captureAndRecord(orderId: string, opts: { mock?: "INSTRUMENT_DECLINED"; actor?: Actor } = {}): Promise<CaptureOutcome> {
   const d = db();

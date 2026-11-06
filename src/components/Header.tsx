@@ -10,7 +10,7 @@ const LINKS = [
   { href: "/try", label: "Try it" },
   { href: "/learn", label: "Learn" },
   { href: "/developers", label: "Developers" },
-  { href: "/judges", label: "For judges" },
+  { href: "/evidence", label: "Evidence" },
 ];
 
 /** The header's own words in Spanish, for the Spanish gift page, receipt and Easy Read report. */

@@ -13,7 +13,7 @@ const KIND: Record<string, string> = { regulation: "Regulation", manual: "SSA's 
 /** The API takes 4 to 300 characters. */
 const MIN = 4;
 const SHORT = "Type a few more words, for example: Can my mom pay my rent?";
-/** Social Security's free benefits counseling, the same page /judges cites. */
+/** Social Security's free benefits counseling, the same page /evidence cites. */
 const COUNSELING = "https://choosework.ssa.gov/library/fact-sheet-benefits-counseling-and-the-path-to-employment";
 
 /** Ask a question; see the passages Elasticsearch found, the answer written from them, and each quote checked. */

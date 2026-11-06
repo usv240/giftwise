@@ -72,7 +72,7 @@
       "command": "npm run checks:local",
       "passed": 24,
       "total": 24,
-      "what": "Every failure case against the PayPal sandbox, every page on the judges' path (now with the Easy Read report in Spanish) and seven public API promises, including the Federal Register watch, all at once, the same list the nightly Render Workflow runs"
+      "what": "Every failure case against the PayPal sandbox, every page on the product path (now with the Easy Read report in Spanish) and seven public API promises, including the Federal Register watch, all at once, the same list the nightly Render Workflow runs"
     },
     {
       "id": "manage",
@@ -101,7 +101,7 @@
     {
       "id": "cases",
       "name": "Failure cases, live",
-      "command": "POST /api/judges/run",
+      "command": "POST /api/cases/run",
       "passed": 8,
       "total": 8,
       "what": "Run the eight failure cases on this page yourself"

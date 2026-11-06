@@ -17,7 +17,7 @@ const Body = z.object({
 
 /**
  * POST /api/org/payouts: route each household's grant with the rules engine and send one PayPal Payouts batch.
- * With preview: true, only the routing comes back. Sandbox caps keep the fund's balance usable through judging.
+ * With preview: true, only the routing comes back. Sandbox caps keep the fund's balance usable over many runs.
  */
 export async function POST(req: Request) {
   const started = Date.now();

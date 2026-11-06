@@ -78,6 +78,12 @@ export default function DevelopersPage() {
       </ul>
 
       <DevConsole />
+
+      <p className="dev-source muted">
+        <a className="text-link" href="https://github.com/usv240/giftwise">
+          Source
+        </a>
+      </p>
     </div>
   );
 }

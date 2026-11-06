@@ -4,7 +4,7 @@ import { RunChecks } from "./RunChecks";
 
 const GROUPS: { id: CheckResult["group"]; title: string }[] = [
   { id: "case", title: "Failure cases, against the PayPal sandbox" },
-  { id: "path", title: "The judges' path, page by page" },
+  { id: "path", title: "The product path, page by page" },
   { id: "api", title: "The public API" },
 ];
 const WHEN = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" });
@@ -64,10 +64,11 @@ export async function NightlyChecks() {
                     </span>
                   </h3>
                   <ul>
+                    {/* Runs filed before the page was renamed carry its old title. */}
                     {g.rows.map((r) => (
                       <li key={r.id} data-ok={r.ok ? "" : undefined}>
                         <span className="nc-state">{r.ok ? "Passed" : "Needs a look"}</span>
-                        <span className="nc-title">{r.title}</span>
+                        <span className="nc-title">{r.title === "For judges" ? "Evidence" : r.title}</span>
                         <span className="nc-ms tabular muted tech-only">{r.ms >= 1000 ? `${(r.ms / 1000).toFixed(1)} s` : `${r.ms} ms`}</span>
                         <span className="nc-detail tech-only">{r.detail}</span>
                       </li>

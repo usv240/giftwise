@@ -1,5 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { z } from "zod";
 
 export const MODEL = "claude-opus-5-5";
@@ -51,6 +54,27 @@ export function aiError(e: unknown): unknown {
 }
 
 /**
+ * Local test runs only. When AI_CACHE_DIR is set, a request identical to one already made (same model, prompt, images
+ * and settings) returns the answer Claude gave the first time, read from disk, instead of paying for the same answer
+ * again. Any change to the request is a new key, so a changed prompt always calls Claude. The hosted site and CI never
+ * set AI_CACHE_DIR, so they always call Claude live.
+ */
+export async function replayable<T>(params: unknown, call: () => Promise<T>): Promise<T> {
+  const dir = process.env.AI_CACHE_DIR;
+  if (!dir) return call();
+  const file = path.join(dir, `${createHash("sha256").update(JSON.stringify(params)).digest("hex")}.json`);
+  try {
+    return JSON.parse(await readFile(file, "utf8")) as T;
+  } catch {
+    /* not stored yet */
+  }
+  const res = await call();
+  await mkdir(dir, { recursive: true });
+  await writeFile(file, JSON.stringify(res));
+  return res;
+}
+
+/**
  * Structured output with server-side fallbacks. Thinking is adaptive (Opus 5.5 cannot disable it);
  * effort is set explicitly because the Opus 5.5 default is medium.
  */
@@ -63,19 +87,21 @@ export async function structured<S extends z.ZodType>(opts: {
 }): Promise<{ data: z.infer<S>; usage: unknown; model: string }> {
   const c = claude();
   if (!c) throw new AiUnavailableError();
-  const res = await c.beta.messages
-    .parse({
-      model: MODEL,
-      max_tokens: opts.maxTokens ?? 16000,
-      betas: [FALLBACK_BETA],
-      fallbacks: "default",
-      system: opts.system,
-      output_config: { effort: opts.effort ?? "medium", format: betaZodOutputFormat(opts.schema) },
-      messages: [{ role: "user", content: opts.content }],
-    })
-    .catch((e: unknown) => {
+  const params = {
+    model: MODEL,
+    max_tokens: opts.maxTokens ?? 16000,
+    betas: [FALLBACK_BETA],
+    fallbacks: "default" as const,
+    system: opts.system,
+    output_config: { effort: opts.effort ?? "medium", format: betaZodOutputFormat(opts.schema) },
+    messages: [{ role: "user" as const, content: opts.content }],
+  };
+  const res = await replayable(params, async () => {
+    const r = await c.beta.messages.parse(params).catch((e: unknown) => {
       throw aiError(e);
     });
+    return { parsed_output: r.parsed_output, usage: r.usage, model: r.model, stop_reason: r.stop_reason };
+  });
   if (res.stop_reason === "refusal" || !res.parsed_output) {
     throw new AiRefusedError("The AI could not complete this request.");
   }

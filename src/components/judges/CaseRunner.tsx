@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CASES } from "@/lib/judges/list";
+import { CASES } from "@/lib/cases/list";
 
 type Result = { id: string; outcome: "handled" | "problem"; evidence: string[]; ms: number };
 
@@ -20,7 +20,7 @@ export function CaseRunner() {
     setNote("");
     if (list.current) list.current.open = true;
     try {
-      const r = await fetch("/api/judges/run", { method: "POST" });
+      const r = await fetch("/api/cases/run", { method: "POST" });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error?.message ?? "The checks did not run. Please try again.");
       setResults(Object.fromEntries((j.data.results as Result[]).map((x) => [x.id, x])));

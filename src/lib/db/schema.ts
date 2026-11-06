@@ -142,7 +142,7 @@ export const apiRequests = pgTable("api_requests", {
   at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** One run of the outside checks: every failure case, the judges' path and the public API, run by Render Workflows (or locally). */
+/** One run of the outside checks: every failure case, the product path and the public API, run by Render Workflows (or locally). */
 export const checkRuns = pgTable("check_runs", {
   id: serial("id").primaryKey(),
   /** render-workflow | local */

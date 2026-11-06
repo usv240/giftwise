@@ -2,12 +2,12 @@ import { task, type TaskContext } from "@renderinc/sdk/workflows";
 import { checkApi, checkPage, env, fileRun, listMonthly, planMonthly, reindexRulebook, runAll, runCase, thisMonth, type CheckResult } from "./checks";
 
 /**
- * giftwise-checks: a Render Workflow that checks the hosted Giftwise from outside, the way a judge would.
+ * giftwise-checks: a Render Workflow that checks the hosted Giftwise from outside, the way a visitor would.
  *
- * nightlyCheck fans out one task per check (each failure case against the PayPal sandbox, each page on the judges'
+ * nightlyCheck fans out one task per check (each failure case against the PayPal sandbox, each page on the product's
  * path, each public API promise), so every check runs on its own instance with its own retries. When they finish it
- * files the results with the app, which shows them on /judges. A Render cron job starts it every night; the
- * "Run the checks now" button on /judges starts it on demand.
+ * files the results with the app, which shows them on /evidence. A Render cron job starts it every night; the
+ * "Run the checks now" button on /evidence starts it on demand.
  */
 
 // PayPal's sandbox and a cold start can each fail once for reasons that are not ours: try twice more, 5 s then 10 s.
