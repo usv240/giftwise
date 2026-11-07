@@ -21,7 +21,12 @@ Help from others changes the check for many people: in January 2022 SSA lowered 
 - **59 of 59 labeled bills** routed so the check stays whole. Claude with no rulebook: 56 of 59.
 - **100,000 random gifts, every promise kept.** A seeded generator makes up gifts from one cent to $20,000, up to twelve open needs and people in every living arrangement, and checks each answer against twelve promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit, at most 10 PayPal recipients, and more.
 
-All four are on [`/judges`](https://giftwise-405i.onrender.com/judges), case by case, with the sources.
+**The two errors that cost money**, counted over every case above whose right answer is known (`src/lib/error-rates.ts`, from the recorded runs):
+
+- **0 of 55** gifts that would lower the check were let through as given (SSA's examples 0 of 17, court cases 0 of 14, bills 0 of 24). Claude with no rulebook, on the same bills: 1 of 24.
+- **6 of 51** gifts that were fine as given were sent another way (SSA's examples 0 of 23, bills 6 of 28). All 6 are hard bills the two reviewers did not settle, so the money went to her ABLE account instead of the shop, and her check stayed whole. Claude with no rulebook, on the same bills: 4 of 28.
+
+All of these are on [`/judges`](https://giftwise-405i.onrender.com/judges), case by case, with the sources.
 
 ## See it
 
@@ -41,6 +46,21 @@ All four are on [`/judges`](https://giftwise-405i.onrender.com/judges), case by 
 2. **Any amount, routed by the rules.** A donor types one number. A deterministic rules engine splits it across the needs and the ABLE account so that none of it counts as income, and shows the check before and after.
 3. **One PayPal checkout, many payees.** Giftwise creates one Orders v2 order with a purchase unit and payee for each recipient. The donor approves once, PayPal captures each payment separately, and Giftwise never holds the money.
 4. **A public receipt.** Every payee with its PayPal capture ID, the rules that applied, a live "Check with PayPal now" button, and a hash-chained ledger anyone can verify.
+
+## What the AI never decides
+
+Claude reads and explains. Each decision about money is made by code, the same way every time (also on [`/judges#ai`](https://giftwise-405i.onrender.com/judges#ai)):
+
+| Decided only by code | How | Where |
+|---|---|---|
+| How much each payee gets | The rules split the giver's amount across the open needs, to the cent, never past what a need still needs. The server routes every gift again and ignores any split a browser or agent sends. | `routeGift()` in `src/lib/routing.ts`, `src/lib/paypal/gift-order.ts` |
+| Which rule applies | Code maps each kind of need to its rule. A reviewer's reading of a bill counts only when both agree and both quotes check out word for word; otherwise code takes the route that is safe under either reading. | `evaluateGift()` in `src/lib/rules/engine.ts`, `referee()` and `routeForDecision()` in `src/lib/review/referee.ts` |
+| The benefit arithmetic | Every exclusion, the in-kind support amount and the check two months later. The bill, reviewer and rulebook prompts tell the model never to compute benefit amounts. | `computeMonth()` in `src/lib/rules/engine.ts` |
+| When money moves | Only when a person acts: a giver approves in PayPal, or an organization sends its Payouts batch. Each capture happens once, with a `PayPal-Request-Id`. An AI assistant can start a checkout, never approve one, and a gift that would lower the check is never created. | `src/lib/paypal/capture.ts`, `startRoutedGift()`, `POST /api/paypal/orders` |
+| Who gets paid | The need's route picks the payee from accounts the server holds; housing needs go to the ABLE account. | `routeNeed()` in `src/lib/manage.ts`, `payeeEmail()` in `src/lib/households.ts` |
+| The report to Social Security | Built from the payments, in full and in Easy Read, with no model call. | `buildReport()` in `src/lib/report/ssa.ts`, `src/lib/report/easy.ts` |
+
+What the model does instead: it reads bills and fundraiser pages into Zod-validated structured data (who, how much, what kind) that the organizer sees before making a page, two reviewers compare a bill with their own rulebooks and quote them word for word (a program checks every quote), and it explains answers in plain words. Everything it reads goes through the rules engine before any of it reaches money.
 
 ## How this works for real
 
@@ -75,6 +95,13 @@ Three groups already help people on SSI with money every month, and each can run
 - **Benefits counselors.** Social Security funds free benefits counseling nationwide through its Work Incentives Planning and Assistance projects; its current round planned 75 projects and $20 million ([WIPA-WIP-21-001](https://www.highergov.com/grant-opportunity/ssa-work-incentives-planning-and-assistance-program-wipa-331605/)). A counselor makes the gift page with the family, and each month the family has the report to file by the 10th.
 - **State ABLE programs.** 46 states and DC run one, and 31 plans accept people from any state ([ABLE National Resource Center](https://www.ablenrc.org/choose-plan/)). The ABLE share of each gift goes to the plan's own gift link; needs better paid to a shop are paid there through PayPal.
 - **Payee organizations.** About 1 in 10 of the 7.7 million people with a representative payee are served by an organization ([CRS IF13018](https://www.congress.gov/crs_external_products/IF/PDF/IF13018/IF13018.2.pdf), FY2024). One PayPal Payouts batch pays shops and ABLE accounts for many people, with each person's ledger and report.
+
+**A first pilot.** One benefits counseling project offers Giftwise to 25 families it already counsels, for 120 days: two months of gifts, and the checks SSA pays for those months two months later. It measures two outcomes, both from records Giftwise already keeps:
+
+1. **SSI dollars kept.** The check each gift leaves with Giftwise, compared with the same gift as cash, priced by the same rules when it is made. Recorded in the audit ledger: each `paypal.routed_order.created` entry holds `checkWithRouting` and `checkIfCash`, hash-chained (`npm run verify-ledger`).
+2. **Checks that match the report.** The check SSA pays each month, compared with the one the family's monthly report said to expect, against the measured rate above of 0 of 55 gifts let through that the rule counts. The report is rebuilt from the payments table (`buildReport()`, `totals.check`) and checkable by its QR code; SSA's amount is on the family's notice.
+
+**Why it holds up if a larger tool adds the same AI.** The model call is the easy part to copy; what decides here is the rules in code, a ledger and reports anyone can check, and error rates measured on Social Security's own examples and federal court cases.
 
 ## Designed for the people who use it
 

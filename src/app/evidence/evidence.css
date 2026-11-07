@@ -222,6 +222,54 @@
   gap: 4px 16px;
 }
 
+/* What the AI never decides: the decisions made by code in the same rows as the parts above, then what the model does. */
+.nd {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 40px;
+}
+@media (max-width: 1100px) {
+  .nd {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .nd {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.nd-item {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 14px 0 12px;
+  border-top: 1px solid var(--surface-2);
+}
+.nd-item dt {
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+.nd-item dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  max-width: 60ch;
+}
+.nd-where {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.evidence .nd-model {
+  margin: 10px 0 0;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: var(--surface);
+  font-size: 0.9375rem;
+}
+.nd-model-k {
+  font-weight: 500;
+}
+
 /* Disclosures. Every row that opens draws the same plus, which folds into a minus, and acknowledges the press. */
 .jx-disc > summary,
 .jp-disc > summary,
@@ -1000,6 +1048,87 @@
   }
 }
 
+/* The two errors that cost money: one band right under the results, each rate as a count of its cases, the definition
+   beside it, the sources in the technical view. A zero takes the results' green; any other count stays in ink. */
+.je {
+  margin-top: 12px;
+  padding: clamp(16px, 0.9rem + 0.6vw, 22px) clamp(18px, 1rem + 0.8vw, 26px);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.je-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.evidence .je-h {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+.je-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px clamp(24px, 3vw, 48px);
+}
+@media (max-width: 860px) {
+  .je-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.je-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 6px 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-2);
+}
+@media (max-width: 480px) {
+  .je-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.evidence .je-fig {
+  margin: 0;
+  font-size: clamp(1.875rem, 1.5rem + 1.2vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.evidence .je-fig[data-zero] {
+  color: var(--positive);
+}
+.je-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.evidence .je-body > p {
+  margin: 0;
+  max-width: 64ch;
+}
+.je-what {
+  font-weight: 500;
+  line-height: 1.35;
+}
+.je-def {
+  font-size: 0.9375rem;
+}
+.je-by,
+.je-tech {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.je-tech {
+  overflow-wrap: anywhere;
+}
+
 /* The rules watch: the live answer, then each document and what Giftwise does with it. */
 .rw-status {
   margin: 0;
@@ -1132,6 +1261,79 @@
 .ad-link {
   justify-self: start;
   font-size: 0.9375rem;
+}
+/* The first pilot: who runs it, its two outcomes side by side with what each is compared with and where it is recorded,
+   then why it holds up. One band under the three groups. */
+.ad-pilot {
+  margin-top: 8px;
+  padding: 18px 22px 20px;
+  border-radius: 14px;
+  background: var(--surface);
+  display: grid;
+  gap: 12px;
+}
+.evidence .ad-pilot > * {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .ad-pilot {
+    padding: 16px 16px 18px;
+  }
+}
+.ad-pilot-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.evidence .ad-pilot-h {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+.ad-pilot-what {
+  max-width: 68ch;
+}
+.ad-outcomes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 32px;
+}
+@media (max-width: 760px) {
+  .ad-outcomes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.ad-outcome {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-2);
+}
+.ad-outcome dt {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+.ad-outcome dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  max-width: 62ch;
+}
+.ad-tech {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.ad-hold {
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-2);
+}
+.evidence .ad-hold p {
+  margin: 0;
+  font-size: 0.9375rem;
+  max-width: 86ch;
 }
 
 /* How it compares: a table on wide screens; on a phone, each row becomes its own block. */

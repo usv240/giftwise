@@ -729,5 +729,23 @@
     "what": "What the demo runs on today, and what a real deployment changes.",
     "why": "Saying the operating range plainly is part of being ready: the demo's limits are chosen for a sandbox and each one has a known next step.",
     "technical": "One Render Starter instance (0.5 CPU, 512 MB), a 256 MB Postgres with a 1 GB disk, a $2 daily AI cap, no login on the organizer pages beyond the private manage link. render.yaml holds the current shape."
+  },
+  "evidence.errors": {
+    "title": "The two errors that cost money",
+    "what": "How often Giftwise let a gift through that the rule counts, and how often it sent a gift that was fine as given another way, across every recorded case whose right answer is known.",
+    "why": "The first lowers a check. The second keeps the check whole but adds a step, because the money goes to the ABLE account instead of straight to the shop. When Giftwise is unsure, it takes the route that is safe under either reading, so a reading it cannot settle costs a step, not a check.",
+    "technical": "src/lib/error-rates.ts counts both from the recorded runs, with no model call: SSA's worked examples (content/eval/ssa-examples.json and ssa-examples-results.json), the scored federal court cases (content/eval/field-cases-results.json) and the labeled bills with one right answer (content/eval-results.json, the two reviewers with the referee). A case is in the first rate when SSA's answer, the court's holding or the bill's label says the gift as given counts, and in the second when it does not. For a bill, as given means paid straight to the company."
+  },
+  "evidence.never_decides": {
+    "title": "What the AI never decides",
+    "what": "The decisions about money that only code makes, and what Claude does instead.",
+    "why": "A model can misread. With the amounts, rules, checks, payments and payees in code, every answer traces to a rule, the same gift always gets the same answer, and the errors can be measured.",
+    "technical": "The bill, fundraiser and reviewer answers are Zod-validated structured outputs (structured() in src/lib/ai/claude.ts). They reach money only as inputs to the rules engine: a bill's category and amount go to evaluateGift(), and the reviewers' answers go to referee() and routeForDecision(). Switch to the Technical view to see the file behind each decision."
+  },
+  "evidence.pilot": {
+    "title": "A first pilot",
+    "what": "One concrete pilot and the two outcomes it measures, each with what it is compared with and where Giftwise already records it.",
+    "why": "SSI pays each month's check two months later, so the pilot runs long enough to see the checks for its gifts. Both outcomes come from records Giftwise already keeps for every family, so no new tracking is needed.",
+    "technical": "Outcome 1: audit_events rows with action paypal.routed_order.created hold checkIfCash and checkWithRouting for each order, joined to captured payments rows by order id. Outcome 2: buildReport() in src/lib/report/ssa.ts gives totals.check for each month, rebuilt from the payments table; the family's SSA notice gives the amount paid."
   }
 }

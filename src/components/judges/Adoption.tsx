@@ -1,5 +1,7 @@
 import Link from "next/link";
 import fieldResults from "../../../content/eval/field-cases-results.json";
+import { Info } from "@/components/Info";
+import { ERROR_RATES } from "@/lib/error-rates";
 
 const routed = fieldResults.summary.dollars.as_shown_in_the_opinions;
 const perPerson = routed.kept_per_month_2026 / routed.cases_where_routing_keeps_money;
@@ -104,5 +106,68 @@ export function Adoption() {
         ))}
       </ol>
     </>
+  );
+}
+
+const lowered = ERROR_RATES.lowered;
+
+/** One pilot, sized to SSI's two-month lag, and the two outcomes it reads off records Giftwise already keeps. */
+const OUTCOMES = [
+  {
+    name: "SSI dollars kept",
+    what: "The check each gift leaves, with Giftwise.",
+    against: "the same gift as cash, priced by the same rules when it is made.",
+    where: "the audit ledger: each routed order's entry holds both checks.",
+    tech: "audit_events where action = 'paypal.routed_order.created': detail.checkWithRouting against detail.checkIfCash, for orders whose payments rows are captured. The hash chain verifies with npm run verify-ledger.",
+  },
+  {
+    name: "Checks that match the report",
+    what: "The check SSA pays each month, against the one the family's report said to expect.",
+    against: `${lowered.errors} of ${lowered.of}, the measured rate of gifts let through that the rule counts.`,
+    where: "the monthly report, rebuilt from the payments and checkable by its QR code; SSA's amount is on the family's notice.",
+    tech: "totals.check from buildReport() in src/lib/report/ssa.ts for each month with gifts; /v/{slug}/{month}/{code} rebuilds it and asks PayPal for each payment.",
+  },
+] as const;
+
+export function Pilot() {
+  return (
+    <div className="ad-pilot" data-ui>
+      <div className="ad-pilot-top">
+        <h3 className="ad-pilot-h">A first pilot</h3>
+        <Info id="evidence.pilot" label="" />
+      </div>
+      <p className="ad-pilot-what">
+        One benefits counseling project offers Giftwise to 25 families it already counsels, for 120 days: two months of gifts, and the checks SSA pays for those months two months later.
+      </p>
+      <dl className="ad-outcomes">
+        {OUTCOMES.map((o, i) => (
+          <div key={o.name} className="ad-outcome">
+            <dt>
+              <span className="ad-n tabular" aria-hidden="true">
+                {i + 1}
+              </span>
+              {o.name}
+            </dt>
+            <dd>{o.what}</dd>
+            <dd>
+              <span className="ad-use-k">Compared with </span>
+              {o.against}
+            </dd>
+            <dd>
+              <span className="ad-use-k">Recorded in </span>
+              {o.where}
+            </dd>
+            <dd className="ad-tech tech-only">{o.tech}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="ad-hold">
+        <p>
+          <span className="ad-use-k">Why it holds up if a larger tool adds the same AI. </span>
+          The model call is the easy part to copy; what decides here is the rules in code, a ledger and reports anyone can check, and error rates measured on Social Security&rsquo;s own examples and federal court
+          cases.
+        </p>
+      </div>
+    </div>
   );
 }

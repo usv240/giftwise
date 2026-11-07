@@ -32,6 +32,12 @@ export default function AboutPage() {
             shop directly through PayPal, so the help arrives and her check stays the same.
           </p>
           <p>Every answer shows the rule it comes from. Fixed rules do the money math; AI reads documents and explains.</p>
+          <p>
+            How much each payee gets, the check, when money moves and who gets paid are decided by code, never by the AI.{" "}
+            <Link className="text-link" href="/evidence#ai">
+              What the AI never decides
+            </Link>
+          </p>
         </div>
         <figure className="about-photo">
           <Image

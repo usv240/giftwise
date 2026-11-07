@@ -9,12 +9,14 @@ import invResults from "../../../content/eval/invariants-results.json";
 import loadTest from "../../../content/public/load-test.json";
 import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
-import { Adoption } from "@/components/judges/Adoption";
+import { Adoption, Pilot } from "@/components/judges/Adoption";
 import { CaseRunner } from "@/components/judges/CaseRunner";
 import { Compare } from "@/components/judges/Compare";
+import { ErrorRates } from "@/components/judges/ErrorRates";
 import { EvalIntro, EvalResults } from "@/components/judges/EvalResults";
 import { FieldCases } from "@/components/judges/FieldCases";
 import { Invariants, InvariantsIntro } from "@/components/judges/Invariants";
+import { NeverDecides } from "@/components/judges/NeverDecides";
 import { NightlyChecks } from "@/components/judges/NightlyChecks";
 import { Results } from "@/components/judges/Results";
 import { RulesWatch } from "@/components/judges/RulesWatch";
@@ -143,6 +145,7 @@ const PARTS: Part[] = [
 const TOC = [
   ["#path", "Five-minute path"],
   ["#parts", "Where to see each part"],
+  ["#ai", "What the AI never decides"],
   ["#more", "More to try"],
   ["#nightly", "Nightly checks"],
   ["#failure-cases", "Failure cases"],
@@ -189,6 +192,8 @@ export default function EvidencePage() {
       </header>
 
       <Results />
+
+      <ErrorRates />
 
       <nav className="jp-toc" aria-label="On this page">
         <ul>
@@ -264,6 +269,19 @@ export default function EvidencePage() {
           ))}
 
         </dl>
+      </section>
+
+      <section id="ai" className="page-section" aria-labelledby="ai-h">
+        <div className="title-row">
+          <h2 id="ai-h">What the AI never decides</h2>
+
+          <Info id="evidence.never_decides" label="" />
+
+        </div>
+        <p className="page-prose jp-intro">Claude reads and explains. Each decision about money below is made by code, the same way every time.</p>
+
+        <NeverDecides />
+
       </section>
 
       <section id="more" className="page-section" aria-labelledby="more-h">
@@ -436,6 +454,8 @@ export default function EvidencePage() {
         <p className="page-prose jp-intro">Three groups already help people on SSI with money every month. Each can run Giftwise as it is today.</p>
 
         <Adoption />
+
+        <Pilot />
 
       </section>
 
