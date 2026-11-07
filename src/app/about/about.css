@@ -48,3 +48,57 @@
 .about .rw-tech {
   font-size: var(--step-small);
 }
+
+/* A year of gifts, run for real: one bar split by where the money goes, green to a shop through PayPal, blue to ABLE. */
+.about-year {
+  max-width: 44rem;
+}
+.about-split {
+  margin-top: 1rem;
+  display: flex;
+  gap: 3px;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.about-seg {
+  flex: 0 1 0;
+  min-width: 6px;
+  background: var(--positive);
+}
+.about-seg[data-part="able"],
+.about-swatch[data-part="able"] {
+  background: var(--accent);
+}
+.about-seg[data-part="item"],
+.about-swatch[data-part="item"] {
+  background: var(--muted);
+}
+.about-parts {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.about-parts li {
+  display: grid;
+  grid-template-columns: 4.5rem 10px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+.about-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--positive);
+}
+.about-part-amt {
+  font-weight: 500;
+  text-align: right;
+}
+.about-year-src {
+  margin-top: 0.75rem;
+  font-size: var(--step-small);
+}

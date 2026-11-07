@@ -1,3 +1,4 @@
+import Link from "next/link";
 import results from "../../../content/eval-results.json";
 import { stressTest } from "@/lib/review/stress";
 import { modelName } from "@/lib/ai/model-name";
@@ -285,60 +286,69 @@ export function EvalResults() {
             <p className="muted tech-only">scripts/run-eval.ts over content/eval/bills.json and content/eval/bills-hard.json; add --rescore to re-score the recorded answers with no AI calls.</p>
           </div>
         </details>
-        <details className="jx-disc">
-          <summary>All {R.cases.length} bills, with every answer</summary>
-          <div className="jx-body">
-            <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Every bill in the evaluation">
-              <table className="doc-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Bill</th>
-                    <th scope="col">Label</th>
-                    <th scope="col">No rulebook</th>
-                    <th scope="col">Regulations</th>
-                    <th scope="col">Manual</th>
-                    <th scope="col">Giftwise</th>
-                  </tr>
-                </thead>
-                {SETS.map(([id, label]) => (
-                  <tbody key={id}>
-                    <tr>
-                      <th scope="rowgroup" colSpan={6}>
-                        {label}
-                      </th>
-                    </tr>
-                    {R.cases
-                      .filter((c) => (c.set ?? "first") === id)
-                      .map((c) => (
-                        <tr key={c.id}>
-                          <td>
-                            {c.description}
-                            <span className="ev-basis">{c.basis}</span>
-                          </td>
-                          <td>{WORD[c.truth]}</td>
-                          <td>
-                            {c.baseline ? `${WORD[c.baseline.answer] ?? c.baseline.answer}, ${ROUTE[c.baseline.route] ?? c.baseline.route}` : "No answer"}
-                            {!c.outcome.baseline.safe && ", check lower"}
-                          </td>
-                          <td>
-                            <Answer v={c.regs} />
-                          </td>
-                          <td>
-                            <Answer v={c.poms} />
-                          </td>
-                          <td>
-                            {c.outcome.referee.route ? ROUTE[c.outcome.referee.route] : "No route"}
-                            {c.outcome.referee.safe ? ", check whole" : ", check lower"}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                ))}
-              </table>
-            </div>
-          </div>
-        </details>
+        <Link className="jx-go" href="/evidence/bills">
+          All {R.cases.length} bills, with every answer
+        </Link>
       </div>
     </>
+  );
+}
+
+/** Every bill, on its own page (/evidence/bills): its label and each setup's answer. */
+export function BillList() {
+  return (
+    <section className="page-section" aria-labelledby="bills-h">
+      <h2 id="bills-h">All {R.cases.length} bills, with every answer</h2>
+<div className="jx-sheet">
+      <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Every bill in the evaluation">
+        <table className="doc-table">
+          <thead>
+            <tr>
+              <th scope="col">Bill</th>
+              <th scope="col">Label</th>
+              <th scope="col">No rulebook</th>
+              <th scope="col">Regulations</th>
+              <th scope="col">Manual</th>
+              <th scope="col">Giftwise</th>
+            </tr>
+          </thead>
+          {SETS.map(([id, label]) => (
+            <tbody key={id}>
+              <tr>
+                <th scope="rowgroup" colSpan={6}>
+                  {label}
+                </th>
+              </tr>
+              {R.cases
+                .filter((c) => (c.set ?? "first") === id)
+                .map((c) => (
+                  <tr key={c.id}>
+                    <td>
+                      {c.description}
+                      <span className="ev-basis">{c.basis}</span>
+                    </td>
+                    <td>{WORD[c.truth]}</td>
+                    <td>
+                      {c.baseline ? `${WORD[c.baseline.answer] ?? c.baseline.answer}, ${ROUTE[c.baseline.route] ?? c.baseline.route}` : "No answer"}
+                      {!c.outcome.baseline.safe && ", check lower"}
+                    </td>
+                    <td>
+                      <Answer v={c.regs} />
+                    </td>
+                    <td>
+                      <Answer v={c.poms} />
+                    </td>
+                    <td>
+                      {c.outcome.referee.route ? ROUTE[c.outcome.referee.route] : "No route"}
+                      {c.outcome.referee.safe ? ", check whole" : ", check lower"}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          ))}
+        </table>
+      </div>
+    </div>
+    </section>
   );
 }

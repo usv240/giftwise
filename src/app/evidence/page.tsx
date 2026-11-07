@@ -13,17 +13,20 @@ import { Adoption, Pilot } from "@/components/judges/Adoption";
 import { CaseRunner } from "@/components/judges/CaseRunner";
 import { Compare } from "@/components/judges/Compare";
 import { ErrorRates } from "@/components/judges/ErrorRates";
+import { Impact } from "@/components/judges/Impact";
 import { EvalIntro, EvalResults } from "@/components/judges/EvalResults";
 import { FieldCases } from "@/components/judges/FieldCases";
 import { Invariants, InvariantsIntro } from "@/components/judges/Invariants";
 import { NeverDecides } from "@/components/judges/NeverDecides";
 import { NightlyChecks } from "@/components/judges/NightlyChecks";
+import { RefereeExample } from "@/components/judges/RefereeExample";
 import { Results } from "@/components/judges/Results";
 import { RulesWatch } from "@/components/judges/RulesWatch";
 import { SsaExamples } from "@/components/judges/SsaExamples";
 import { TourStart } from "@/components/tour/Tour";
 import { SandboxLogin } from "@/components/SandboxLogin";
-import { Suspense } from "react";
+import { IMPACT } from "@/lib/impact";
+import { reviewedWatch } from "@/lib/rules-watch";
 import "../pages.css";
 import "../developers/dev.css";
 import "./evidence.css";
@@ -40,9 +43,12 @@ const PATH = [
   { href: "/g/maya/calendar?month=2026-10", label: "Her benefit calendar", time: "40 s", look: "Press As cash and drag Aunt June's $150 from October 28 to November 2. A different check drops: SSI counts income by calendar month." },
 ];
 
-/** The federal court cases where a benefit-safe route exists: what routing keeps a month, in all and for each person. */
-const ROUTED = fieldResults.summary.dollars.as_shown_in_the_opinions;
-const PER_PERSON = Math.round(ROUTED.kept_per_month_2026 / ROUTED.cases_where_routing_keeps_money);
+/** A YYYY-MM-DD date in words, the same on any server. */
+const day = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
+
+/** The federal court cases where a benefit-safe route exists: what routing keeps a month for each person. */
+const PER_PERSON = IMPACT.keptMonthlyPerPerson;
+const A11Y = results.suites.find((s) => s.id === "a11y")!;
 
 /** Everything else, for a visitor with more time, in three groups of at most five. */
 const MORE = [
@@ -54,7 +60,7 @@ const MORE = [
       {
         href: "#field-cases",
         label: "Real cases from federal courts",
-        look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did. In the ${ROUTED.cases_where_routing_keeps_money} cases with a benefit-safe route, the same help keeps about $${PER_PERSON} a month for each person.`,
+        look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did. In the ${IMPACT.routedCases} cases with a benefit-safe route, the same help keeps about $${PER_PERSON} a month for each person.`,
       },
       { href: "#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, look: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
       { href: "#rules-watch", label: "The rules watch the Federal Register", look: "Asked live: every change to SSI's income rules and amounts since 2022, each with what Giftwise does. The 2027 amounts, published October 26, are in use." },
@@ -98,9 +104,9 @@ const PARTS: Part[] = [
 
   {
     name: "Design",
-    line: "Built to published research for the people who use it, and accessible to WCAG 2.2 AA on 108 page views.",
+    line: `Built to published research for the people who use it, and accessible to WCAG 2.2 AA on ${A11Y.total} page views.`,
     more: "The standards, themes and languages",
-    where: "Built to published research for the people who use it: W3C's guidance for cognitive and learning disabilities, the NHS England and Inclusion Europe Easy Read standards, GOV.UK confirmation patterns and Baymard's checkout research, so the total sits beside the PayPal button and every tap target is 44 pixels. Light and dark themes, Large text that reaches every part, plain and technical views, accessible to WCAG 2.2 AA on 108 page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.",
+    where: `Built to published research for the people who use it: W3C's guidance for cognitive and learning disabilities, the NHS England and Inclusion Europe Easy Read standards, GOV.UK confirmation patterns and Baymard's checkout research, so the total sits beside the PayPal button and every tap target is 44 pixels. Light and dark themes, Large text that reaches every part, plain and technical views, accessible to WCAG 2.2 AA on ${A11Y.total} page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.`,
     links: [
       ["/g/maya", "Gift page"],
       ["/g/maya?lang=es", "En español"],
@@ -124,16 +130,15 @@ const PARTS: Part[] = [
 
   {
     name: "What is new",
-    line: "The money is routed by the rules before PayPal moves it, and anyone can check the result on a public receipt.",
-    more: "Four more, from MCP to checkable reports",
-    where:
-      "AI assistants can ask Giftwise first over MCP, two reviewers with different rulebooks must quote their source word for word, the rules check the Federal Register for their own updates, and every report carries a code anyone can check against PayPal and the ledger.",
+    line: "Code referees two Claude reviewers who must quote their rulebooks word for word, one PayPal checkout pays every shop and the ABLE account directly so the check stays whole, and anyone can check a report to Social Security against PayPal and the ledger.",
+    more: "Two more, for AI agents and rule changes",
+    where: "AI assistants ask Giftwise first over MCP and can start a checkout that only the giver can approve, and the rules check the Federal Register for their own updates.",
     links: [
-      ["#compare", "How it compares"],
+      ["#referee", "The two reviewers"],
       ["/g/maya", "Give any amount"],
+      ["/g/maya/report?month=2026-10#rp-verify-h", "A report anyone can check"],
       ["/agents", "For AI agents"],
-      ["/try/presets/electric-bill", "The two reviewers"],
-      ["#rules-watch", "The rules watch"],
+      ["#compare", "How it compares"],
     ],
   },
 
@@ -191,7 +196,16 @@ export default function EvidencePage() {
         </p>
       </header>
 
-      <Results />
+      <Impact />
+
+      <RefereeExample />
+
+      <section className="jr-band" aria-labelledby="jr-h">
+        <h2 id="jr-h" className="jr-h">
+          How the rules were checked
+        </h2>
+        <Results />
+      </section>
 
       <ErrorRates />
 
@@ -235,9 +249,7 @@ export default function EvidencePage() {
             <p className="muted">A PayPal sandbox test account. It works only in PayPal&rsquo;s sandbox checkout window, and no real money moves.</p>
           </div>
 
-          <Suspense fallback={null}>
-            <SandboxLogin />
-          </Suspense>
+          <SandboxLogin />
 
         </div>
       </section>
@@ -333,9 +345,7 @@ export default function EvidencePage() {
           </p>
         </div>
 
-        <Suspense fallback={<p className="page-loading">Loading the latest run…</p>}>
-          <NightlyChecks />
-        </Suspense>
+        <NightlyChecks />
 
       </section>
 
@@ -433,9 +443,7 @@ export default function EvidencePage() {
           </p>
         </div>
 
-        <Suspense fallback={<p className="page-loading">Asking the Federal Register…</p>}>
-          <RulesWatch />
-        </Suspense>
+        <RulesWatch initial={reviewedWatch()} />
 
       </section>
 
@@ -467,7 +475,8 @@ export default function EvidencePage() {
 
         </div>
         <p className="page-prose jp-intro">
-          Last run {new Date(`${results.ranAt}T12:00:00Z`).toLocaleDateString("en-US", { dateStyle: "long" })}. {results.build}.
+          Latest run {day(results.ranAt)}; each suite&rsquo;s own date is with its command. {results.build}. The counts are written by scripts/test-results.mjs after each run, and the README
+          and TESTING.md are checked against the same file.
         </p>
         <ul className="jp-tests" aria-label="Each suite, passed of total">
 
@@ -496,7 +505,9 @@ export default function EvidencePage() {
                       </span>
                     </p>
                     <p className="jp-test-what">{s.what}</p>
-                    <p className="jp-test-cmd tabular">{s.command}</p>
+                    <p className="jp-test-cmd tabular">
+                      {s.command}, {day(s.ranAt)}
+                    </p>
                   </li>
                 ))}
 

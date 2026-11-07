@@ -1,17 +1,41 @@
-import { connection } from "next/server";
-import { rulesWatch } from "@/lib/rules-watch";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import type { Watch } from "@/lib/rules-watch";
 
 const day = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" });
 
-/** The rules watch, asked live: every Federal Register document that changes SSI's income rules or amounts, with what Giftwise does with it. */
-export async function RulesWatch() {
-  await connection();
-  const w = await rulesWatch();
+/**
+ * The rules watch: every Federal Register document that changes SSI's income rules or amounts, with what Giftwise does
+ * with it. The page ships the reviewed list; when the section comes near the screen it asks the Federal Register live
+ * through GET /api/rules-watch and shows that answer instead.
+ */
+export function RulesWatch({ initial }: { initial: Watch }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(initial);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let asked = false;
+    const ask = async () => {
+      if (asked) return;
+      asked = true;
+      try {
+        const j = await (await fetch("/api/rules-watch")).json();
+        if (j.data?.documents) setW(j.data as Watch);
+      } catch {
+        /* the reviewed list stays */
+      }
+    };
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && void ask(), { rootMargin: "600px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const reviewed = w.documents.filter((d) => d.reviewed).length;
   const total = w.documents.length;
   return (
-    <>
-      <div className="jx-result" data-ui>
+    <div ref={ref}>
+      <div className="jx-result" data-ui aria-live="polite">
         <p className="sx-score" data-short={reviewed === total ? undefined : ""}>
           <span className="tabular">
             {reviewed} of {total}
@@ -59,6 +83,6 @@ export async function RulesWatch() {
           </div>
         </details>
       </div>
-    </>
+    </div>
   );
 }

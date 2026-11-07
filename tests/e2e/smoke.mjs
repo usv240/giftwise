@@ -3,8 +3,10 @@
 // fresh build against an empty Postgres. Usage: BASE_URL=http://localhost:3100 npm run e2e:smoke
 const B = process.env.BASE_URL ?? "http://localhost:3100";
 let failed = 0;
+let total = 0;
 const check = (name, ok, detail = "") => {
   console.log(`${ok ? "ok  " : "FAIL"} ${name}${detail ? `  ${detail}` : ""}`);
+  total++;
   if (!ok) failed++;
 };
 
@@ -19,6 +21,9 @@ const pages = [
   ["/g/maya/calendar", "Maya"],
   ["/manage/maya-sample-organizer", "Maya"],
   ["/evidence", "Giftwise"],
+  ["/evidence/ssa-examples", "worked examples"],
+  ["/evidence/bills", "labeled bills"],
+  ["/evidence/court-cases", "federal court"],
   ["/agents", "MCP"],
   ["/dashboard", "Giftwise"],
   ["/organizations", "Giftwise"],
@@ -73,5 +78,11 @@ check("health: error tracking reports live or not connected", errors && ["live",
 const head = await fetch(B + "/");
 check("security headers", Boolean(head.headers.get("strict-transport-security") && head.headers.get("x-content-type-options") && head.headers.get("content-security-policy")));
 
-console.log(failed ? `\n${failed} checks failed` : "\nall smoke checks pass");
+// The recorded assistant on /agents names the same two checks Maya's page computes for a $300 cash gift today.
+const giftHtml = (await (await fetch(`${B}/g/maya`)).text()).replace(/<!-- -->/g, "");
+const agentsHtml = await (await fetch(`${B}/agents`)).text();
+const cashLine = /A \$300 cash gift would lower her check to (\$[\d,]+)\. Paying for one of these needs instead keeps her full (\$[\d,]+)/.exec(giftHtml);
+check("/agents and /g/maya name the same checks for $300 in cash", Boolean(cashLine) && agentsHtml.includes(cashLine[1]) && agentsHtml.includes(cashLine[2]), cashLine ? `${cashLine[2]} and ${cashLine[1]}` : "no cash line on /g/maya");
+
+console.log(`\n${total - failed} passed, ${failed} failed`);
 process.exitCode = failed ? 1 : 0;

@@ -387,8 +387,8 @@
   "gift.sandbox": {
     "title": "Testing with PayPal sandbox",
     "what": "This demo uses PayPal's sandbox, a practice version of PayPal where no real money moves.",
-    "why": "Anyone can try the full payment safely. Use the sandbox buyer login from TESTING.md in the project repository.",
-    "technical": "api-m.sandbox.paypal.com and the sandbox JavaScript SDK at www.sandbox.paypal.com/web-sdk/v6/core."
+    "why": "Anyone can try the full payment safely, with the sandbox buyer login shown beside it. Each sample shop is paid to its own sandbox business account and her ABLE account to another, so PayPal's record names every payee separately.",
+    "technical": "api-m.sandbox.paypal.com and the sandbox JavaScript SDK at www.sandbox.paypal.com/web-sdk/v6/core. Payees resolve on the server: vendor:riverside, vendor:eastgate and vendor:northside each to their own PAYPAL_VENDOR_EMAIL_* account, able to PAYPAL_ABLE_EMAIL (payeeEmail() in src/lib/households.ts); /status shows how many accounts that is."
   },
   "real.world": {
     "title": "How this works for real",

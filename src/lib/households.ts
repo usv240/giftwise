@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "./db";
-import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Pronoun } from "./rules";
+import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Profile, type Pronoun } from "./rules";
 import { SAMPLE_MANAGE_TOKEN, hashToken, newToken, resetSampleManage, routeNeed } from "./manage";
 
 export type NeedRow = typeof schema.needs.$inferSelect;
@@ -21,6 +21,17 @@ export const SAMPLE = {
     { title: "Therapy co-pay", detail: "Weekly physical therapy.", category: "medical", route: "vendor", payeeName: "Northside Physical Therapy", payeeAccount: "vendor:northside", amount: "90.00", recurring: false },
   ],
 } as const;
+
+/** The cash gift every gift page compares with: this many dollars given in cash today. */
+export const CASH_EXAMPLE_USD = 300;
+
+/**
+ * What the comparison cash gift does to the check: the figures under "Prefer to give cash?" on every gift page. The
+ * recorded assistant on /agents is checked against the same figures (tests/agent-demo.test.ts), so the two never disagree.
+ */
+export function cashExample(profile: Profile, date: string) {
+  return evaluateGift({ id: "cash", date, amount: CASH_EXAMPLE_USD, delivery: "cash", category: "other" }, profile);
+}
 
 /** Create the sample household if it does not exist yet. Safe to call on every request. */
 export async function ensureSample() {
@@ -49,12 +60,15 @@ export async function getHousehold(slug: string) {
   const d = db();
   const [h] = await d.select().from(schema.households).where(eq(schema.households.slug, slug)).limit(1);
   if (!h) return null;
-  const needs = await d.select().from(schema.needs).where(eq(schema.needs.householdId, h.id)).orderBy(asc(schema.needs.sortOrder));
-  const pays = await d
-    .select()
-    .from(schema.payments)
-    .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured")))
-    .orderBy(desc(schema.payments.capturedAt));
+  // The needs and the payments do not depend on each other, so they are read at the same time.
+  const [needs, pays] = await Promise.all([
+    d.select().from(schema.needs).where(eq(schema.needs.householdId, h.id)).orderBy(asc(schema.needs.sortOrder)),
+    d
+      .select()
+      .from(schema.payments)
+      .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured")))
+      .orderBy(desc(schema.payments.capturedAt)),
+  ]);
   return { household: h, needs, payments: pays };
 }
 
@@ -95,6 +109,26 @@ export function payeeEmail(account: string) {
   const email = account === "able" ? process.env.PAYPAL_ABLE_EMAIL : shop || process.env.PAYPAL_VENDOR_EMAIL;
   if (!email) throw new Error(`No sandbox payee configured for ${account}`);
   return email.trim();
+}
+
+/**
+ * How the sample page's payees map to sandbox accounts, as counts only (no address leaves the server): the sample
+ * shops, how many separate business accounts they resolve to, and whether her ABLE account is its own. Shown on /status.
+ */
+export function samplePayees() {
+  const shops = [...new Set(SAMPLE.needs.map((n) => n.payeeAccount).filter((a) => a.startsWith("vendor:")))];
+  const resolve = (a: string) => {
+    try {
+      return payeeEmail(a).toLowerCase();
+    } catch {
+      return null;
+    }
+  };
+  const shopEmails = shops.map(resolve);
+  const able = resolve("able");
+  if (shopEmails.some((e) => !e) || !able) return null;
+  const distinct = new Set(shopEmails).size;
+  return { shops: shops.length, shopAccounts: distinct, ableOwn: !shopEmails.includes(able) };
 }
 
 /** Reset the sample so every visitor sees the same starting state. */

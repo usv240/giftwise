@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Status", description: "Every service
 
 const LABEL = { live: "Live", fallback: "Fallback", not_connected: "Not connected" } as const;
 /** The Info entry that explains each service, when it is not stack.<id>. */
-const INFO: Record<string, string> = { database: "render", webhooks: "paypal", checks: "render", "paypal-mcp": "paypal_apis" };
+const INFO: Record<string, string> = { database: "render", webhooks: "paypal", payees: "paypal", checks: "render", "paypal-mcp": "paypal_apis" };
 
 async function Rows() {
   await connection();

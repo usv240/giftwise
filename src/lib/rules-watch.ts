@@ -50,6 +50,12 @@ function describe(docs: WatchDoc[], live: boolean): Pick<Watch, "status" | "sent
   };
 }
 
+/** The reviewed list as of its date, with no call: what a page shows before the live answer arrives. */
+export function reviewedWatch(status: Watch["status"] = "current", checkedAt = `${watch.reviewed_on}T12:00:00Z`): Watch {
+  const documents: WatchDoc[] = watch.documents.map((d) => ({ number: d.number, citation: d.citation, published: d.published, title: d.title, url: `https://www.federalregister.gov/d/${d.number}`, reviewed: true, how: d.how }));
+  return { ...describe(documents, false), status, checkedAt, live: false, documents, newest: documents[0] ?? null, rateYears: RATE_YEARS, reviewedOn: watch.reviewed_on };
+}
+
 let cache: { at: number; value: Watch } | null = null;
 
 /** Live when the Federal Register answers; otherwise the reviewed list as of its date. Cached for six hours. */
@@ -75,7 +81,6 @@ export async function rulesWatch(timeoutMs = 8000): Promise<Watch> {
     cache = { at: Date.now(), value };
     return value;
   } catch {
-    const documents: WatchDoc[] = watch.documents.map((d) => ({ number: d.number, citation: d.citation, published: d.published, title: d.title, url: `https://www.federalregister.gov/d/${d.number}`, reviewed: true, how: d.how }));
-    return { ...describe(documents, false), status: "unreachable", checkedAt, live: false, documents, newest: documents[0] ?? null, rateYears: RATE_YEARS, reviewedOn: watch.reviewed_on };
+    return reviewedWatch("unreachable", checkedAt);
   }
 }

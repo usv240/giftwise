@@ -83,11 +83,21 @@ export async function checkPage(e: Env, id: string): Promise<Omit<CheckResult, "
 
 // ---------- The public API, including the bugs this project has already fixed once ----------
 
+/**
+ * The tools the MCP server lists, by name. tests/checks-workflow.test.ts holds this list to the app's own
+ * (src/lib/mcp/tools.ts), so a new tool cannot leave the outside check behind.
+ */
+export const MCP_TOOLS = ["check_gift", "get_gift_page", "ask_rulebook", "find_gift", "plan_gift", "review_bill", "get_ssa_report", "start_gift_checkout", "start_monthly_gift"] as const;
+const COUNT_WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+
+/** When the nightly run starts, in UTC. render.yaml's cron schedule says the same (tests/checks-workflow.test.ts). */
+export const NIGHTLY_UTC = { hour: 9, minute: 0 } as const;
+
 export const API = [
   { id: "health", title: "Service status: PayPal, Claude and the database live" },
   { id: "ledger", title: "The audit ledger's hash chain verifies end to end" },
   { id: "ssa-report", title: "October's report: nothing counts, her check stays $994" },
-  { id: "mcp", title: "The MCP server lists its nine tools" },
+  { id: "mcp", title: `The MCP server lists its ${COUNT_WORDS[MCP_TOOLS.length] ?? MCP_TOOLS.length} tools` },
   { id: "rules-watch", title: "Every Federal Register change to SSI's income rules and amounts is reviewed" },
   { id: "openapi", title: "OpenAPI names the public address, not the internal port" },
   { id: "paypal-return", title: "PayPal's return link sends people to the public address" },
@@ -115,7 +125,10 @@ export async function checkApi(e: Env, id: string): Promise<Omit<CheckResult, "a
         const res = await call(`${e.app}/api/mcp`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) });
         const j = (await res.json()) as { result?: { tools: { name: string }[] } };
         const names = j.result?.tools.map((t) => t.name) ?? [];
-        return { ok: names.length === 9 && names.includes("ask_rulebook") && names.includes("find_gift") && names.includes("get_ssa_report") && names.includes("start_gift_checkout") && names.includes("start_monthly_gift"), detail: names.join(", ") };
+        const missing = MCP_TOOLS.filter((n) => !names.includes(n));
+        const extra = names.filter((n) => !(MCP_TOOLS as readonly string[]).includes(n));
+        const diff = [missing.length ? `missing ${missing.join(", ")}` : "", extra.length ? `not expected ${extra.join(", ")}` : ""].filter(Boolean).join("; ");
+        return { ok: !missing.length && !extra.length, detail: `${names.join(", ")}${diff ? ` (${diff})` : ""}` };
       }
       case "rules-watch": {
         const j = (await (await call(`${e.app}/api/rules-watch`)).json()) as { data: { status: string; live: boolean; documents: { citation: string; reviewed: boolean }[]; sentence: string } };

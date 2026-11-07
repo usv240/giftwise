@@ -285,7 +285,8 @@ async function Alerts() {
       <p className="ops-note">
         {run ? (
           <>
-            The outside checks last ran {run.ageMinutes < 60 ? `${run.ageMinutes} minutes` : `${Math.round(run.ageMinutes / 60)} hours`} ago on {run.source === "render-workflow" ? "Render Workflows" : "a developer's machine"}: {run.passed} of {run.total} passed.{" "}
+            The outside checks last ran {new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" }).format(new Date(run.finishedAt))} ET on{" "}
+            {run.source === "render-workflow" ? "Render Workflows" : "a developer's machine"}: {run.passed} of {run.total} passed.{" "}
           </>
         ) : (
           <>No outside check run has been filed on this server yet. </>

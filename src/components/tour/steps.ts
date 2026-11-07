@@ -46,7 +46,7 @@ export const TOUR: TourStep[] = [
   },
   {
     path: "/evidence",
-    target: ".jr",
+    target: ".jr-band",
     title: "Checked four ways",
     text: "Each result opens its cases: Social Security's own examples, federal court cases, labeled bills and 100,000 random gifts. Further down: failure cases run live against PayPal, and the rules watching the Federal Register.",
   },

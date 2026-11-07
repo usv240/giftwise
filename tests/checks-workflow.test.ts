@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { API, PATH, Transient, runAll, withRetry, type CheckResult, type Env } from "../workflows/src/checks";
+import { API, MCP_TOOLS, NIGHTLY_UTC, PATH, Transient, runAll, withRetry, type CheckResult, type Env } from "../workflows/src/checks";
+import { TOOLS } from "@/lib/mcp/tools";
 
 const e: Env = { app: "https://giftwise.example", secret: "s" };
 const pass = (id: string, group: CheckResult["group"]): CheckResult => ({ id, group, title: id, ok: true, detail: "", ms: 1, attempts: 1 });
@@ -54,5 +56,20 @@ describe("the outside checks workflow", () => {
     );
     expect(r.attempts).toBe(3);
     await expect(withRetry(async () => Promise.reject(new Error("bad answer")), 2, 1)).rejects.toThrow("bad answer");
+  });
+
+  it("expects exactly the tools the MCP server lists, and says how many", () => {
+    expect([...MCP_TOOLS].sort()).toEqual(TOOLS.map((t) => t.name).sort());
+    expect(API.find((a) => a.id === "mcp")?.title).toMatch(/lists its \w+ tools$/);
+    expect(API.find((a) => a.id === "mcp")?.title).not.toMatch(/\d/);
+  });
+
+  it("runs nightly at the hour render.yaml and TESTING.md give", () => {
+    const yaml = readFileSync("render.yaml", "utf8");
+    const cron = /name: giftwise-nightly[\s\S]*?schedule: "([^"]+)"/.exec(yaml)?.[1];
+    expect(cron).toBe(`${NIGHTLY_UTC.minute} ${NIGHTLY_UTC.hour} * * *`);
+    const hh = String(NIGHTLY_UTC.hour).padStart(2, "0");
+    const mm = String(NIGHTLY_UTC.minute).padStart(2, "0");
+    expect(readFileSync("TESTING.md", "utf8")).toContain(`${hh}:${mm} UTC`);
   });
 });

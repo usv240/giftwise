@@ -1,12 +1,12 @@
 {
-  "ran_at": "2026-11-06T22:55:16.845Z",
+  "ran_at": "2026-11-07T21:15:59.910Z",
   "base_url": "http://localhost:3100",
   "concurrency": 100,
   "rounds": 3,
   "runs": 300,
   "total_requests": 600,
-  "total_ms": 16395,
-  "requests_per_second": 36.6,
+  "total_ms": 18930,
+  "requests_per_second": 31.7,
   "method": "100 concurrent runs, 3 rounds, each run a gift check (POST /api/v1/check-gift, $1,000 as cash) then the gift page (GET /g/maya), after one warm-up request per path. Each run arrives as its own visitor (its own x-forwarded-for in 198.51.100.0/24), so the per-visitor demo limit sees 100 visitors at once. Latency is measured by the client from request start to the full body, with node's fetch on the same machine as the server.",
   "machine": "Intel(R) Core(TM) Ultra 9 185H, 22 threads, 32 GB, win32 10.0.26300, Node v24.13.1; the server is the production build (next start) with Postgres 17 in Docker on the same machine",
   "paths": [
@@ -16,10 +16,10 @@
       "requests": 300,
       "errors": 0,
       "error_rate": 0,
-      "p50_ms": 1024,
-      "p95_ms": 1745,
-      "p99_ms": 1916,
-      "max_ms": 1967,
+      "p50_ms": 1514,
+      "p95_ms": 3296,
+      "p99_ms": 3915,
+      "max_ms": 4053,
       "statuses": {
         "200": 300
       }
@@ -30,10 +30,10 @@
       "requests": 300,
       "errors": 0,
       "error_rate": 0,
-      "p50_ms": 3600,
-      "p95_ms": 4718,
-      "p99_ms": 4811,
-      "max_ms": 4852,
+      "p50_ms": 3680,
+      "p95_ms": 5616,
+      "p99_ms": 5739,
+      "max_ms": 5763,
       "statuses": {
         "200": 300
       }

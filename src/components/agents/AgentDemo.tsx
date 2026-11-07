@@ -71,30 +71,57 @@ function PayPalOrderCard({ text, technical }: { text: string; technical: boolean
   );
 }
 
-/** Plain text with **bold** and bare links, the way the assistant writes it. Nothing is rendered as HTML. */
-function Rich({ text }: { text: string }) {
+/** One line's **bold** and bare links. */
+function Inline({ line }: { line: string }) {
   return (
     <>
-      {tidy(text)
-        .replace(/\p{Extended_Pictographic}️?/gu, "")
-        .split(/\n+/)
-        .filter((line) => line.trim())
-        .map((line, i) => (
+      {line.split(/(\*\*[^*]+\*\*|https?:\/\/\S+)/g).map((part, j) => {
+        if (part.startsWith("**") && part.endsWith("**")) return <strong key={j}>{part.slice(2, -2)}</strong>;
+        if (/^https?:\/\//.test(part)) {
+          const href = part.replace(/[).,]+$/, "");
+          return (
+            <a key={j} className="text-link" href={href} target="_blank" rel="noreferrer">
+              {href.includes("paypal.com") ? "Open PayPal to approve" : href}
+            </a>
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+}
+
+/** Plain text with **bold**, bare links and "- " lists, the way the assistant writes it. Nothing is rendered as HTML. */
+function Rich({ text }: { text: string }) {
+  const lines = tidy(text)
+    .replace(/\p{Extended_Pictographic}️?/gu, "")
+    .split(/\n+/)
+    .filter((line) => line.trim());
+  // Consecutive "- " lines become one list; every other line is a paragraph.
+  const blocks: (string | string[])[] = [];
+  for (const line of lines) {
+    const item = /^\s*[-*]\s+(.*)$/.exec(line);
+    const last = blocks[blocks.length - 1];
+    if (item && Array.isArray(last)) last.push(item[1]);
+    else blocks.push(item ? [item[1]] : line);
+  }
+  return (
+    <>
+      {blocks.map((b, i) =>
+        Array.isArray(b) ? (
+          <ul key={i} className="ag-list">
+            {b.map((li, k) => (
+              <li key={k}>
+                <Inline line={li} />
+              </li>
+            ))}
+          </ul>
+        ) : (
           <p key={i}>
-            {line.split(/(\*\*[^*]+\*\*|https?:\/\/\S+)/g).map((part, j) => {
-              if (part.startsWith("**") && part.endsWith("**")) return <strong key={j}>{part.slice(2, -2)}</strong>;
-              if (/^https?:\/\//.test(part)) {
-                const href = part.replace(/[).,]+$/, "");
-                return (
-                  <a key={j} className="text-link" href={href} target="_blank" rel="noreferrer">
-                    {href.includes("paypal.com") ? "Open PayPal to approve" : href}
-                  </a>
-                );
-              }
-              return part;
-            })}
+            <Inline line={b} />
           </p>
-        ))}
+        ),
+      )}
     </>
   );
 }

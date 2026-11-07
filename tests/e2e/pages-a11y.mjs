@@ -12,7 +12,7 @@ const monthly = await (await fetch(`${B}/api/monthly`, { method: "POST", headers
 const verify = await (await fetch(`${B}/api/v1/ssa-report?page=maya&month=2026-10`)).json();
 // A gift page made from a list of needs, they/them, so the generated pages are checked too.
 const made = await (await fetch(`${B}/api/v1/gift-pages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Jordan", pronoun: "they", organizer: "E2E", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] }) })).json();
-const routes = ["/", "/try", "/try/presets/electric-bill", "/learn", "/g/maya", "/g/maya?lang=es", "/g/maya/report?month=2026-10", "/g/maya/report?month=2026-10&view=cash", "/g/maya/report/easy?month=2026-10", "/g/maya/report/easy?month=2026-10&lang=es&view=cash", "/g/maya/calendar", "/manage/maya-sample-organizer", ...(verify.data?.verify?.url ? [verify.data.verify.url.replace(/^https?:\/\/[^/]+/, "")] : []), ...(monthly.data?.url ? [monthly.data.url] : []), ...(made.data?.url ? [made.data.url] : []), "/evidence", "/agents", "/dashboard", "/organizations", "/developers", "/developers/docs", "/developers/keys", "/status", "/ops", "/stack", "/about", ...(order.data?.id ? [`/r/${order.data.id}`, `/r/${order.data.id}?lang=es`] : [])];
+const routes = ["/", "/try", "/try/presets/electric-bill", "/learn", "/g/maya", "/g/maya?lang=es", "/g/maya/report?month=2026-10", "/g/maya/report?month=2026-10&view=cash", "/g/maya/report/easy?month=2026-10", "/g/maya/report/easy?month=2026-10&lang=es&view=cash", "/g/maya/calendar", "/manage/maya-sample-organizer", ...(verify.data?.verify?.url ? [verify.data.verify.url.replace(/^https?:\/\/[^/]+/, "")] : []), ...(monthly.data?.url ? [monthly.data.url] : []), ...(made.data?.url ? [made.data.url] : []), "/evidence", "/evidence/ssa-examples", "/evidence/bills", "/evidence/court-cases", "/agents", "/dashboard", "/organizations", "/developers", "/developers/docs", "/developers/keys", "/status", "/ops", "/stack", "/about", ...(order.data?.id ? [`/r/${order.data.id}`, `/r/${order.data.id}?lang=es`] : [])];
 
 const b = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
 let failed = 0;
@@ -27,4 +27,6 @@ for (const route of routes) for (const w of [1440, 390]) for (const theme of ["l
   await p.close();
 }
 await b.close();
-console.log(failed ? `\n${failed} page views with problems` : "\nall page views pass");
+const views = routes.length * 4;
+console.log(`\n${views - failed} passed, ${failed} failed (page views)`);
+process.exitCode = failed ? 1 : 0;

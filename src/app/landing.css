@@ -22,6 +22,57 @@
   margin-top: 1.25rem;
   max-width: 38ch;
 }
+/* What routing keeps, in dollars from real court cases: two figures under the promise, each linking to its cases. */
+.hero-impact {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.5rem;
+  max-width: 34rem;
+}
+@media (max-width: 420px) {
+  .hero-impact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.hero-impact-link {
+  display: grid;
+  gap: 4px;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--surface-2);
+  color: var(--ink);
+  text-decoration: none;
+}
+.hero-impact-fig {
+  font-size: clamp(1.375rem, 1.15rem + 0.8vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.hero-impact-fig[data-kept] {
+  color: var(--positive);
+}
+.hero-impact-what {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hero-impact-link:hover .hero-impact-what {
+    text-decoration-color: currentColor;
+  }
+}
+.hero-impact-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
 .hero-actions {
   margin-top: 1.75rem;
   display: flex;

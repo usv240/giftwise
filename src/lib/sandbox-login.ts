@@ -1,14 +1,21 @@
-import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 /**
  * The PayPal sandbox buyer login that TESTING.md publishes, read from that file so the page and the file can
  * never disagree. It is a sandbox test account: it works only in PayPal's sandbox checkout window and moves no money.
- * Returns null when the file or its rows are missing.
+ * Read synchronously, so a static page includes it when it is built. Returns null when the file or its rows are missing.
  */
-export async function sandboxBuyerLogin(): Promise<{ email: string; password: string } | null> {
+let read: { email: string; password: string } | null | undefined;
+export function sandboxBuyerLogin(): { email: string; password: string } | null {
+  if (read !== undefined) return read;
+  read = readLogin();
+  return read;
+}
+
+function readLogin(): { email: string; password: string } | null {
   try {
-    const md = await readFile(path.join(process.cwd(), "TESTING.md"), "utf8");
+    const md = readFileSync(path.join(process.cwd(), "TESTING.md"), "utf8");
     const row = (label: string) => new RegExp(`^\\|\\s*${label}\\s*\\|\\s*\`([^\`]+)\`\\s*\\|`, "m").exec(md)?.[1] ?? null;
     const email = row("Email");
     const password = row("Password");

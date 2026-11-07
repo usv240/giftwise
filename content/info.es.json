@@ -23,8 +23,8 @@
   "gift.sandbox": {
     "title": "Pruebas con el sandbox de PayPal",
     "what": "Esta demostración usa el sandbox de PayPal, una versión de práctica de PayPal donde no se mueve dinero real.",
-    "why": "Cualquier persona puede probar el pago completo sin riesgo. Use el comprador de prueba de TESTING.md, en el repositorio del proyecto.",
-    "technical": "api-m.sandbox.paypal.com y el SDK de JavaScript del sandbox en www.sandbox.paypal.com/web-sdk/v6/core."
+    "why": "Cualquier persona puede probar el pago completo sin riesgo, con el comprador de prueba que aparece al lado. Cada tienda de la muestra recibe el pago en su propia cuenta comercial de prueba y su cuenta ABLE en otra, así el registro de PayPal nombra a cada destinatario por separado.",
+    "technical": "api-m.sandbox.paypal.com y el SDK de JavaScript del sandbox en www.sandbox.paypal.com/web-sdk/v6/core. Los destinatarios se resuelven en el servidor: vendor:riverside, vendor:eastgate y vendor:northside cada uno a su propia cuenta PAYPAL_VENDOR_EMAIL_*, able a PAYPAL_ABLE_EMAIL (payeeEmail() en src/lib/households.ts); /status muestra cuántas cuentas son."
   },
   "gift.receipt": {
     "title": "Recibo público",

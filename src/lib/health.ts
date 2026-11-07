@@ -7,6 +7,7 @@ import { connectPayPalMcp, type PayPalMcpClient } from "./agent/paypal-mcp";
 import { rulesWatch } from "./rules-watch";
 import { channel3Configured } from "./channel3";
 import { elasticConfigured } from "./rulebook";
+import { samplePayees } from "./households";
 import { RELEASE, sentryEnabled } from "./sentry";
 import pkg from "../../package.json";
 
@@ -44,6 +45,19 @@ async function paypalMcp() {
 export type Mode = "live" | "fallback" | "not_connected";
 export type Check = { id: string; name: string; mode: Mode; detail: string; ms?: number };
 
+/** Who the sample page pays in the sandbox: one business account per shop when each is set, and her ABLE account. */
+function payees(): Check {
+  const p = samplePayees();
+  const name = "PayPal payees";
+  if (!p) return { id: "payees", name, mode: "not_connected", detail: "Sandbox payee accounts not set" };
+  const able = p.ableOwn ? "her ABLE account another" : "her ABLE account the same one";
+  const detail =
+    p.shopAccounts === p.shops
+      ? `Each of the ${p.shops} sample shops has its own sandbox business account, and ${able}; one order pays each of them directly`
+      : `The ${p.shops} sample shops use ${p.shopAccounts} sandbox business ${p.shopAccounts === 1 ? "account" : "accounts"}, and ${able}; one order pays each payee directly`;
+  return { id: "payees", name, mode: "live", detail };
+}
+
 async function timed(fn: () => Promise<string>): Promise<{ ok: boolean; detail: string; ms: number }> {
   const t = Date.now();
   try {
@@ -65,9 +79,11 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
   ]);
   const agKey = Boolean(process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY?.trim());
   const run = database?.ok ? await latestRun().catch(() => null) : null;
-  const age = run ? (run.ageMinutes < 60 ? `${run.ageMinutes} min ago` : `${Math.round(run.ageMinutes / 60)} h ago`) : "";
+  // The time of the run itself, so the line reads the same however long ago it was.
+  const at = run ? `${new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" }).format(new Date(run.finishedAt))} ET` : "";
   return [
     { id: "paypal", name: "PayPal sandbox", mode: pp?.ok ? "live" : "not_connected", detail: pp ? pp.detail : "Credentials not set", ms: pp?.ms },
+    payees(),
     { id: "claude", name: "Claude Opus 5.5", mode: aiAvailable() ? "live" : "fallback", detail: aiAvailable() ? "API key set; bill and fundraiser reading are live" : aiPaused() ? "The API is not taking requests from this account just now; ready-made examples show saved results" : "Ready-made examples show saved results" },
     {
       id: "webhooks",
@@ -118,7 +134,7 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       id: "checks",
       name: "Outside checks",
       mode: run ? "live" : "not_connected",
-      detail: run ? `${run.passed} of ${run.total} passed ${age}, ${run.source === "render-workflow" ? "on Render Workflows" : "run locally"}` : "No run filed yet; the nightly Render Workflow fills this in",
+      detail: run ? `${run.passed} of ${run.total} passed in the latest run, ${at}, ${run.source === "render-workflow" ? "on Render Workflows" : "run locally"}` : "No run filed yet; the nightly Render Workflow fills this in",
     },
   ];
 }

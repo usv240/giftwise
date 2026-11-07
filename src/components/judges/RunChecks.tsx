@@ -6,7 +6,7 @@ import { useState } from "react";
 type Latest = { data?: { run: { runId: string } | null }; error?: { message: string } };
 
 /** Start the outside checks on Render Workflows, then wait for the run to file its results and refresh the panel. */
-export function RunChecks({ canStart }: { canStart: boolean }) {
+export function RunChecks({ canStart, onDone }: { canStart: boolean; onDone?: () => void }) {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "running" | "done" | "error">("idle");
   const [note, setNote] = useState("");
@@ -31,7 +31,8 @@ export function RunChecks({ canStart }: { canStart: boolean }) {
         if (l.data?.run?.runId === id) {
           setState("done");
           setNote(`Task run ${id} finished. The results are below.`);
-          router.refresh();
+          if (onDone) onDone();
+          else router.refresh();
           return;
         }
       }

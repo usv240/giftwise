@@ -1,12 +1,10 @@
-import { connection } from "next/server";
 import { sandboxBuyerLogin } from "@/lib/sandbox-login";
 import { giftText, type Lang } from "@/lib/i18n/gift";
 
 /** The sandbox buyer login, shown next to the PayPal buttons and on the Evidence page. */
-export async function SandboxLogin({ compact, lang = "en" }: { compact?: boolean; lang?: Lang }) {
+export function SandboxLogin({ compact, lang = "en" }: { compact?: boolean; lang?: Lang }) {
   const t = giftText(lang);
-  await connection();
-  const login = await sandboxBuyerLogin();
+  const login = sandboxBuyerLogin();
   if (!login) {
     return <p className="sbl-missing">The sandbox buyer login is not available on this build. Any PayPal sandbox buyer account works in the checkout window.</p>;
   }

@@ -769,9 +769,10 @@
   border-bottom: 1px solid var(--surface-2);
   font-size: 0.9375rem;
 }
+/* A check that did not pass reads in the text color with what it found below it; a pass is green. */
 .nc-state {
   font-weight: 500;
-  color: var(--attention);
+  color: var(--ink);
 }
 .nc-group li[data-ok] .nc-state {
   color: var(--positive);
@@ -1480,4 +1481,211 @@
 .jp-real td,
 .jp-real th {
   overflow-wrap: anywhere;
+}
+
+/* A list that lives on its own page: a full-width row like a disclosure, with an arrow instead of a plus. */
+.jx-go {
+  min-height: 52px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--surface);
+  border-radius: 14px;
+  transition: background-color var(--dur-press) var(--ease-out);
+}
+.jx-go::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-top: 1.5px solid var(--muted);
+  border-right: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  margin-right: 3px;
+}
+.jx-go:active {
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface));
+}
+.jx-go:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .jx-go:hover {
+    background: color-mix(in srgb, var(--ink) 3%, var(--surface));
+  }
+}
+@media (max-width: 600px) {
+  .jx-go {
+    padding: 12px 16px;
+  }
+}
+
+/* The pages that hold a full list: the way back, then each list on its own surface. */
+.jx-crumb {
+  margin: 0 0 8px;
+  font-size: 0.9375rem;
+}
+.jx-sheet {
+  margin-top: 16px;
+  padding: 22px 20px;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  background: var(--surface);
+  border-radius: 14px;
+}
+.evidence .jx-sheet > * {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .jx-sheet {
+    padding: 18px 16px;
+  }
+}
+
+/* What it keeps, in dollars: the first band on the page, in the results band's tiles, under a short heading. */
+.ji {
+  margin-top: clamp(1.75rem, 1.25rem + 1.5vw, 2.75rem);
+}
+.evidence .ji-h,
+.evidence .jr-h {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.evidence .ji .jr {
+  margin-top: 0;
+}
+.ji-fig-ink {
+  color: var(--ink);
+}
+.jr-band {
+  margin-top: 12px;
+}
+.evidence .jr-band .jr {
+  margin-top: 0;
+}
+
+/* One recorded bill: the two reviewers side by side with their quotes, then the code's decision under them. */
+.jref {
+  margin-top: 12px;
+  padding: clamp(18px, 1rem + 0.8vw, 26px);
+  display: grid;
+  gap: 16px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+.evidence .jref p,
+.evidence .jref h2 {
+  margin: 0;
+}
+.jref-top {
+  display: grid;
+  gap: 6px;
+}
+.evidence .jref-h {
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.jref-sub {
+  font-size: 0.9375rem;
+  max-width: 72ch;
+}
+.jref-bill {
+  display: grid;
+  gap: 2px;
+  max-width: 72ch;
+}
+.jref-k {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.jref-votes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 860px) {
+  .jref-votes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.jref-vote {
+  margin: 0;
+  padding: 16px 18px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border-radius: 12px;
+  background: var(--bg);
+  min-width: 0;
+}
+.jref-vote figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+.jref-who {
+  font-weight: 500;
+}
+/* Both answers wear the same tint: they disagree, and neither is marked wrong. */
+.jref-answer {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--tint-blue);
+  color: var(--tint-blue-ink);
+}
+.jref-reads {
+  font-size: 0.875rem;
+}
+.jref-quote {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--surface-2);
+  display: grid;
+  gap: 6px;
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+.jref-quote footer {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.jref-checked {
+  color: var(--positive);
+  font-weight: 500;
+}
+.jref-call {
+  display: grid;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-2);
+}
+.jref-decision {
+  max-width: 76ch;
+}
+.jref-tech {
+  font-size: 0.875rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.jref-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
 }

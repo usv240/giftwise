@@ -3,7 +3,7 @@
 Giftwise runs on PayPal's sandbox, a practice version of PayPal where no real money moves. You do not need a Giftwise account.
 
 - **Hosted demo:** [giftwise-405i.onrender.com](https://giftwise-405i.onrender.com), hosted on Render.
-- **Start here:** [`/judges`](https://giftwise-405i.onrender.com/judges) has the five-minute path, the failure cases you can run live, and the latest test results.
+- **Start here:** [`/evidence`](https://giftwise-405i.onrender.com/evidence) has the five-minute path, the failure cases you can run live, and the latest test results.
 
 ## PayPal sandbox buyer login
 
@@ -41,26 +41,31 @@ To pay for a single need instead, press the PayPal button on its card. You can r
 
 ### Who receives the money
 
-Each payment in the order names its own payee, and PayPal captures each one separately. Giftwise is never a payee: nothing goes to Giftwise or to Maya's bank account. In the sandbox, the three sample shops share one business account and her ABLE account is a second one:
+Each payment in the order names its own payee, and PayPal captures each one separately. Giftwise is never a payee: nothing goes to Giftwise or to Maya's bank account. In the sandbox, each of the three sample shops has its own business account and her ABLE account is a fourth, so PayPal's record of a $1,500 gift shows five payments to four accounts:
 
 | Recipient | Sandbox business account |
 |---|---|
-| Riverside Mobility Repair, Eastgate College Bookstore, Northside Physical Therapy | `sb-viaij53657116@business.example.com` |
+| Riverside Mobility Repair | `sb-y1vss53656738@business.example.com` |
+| Eastgate College Bookstore | `sb-yau9l53656728@business.example.com` |
+| Northside Physical Therapy | `sb-a6t8853656735@business.example.com` |
 | Maya's ABLE account | `sb-ros8g53657188@business.example.com` |
+| Shops on a page made from a fundraiser, or added on the organizer's page | `sb-viaij53657116@business.example.com` |
+
+The server picks the account from the need, never from the browser (`payeeEmail()` in `src/lib/households.ts`), and `/status` shows how many separate accounts the sample uses under **PayPal payees**.
 
 ## Checked every night, on Render Workflows
 
-On `/judges`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 24 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and six public API promises (status, ledger, the SSA report, the MCP tools, the OpenAPI address and PayPal's return link).
+On `/evidence`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 24 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and seven public API promises (status, the ledger, the SSA report, the MCP tools, the Federal Register watch, the OpenAPI address and PayPal's return link).
 
 1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
-2. In about a minute the run files its results and the panel refreshes with the new time and count. Open **All 24 checks, with each result**, or set **Display** to Technical to see what each check found.
+2. In about a minute the run files its results and the panel refreshes with the time of the run and its count. Open **All 24 checks, with each result**, or set **Display** to Technical to see what each check found.
 3. `/status` shows the same run under **Outside checks**.
 
 A run can start every 10 minutes. The nightly run starts from a Render cron job at 09:00 UTC.
 
 ## Failure cases, live
 
-On `/judges`, under **Failure cases**, press **Run all eight checks**. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer.
+On `/evidence`, under **Failure cases**, press **Run all eight checks**. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer.
 
 | Case | What you should see |
 |---|---|
@@ -144,7 +149,8 @@ npm run dev -- -p 3100        # open http://localhost:3100
 | Variable | What it is |
 |---|---|
 | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | Your sandbox app: developer.paypal.com > Apps & Credentials > Sandbox |
-| `PAYPAL_VENDOR_EMAIL`, `PAYPAL_ABLE_EMAIL` | Two sandbox business accounts that receive gifts: Testing Tools > Sandbox Accounts |
+| `PAYPAL_VENDOR_EMAIL`, `PAYPAL_ABLE_EMAIL` | Sandbox business accounts that receive gifts (Testing Tools > Sandbox Accounts): one for shops on new pages, one for the ABLE account |
+| `PAYPAL_VENDOR_EMAIL_RIVERSIDE`, `PAYPAL_VENDOR_EMAIL_EASTGATE`, `PAYPAL_VENDOR_EMAIL_NORTHSIDE` | Optional: one sandbox business account for each sample shop. A shop left unset is paid to `PAYPAL_VENDOR_EMAIL` |
 | `DATABASE_URL` | Already set for the Docker database |
 | `ANTHROPIC_API_KEY` | Reads bills and fundraiser pages |
 | `SANDBOX_BUYER_EMAIL`, `SANDBOX_BUYER_PASSWORD` | Only for `npm run e2e:paypal` |
@@ -159,7 +165,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 158 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 189 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
@@ -169,8 +175,8 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
 | The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 assertions |
 | Browser end to end | `npm run e2e:ui` | 64 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 108 page views pass |
-| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 26 passed |
+| Accessibility and layout | `npm run e2e:a11y` | All 124 page views pass |
+| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 36 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |

@@ -14,6 +14,7 @@ import { Faq } from "@/components/landing/Faq";
 import { HowNav } from "@/components/landing/HowNav";
 import { LoopVideo } from "@/components/landing/LoopVideo";
 import { ShowcaseBoard } from "@/components/landing/ShowcaseBoard";
+import { IMPACT } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 import "./landing.css";
 
@@ -106,6 +107,22 @@ export default function Home() {
           <p className="hero-sub">
             For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules and pays the shop directly through PayPal. Claude reads the bills and fundraiser pages; the rules do the math.
           </p>
+          <ul className="hero-impact" aria-label="What routing keeps, in real federal court cases">
+            <li>
+              <Link className="hero-impact-link" href="/evidence#field-cases">
+                <span className="hero-impact-fig tabular" data-kept="">
+                  {usd(IMPACT.keptMonthlyPerPerson)} a month
+                </span>
+                <span className="hero-impact-what">kept for each person in real federal court cases, when the help is routed the benefit-safe way</span>
+              </Link>
+            </li>
+            <li>
+              <Link className="hero-impact-link" href="/evidence#field-cases">
+                <span className="hero-impact-fig tabular">{IMPACT.askedBack.toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
+                <span className="hero-impact-what">SSA asked to be paid back in {IMPACT.askedBackCases === 2 ? "two" : IMPACT.askedBackCases} of those cases, for money family gave</span>
+              </Link>
+            </li>
+          </ul>
           <div className="hero-actions">
             <Link href="/try#fundraiser" className="btn btn-primary">
               Start a gift page
@@ -348,7 +365,8 @@ export default function Home() {
             <pre>
               <code>{`POST /api/v1/check-gift
 Authorization: Bearer gw_test_...
-{ "gift": { "amount": 1000, "delivery": "cash" } }
+{ "gift": { "amount": 1000, "delivery": "cash",
+            "date": "2026-04-10" } }
 
 200 OK
 { "data": {

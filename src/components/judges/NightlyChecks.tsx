@@ -1,85 +1,18 @@
-import { connection } from "next/server";
-import { latestRun, workflowTask, type CheckResult } from "@/lib/checks";
-import { RunChecks } from "./RunChecks";
+import { CASES } from "@/lib/cases/list";
+import { API, NIGHTLY_UTC, PATH } from "../../../workflows/src/checks";
+import { NightlyLive } from "./NightlyLive";
 
-const GROUPS: { id: CheckResult["group"]; title: string }[] = [
-  { id: "case", title: "Failure cases, against the PayPal sandbox" },
-  { id: "path", title: "The product path, page by page" },
-  { id: "api", title: "The public API" },
-];
-const WHEN = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" });
-const DAY = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" });
-
-function ago(min: number) {
-  if (min < 1) return "just now";
-  if (min < 60) return `${min} ${min === 1 ? "minute" : "minutes"} ago`;
-  const h = Math.round(min / 60);
-  if (h < 48) return `${h} ${h === 1 ? "hour" : "hours"} ago`;
-  return `${Math.round(h / 24)} days ago`;
-}
-
-/** The latest outside check: what Render Workflows ran against the hosted demo, and a button to run it again. */
-export async function NightlyChecks() {
-  await connection();
-  const run = await latestRun();
-  const canStart = Boolean(workflowTask());
-  if (!run) {
-    return (
-      <div className="jx-result nc" data-ui>
-        <RunChecks canStart={canStart} />
-        <p className="nc-empty">No run has been filed yet on this server. The first nightly run fills this in.</p>
-      </div>
-    );
-  }
-  const hosted = run.source === "render-workflow";
-  const secs = Math.max(1, Math.round((Date.parse(run.finishedAt) - Date.parse(run.startedAt)) / 1000));
-  // Say where this run happened: the hosted Render Workflow run, or a run on the developer's machine until the first hosted one lands.
-  const meta = hosted
-    ? `${WHEN.format(new Date(run.finishedAt))} ET, the hosted run on Render Workflows${run.runId ? `, task run ${run.runId}` : ""}. Every check ran at once and the whole run took ${secs} seconds.`
-    : `Last run on the developer's machine, ${DAY.format(new Date(run.finishedAt))}. The hosted nightly run shows here once it completes. Every check ran at once and the whole run took ${secs} seconds.`;
-  const groups = GROUPS.map((g) => ({ ...g, rows: run.results.filter((r) => r.group === g.id) })).filter((g) => g.rows.length);
-  return (
-    <>
-      <div className="jx-result nc" data-ui>
-        <p className="nc-verdict" data-all={run.passed === run.total ? "" : undefined}>
-          <span className="tabular">
-            {run.passed} of {run.total}
-          </span>{" "}
-          checks passed {ago(run.ageMinutes)}.
-        </p>
-        <p className="nc-meta muted">{meta}</p>
-        <RunChecks canStart={canStart} />
-      </div>
-      <div className="jx-more">
-        <details className="jx-disc">
-          <summary>All {run.total} checks, with each result</summary>
-          <div className="jx-body">
-            <div className="nc-groups">
-              {groups.map((g) => (
-                <section key={g.id} className="nc-group" aria-label={g.title}>
-                  <h3>
-                    {g.title}{" "}
-                    <span className="muted tabular">
-                      {g.rows.filter((r) => r.ok).length}/{g.rows.length}
-                    </span>
-                  </h3>
-                  <ul>
-                    {/* Runs filed before the page was renamed carry its old title. */}
-                    {g.rows.map((r) => (
-                      <li key={r.id} data-ok={r.ok ? "" : undefined}>
-                        <span className="nc-state">{r.ok ? "Passed" : "Needs a look"}</span>
-                        <span className="nc-title">{r.title === "For judges" ? "Evidence" : r.title}</span>
-                        <span className="nc-ms tabular muted tech-only">{r.ms >= 1000 ? `${(r.ms / 1000).toFixed(1)} s` : `${r.ms} ms`}</span>
-                        <span className="nc-detail tech-only">{r.detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          </div>
-        </details>
-      </div>
-    </>
-  );
+/**
+ * The latest outside check: what Render Workflows ran against the hosted site, and a button to run it again. The page
+ * around it is static, so the run is read in the browser from GET /api/checks/latest. The list it compares the run with
+ * is the one the workflow runs today (workflows/src/checks.ts and the app's failure cases).
+ */
+export function NightlyChecks() {
+  const current = [
+    ...CASES.map((c) => ({ id: `case:${c.id}`, title: c.title })),
+    ...PATH.map((p) => ({ id: `path:${p.id}`, title: p.title })),
+    ...API.map((a) => ({ id: `api:${a.id}`, title: a.title })),
+  ];
+  const nightly = `${String(NIGHTLY_UTC.hour).padStart(2, "0")}:${String(NIGHTLY_UTC.minute).padStart(2, "0")} UTC`;
+  return <NightlyLive current={current} nightly={nightly} />;
 }

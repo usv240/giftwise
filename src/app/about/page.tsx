@@ -5,6 +5,8 @@ import videoCredits from "../../../public/media/credits.json";
 import { Info } from "@/components/Info";
 import Image from "next/image";
 import { RealWorld } from "@/components/RealWorld";
+import { sampleYearSplit } from "@/lib/impact";
+import { usd } from "@/lib/rules";
 import "../pages.css";
 import "./about.css";
 
@@ -14,6 +16,12 @@ type Credit = { credit?: string; page?: string; title?: string };
 const ALL = [...(credits as Credit[]), ...(videoCredits as Credit[])];
 
 export default function AboutPage() {
+  const year = sampleYearSplit();
+  const parts = [
+    { id: "paypal", label: "Paid to shops and clinics through PayPal", ...year.paypal },
+    { id: "able", label: "Paid to her ABLE account through the ABLE plan’s own gift page", ...year.able },
+    { id: "item", label: "Given as the item itself, a jacket, so no money moves", ...year.item },
+  ].filter((p) => p.gifts > 0);
   return (
     <div className="page frame about">
       <header className="page-head">
@@ -59,6 +67,33 @@ export default function AboutPage() {
           <li>Runs in PayPal&rsquo;s sandbox, a practice version of PayPal where no real money moves.</li>
           <li>The household on the sample pages, Maya, and the shops are fictional.</li>
         </ul>
+      </section>
+
+      <section className="page-section about-year" aria-labelledby="year-h">
+        <div className="page-prose">
+          <h2 id="year-h">A year of gifts, run for real</h2>
+          <p>
+            Maya&rsquo;s sample year is {year.gifts} gifts from family and friends, {usd(year.total)} in all, and {year.checkWhole === year.gifts ? "every one" : `${year.checkWhole} of them`} keeps her check whole. Outside
+            PayPal&rsquo;s sandbox, the money would move like this.
+          </p>
+        </div>
+        <div className="about-split" role="img" aria-label={parts.map((p) => `${usd(p.amount)} ${p.label.toLowerCase()}`).join("; ")}>
+          {parts.map((p) => (
+            <span key={p.id} className="about-seg" data-part={p.id} style={{ flexGrow: p.amount }} />
+          ))}
+        </div>
+        <ul className="about-parts">
+          {parts.map((p) => (
+            <li key={p.id}>
+              <span className="about-part-amt tabular">{usd(p.amount)}</span>
+              <span className="about-swatch" data-part={p.id} aria-hidden="true" />
+              <span className="about-part-what">
+                {p.label} <span className="muted tabular">({p.gifts} {p.gifts === 1 ? "gift" : "gifts"})</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="muted about-year-src">Each gift runs through the rules engine; the gifts are the ones on the dashboard and in her reports.</p>
       </section>
 
       <div id="real" className="page-section">

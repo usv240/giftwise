@@ -24,6 +24,9 @@ export const asTyped = (n: number) => (Number.isInteger(n) ? String(n) : n.toFix
 
 export type Chip = { amount: number; label?: string };
 
+/** The amount the giving card starts with. */
+export const DEFAULT_GIFT = 500;
+
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**

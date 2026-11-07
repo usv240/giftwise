@@ -1,3 +1,4 @@
+import Link from "next/link";
 import data from "../../../content/eval/ssa-examples.json";
 import results from "../../../content/eval/ssa-examples-results.json";
 import sources from "../../../content/sources.json";
@@ -91,95 +92,110 @@ export function SsaExamples() {
       </div>
 
       <div className="jx-more">
-        <details className="jx-disc">
-          <summary>All {rows.length} examples, with SSA&rsquo;s passage and both answers</summary>
-          <div className="jx-body">
-            <p className="sx-meta muted">
-              The facts and answers are SSA&rsquo;s, with dates moved to 2026 so 2026 amounts apply; where SSA gives no amount, one is supplied that does not change SSA&rsquo;s answer. Examples on other
-              questions are listed at the end, each with what it is about.
-            </p>
-
-            <div className="sx-findings">
-              {data.findings.map((f) => (
-                <div key={f.id} className="sx-finding" data-open={f.fixed ? undefined : ""}>
-                  <p className="sx-finding-k">{f.fixed ? "What the examples added" : "Next"}</p>
-                  <p>{f.found}</p>
-                  {f.fixed && <p>{f.fixed}</p>}
-                </div>
-              ))}
-            </div>
-
-            <ol className="sx-list">
-              {rows.map((c) => {
-                const r = ROWS.get(c.id)!;
-                return (
-                  <li key={c.id}>
-                    <details className="sx-case">
-                      <summary>
-                        <span className="sx-title">{c.title}</span>
-                        <span className="sx-sides">
-                          <span className="sx-side">
-                            <span className="sx-who">Giftwise</span> <Verdict side={r.engine} />
-                          </span>
-                          <span className="sx-side">
-                            <span className="sx-who">Claude alone</span> <Verdict side={r.claude} />
-                          </span>
-                        </span>
-                      </summary>
-                      <div className="sx-body">
-                        <p>
-                          <strong>SSA&rsquo;s answer:</strong> {c.ssa_answer}
-                        </p>
-                        {"updated" in c && c.updated && <p className="sx-note">{c.updated.note}</p>}
-                        <blockquote className="sx-quote">
-                          <p>{c.passage}</p>
-                          <footer>
-                            <a className="text-link" href={SRC[c.source]?.url} target="_blank" rel="noreferrer">
-                              {c.cite} {c.part}
-                            </a>
-                          </footer>
-                        </blockquote>
-                        <p className="muted">
-                          Asked: {c.situation} {c.question}
-                        </p>
-                        <div className="sx-answers">
-                          <div>
-                            <p className="sx-who">Giftwise</p>
-                            <Figures side={r.engine} />
-                            {r.engine.rules && <p className="sx-rules tech-only">Rules {r.engine.rules.join(", ")}</p>}
-                          </div>
-                          {r.claude && (
-                            <div>
-                              <p className="sx-who">Claude alone</p>
-                              <Figures side={r.claude} />
-                              {r.claude.reason && <p className="sx-reason muted">{r.claude.reason}</p>}
-                            </div>
-                          )}
-                        </div>
-                        {"input_note" in c && c.input_note && <p className="sx-note muted">{c.input_note}</p>}
-                      </div>
-                    </details>
-                  </li>
-                );
-              })}
-            </ol>
-            <p className="sx-cmd muted tech-only">npx tsx --env-file=.env.local scripts/run-ssa-examples.ts (add --engine to skip the Claude calls)</p>
-          </div>
-        </details>
-
-        <details className="jx-disc">
-          <summary>Examples on other questions, and what each is about</summary>
-          <div className="jx-body">
-            <ul className="jx-list">
-              {data.out_of_scope.map((o) => (
-                <li key={o.cite}>
-                  <strong>{o.what}</strong> <span className="muted">({o.cite})</span>. {o.why}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </details>
+        <Link className="jx-go" href="/evidence/ssa-examples">
+          All {rows.length} examples, with SSA&rsquo;s passage and both answers
+        </Link>
+        <Link className="jx-go" href="/evidence/ssa-examples#other">
+          Examples on other questions, and what each is about
+        </Link>
       </div>
+    </>
+  );
+}
+
+/** Every worked example, on its own page (/evidence/ssa-examples): SSA's passage and answer, and both answers to it. */
+export function SsaExampleList() {
+  const rows = data.cases.filter((c) => ROWS.has(c.id));
+  return (
+    <>
+      <section className="page-section" aria-labelledby="examples-h">
+        <h2 id="examples-h">All {rows.length} examples</h2>
+<div className="jx-sheet">
+        <p className="sx-meta muted">
+          The facts and answers are SSA&rsquo;s, with dates moved to 2026 so 2026 amounts apply; where SSA gives no amount, one is supplied that does not change SSA&rsquo;s answer. Examples on other
+          questions are listed at the end, each with what it is about.
+        </p>
+
+        <div className="sx-findings">
+          {data.findings.map((f) => (
+            <div key={f.id} className="sx-finding" data-open={f.fixed ? undefined : ""}>
+              <p className="sx-finding-k">{f.fixed ? "What the examples added" : "Next"}</p>
+              <p>{f.found}</p>
+              {f.fixed && <p>{f.fixed}</p>}
+            </div>
+          ))}
+        </div>
+
+        <ol className="sx-list">
+          {rows.map((c) => {
+            const r = ROWS.get(c.id)!;
+            return (
+              <li key={c.id}>
+                <details className="sx-case">
+                  <summary>
+                    <span className="sx-title">{c.title}</span>
+                    <span className="sx-sides">
+                      <span className="sx-side">
+                        <span className="sx-who">Giftwise</span> <Verdict side={r.engine} />
+                      </span>
+                      <span className="sx-side">
+                        <span className="sx-who">Claude alone</span> <Verdict side={r.claude} />
+                      </span>
+                    </span>
+                  </summary>
+                  <div className="sx-body">
+                    <p>
+                      <strong>SSA&rsquo;s answer:</strong> {c.ssa_answer}
+                    </p>
+                    {"updated" in c && c.updated && <p className="sx-note">{c.updated.note}</p>}
+                    <blockquote className="sx-quote">
+                      <p>{c.passage}</p>
+                      <footer>
+                        <a className="text-link" href={SRC[c.source]?.url} target="_blank" rel="noreferrer">
+                          {c.cite} {c.part}
+                        </a>
+                      </footer>
+                    </blockquote>
+                    <p className="muted">
+                      Asked: {c.situation} {c.question}
+                    </p>
+                    <div className="sx-answers">
+                      <div>
+                        <p className="sx-who">Giftwise</p>
+                        <Figures side={r.engine} />
+                        {r.engine.rules && <p className="sx-rules tech-only">Rules {r.engine.rules.join(", ")}</p>}
+                      </div>
+                      {r.claude && (
+                        <div>
+                          <p className="sx-who">Claude alone</p>
+                          <Figures side={r.claude} />
+                          {r.claude.reason && <p className="sx-reason muted">{r.claude.reason}</p>}
+                        </div>
+                      )}
+                    </div>
+                    {"input_note" in c && c.input_note && <p className="sx-note muted">{c.input_note}</p>}
+                  </div>
+                </details>
+              </li>
+            );
+          })}
+        </ol>
+        <p className="sx-cmd muted tech-only">npx tsx --env-file=.env.local scripts/run-ssa-examples.ts (add --engine to skip the Claude calls)</p>
+      </div>
+      </section>
+
+      <section id="other" className="page-section" aria-labelledby="other-h">
+        <h2 id="other-h">Examples on other questions, and what each is about</h2>
+<div className="jx-sheet">
+        <ul className="jx-list">
+          {data.out_of_scope.map((o) => (
+            <li key={o.cite}>
+              <strong>{o.what}</strong> <span className="muted">({o.cite})</span>. {o.why}
+            </li>
+          ))}
+        </ul>
+      </div>
+      </section>
     </>
   );
 }

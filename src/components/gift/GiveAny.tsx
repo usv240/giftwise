@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { Info } from "../Info";
 import { usePrefs } from "../prefs";
-import { MAX_GIFT, asTyped, readAmount, suggestedAmounts } from "./amount";
+import { DEFAULT_GIFT, MAX_GIFT, asTyped, readAmount, suggestedAmounts, type Chip } from "./amount";
 import { StartMonthly } from "./MonthlyActions";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
@@ -23,7 +23,29 @@ const tone = (i: number) => `color-mix(in oklab, var(--positive) ${[100, 74, 56,
 const share = (check: number, baseline: number) => (baseline > 0 ? Math.max(0, Math.min(1, check / baseline)) : 0);
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE, lang = "en" }: { slug: string; name: string; needs: OpenNeed[]; date: string; profile?: Profile; lang?: Lang }) {
+/**
+ * `chips` and `firstPlan` (the split of the starting amount) can come from the server, which computes them once for the
+ * same needs, date and profile, so the card renders and hydrates without running the router for them again.
+ */
+export function GiveAny({
+  slug,
+  name,
+  needs,
+  date,
+  profile = DEFAULT_PROFILE,
+  lang = "en",
+  chips: givenChips,
+  firstPlan,
+}: {
+  slug: string;
+  name: string;
+  needs: OpenNeed[];
+  date: string;
+  profile?: Profile;
+  lang?: Lang;
+  chips?: Chip[];
+  firstPlan?: RoutedGift;
+}) {
   const w = pronounWords(profile.pronoun);
   const t = giftText(lang);
   const lineTitle = (ref: string, title: string) => (ref === "able-savings" ? t.savingsLater : title);
@@ -33,7 +55,7 @@ export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE, la
   const { prefs } = usePrefs();
   const router = useRouter();
   const ableName = `${name}'s ABLE account`;
-  const [raw, setRaw] = useState("500");
+  const [raw, setRaw] = useState(String(DEFAULT_GIFT));
   const [receipt, setReceipt] = useState<Receipt | null>(null);
   // The plan the donor saw when they paid. The page refreshes after payment, so `plan` moves on to what is still open.
   const [paidPlan, setPaidPlan] = useState<RoutedGift | null>(null);
@@ -42,8 +64,11 @@ export function GiveAny({ slug, name, needs, date, profile = DEFAULT_PROFILE, la
   const over = value > MAX_GIFT;
   // Nothing is routed for an amount that cannot be paid, so the page never shows a split that looks payable.
   const payable = value >= 1 && !over;
-  const plan = useMemo(() => routeGift(payable ? value : 0, needs, date, profile, ableName), [payable, value, needs, date, profile, ableName]);
-  const chips = useMemo(() => suggestedAmounts(needs, date, profile, ableName, giftText(lang).chipAll), [needs, date, profile, ableName, lang]);
+  const plan = useMemo(
+    () => (firstPlan && payable && value === DEFAULT_GIFT ? firstPlan : routeGift(payable ? value : 0, needs, date, profile, ableName)),
+    [firstPlan, payable, value, needs, date, profile, ableName],
+  );
+  const chips = useMemo(() => givenChips ?? suggestedAmounts(needs, date, profile, ableName, giftText(lang).chipAll), [givenChips, needs, date, profile, ableName, lang]);
   const total = round2(plan.lines.reduce((s, l) => s + l.amount, 0));
   const ready = payable && plan.lines.length > 0;
   const giftMonth = monthIn(lang, monthOf(date));

@@ -120,6 +120,13 @@
 .ag-say {
   background: var(--surface);
 }
+/* A list the assistant writes ("- " lines) reads as a list, with the step's own spacing. */
+.ag-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 2px;
+}
 .ag-who {
   font-size: 0.8125rem;
   font-weight: 500;
