@@ -8,9 +8,9 @@ const gift = (over: Parameters<typeof evaluateGift>[0]) => evaluateGift(over, DE
 describe("the giver's side in Spanish", () => {
   it("names the month the check is paid, in Spanish, with the 2027 rate for November's gifts", () => {
     const shop = gift({ id: "a", date: "2026-11-10", amount: 420, delivery: "vendor", category: "equipment" });
-    expect(ruleSentenceEs(shop)).toBe("Se paga directamente a la tienda, así que no se cuenta. Su cheque de enero se mantiene en $1,029.");
+    expect(ruleSentenceEs(shop)).toBe("Se paga directamente a la tienda, así que no se cuenta. Su cheque de enero de 2027 se mantiene en $1,029.");
     const school = gift({ id: "b", date: "2026-04-10", amount: 649, delivery: "vendor", category: "education" });
-    expect(ruleSentenceEs(school)).toMatch(/^Un regalo para matrícula, libros o útiles escolares no se cuenta\. Su cheque de junio se mantiene en \$994\. Guarde los recibos\.$/);
+    expect(ruleSentenceEs(school)).toMatch(/^Un regalo para matrícula, libros o útiles escolares no se cuenta\. Su cheque de junio de 2026 se mantiene en \$994\. Guarde los recibos\.$/);
   });
 
   it("follows the engine's branch for ABLE, housing help and an ABLE account someone cannot have", () => {

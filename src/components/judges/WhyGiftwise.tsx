@@ -2,8 +2,8 @@ import Link from "next/link";
 import facts from "../../../content/facts.json";
 import inv from "../../../content/eval/invariants-results.json";
 import sources from "../../../content/sources.json";
-import { payItYourself, sampleYearSplit } from "@/lib/impact";
-import { usd } from "@/lib/rules";
+import { housingReach, payItYourself, sampleYearSplit } from "@/lib/impact";
+import { checkMonthName, usd } from "@/lib/rules";
 
 const SRC = sources as Record<string, { title: string; url: string }>;
 const A = facts.audience;
@@ -14,33 +14,47 @@ const Src = ({ id, children }: { id: string; children: React.ReactNode }) => (
   </a>
 );
 
-/** Who each route reaches, from SSA's counts as CRS reports them and the ABLE age rule in SSA's manual. */
+/**
+ * Who each route reaches: the gifts that reach everyone first (SSA's counts as CRS reports them), then housing as the
+ * engine measures it, with and without an ABLE account (the age rule in SSA's manual).
+ */
 export function Reach() {
+  const h = housingReach();
+  const onset = facts.values.able_onset_age.value;
   return (
     <dl className="why-list">
       <div className="why-row">
         <dt>
-          <span className="why-fig tabular">{A.ssi_jan2025_total.value}</span> can be paid for at a shop
+          <span className="why-fig tabular">{A.ssi_jan2025_total.value}</span> people, for items, care and school
         </dt>
         <dd>
-          Paying the shop, the clinic or the landlord works for everyone on SSI, whatever their age or when their disability began: all {A.ssi_jan2025_total.value} people receiving SSI in January 2025 (
-          <Src id="crs-if10482">CRS IF10482</Src>, from SSA&rsquo;s Monthly Statistical Snapshot).
+          Paying the shop, the clinic, the pharmacy or the school keeps the check whole for everyone on SSI, whatever their age or when their disability began: all {A.ssi_jan2025_total.value} people
+          receiving SSI in January 2025 (<Src id="crs-if10482">CRS IF10482</Src>, from SSA&rsquo;s Monthly Statistical Snapshot). A wheelchair repair, medicine, a laptop for school or a coat: none of it
+          counts, by any route that pays the seller.
         </dd>
       </div>
       <div className="why-row">
-        <dt>
-          <span className="why-fig tabular">{A.ssi_jan2025_children.value}</span> children, and adults whose disability began before {facts.values.able_onset_age.value}, can use ABLE
-        </dt>
+        <dt>Rent and utilities, through ABLE</dt>
         <dd>
-          The ABLE route needs blindness or a disability that began before age {facts.values.able_onset_age.value}, the rule since January 1, 2026 (<Src id="poms-si-01130-740">POMS SI 01130.740</Src>). That
-          covers all {A.ssi_jan2025_children.value} children on SSI. The {A.ssi_jan2025_adults.value} adults aged 18 to 64 are all on SSI for blindness or disability, and those whose condition began before{" "}
-          {facts.values.able_onset_age.value} qualify, as do people 65 or older whose blindness or disability began then. SSA counts recipients by age rather than by when a disability began, so the adult
-          share is a range, not one number. About {A.able_newly_eligible.value} more people became eligible for ABLE on January 1, 2026 (
-          <Src id="able-nrc-age-adjustment">ABLE National Resource Center</Src>).
+          Help with housing counts even when paid straight to the landlord, so the engine sends it through an ABLE account, which needs blindness or a disability that began before age {onset} (
+          <Src id="poms-si-01130-740">POMS SI 01130.740</Src>). That covers all {A.ssi_jan2025_children.value} children on SSI, and the adults and people 65 or older whose condition began before {onset};
+          SSA counts recipients by age rather than by when a disability began, so the adult share is a range. The ABLE National Resource Center estimates about 8 million people were potentially eligible
+          under the original law and {A.able_newly_eligible.value} more since January 1, 2026 (<Src id="able-nrc-age-case-summary">ABLE Case Summary, October 2025</Src>).
         </dd>
       </div>
       <div className="why-row">
-        <dt>Everyone else is routed to a shop</dt>
+        <dt>Rent without ABLE, capped</dt>
+        <dd>
+          For someone who cannot have an ABLE account, family help with rent still lowers the check, by at most the presumed maximum value less the $20 general exclusion. Measured on{" "}
+          {usd(h.amount)} of rent paid by family:{" "}
+          {h.years
+            .map((y) => `the ${checkMonthName(y.paymentMonth)} check is ${usd(y.rentWithoutAble)} of ${usd(y.full)}, ${usd(y.lowered)} lower; through ABLE it stays ${usd(y.rentThroughAble)}`)
+            .join("; ")}
+          . Giftwise says so before anyone pays, and sends the rest of the help to the needs that reach everyone.
+        </dd>
+      </div>
+      <div className="why-row">
+        <dt>Never to ABLE without eligibility</dt>
         <dd>Money goes to an ABLE account only for someone who can have one, a promise held on all {inv.gifts.toLocaleString("en-US")} random gifts; for everyone else, each need is paid at its shop.</dd>
       </div>
     </dl>

@@ -17,6 +17,18 @@ const keptCases = field.cases
   .map((c) => ({ id: c.id, title: c.title, citation: c.citation, kept: c.dollars.kept_per_month as number, years: (c.dollars.months ?? []).map((m) => Number(m.month.slice(0, 4))) }));
 const keptYears = keptCases.flatMap((c) => c.years);
 
+/**
+ * The cases whose opinions state how many months the help lasted: what the engine keeps for that family over those
+ * months, from the case's own facts (the amount it keeps each month, repriced at 2026 rates, times the months stated).
+ */
+const familyCases = field.cases
+  .filter((c) => c.dollars.computed && (c.dollars.kept_over_stated_months ?? 0) > 0)
+  .map((c) => ({ id: c.id, title: c.title, citation: c.citation, months: c.dollars.months_stated as number, perMonth: c.dollars.kept_per_month as number, total: c.dollars.kept_over_stated_months as number }))
+  .sort((a, b) => a.total - b.total);
+const familyTotal = Math.round(familyCases.reduce((s, c) => s + c.total, 0) * 100) / 100;
+if (familyTotal !== routed.kept_over_stated_months_2026 || familyCases.length !== routed.cases_with_stated_months)
+  throw new Error("field-cases-results.json: the per-family totals do not add up to the summary");
+
 /** Each case where SSA asked money back: the amount, and whether the same help routed through Giftwise keeps her savings under the limit. */
 const askedCases = asked.scored.map((o) => {
   const able = o.routed.find((r) => r.route === "able");
@@ -35,6 +47,9 @@ export const IMPACT = {
   keptCases,
   keptFromYear: Math.min(...keptYears),
   keptToYear: Math.max(...keptYears),
+  /** Per family, over the months each opinion states: the engine's counterfactual, at 2026 rates, smallest first. */
+  familyCases,
+  familyTotal,
   /** Overpayments SSA assessed, as the opinions state them: what it asked to be paid back, case by case. */
   askedBack: asked.scored_total,
   askedBackCases: asked.scored.length,
@@ -52,6 +67,20 @@ const dollarsCents = (n: number) => n.toLocaleString("en-US", { style: "currency
  * month at 2026 rates."
  */
 export const KEPT_SENTENCE = `In ${IMPACT.routedCases} of ${IMPACT.scoredCases} real court cases, the same help routed through Giftwise would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month at 2026 rates.`;
+const COUNT_WORD = ["no", "one", "two", "three", "four", "five", "six"];
+/**
+ * The lead court-case claim, per family: "In the two real court cases whose opinions state how long the help lasted,
+ * the same help routed through Giftwise would have kept one family $13,584.53 over 41 months and another $24,518.79
+ * over 37 months, $38,103.32 in all, at 2026 rates."
+ */
+export const FAMILY_SENTENCE = `In the ${COUNT_WORD[IMPACT.familyCases.length] ?? IMPACT.familyCases.length} real court cases whose opinions state how long the help lasted, the same help routed through Giftwise would have kept ${IMPACT.familyCases
+  .map((c, i) => `${i === 0 ? "one family" : "another"} ${dollarsCents(c.total)} over ${c.months} months`)
+  .join(" and ")}, ${dollarsCents(IMPACT.familyTotal)} in all, at 2026 rates.`;
+/** Where the per-family figures come from. */
+export const FAMILY_BASIS = `The rules engine's counterfactual on each case's own facts: what it keeps each month (${IMPACT.familyCases.map((c) => dollarsCents(c.perMonth)).join(" and ")}), repriced at 2026 rates, times the months the opinion states.`;
+/** The per-family figures as whole dollars, for a headline: "$13,585 and $24,519". */
+export const FAMILY_FIGURE = IMPACT.familyCases.map((c) => whole(c.total)).join(" and ");
+
 /** Where those figures come from, in plain words. */
 export const KEPT_BASIS = `The rules engine's counterfactual: each case's facts (from ${IMPACT.keptFromYear} to ${IMPACT.keptToYear}) repriced at 2026 rates, with the help routed the benefit-safe way; ${IMPACT.keptCases.filter((c) => c.kept === IMPACT.keptMin).length} cases at ${dollarsCents(IMPACT.keptMin)} and ${IMPACT.keptCases.filter((c) => c.kept === IMPACT.keptMax).length} at ${dollarsCents(IMPACT.keptMax)}.`;
 /** The overpayment claim, case by case. */
@@ -97,6 +126,39 @@ export function payItYourself() {
     ableLimit: P.ableAnnualLimit,
     maxRecipients: MAX_UNITS,
   };
+}
+
+/**
+ * Who each route reaches, measured by the engine on one family-paid rent bill ($800, paid the month of the gift). Paying
+ * a shop, a clinic or a school reaches everyone on SSI; rent and utilities stay whole only through an ABLE account, open
+ * to people whose disability began before 46. Without ABLE, the presumed maximum value caps how much housing help lowers
+ * the check: by the PMV less the $20 general exclusion, $331.33 for a 2026 check and $343 for a 2027 check.
+ */
+export function housingReach(amount = 800) {
+  const profile: Profile = { ...DEFAULT_PROFILE };
+  const at = (date: string) => {
+    const shop = evaluateGift({ id: "h-shop", date, amount, delivery: "vendor", category: "equipment" }, profile);
+    const rentNoAble = evaluateGift({ id: "h-rent", date, amount, delivery: "vendor", category: "rent" }, { ...profile, ableEligible: false });
+    const rentAble = evaluateGift({ id: "h-able", date, amount, delivery: "able", category: "rent" }, profile);
+    return {
+      paymentMonth: shop.paymentMonth,
+      full: shop.checkBaseline,
+      shop: shop.checkAfter,
+      rentWithoutAble: rentNoAble.checkAfter,
+      rentThroughAble: rentAble.checkAfter,
+      lowered: Math.round((rentNoAble.checkBaseline - rentNoAble.checkAfter) * 100) / 100,
+    };
+  };
+  return { amount, onsetAge: P.ableOnsetAge, years: [at("2026-04-10"), at("2026-11-10")] };
+}
+
+/**
+ * The sample-year claim: what one shared page keeps against each giver paying alone. "In Maya's sample year, one shared
+ * page keeps $1,747.33 that 10 of her monthly checks would lose with each giver paying on their own."
+ */
+export function sampleYearSentence() {
+  const y = payItYourself();
+  return `In Maya's sample year, one shared page keeps ${dollarsCents(y.totalLowered)} that ${y.monthsLowered} of her monthly checks would lose with each giver paying on their own.`;
 }
 
 /**

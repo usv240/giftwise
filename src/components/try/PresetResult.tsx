@@ -1,7 +1,7 @@
 "use client";
 
 import { getPreset, runPreset } from "@/lib/presets";
-import { monthName, usd } from "@/lib/rules";
+import { checkMonthName, fbr, monthName, usd } from "@/lib/rules";
 import { ResultCard } from "../ResultCard";
 
 export function PresetResult({ id }: { id: string }) {
@@ -14,9 +14,9 @@ export function PresetResult({ id }: { id: string }) {
       {run.plan.months.map((m) => (
         <div key={m.month}>
           <p className="month-name">
-            {monthName(m.month)} gifts, counted for the {monthName(m.paymentMonth)} check
+            {monthName(m.month)} gifts, counted for the {checkMonthName(m.paymentMonth)} check
           </p>
-          <p className="month-check tabular" data-kept={m.check >= 994 ? "" : undefined}>
+          <p className="month-check tabular" data-kept={m.check >= fbr(false, m.paymentMonth) ? "" : undefined}>
             {usd(m.check)}
           </p>
           <p className="month-detail">

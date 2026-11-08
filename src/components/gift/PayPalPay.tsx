@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { preconnect } from "react-dom";
 import { giftText, type Lang } from "@/lib/i18n/gift";
 import { paypalEnv, paypalHosts } from "@/lib/paypal/env";
 import "./paypal.css";
@@ -39,10 +40,10 @@ declare module "react" {
 const SDK_SRC = paypalHosts(paypalEnv(process.env.NEXT_PUBLIC_PAYPAL_ENV)).sdk;
 
 /**
- * PayPal's SDK is about 300 ms of script on a mid-range phone, and no one pays before touching the page. So it loads at
- * the first sign of a person (a touch, a key, a scroll, the pointer moving, focus) or, failing that, once the browser has
- * been idle a few seconds after the page loaded, so someone using a screen reader finds a ready button without pressing
- * anything first. The page itself is interactive sooner on a phone.
+ * PayPal's SDK loads once per page, for every button on it: at the first sign of a person (a touch, a key, a scroll, the
+ * pointer moving, focus) or as soon as the browser is idle after the buttons hydrate, whichever comes first, so the
+ * buttons are drawn about a second after the page rather than several. The connection to PayPal opens with the page
+ * (preconnect, below), and each button's place is held at its drawn size until PayPal draws it.
  */
 let wanted: Promise<void> | null = null;
 const INTENT = ["pointerdown", "pointermove", "touchstart", "keydown", "wheel", "scroll", "focusin"] as const;
@@ -56,10 +57,11 @@ function whenWanted() {
     };
     for (const e of INTENT) window.addEventListener(e, go, { capture: true, passive: true });
     const afterLoad = () => {
-      timer = window.setTimeout(() => ("requestIdleCallback" in window ? window.requestIdleCallback(go, { timeout: 2000 }) : go()), 3000);
+      timer = window.setTimeout(() => ("requestIdleCallback" in window ? window.requestIdleCallback(go, { timeout: 600 }) : go()), 50);
     };
-    if (document.readyState === "complete") afterLoad();
-    else window.addEventListener("load", afterLoad, { once: true });
+    // The buttons hydrate after the page's own script, so the wait starts here rather than at the load event, which a
+    // slow image or the video can hold back for seconds.
+    afterLoad();
   });
   return wanted;
 }
@@ -145,6 +147,11 @@ export function PayPalPay({
   const [message, setMessage] = useState("");
   const [attempt, setAttempt] = useState(0);
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  // Open the connection to PayPal while the page loads, so the SDK's first byte comes sooner (one hint per page).
+  preconnect(new URL(SDK_SRC).origin);
+  // The buttons show in the same render that removes their placeholder, so the two never stand on screen together.
+  const drawn = state === "ready" || state === "working" || state === "error";
+  const [cardOn, setCardOn] = useState(false);
 
   useEffect(() => {
     createRef.current = createOrder;
@@ -233,7 +240,6 @@ export function PayPalPay({
         };
         /** Each press asks the server for a fresh order and opens PayPal's own window for it. */
         const wire = (btn: HTMLElement, session: Session, guest = false) => {
-          btn.removeAttribute("hidden");
           btn.onclick = () => {
             if (btn.getAttribute("aria-disabled") === "true") return;
             setMessage("");
@@ -249,7 +255,10 @@ export function PayPalPay({
           };
         };
         wire(ref.current, sdk.createPayPalOneTimePaymentSession(handlers));
-        if (card && cardEligible && cardRef.current && sdk.createPayPalGuestOneTimePaymentSession) wire(cardRef.current, sdk.createPayPalGuestOneTimePaymentSession(handlers), true);
+        if (card && cardEligible && cardRef.current && sdk.createPayPalGuestOneTimePaymentSession) {
+          wire(cardRef.current, sdk.createPayPalGuestOneTimePaymentSession(handlers), true);
+          setCardOn(true);
+        }
         drawnRef.current = true;
         setState("ready");
       })
@@ -291,7 +300,7 @@ export function PayPalPay({
       <paypal-button
         ref={ref}
         type="pay"
-        hidden
+        hidden={!drawn}
         className={look === "white" ? "pp-button paypal-white" : "pp-button"}
         aria-describedby={describedBy}
         aria-disabled={disabled ? "true" : undefined}
@@ -302,7 +311,7 @@ export function PayPalPay({
         <paypal-basic-card-container className="pp-card-wrap">
           <paypal-basic-card-button
             ref={cardRef}
-            hidden
+            hidden={!(drawn && cardOn)}
             className="pp-button pp-card"
             aria-describedby={describedBy}
             aria-disabled={disabled ? "true" : undefined}

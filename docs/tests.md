@@ -6,16 +6,16 @@ Every push runs [CI](../.github/workflows/ci.yml): `npm audit` at every severity
 
 | Suite | Command | Result |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner, 1,000 random gifts, the AI fallbacks, secrets kept out of every response, the bill reviewers, a receipt surviving a reset, the card check, the amounts givers type ("$50", "1,000"), and the docs examples checked against the real handlers | `npm test` | 243 of 243 |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner, 1,000 random gifts, the AI fallbacks, secrets kept out of every response, the bill reviewers, a receipt surviving a reset, the card check, the amounts givers type ("$50", "1,000"), and the docs examples checked against the real handlers | `npm test` | 257 of 257 |
 | Social Security's own worked examples (rules engine, and Claude alone as the baseline) | `npm run eval:ssa` | 40 of 40 (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 |
 | 59 labeled bills: wrong routes accepted (referee; Claude with no rulebook) | `npx tsx --env-file=.env.local scripts/run-eval.ts` | 0 (3) |
 | API end to end, including the report check page, the rulebook, the workflow jobs, discovery documents and security headers | `npm run e2e:api` | 99 of 99 |
 | The organizer's side: needs, the gift finder, closing a page, and a signed webhook from a real sandbox capture | `npm run e2e:manage` | 21 of 21 |
 | The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 of 20 assertions |
-| Browser end to end, including the Spanish gift page, the guided tour, the calendar planner and the Gift Checker naming the same check as Maya's page | `npm run e2e:ui` | 65 of 65 |
+| Browser end to end, including the Spanish gift page, the guided tour, the calendar planner and the Gift Checker naming the same check as Maya's page (on a server with no AI key, the three steps where Claude reads a document are skipped) | `npm run e2e:ui` | 61 of 61 |
 | Accessibility, every public page in light and dark, phone and desktop | `npm run e2e:a11y` | 136 of 136 page views |
-| Every page and public endpoint with no service keys, each integration on its fallback, robots.txt and the sitemap | `npm run e2e:smoke` | 43 of 43 |
+| Every page and public endpoint with no service keys, each integration on its fallback, robots.txt and the sitemap | `npm run e2e:smoke` | 68 of 68 |
 | Real PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 of 14 |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 of 5 |

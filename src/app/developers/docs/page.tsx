@@ -7,6 +7,7 @@ import { Toc } from "@/components/learn/Toc";
 import { ENDPOINTS, ERRORS } from "@/lib/api/endpoints";
 import { LIMITS } from "@/lib/api/keys";
 import { openapi } from "@/lib/api/openapi";
+import { fullCheckByYear } from "@/lib/rules";
 import { RECORDED_ON, docExamples } from "./examples";
 import "../../pages.css";
 import "../../learn/toc.css";
@@ -41,7 +42,7 @@ export default function DocsPage() {
   const examples = docExamples();
   const contents = [{ id: "keys", title: "Keys and limits" }, ...ENDPOINTS.map((e) => ({ id: e.id, title: e.title })), { id: "errors", title: "Errors" }];
   return (
-    <div className="page frame dev-docs">
+    <div className="page frame dev-docs" data-check-year="">
       <header className="page-head">
         <div className="title-row">
           <h1 className="page-title">API docs</h1>
@@ -53,6 +54,9 @@ export default function DocsPage() {
             /openapi.json
           </a>{" "}
           for Postman, SDK generators and AI agents.
+        </p>
+        <p className="page-prose muted">
+          Every check in the examples is the one paid in its <code>payment_month</code>, two months after the gift, at that year&rsquo;s federal amount: {fullCheckByYear()} for one person.
         </p>
         <p className="page-prose">
           Or start from the{" "}

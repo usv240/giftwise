@@ -9,9 +9,9 @@ describe("pronouns in explanations", () => {
     const g = { id: "p", date: "2026-11-10", amount: 420, delivery: "vendor" as const, category: "equipment" as const };
     const they = evaluateGift(g, { ...DEFAULT_PROFILE, pronoun: "they" });
     const she = evaluateGift(g, DEFAULT_PROFILE);
-    expect(they.explanation.plain).toMatch(/Their \w+ check stays/);
+    expect(they.explanation.plain).toMatch(/Their \w+ 2027 check stays/);
     expect(they.explanation.plain).not.toMatch(/\bher\b/i);
-    expect(she.explanation.plain).toMatch(/Her \w+ check stays/);
+    expect(she.explanation.plain).toMatch(/Her \w+ 2027 check stays/);
     expect(they.checkAfter).toBe(she.checkAfter);
   });
 });

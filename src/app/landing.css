@@ -897,84 +897,6 @@
   letter-spacing: -0.01em;
 }
 
-/* For developers, and how it is built: side by side on a wide screen. */
-.dev-built {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  column-gap: clamp(2rem, 1rem + 3vw, 5rem);
-  row-gap: clamp(3rem, 2rem + 3vw, 4.5rem);
-  align-items: start;
-}
-.dev .lede {
-  margin-top: 1rem;
-}
-/* The board tokens keep code dark in both themes (ink would turn it into a white slab on the dark page). */
-.dev-code {
-  margin-top: 2rem;
-  background: var(--board);
-  color: var(--board-ink);
-  border-radius: 12px;
-  padding: 22px;
-}
-@media (max-width: 900px) {
-  .dev-built {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-@media (max-width: 640px) {
-  .dev-code {
-    margin-top: 1.5rem;
-    padding: 16px;
-  }
-}
-
-/* Built list */
-.built-list {
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem 0 0;
-}
-/* Tool and job on one left edge each, so the jobs read as a column rather than a ragged right margin. */
-.built-row {
-  display: grid;
-  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
-  align-items: baseline;
-  gap: 1.25rem;
-  min-height: 44px;
-  padding-block: 7px;
-}
-.built-tool {
-  display: flex;
-  align-items: center;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.built-job {
-  color: var(--muted);
-  text-align: left;
-}
-/* Phone: the six tools in two columns, each with its job under it. */
-@media (max-width: 640px) {
-  .built-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 16px;
-  }
-  .built-row {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: start;
-    gap: 2px;
-    min-height: 0;
-    padding: 0;
-  }
-  .built-tool {
-    white-space: normal;
-  }
-  .built-job {
-    font-size: 0.9375rem;
-  }
-}
-
 /* FAQ: question index, one answer */
 /* On a wide screen the heading sits over the answer, beside the questions, so the list starts at the section's top. */
 @media (min-width: 901px) {
@@ -1497,5 +1419,83 @@
 @media (max-width: 900px) {
   .home-new > .new3 {
     grid-column: 1 / -1;
+  }
+}
+
+/* The second line of each hero figure: the per-month range, or the months it holds. */
+.hero-impact-base {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+/* Under the Gift Checker: PayPal as the place the rules are enforced, and the two proofs anyone can open. */
+.hero-proof {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  padding-inline: 4px;
+}
+.hero-proof-line {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  max-width: 52ch;
+}
+.hero-proof-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+}
+.hero-proof-links .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* For developers: one quiet row at the foot of the page, four links with what each holds. */
+.home-dev {
+  padding-block: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  border-top: 1px solid var(--surface-2);
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+  gap: 1rem clamp(1.5rem, 1rem + 2vw, 3rem);
+  align-items: baseline;
+}
+.home-dev-h {
+  font-size: var(--step-lead);
+  font-weight: 500;
+}
+.home-dev-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem clamp(1.5rem, 1rem + 2vw, 3rem);
+}
+.home-dev-list li {
+  display: grid;
+  gap: 2px;
+  padding-block: 6px;
+}
+.home-dev-link {
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  width: fit-content;
+}
+.home-dev-what {
+  font-size: var(--step-small);
+}
+@media (min-width: 1100px) {
+  .home-dev-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .home-dev {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .home-dev-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

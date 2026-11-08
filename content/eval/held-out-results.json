@@ -1,0 +1,167 @@
+{
+  "ran_at": "2026-11-08T09:27:54.564Z",
+  "engine": {
+    "commit": "3f3ea60",
+    "git_tree_src_lib_rules": "16ed27110eebdc38935767a8c4c1923e16fd3b6e",
+    "files_sha256": "fa95b38939c96c36",
+    "rules_version": "2026.1"
+  },
+  "source": "content/eval/held-out.json",
+  "summary": {
+    "cases": 5,
+    "engine_matches": 4,
+    "counts_matches": 4,
+    "misses": [
+      "office-certificate"
+    ],
+    "not_scored": 3
+  },
+  "first_run": {
+    "ran_at": "2026-11-08T08:48:49.600Z",
+    "engine_matches": 1,
+    "cases": 5,
+    "counts_matches": 3
+  },
+  "cases": [
+    {
+      "id": "award-gift-card",
+      "title": "A $3,100 store gift card received as an award",
+      "cite": "POMS SI 00830.522",
+      "part": "C.1, Example 1",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830522",
+      "ssa_answer": "Income at its face value in the month it is received, subject to the income exclusions: $3,100 less the $60 infrequent or irregular income exclusion leaves $3,040.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "after_infrequent",
+          "value": 3040,
+          "got": 3040,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-CASH-01",
+        "R-INFREQ-01",
+        "R-GIE-01",
+        "R-RMA-01",
+        "R-RES-01"
+      ],
+      "match": true
+    },
+    {
+      "id": "visa-gift-card",
+      "title": "A $200 Visa gift card from a friend",
+      "cite": "POMS SI 00830.522",
+      "part": "C.1, Example 2",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830522",
+      "ssa_answer": "Income at its value in the month it is received, subject to the income exclusions: $200 less the $60 infrequent or irregular income exclusion leaves $140.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-05",
+          "measure": "after_infrequent",
+          "value": 140,
+          "got": 140,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-CASH-01",
+        "R-INFREQ-01",
+        "R-GIE-01",
+        "R-RMA-01"
+      ],
+      "match": true
+    },
+    {
+      "id": "office-certificate",
+      "title": "A $100 office-supply gift certificate that cannot be resold",
+      "cite": "POMS SI 00830.522",
+      "part": "C.2",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830522",
+      "ssa_answer": "Not income, and not a resource: it cannot buy food or shelter and cannot be sold.",
+      "expected_counts": false,
+      "engine_counts": true,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-06",
+          "measure": "after_infrequent",
+          "value": 0,
+          "got": 40,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-CASH-01",
+        "R-INFREQ-01",
+        "R-GIE-01",
+        "R-RMA-01"
+      ],
+      "match": false
+    },
+    {
+      "id": "birthday-gift-card",
+      "title": "A $50 birthday gift card from a daughter",
+      "cite": "POMS SI 00830.522",
+      "part": "C.3, Example 1",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830522",
+      "ssa_answer": "Excluded as infrequent or irregular income.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-08",
+          "measure": "after_infrequent",
+          "value": 0,
+          "got": 0,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-CASH-01",
+        "R-INFREQ-01",
+        "R-GIE-01",
+        "R-RMA-01"
+      ],
+      "match": true
+    },
+    {
+      "id": "vtr-after-cola",
+      "title": "The one-third reduction after a cost-of-living increase",
+      "cite": "POMS SI 02005.001",
+      "part": "E, Example: Individual Subject To VTR Prior To FBR Increase",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0502005001",
+      "ssa_answer": "The reduction for the January 2027 check is one third of the new year's rate, charged on November's support: $1,029 less $343 is $686 (SSA's own figures for 2000: $512 less $170.66 is $341.34). The December 2026 check stays at 2026 amounts: $994 less $331.33 is $662.67.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-10",
+          "measure": "ssi_amount",
+          "value": 662.67,
+          "got": 662.67,
+          "match": true
+        },
+        {
+          "month": "2026-11",
+          "measure": "ssi_amount",
+          "value": 686,
+          "got": 686,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-VTR"
+      ],
+      "match": true
+    }
+  ]
+}

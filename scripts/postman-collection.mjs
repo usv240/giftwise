@@ -29,13 +29,13 @@ const collection = {
     {
       name: "Rules",
       item: [
-        item("Check a gift: $1,000 in cash", "Cash counts as income: two months later the $994 check drops to $74.", post("/api/v1/check-gift", { gift: { amount: 1000, delivery: "cash", date: "2026-04-10" } }), [
+        item("Check a gift: $1,000 in cash", "Cash counts as income: two months later her June 2026 check drops from $994 to $74.", post("/api/v1/check-gift", { gift: { amount: 1000, delivery: "cash", date: "2026-04-10" } }), [
           'pm.test("200 with the standard envelope", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().meta.request_id).to.be.a("string"); });',
           'pm.test("cash leaves a $74 check", () => pm.expect(pm.response.json().data.check_after).to.eql(74));',
           'pm.test("every citation has a source link", () => pm.response.json().data.citations.forEach((c) => pm.expect(c.url).to.match(/^https:/)));',
         ]),
-        item("Check a gift: the same $420 paid to the shop", "Paid straight to the shop, the check stays $994.", post("/api/v1/check-gift", { gift: { amount: 420, delivery: "vendor", category: "equipment", date: "2026-04-10" } }), [
-          'pm.test("the check stays $994", () => pm.expect(pm.response.json().data.check_after).to.eql(994));',
+        item("Check a gift: the same $420 paid to the shop", "Paid straight to the shop, her June 2026 check stays $994.", post("/api/v1/check-gift", { gift: { amount: 420, delivery: "vendor", category: "equipment", date: "2026-04-10" } }), [
+          'pm.test("her June 2026 check stays $994", () => pm.expect(pm.response.json().data.check_after).to.eql(994));',
         ]),
         item("Check a gift: rent paid to the landlord", "Housing paid by someone else counts even when paid straight to the landlord.", post("/api/v1/check-gift", { gift: { amount: 800, delivery: "vendor", category: "rent", recurring: true, date: "2026-04-10" } }), [
           'pm.test("rent lowers the check to $662.67", () => pm.expect(pm.response.json().data.check_after).to.eql(662.67));',
@@ -54,7 +54,7 @@ const collection = {
       item: [
         item("Maya's October report to Social Security", "Written from the gifts themselves. The answer names a code anyone can use to check it.", get("/api/v1/ssa-report", [{ key: "page", value: "maya" }, { key: "month", value: "2026-10" }]), [
           'const d = pm.response.json().data;',
-          'pm.test("nothing counts and the check stays $994", () => { pm.expect(d.status).to.eql("nothing_counts"); pm.expect(d.totals.check).to.eql(994); });',
+          'pm.test("nothing counts and her December 2026 check stays $994", () => { pm.expect(d.status).to.eql("nothing_counts"); pm.expect(d.totals.check).to.eql(994); });',
           'pm.test("the report carries its check code", () => pm.expect(d.verify.code).to.match(/^[0-9A-Z]{5}-[0-9A-Z]{5}$/));',
           'pm.collectionVariables.set("verifyPath", "/" + d.verify.url.split("/").slice(3).join("/"));',
         ]),

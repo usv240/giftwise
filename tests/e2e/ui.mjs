@@ -10,6 +10,9 @@ let pass = 0, fail = 0;
 const PAY = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 2, 1));
 const FULL = PAY.getUTCFullYear() >= 2027 ? 1029 : 994;
 const ok = (n, c, x = "") => { if (c) pass++; else fail++; console.log(`${c ? "PASS" : "FAIL"}  ${n}${x ? "  | " + x : ""}`); };
+// The two steps where Claude reads a document need the AI key; on a server without one they are skipped, not failed.
+const AI = (await (await fetch(`${B}/api/health`)).json().catch(() => ({}))).checks?.find((c) => c.id === "claude")?.mode === "live";
+const skip = (n) => console.log(`SKIP  ${n}  | no AI key on this server`);
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
@@ -74,7 +77,8 @@ await page.keyboard.press("Escape");
 await page.waitForTimeout(200);
 ok("Info closes on Escape", !(await page.locator(".info-pop").isVisible()));
 const infoCount = await page.locator("[data-info-id]").count();
-ok("landing has an Info button beside each rule it explains", infoCount >= 10, `${infoCount}`);
+// The seven numbers and their Info buttons live on /learn; the home page keeps one beside the Gift Checker's route, who it is for, and the rule.
+ok("landing has an Info button beside each rule it explains", infoCount >= 3, `${infoCount}`);
 const missing = await page.$$eval("[data-info-id]", (els) => els.filter((e) => !e.querySelector(".info-dot") || !/^(About|Acerca de) \S/.test(e.getAttribute("aria-label") ?? "")).length);
 ok("every Info button renders", missing === 0);
 
@@ -118,12 +122,17 @@ await page.locator("textarea").fill("date,giver,amount,description,paid_to,categ
 ok("Try month: bad CSV rows explained", (await page.locator(".try-problems li").count()) >= 1);
 
 // 6. Try: bill tab upload through the UI (live Claude)
-await page.getByRole("tab", { name: "A bill or quote" }).click();
-await page.locator('input[type="file"]').setInputFiles("public/samples/riverside-mobility-quote.png");
-await page.waitForSelector(".read-card, .ai-json, .result-attention", { timeout: 120000 });
-const billOut = await page.locator(".ai-state").textContent();
-ok("Try bill: upload is read through the UI", /Riverside Mobility/.test(billOut ?? ""), (billOut ?? "").slice(0, 80));
-ok("Try bill result shows a readable card, not raw JSON", (await page.locator(".ai-json").count()) === 0 && (await page.locator(".read-card").count()) === 1);
+if (AI) {
+  await page.getByRole("tab", { name: "A bill or quote" }).click();
+  await page.locator('input[type="file"]').setInputFiles("public/samples/riverside-mobility-quote.png");
+  await page.waitForSelector(".read-card, .ai-json, .result-attention", { timeout: 120000 });
+  const billOut = await page.locator(".ai-state").textContent();
+  ok("Try bill: upload is read through the UI", /Riverside Mobility/.test(billOut ?? ""), (billOut ?? "").slice(0, 80));
+  ok("Try bill result shows a readable card, not raw JSON", (await page.locator(".ai-json").count()) === 0 && (await page.locator(".read-card").count()) === 1);
+} else {
+  skip("Try bill: upload is read through the UI");
+  skip("Try bill result shows a readable card, not raw JSON");
+}
 
 // 7. Presets: view + download
 await page.goto(B + "/try/presets/electric-bill", { waitUntil: "networkidle" });
@@ -141,23 +150,25 @@ await page.getByRole("button", { name: "What if a reviewer gets it wrong?" }).cl
 ok("a made-up quote is set aside and her check stays $994", (await page.locator(".rv-card[data-set-aside]").count()) === 1 && /\$994/.test((await page.locator(".rv-outcome").textContent()) ?? "") && /\$876/.test((await page.locator(".rv-trusted").textContent()) ?? ""));
 
 // 7c. A fundraiser becomes a gift page: Claude reads the sample, the form makes a page with every need payable
-await page.goto(B + "/try", { waitUntil: "networkidle" });
-await page.getByRole("tab", { name: "A fundraiser page" }).click();
-await page.getByRole("button", { name: "Use the sample fundraiser" }).click();
-await page.locator(".make-page").waitFor({ timeout: 120000 });
-const uses = await page.locator(".make-need").count();
-await page.getByLabel("Their first name").fill("Maya");
-await page.getByLabel("she/her").check();
-await page.getByLabel("Your name (optional)").fill("E2E");
-await page.getByRole("button", { name: "Make the gift page" }).click();
-// A new page opens the organizer's private manage link first, then the page givers see.
-await page.waitForURL(/\/manage\/[A-Za-z0-9_-]{24}\?new=1$/, { timeout: 60000, waitUntil: "commit" });
-await page.getByText("Keep this link").waitFor({ timeout: 60000 });
-const managedNeeds = await page.locator(".mg-need").count();
-await page.getByRole("link", { name: "Open the page givers see" }).click();
-await page.waitForURL(/\/g\/maya-[0-9a-f]{6}$/, { timeout: 60000, waitUntil: "commit" });
-await page.locator(".need").first().waitFor({ timeout: 60000 });
-ok("fundraiser becomes a live gift page with every use as a payable need, managed from its own private link", uses >= 2 && managedNeeds === uses && (await page.locator(".need").count()) === uses, `${uses} uses, ${managedNeeds} managed`);
+if (AI) {
+  await page.goto(B + "/try", { waitUntil: "networkidle" });
+  await page.getByRole("tab", { name: "A fundraiser page" }).click();
+  await page.getByRole("button", { name: "Use the sample fundraiser" }).click();
+  await page.locator(".make-page").waitFor({ timeout: 120000 });
+  const uses = await page.locator(".make-need").count();
+  await page.getByLabel("Their first name").fill("Maya");
+  await page.getByLabel("she/her").check();
+  await page.getByLabel("Your name (optional)").fill("E2E");
+  await page.getByRole("button", { name: "Make the gift page" }).click();
+  // A new page opens the organizer's private manage link first, then the page givers see.
+  await page.waitForURL(/\/manage\/[A-Za-z0-9_-]{24}\?new=1$/, { timeout: 60000, waitUntil: "commit" });
+  await page.getByText("Keep this link").waitFor({ timeout: 60000 });
+  const managedNeeds = await page.locator(".mg-need").count();
+  await page.getByRole("link", { name: "Open the page givers see" }).click();
+  await page.waitForURL(/\/g\/maya-[0-9a-f]{6}$/, { timeout: 60000, waitUntil: "commit" });
+  await page.locator(".need").first().waitFor({ timeout: 60000 });
+  ok("fundraiser becomes a live gift page with every use as a payable need, managed from its own private link", uses >= 2 && managedNeeds === uses && (await page.locator(".need").count()) === uses, `${uses} uses, ${managedNeeds} managed`);
+} else skip("fundraiser becomes a live gift page with every use as a payable need, managed from its own private link");
 
 // 7d. For AI agents: the recorded conversation shows June, the assistant, and each Giftwise tool it called over MCP
 await page.goto(B + "/agents", { waitUntil: "networkidle" });
@@ -219,7 +230,7 @@ await page.waitForTimeout(400);
 const es = (await page.locator("main").innerText()).replace(/\s+/g, " ");
 ok(
   "Spanish gift page: title, a need's rule, the split and the check are in Spanish, and the switch leads back to English",
-  /Ayude a Maya/.test(es) && /Reparación de la silla de ruedas/.test(es) && /Su cheque de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) se mantiene en \$[\d,]+/.test(es) && /Giftwise lo envía aquí/.test(es) && (await page.locator(".give-seg").count()) >= 2 && (await page.locator('a.gift-lang[hreflang="en"]').count()) === 1,
+  /Ayude a Maya/.test(es) && /Reparación de la silla de ruedas/.test(es) && /Su cheque de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de \d{4} se mantiene en \$[\d,]+/.test(es) && /Giftwise lo envía aquí/.test(es) && (await page.locator(".give-seg").count()) >= 2 && (await page.locator('a.gift-lang[hreflang="en"]').count()) === 1,
   es.slice(0, 120),
 );
 
@@ -290,14 +301,16 @@ await page.getByRole("button", { name: "Send request" }).click();
 await page.locator(".dev-code-badge").waitFor({ timeout: 15000 });
 ok("playground request with the key returns 200 and a request id", (await page.locator(".dev-code-badge").textContent()) === "200" && /req_/.test(await page.locator(".dev-status").textContent()));
 ok("code sample carries the key", (await page.locator(".dev-snip pre").textContent()).includes(shown));
-await page.getByRole("radio", { name: "Read a bill" }).click();
-await page.getByRole("button", { name: "Send request" }).click();
-await page.waitForFunction(() => document.querySelector(".dev-out pre")?.textContent?.includes("request_id"), null, { timeout: 90000 });
-const bill = await page.locator(".dev-out pre").first().textContent();
-ok("playground uploads the sample bill and Claude reads it", (await page.locator(".dev-code-badge").textContent()) === "200" && /utility|electric/i.test(bill), (await page.locator(".dev-code-badge").textContent()) ?? "");
+if (AI) {
+  await page.getByRole("radio", { name: "Read a bill" }).click();
+  await page.getByRole("button", { name: "Send request" }).click();
+  await page.waitForFunction(() => document.querySelector(".dev-out pre")?.textContent?.includes("request_id"), null, { timeout: 90000 });
+  const bill = await page.locator(".dev-out pre").first().textContent();
+  ok("playground uploads the sample bill and Claude reads it", (await page.locator(".dev-code-badge").textContent()) === "200" && /utility|electric/i.test(bill), (await page.locator(".dev-code-badge").textContent()) ?? "");
+} else skip("playground uploads the sample bill and Claude reads it");
 await page.goto(B + "/developers/keys", { waitUntil: "networkidle" });
 await page.locator(".usage-key").first().waitFor({ timeout: 15000 });
-ok("usage page lists the key with its calls", (await page.locator(".usage-key").first().textContent()).includes(shown.slice(0, 12)) && (await page.locator(".doc-table tbody tr").count()) >= 2);
+ok("usage page lists the key with its calls", (await page.locator(".usage-key").first().textContent()).includes(shown.slice(0, 12)) && (await page.locator(".doc-table tbody tr").count()) >= (AI ? 2 : 1));
 
 ok("no JavaScript errors in the browser", errors.length === 0, errors.slice(0, 3).join(" || "));
 console.log(`\n${pass} passed, ${fail} failed`);

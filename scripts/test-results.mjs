@@ -27,6 +27,17 @@ const RUN = {
   monthly: { cmd: "npm", args: ["run", "e2e:monthly"] },
   manage: { cmd: "npm", args: ["run", "e2e:manage"] },
   outside: { cmd: "npm", args: ["run", "checks:local"], pattern: /(\d+) of (\d+) passed/ },
+  // Newman's summary table: assertions executed, then failed.
+  postman: { cmd: "npm", args: ["run", "test:postman"], parse: (out) => {
+    const m = /assertions\s*│\s*(\d+)\s*│\s*(\d+)/.exec(out);
+    return m && { passed: Number(m[1]) - Number(m[2]), total: Number(m[1]) };
+  } },
+  // Each promise's kept and broken counts, then the number of gifts: a gift passes when it breaks no promise.
+  invariants: { cmd: "npx", args: ["tsx", "scripts/run-invariants.ts"], parse: (out) => {
+    const gifts = /(\d+) gifts, \$/.exec(out);
+    const broken = [...out.matchAll(/broken (\d+)/g)].map((m) => Number(m[1]));
+    return gifts && { passed: Number(gifts[1]) - Math.max(0, ...broken), total: Number(gifts[1]) };
+  } },
 };
 
 const ids = process.argv.slice(2);
@@ -74,6 +85,11 @@ function runOnce(id) {
   const r = spawnSync(line(how.args), { encoding: "utf8", shell: true, maxBuffer: 64 * 1024 * 1024 });
   const out = `${r.stdout ?? ""}${r.stderr ?? ""}`;
   process.stdout.write(out.split("\n").slice(-6).join("\n"));
+  if (how.parse) {
+    const p = how.parse(out);
+    if (!p) throw new Error(`Could not read a count from ${id}; is the server running?`);
+    return p;
+  }
   const m = (how.pattern ?? /(\d+) passed, (\d+) failed/).exec(out.slice(-4000));
   if (!m) throw new Error(`Could not read a count from ${id}; is the server running?`);
   return { passed: Number(m[1]), total: how.pattern ? Number(m[2]) : Number(m[1]) + Number(m[2]) };

@@ -45,6 +45,8 @@ export function quarterOf(month: string): string {
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const monthName = (month: string) => MONTHS[Number(month.slice(5, 7)) - 1];
+/** A check's month with its year, "January 2027": the full amount differs by year, so a check is never named without it. */
+export const checkMonthName = (month: string) => `${monthName(month)} ${month.slice(0, 4)}`;
 
 export const usd = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
@@ -335,7 +337,9 @@ function explain(
   resourcesNextFirst: number,
   overLimit: boolean,
 ): { plain: string; technical: string } {
-  const pay = monthName(trace.paymentMonth);
+  // The check is named with its month and year, so its amount reads against the right year's federal rate
+  // ($994 in 2026, $1,029 from January 2027): "her January 2027 check".
+  const pay = checkMonthName(trace.paymentMonth);
   const inc = monthName(trace.month);
   const full = usd(baseline.check);
   const label = CATEGORY_LABEL[gift.category];
@@ -350,17 +354,17 @@ function explain(
   } else if (t.kind === "unearned_cash") {
     const excl = round2(trace.infrequentExcluded + trace.generalExcludedFromUnearned);
     plain = `Cash counts as income. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
-    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
+    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${w.poss} ${pay} check at ${usd(bestCheck)}.`;
     if (overLimit) plain += ` Kept as cash, ${w.poss} savings would be ${usd(resourcesNextFirst)} on the 1st, over the limit.`;
   } else if (t.kind === "unearned_in_kind") {
     const excl = round2(trace.infrequentExcluded + trace.generalExcludedFromUnearned);
     plain = `Tickets ${w.subj} receives count as income at their value, even when bought straight from the box office. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
-    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
+    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${w.poss} ${pay} check at ${usd(bestCheck)}.`;
   } else if (t.kind === "ism_shelter") {
     plain = trace.vtrApplied
       ? `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple, trace.paymentMonth))}, to ${usd(trace.check)}.`
       : `Help with ${label} counts as housing support, up to ${usd(pmv(profile.couple, trace.paymentMonth))} a month. ${usd(counted)} would be counted, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
-    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${usd(bestCheck)}.`;
+    if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${w.poss} ${pay} check at ${usd(bestCheck)}.`;
   } else if (t.ruleIds.includes("R-FOOD-01")) {
     plain = `Food paid for by others has not been counted since September 30, 2024. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`;
   } else if (t.ruleIds.includes("R-EDU-01")) {
@@ -379,7 +383,7 @@ function explain(
     `Rules ${rules}. Income month ${trace.month}, payment month ${trace.paymentMonth} (retrospective monthly accounting, lag ${P.rmaLagMonths}). ` +
     `Cash ${usd(trace.cashIncome)}; in kind ${usd(trace.inKindIncome)}; shelter paid by others ${usd(trace.shelterPaidByOthers)}; ISM value ${usd(trace.ismValue)}${trace.vtrApplied ? " (VTR)" : ""}; ` +
     `infrequent exclusion ${usd(trace.infrequentExcluded)}; general exclusion ${usd(trace.generalExcludedFromUnearned)}; countable ${usd(trace.countableIncome)}; ` +
-    `FBR ${usd(fbr(profile.couple, trace.paymentMonth))} gives ${usd(trace.check)}. Best route: ${best} (${usd(bestCheck)}).`;
+    `FBR for ${pay} ${usd(fbr(profile.couple, trace.paymentMonth))} gives ${usd(trace.check)}. Best route: ${best} (${usd(bestCheck)} in ${pay}).`;
 
   return { plain, technical };
 }

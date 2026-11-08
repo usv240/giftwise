@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Info } from "../Info";
 import { usePrefs } from "../prefs";
 import { referee, routeForDecision, type Review } from "@/lib/review/referee";
-import { DEFAULT_PROFILE, evaluateGift, usd, type Category, type Gift } from "@/lib/rules";
+import { DEFAULT_PROFILE, P, addMonths, checkMonthName, evaluateGift, usd, type Category, type Gift } from "@/lib/rules";
 import { modelName } from "@/lib/ai/model-name";
 
 export type ReviewInput = { description: string; amount: number; category: Category; date: string; recurring?: boolean };
@@ -137,7 +137,8 @@ export function ReviewPanel({ input, recorded, ran }: { input: ReviewInput; reco
             <p className="rv-summary">{shown.referee.summary}</p>
             {shown.outcome.route && shown.outcome.check_after !== null && (
               <p className="rv-outcome">
-                Giftwise will {ROUTE[shown.outcome.route]}. Her check stays <span className="tabular rv-check-v">{usd(shown.outcome.check_after)}</span>.
+                Giftwise will {ROUTE[shown.outcome.route]}. Her {checkMonthName(addMonths(input.date.slice(0, 7), P.rmaLagMonths))} check stays{" "}
+                <span className="tabular rv-check-v">{usd(shown.outcome.check_after)}</span>.
               </p>
             )}
             {trusted !== null && <p className="rv-trusted">Had Giftwise trusted that answer and paid the company, her check would have been {usd(trusted)}.</p>}

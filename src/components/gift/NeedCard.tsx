@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Info } from "../Info";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { pronounWords, usd, type Profile } from "@/lib/rules";
-import { giftText, monthIn, payeeInline, type Lang } from "@/lib/i18n/gift";
+import { checkMonthIn, giftText, payeeInline, type Lang } from "@/lib/i18n/gift";
 
 export type NeedView = {
   id: number;
@@ -73,7 +73,7 @@ export function NeedCard({ need, pronoun = "she", lang = "en", closed = false }:
           <div className="need-receipt" role="status">
             <p className="need-paid">{t.paidBy(who)}</p>
             <p className="need-receipt-line">
-              {t.paidLine(payee, w, monthIn(lang, need.checkMonth), usd(need.checkAfter), need.checkStays)}
+              {t.paidLine(payee, w, checkMonthIn(lang, need.checkMonth), usd(need.checkAfter), need.checkStays)}
             </p>
             {orderId && (
               <>

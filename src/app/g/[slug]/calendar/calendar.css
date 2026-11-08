@@ -110,8 +110,13 @@
   overflow: hidden;
   background: var(--surface);
 }
+/* Until Bryntum draws, its place is held at the calendar's own size (toolbar and month), so nothing below moves. */
 .bc-loading {
   padding: 24px;
+  margin-top: 14px;
+  min-height: max(calc(min(760px, 80vh) + 72px), 592px);
+  border-radius: 12px;
+  background: var(--surface);
 }
 .bc-tip {
   margin: 0;

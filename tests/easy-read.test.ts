@@ -52,11 +52,11 @@ describe("Easy Read report", () => {
     const r = buildReport({ ...maya, month: "2026-10" });
     const en = easyRead(r, "en");
     expect(en.title).toBe("Your gifts in October 2026");
-    expect(en.answer.map((l) => l.text)).toEqual(["You do not need to call Social Security about these gifts.", "Your SSI check in December stays $994."]);
+    expect(en.answer.map((l) => l.text)).toEqual(["You do not need to call Social Security about these gifts.", "Your SSI check in December 2026 stays $994."]);
     expect(en.script).toEqual([]);
     const es = easyRead(r, "es");
     expect(es.title).toBe("Sus regalos de octubre de 2026");
-    expect(es.answer.map((l) => l.text)).toEqual(["No tiene que llamar al Seguro Social por estos regalos.", "Su cheque de SSI de diciembre sigue siendo $994."]);
+    expect(es.answer.map((l) => l.text)).toEqual(["No tiene que llamar al Seguro Social por estos regalos.", "Su cheque de SSI de diciembre de 2026 sigue siendo $994."]);
     expect(es.sections.find((s) => s.id === "records")?.lines.some((l) => l.text === "El 5 de octubre, Lucy puso $133 en su cuenta ABLE.")).toBe(true);
   });
 
@@ -65,7 +65,7 @@ describe("Easy Read report", () => {
     const e = easyRead(r, "en");
     expect(e.answer[0].text).toBe("Call Social Security by November 10.");
     expect(e.answer[1].text).toBe("Tell them about 5 gifts.");
-    expect(e.answer[2].text).toBe(`Your SSI check in December will be $${r.totals.check}.`);
+    expect(e.answer[2].text).toBe(`Your SSI check in December 2026 will be $${r.totals.check}.`);
     expect(e.script[0]).toBe("Hello. My name is Maya.");
     expect(e.script.at(-1)).toBe("That is all. I have the receipts.");
     expect(e.script).toHaveLength(2 + r.totals.tell + 1);

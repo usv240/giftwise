@@ -6,8 +6,8 @@
       "id": "unit",
       "name": "Rules engine, routing, the SSA report, the checks workflow and the cited answers",
       "command": "npm test",
-      "passed": 243,
-      "total": 243,
+      "passed": 257,
+      "total": 257,
       "what": "Every rule row, the 2026 values and the 2027 values for January and February checks, 1,000 random gifts held to twelve promises, the report code that lets anyone check a report, the Spanish rule sentences, the $60 quarterly exclusion in the order gifts arrive, shelter and the one-third reduction's meals test, prepaid housing bills, ABLE, gift routing, monthly gifts month by month, the Easy Read report in English and Spanish (every sentence 15 words or fewer) and its calendar reminder, pronouns, the reviewers' referee and what it does when one reviewer is wrong, the monthly report to Social Security, the checks workflow's fan-out and retries, the AG Studio to Claude translation, a known source behind every real-world answer, Social Security's own worked examples, and the benefit calendar, the logger's masking, the Postgres rate-limit table, the operations page's id shortening, the For agents recording against the gift page, the outside checks against the MCP server and render.yaml, and every test number in the README and TESTING.md against this file",
       "ranAt": "2026-11-08"
     },
@@ -24,8 +24,8 @@
       "id": "ui",
       "name": "Browser end to end",
       "command": "npm run e2e:ui",
-      "passed": 65,
-      "total": 65,
+      "passed": 61,
+      "total": 61,
       "what": "The Gift Checker, Try it, the two reviewers, a fundraiser turned into a gift page, For agents, the AG Studio dashboard and its assistant, For organizations, the gift page and its real-world answers, the benefit calendar, the gift page in Spanish, the guided tour, the calendar planner, keyboard use, and the developer flow",
       "ranAt": "2026-11-08"
     },
@@ -42,8 +42,8 @@
       "id": "smoke",
       "name": "No keys, every page",
       "command": "npm run e2e:smoke",
-      "passed": 43,
-      "total": 43,
+      "passed": 68,
+      "total": 68,
       "what": "Every page and public endpoint answers with only a database: PayPal, Claude, Channel3 and Elastic each on its fallback. It also checks the request id in the header, the envelope and every error message, traced on the operations page, and that the recorded assistant on For agents names the same checks as Maya's gift page. CI runs it on every push against a fresh build and an empty Postgres, after npm audit (0 advisories at every severity), types, lint and the unit tests.",
       "ranAt": "2026-11-08"
     },
@@ -54,7 +54,7 @@
       "passed": 14,
       "total": 14,
       "what": "Both PayPal buttons: the buyer logs in and approves, PayPal captures every payee, the page updates, and the public receipt matches",
-      "ranAt": "2026-11-06"
+      "ranAt": "2026-11-08"
     },
     {
       "id": "agent",
@@ -63,7 +63,7 @@
       "passed": 5,
       "total": 5,
       "what": "The agent calls start_gift_checkout, the sandbox buyer approves the PayPal link, and Giftwise captures on return and shows the receipt",
-      "ranAt": "2026-11-06"
+      "ranAt": "2026-11-08"
     },
     {
       "id": "monthly",
@@ -90,7 +90,7 @@
       "passed": 21,
       "total": 21,
       "what": "The sample's manage link; a need added, edited and removed with the rules choosing its route; the gift finder with a gift card held back and a product added with its link; closing and reopening the page; a webhook that refuses private addresses, receives a signed test event, then a signed gift.received from a real sandbox capture; a new page's own manage link",
-      "ranAt": "2026-11-06"
+      "ranAt": "2026-11-08"
     },
     {
       "id": "postman",
@@ -99,7 +99,7 @@
       "passed": 20,
       "total": 20,
       "what": "16 requests in five folders: gift checks, a quarter's exclusions, a bad request, the report and the page that checks it, the ledger, the rulebook, the rules watch, the MCP server and its discovery documents, OpenAPI and health",
-      "ranAt": "2026-11-06"
+      "ranAt": "2026-11-08"
     },
     {
       "id": "invariants",
@@ -108,7 +108,7 @@
       "passed": 100000,
       "total": 100000,
       "what": "100,000 seeded random gifts from one cent to $20,000, each held to twelve promises: every cent placed, her check exactly as with no gift, never below cash, need caps, the ABLE yearly limit and eligibility, at most 10 PayPal recipients, whole cents, cited rules, checks within the federal rate, recomputation and the same answer every time",
-      "ranAt": "2026-11-06"
+      "ranAt": "2026-11-08"
     },
     {
       "id": "cases",

@@ -10,7 +10,7 @@ import { reportCode, verifyPath } from "@/lib/report/verify";
 import { pageOrigin } from "@/lib/origin";
 import QRCode from "qrcode";
 import { buildReport, currentReportMonth, type Evidence, type ReportLine, type SsaReport } from "@/lib/report/ssa";
-import { monthName, monthOf, pronounWords, usd } from "@/lib/rules";
+import { checkMonthName, monthName, monthOf, pronounWords, usd } from "@/lib/rules";
 import "../../../pages.css";
 import "./report.css";
 
@@ -165,7 +165,7 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
                 <dd className="tabular">{usd(r.totals.counted)}</dd>
               </div>
               <div>
-                <dt>{w.Poss} {monthName(r.totals.checkMonth)} check</dt>
+                <dt>{w.Poss} {checkMonthName(r.totals.checkMonth)} check</dt>
                 <dd className="tabular" data-kept={r.totals.check >= r.totals.fullCheck ? "" : undefined}>
                   {usd(r.totals.check)}
                 </dd>

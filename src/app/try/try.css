@@ -546,3 +546,68 @@
 .make-page .info-dot {
   background: var(--surface);
 }
+
+/* The one live AI step: Claude reads the sample bill now. A quiet panel between the example and the two reviewers. */
+.live-read {
+  margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  padding: clamp(18px, 1rem + 1vw, 28px);
+  border-radius: 16px;
+  background: var(--surface);
+  display: grid;
+  gap: 12px;
+  max-width: 72ch;
+}
+.live-read-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.live-read-tag {
+  font-size: var(--step-small);
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.live-read-btn {
+  justify-self: start;
+}
+.live-read-out:empty {
+  display: none;
+}
+.live-read-out {
+  display: grid;
+  gap: 10px;
+}
+.live-read-mode {
+  font-weight: 500;
+}
+.live-read-mode[data-mode="live"] {
+  color: var(--positive);
+}
+.live-read-facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.live-read-facts div {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+  gap: 12px;
+}
+.live-read-facts dt {
+  color: var(--muted);
+}
+.live-read-facts dd {
+  margin: 0;
+}
+@media (max-width: 560px) {
+  .live-read-facts div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+.live-read + .rv {
+  margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+}

@@ -1,0 +1,60 @@
+import type { Gift, Profile } from "./rules";
+
+/**
+ * Score SSA's held-out worked examples (content/eval/held-out.json) on a rules engine: the frozen copy the runner loads
+ * from git (scripts/run-held-out.ts), or the current one (tests/held-out.test.ts). The measures are the main set's
+ * (scripts/run-ssa-examples.ts): income after the infrequent exclusion, in-kind support, and the SSI amount a month gives.
+ */
+type Measure = "after_infrequent" | "ism_value" | "ssi_amount";
+export type HeldOutCase = {
+  id: string;
+  title: string;
+  cite: string;
+  url: string;
+  part: string;
+  profile?: Partial<Profile>;
+  gifts: Gift[];
+  expected: { counts: boolean; values: { month: string; measure: Measure; value: number }[] };
+  ssa_answer: string;
+};
+type Month = { month: string; check: number; cashIncome: number; inKindIncome: number; ismValue: number; infrequentExcluded: number; vtrApplied: boolean };
+type Engine = {
+  DEFAULT_PROFILE: Profile;
+  planMonths: (gifts: Gift[], profile: Profile) => { months: Month[]; gifts: { ruleIds: string[] }[] };
+  computeMonth: (month: string, gifts: Gift[], profile: Profile) => { check: number };
+};
+
+const TOLERANCE = 1;
+
+export function scoreHeldOut(cases: HeldOutCase[], engine: Engine) {
+  return cases.map((c) => {
+    const profile: Profile = { ...engine.DEFAULT_PROFILE, ableEligible: true, savings: 0, ...c.profile };
+    const plan = engine.planMonths(c.gifts, profile);
+    const byMonth = new Map(plan.months.map((m) => [m.month, m]));
+    const read = (month: string, measure: Measure) => {
+      const t = byMonth.get(month);
+      if (measure === "ssi_amount") return t?.check ?? engine.computeMonth(month, [], profile).check;
+      if (!t) return 0;
+      if (measure === "ism_value") return t.ismValue;
+      return Math.round((t.cashIncome + t.inKindIncome + t.ismValue - t.infrequentExcluded) * 100) / 100;
+    };
+    const values = c.expected.values.map((v) => ({ ...v, got: read(v.month, v.measure), match: Math.abs(read(v.month, v.measure) - v.value) <= TOLERANCE }));
+    // SSA counts the one-third reduction as income too (20 CFR 416.1131), so a month under it counts.
+    const counts = plan.months.some((m) => m.cashIncome + m.inKindIncome + m.ismValue - m.infrequentExcluded > 0 || m.vtrApplied);
+    const countsMatch = counts === c.expected.counts;
+    return {
+      id: c.id,
+      title: c.title,
+      cite: c.cite,
+      part: c.part,
+      url: c.url,
+      ssa_answer: c.ssa_answer,
+      expected_counts: c.expected.counts,
+      engine_counts: counts,
+      counts_match: countsMatch,
+      values,
+      rule_ids: [...new Set(plan.gifts.flatMap((g) => g.ruleIds))],
+      match: countsMatch && values.every((v) => v.match),
+    };
+  });
+}

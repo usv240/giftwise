@@ -18,7 +18,7 @@ const faqs = (bills: number, kept: number) => [
   },
   {
     q: "What about rent and utilities?",
-    a: "Help with rent or utilities counts as housing support, up to $351.33 a month in 2026. Giftwise routes it through her ABLE account instead, so she pays the bill herself and keeps her full check.",
+    a: "Help with rent or utilities counts as housing support, even when paid straight to the landlord. For someone with an ABLE account, Giftwise routes it there, so she pays the bill herself and keeps her full check. Without one, the check is lowered by at most $331.33 in 2026 ($343 from January 2027), and Giftwise shows that before anyone pays.",
   },
   {
     q: "What is an ABLE account?",

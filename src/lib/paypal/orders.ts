@@ -78,11 +78,11 @@ export async function createRoutedOrder(units: Unit[], requestId: string, redire
   return result;
 }
 
-export async function captureOrder(orderId: string, requestId: string) {
-  const { result } = await orders().captureOrder({ id: orderId, paypalRequestId: requestId, prefer: "return=representation" });
-  return result;
-}
-
+/**
+ * Read an order back through the SDK. Capture is not in this file: src/lib/paypal/capture.ts captures over plain REST,
+ * so it can send PayPal's negative-testing header (PayPal-Mock-Response) for the failure-case runner and retry a 5xx
+ * with the same PayPal-Request-Id.
+ */
 export async function getOrder(orderId: string) {
   const { result } = await orders().getOrder({ id: orderId });
   return result;

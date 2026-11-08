@@ -26,7 +26,9 @@ const REAL: [string, string][] = [
   ["Share images rendered on request; no uploads kept", "Object storage with signed URLs for anything a family uploads, never the database"],
   ["About $2 of Claude a day, capped and shown on the Operations page", "A budget per organization, with the same per-call accounting"],
   ["No login: the organizer's page is a private link shown once and stored as a hash; the organizations page is a sample fund", "Login and roles for organizations, with the manage link kept for families"],
-  ["One PayPal sandbox app and one webhook; PAYPAL_ENV=sandbox", "PAYPAL_ENV=live with the live app's keys and a webhook per environment, each with its own webhook id"],
+  ["One PayPal sandbox app and one webhook; PAYPAL_ENV=sandbox (src/lib/paypal/env.ts)", "PAYPAL_ENV=live with the live app's keys and a webhook per environment, each with its own webhook id"],
+  ["Shops paid by payee.email_address; Partner Referrals answers this sandbox app 403 NOT_AUTHORIZED", "Each shop onboarded through Partner Referrals once PayPal approves the partner account, and paid by payee.merchant_id (src/lib/paypal/orders.ts, src/lib/households.ts)"],
+  ["The ABLE share paid to a sandbox business account standing in for the plan", "The ABLE share sent to the plan's own gift page, the shops still paid through PayPal"],
   ["Nightly outside checks on Render Workflows; errors as JSON log lines", "The same checks on every deploy, plus Sentry for server, edge and browser errors with personal data masked"],
 ];
 

@@ -4,7 +4,7 @@ import { OpenOnHash } from "@/components/OpenOnHash";
 import { Adoption, Pilot } from "@/components/judges/Adoption";
 import { Compare } from "@/components/judges/Compare";
 import { PayPalShare, PayYourself, Reach } from "@/components/judges/WhyGiftwise";
-import { ASKED_BASIS, ASKED_SENTENCE, IMPACT, KEPT_BASIS, KEPT_SENTENCE } from "@/lib/impact";
+import { ASKED_BASIS, ASKED_SENTENCE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_BASIS, KEPT_SENTENCE } from "@/lib/impact";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../evidence.css";
@@ -31,9 +31,24 @@ export default function ImpactPage() {
       </header>
 
       <section id="kept" className="page-section" aria-labelledby="kept-h">
-        <h2 id="kept-h">What routing would have kept, case by case</h2>
+        <h2 id="kept-h">What routing would have kept, family by family</h2>
         <p className="page-prose jp-intro">
-          {KEPT_SENTENCE} {KEPT_BASIS} These are the engine&rsquo;s counterfactuals on each case&rsquo;s facts, not outcomes anyone saw.
+          {FAMILY_SENTENCE} {FAMILY_BASIS} These are the engine&rsquo;s counterfactuals on each case&rsquo;s facts, not outcomes anyone saw.
+        </p>
+        <dl className="why-list">
+          {IMPACT.familyCases.map((c) => (
+            <div key={c.id} className="why-row">
+              <dt>
+                <span className="why-fig tabular">{cents(c.total)}</span> over {c.months} months
+              </dt>
+              <dd>
+                {c.title}: {cents(c.perMonth)} a month. <span className="muted">{c.citation.replace(/^.*?,\s*(No\.)/, "$1")}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="page-prose why-next">
+          {KEPT_SENTENCE} {KEPT_BASIS}
         </p>
         <dl className="why-list">
           {IMPACT.keptCases.map((c) => (

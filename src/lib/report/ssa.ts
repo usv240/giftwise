@@ -1,6 +1,7 @@
 import reporting from "../../../content/reporting.json";
 import sources from "../../../content/sources.json";
 import {
+  checkMonthName,
   RULES,
   RULES_VERSION,
   addMonths,
@@ -248,8 +249,8 @@ export function buildReport(o: { name: string; profile: Profile; gifts: ReportGi
     status === "no_gifts"
       ? `Giftwise has no gifts for ${name} in ${label}, so there is nothing from Giftwise to report for that month.`
       : status === "nothing_counts"
-        ? `${lines.length === 1 ? "The one gift" : `All ${lines.length} gifts`}, ${usd(given)} in all, went straight to a shop or ${w.poss} ABLE account. None of them changes ${w.poss} income, so there is no income change from these gifts to report for ${monthName(month)}. ${w.Poss} ${monthName(checkMonth)} check stays ${usd(trace?.check ?? baseline.check)}.`
-        : `${usd(counted)} counts as ${w.poss} income for ${monthName(month)}, so ${w.poss} ${monthName(checkMonth)} check would be ${usd(trace?.check ?? baseline.check)} instead of ${usd(baseline.check)}.`;
+        ? `${lines.length === 1 ? "The one gift" : `All ${lines.length} gifts`}, ${usd(given)} in all, went straight to a shop or ${w.poss} ABLE account. None of them changes ${w.poss} income, so there is no income change from these gifts to report for ${monthName(month)}. ${w.Poss} ${checkMonthName(checkMonth)} check stays ${usd(trace?.check ?? baseline.check)}.`
+        : `${usd(counted)} counts as ${w.poss} income for ${monthName(month)}, so ${w.poss} ${checkMonthName(checkMonth)} check would be ${usd(trace?.check ?? baseline.check)} instead of ${usd(baseline.check)}.`;
 
   const todo: SsaReport["todo"] = [];
   const housingToAble = lines.filter((l) => l.delivery === "able" && l.ruleIds.includes("R-ABLE-02"));

@@ -29,7 +29,7 @@
   "audience": {
     "ssi_recipients": { "value": "7.3 million", "label": "People receiving SSI (Sept 2026)", "source": "ssa-monthly-snapshot", "verified": true },
     "survey_unsure": { "value": "44%", "label": "US adults unsure whether medical fundraising affects benefits", "source": "hhl-survey-2026", "verified": true },
-    "able_newly_eligible": { "value": "about 6 million", "label": "People newly eligible for ABLE accounts from Jan 1, 2026", "source": "able-nrc-age-adjustment", "verified": true },
+    "able_newly_eligible": { "value": "an estimated 6 million", "label": "People newly potentially eligible for ABLE accounts from Jan 1, 2026 (about 8 million under the original law)", "source": "able-nrc-age-case-summary", "verified": true },
     "ssi_jan2025_total": { "value": "7.4 million", "label": "People receiving SSI (January 2025)", "source": "crs-if10482", "verified": true },
     "ssi_jan2025_children": { "value": "1.0 million", "label": "Children under 18 receiving SSI (January 2025)", "source": "crs-if10482", "verified": true },
     "ssi_jan2025_adults": { "value": "3.9 million", "label": "Adults 18 to 64 receiving SSI, each on blindness or disability (January 2025)", "source": "crs-if10482", "verified": true },

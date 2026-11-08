@@ -186,7 +186,7 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       detail: process.env.PAYPAL_WEBHOOK_ID?.trim() ? "Every event is signature-checked with PayPal before use" : "Optional, off: PAYPAL_WEBHOOK_ID is not set, and every payment is captured on the server either way",
     },
     mcpCheck(mcp, paypalConfigured()),
-    { id: "apimatic", name: "PayPal Server SDK (APIMatic)", mode: "live", detail: `@paypal/paypal-server-sdk ${pinned("@paypal/paypal-server-sdk")} creates, reads and captures orders` },
+    { id: "apimatic", name: "PayPal Server SDK (APIMatic)", mode: "live", detail: `@paypal/paypal-server-sdk ${pinned("@paypal/paypal-server-sdk")} creates and reads orders; capture is plain REST with a PayPal-Request-Id` },
     {
       id: "ag-studio",
       name: "AG Studio",

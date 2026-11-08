@@ -2,12 +2,12 @@
 import type { GiftResult } from "../rules";
 import { P, pmv, usd, vtr } from "../rules";
 import { CATEGORY_ES } from "../report/easy";
-import { monthIn } from "./gift";
+import { checkMonthIn } from "./gift";
 
 /** Follows the same branches as the engine's explanation. */
 export function ruleSentenceEs(r: GiftResult, couple = false) {
   const t = r.treatment;
-  const mes = monthIn("es", r.trace.paymentMonth);
+  const mes = checkMonthIn("es", r.trace.paymentMonth);
   const label = CATEGORY_ES[r.gift.category];
   const stays = `Su cheque de ${mes} se mantiene en ${usd(r.checkAfter)}.`;
   if (t.kind === "not_possible")

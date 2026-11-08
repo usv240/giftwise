@@ -1,7 +1,7 @@
 "use client";
 
 import sources from "../../content/sources.json";
-import { monthName, usd, type GiftResult } from "@/lib/rules";
+import { checkMonthName, usd, type GiftResult } from "@/lib/rules";
 import { Info } from "./Info";
 import { usePrefs } from "./prefs";
 
@@ -16,7 +16,7 @@ const ROUTE_LABEL: Record<string, string> = {
 /** The receipt-style answer for one gift: her check, the best route, and the rule. */
 export function ResultCard({ result, title }: { result: GiftResult; title?: string }) {
   const { prefs } = usePrefs();
-  const pay = monthName(result.paymentMonth);
+  const pay = checkMonthName(result.paymentMonth);
   const better = result.checkWithBestRoute > result.checkAfter;
   return (
     <div className="result-card" data-ui aria-live="polite">

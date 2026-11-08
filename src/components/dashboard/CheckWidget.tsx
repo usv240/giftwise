@@ -4,7 +4,7 @@ import type { AgBaseWidgetDefinition, AgDefaultRegistry, AgDefaultWidgetDefiniti
 import { useEffect, useRef, useState } from "react";
 import type { RoutesDef } from "./RoutesWidget";
 import { CATEGORY_CODE, ROUTE_CODE } from "@/lib/dashboard/labels";
-import { DEFAULT_PROFILE, monthName, planMonths, usd, type Category, type Delivery, type Gift } from "@/lib/rules";
+import { DEFAULT_PROFILE, checkMonthName, fbr, planMonths, usd, type Category, type Delivery, type Gift } from "@/lib/rules";
 
 /** The Giftwise check widget: runs the rules engine on whatever gifts the dashboard's filters leave in view. */
 export interface CheckDef {
@@ -23,7 +23,7 @@ export type GiftwiseRegistry = Omit<AgDefaultRegistry, "widgets"> & {
   widgets: readonly (AgBaseWidgetDefinition<"giftwiseCheck", CheckDef> | AgBaseWidgetDefinition<"giftwiseRoutes", RoutesDef> | AgDefaultWidgetDefinition)[];
 };
 
-type Result = { lowestRouted: number; lowestCash: number; lowestCashMonth: string; kept: number; months: number; full: number };
+type Result = { lowestRouted: number; lowestCash: number; lowestCashMonth: string; kept: number; months: number; whole: boolean; years: string[] };
 
 const toDate = (v: unknown) => {
   const d = v instanceof Date ? v : new Date(typeof v === "number" ? v : String(v));
@@ -73,10 +73,12 @@ export default function CheckWidget(params: AgWidgetParams<CheckDef>) {
       setR({
         lowestRouted: Math.min(...routed.map((m) => m.check)),
         lowestCash: worst.check,
-        lowestCashMonth: monthName(worst.paymentMonth),
+        lowestCashMonth: checkMonthName(worst.paymentMonth),
         kept: routed.reduce((s, m, i) => s + (m.check - cash[i].check), 0),
         months: routed.length,
-        full: Math.max(...routed.map((m) => m.check)),
+        // Each check against its own year's full amount: $994 for a 2026 check, $1,029 for a 2027 one.
+        whole: routed.every((m) => m.check >= fbr(false, m.paymentMonth)),
+        years: [...new Set(routed.map((m) => m.paymentMonth.slice(0, 4)))],
       });
       setState("displayed", rows);
     });
@@ -88,11 +90,11 @@ export default function CheckWidget(params: AgWidgetParams<CheckDef>) {
   }, [params]);
 
   if (!r) return null;
-  const whole = r.lowestRouted >= r.full;
+  const whole = r.whole;
   return (
     <div className="gw-check">
       <p className="gw-check-v tabular">{usd(r.lowestRouted)}</p>
-      <p className="gw-check-note">{whole ? `Every month, ${r.months} ${r.months === 1 ? "month" : "months"} in view.` : `Lowest month in view.`}</p>
+      <p className="gw-check-note">{whole ? `Every month, ${r.months} ${r.months === 1 ? "month" : "months"} in view: the full ${r.years.join(" and ")} check.` : `Lowest month in view.`}</p>
       <p className="gw-check-cash">
         As cash, her {r.lowestCashMonth} check would have dropped to <strong className="tabular">{usd(r.lowestCash)}</strong>. Giftwise kept <strong className="tabular">{usd(r.kept)}</strong> in her
         checks.

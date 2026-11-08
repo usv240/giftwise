@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { preload } from "react-dom";
 import { Info } from "@/components/Info";
 import { CalendarLoader } from "@/components/calendar/CalendarLoader";
 import { today } from "@/lib/api/envelope";
@@ -22,6 +23,8 @@ async function CalendarPage({ params, searchParams }: { params: Promise<{ slug: 
   if (!s) notFound();
   const w = pronounWords(s.profile.pronoun);
   const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(q.month ?? "") ? q.month! : currentReportMonth(today(), [...new Set(s.gifts.map((g) => monthOf(g.date)))]);
+  // Bryntum's script starts downloading with the page, before the component that needs it hydrates.
+  preload("/bryntum/calendar.umd.js", { as: "script" });
   const gifts = s.gifts.map((g) => ({ id: g.id, date: g.date, amount: g.amount, delivery: g.delivery, category: g.category, giver: g.giver, need: g.need, paidTo: g.paidTo, recurring: g.recurring }));
   return (
     <>

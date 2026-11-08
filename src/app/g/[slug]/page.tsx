@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import sources from "../../../../content/sources.json";
 import { notFound } from "next/navigation";
 import { Info } from "@/components/Info";
 import { GiveAny } from "@/components/gift/GiveAny";
@@ -17,7 +18,7 @@ import { cashExample, getHousehold, openNeeds, withAbleSoFar } from "@/lib/house
 import { pageOrigin } from "@/lib/origin";
 import QRCode from "qrcode";
 import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
-import { asLang, giftText, monthIn, sampleIn } from "@/lib/i18n/gift";
+import { asLang, checkMonthIn, giftText, monthIn, sampleIn } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "./gift.css";
 
@@ -51,6 +52,9 @@ const qrFor = (url: string) => {
   }
   return svg;
 };
+
+/** IAble's page on Ugift codes: the published pattern for giving to an ABLE account through the plan's own gift page. */
+const UGIFT = (sources as Record<string, { url: string }>)["ugift-iable"];
 
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Search> }): Promise<Metadata> {
   const [{ slug }, q] = await Promise.all([params, searchParams]);
@@ -140,6 +144,12 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
         </div>
         <p className="gift-note">{own(household.note)}</p>
         <p className="gift-sample muted">{household.isSample ? t.sampleNote : t.madeNote}</p>
+        <p className="gift-sample muted gift-able-real">
+          {t.ableReal(w)}{" "}
+          <a className="text-link" href={UGIFT.url} target="_blank" rel="noreferrer">
+            {t.ableRealSource}
+          </a>
+        </p>
         {household.isSample && lang === "en" && (
           <p className="gift-sample">
             <Link className="text-link gift-organizer" href="/manage/maya-sample-organizer">
@@ -229,7 +239,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
         <details className="gift-cash">
           <summary>{t.cashQ}</summary>
           <p>
-            {t.cashText(w, usd(cash.checkAfter), usd(cash.checkBaseline))}{" "}
+            {t.cashText(w, usd(cash.checkAfter), usd(cash.checkBaseline), checkMonthIn(lang, cash.paymentMonth))}{" "}
             <Link className="text-link" href="/try">
               {t.checkAny}
             </Link>

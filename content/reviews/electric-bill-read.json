@@ -1,0 +1,33 @@
+{
+  "recorded_at": "2026-11-08T08:54:35.184Z",
+  "model": "claude-opus-5-5",
+  "ms": 4451,
+  "data": {
+    "vendor_name": "Northside Electric Co-op",
+    "vendor_category": "utility",
+    "amount_due": 138,
+    "currency": "USD",
+    "due_date": "2026-11-20",
+    "customer_name": "Maya Ortiz",
+    "line_items": [
+      {
+        "description": "Electric usage, 612 kWh",
+        "amount": 112.3
+      },
+      {
+        "description": "Delivery charge",
+        "amount": 19.2
+      },
+      {
+        "description": "Taxes and fees",
+        "amount": 6.5
+      }
+    ],
+    "is_shelter_cost": true,
+    "confidence": 0.97,
+    "explanation": {
+      "plain": "This is Maya's home electric bill from Northside Electric Co-op. The total is $138.00, and it's due by November 20, 2026.",
+      "technical": "Read vendor header 'Northside Electric Co-op', 'Bill to: Maya Ortiz', 'Due: 2026-11-20', three line items summing to $138.00 matching 'Total due'. Category set to utility because the statement is for residential electric service (kWh usage, delivery charge); electricity is a utility, so is_shelter_cost is true. Document is marked as a sample/fictional; currency inferred as USD from $ symbol."
+    }
+  }
+}

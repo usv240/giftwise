@@ -2,22 +2,22 @@ import Link from "next/link";
 import bills from "../../content/eval-results.json";
 
 /**
- * The three things no other way of giving does, in the same words on the home page and the Evidence page: a referee
- * in code over two reviewers with different rulebooks, a report to Social Security anyone can check, and an AI
- * assistant that asks before a gift is given.
+ * The three things no other way of giving does, in the same words on the home page and the Evidence page: a report to
+ * Social Security anyone can check against PayPal, a referee in code over two reviewers with different rulebooks, and
+ * an AI assistant that asks before a gift is given.
  */
 const NEW = [
+  {
+    k: "A report anyone can check",
+    v: "PayPal pays only the payees the rules picked, in one order captured once, so every gift has a PayPal record. Each month's report to Social Security carries a code and a QR code: opening it rebuilds the report, asks PayPal live for every payment in it and checks the audit ledger, with no login.",
+    href: "/g/maya/report?month=2026-10#rp-verify-h",
+    link: "October's report",
+  },
   {
     k: "Two rulebooks, and a referee in code",
     v: `When a bill might be a housing cost, two Claude reviewers read different rulebooks and must quote them word for word. Code checks every quote, takes a reading only when both agree, and otherwise picks the route that keeps her check whole either way: ${bills.summary.referee.check_kept_whole} of ${bills.summary.referee.all_cases} labeled bills.`,
     href: "/evidence/rules#referee",
     link: "One bill, two reviewers",
-  },
-  {
-    k: "A report anyone can check",
-    v: "Each month's report to Social Security carries a code and a QR code. Opening it rebuilds the report, asks PayPal live for every payment in it and checks the audit ledger, with no login.",
-    href: "/g/maya/report?month=2026-10#rp-verify-h",
-    link: "October's report",
   },
   {
     k: "An AI assistant that asks first",

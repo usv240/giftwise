@@ -11,7 +11,7 @@ import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
 import { easyRead } from "@/lib/report/easy";
 import { dbConfigured } from "@/lib/db";
 import { monthlyView, startMonthly } from "@/lib/monthly";
-import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, evaluateGift, fullCheckByYear, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
 import { reportCode, verifyPath } from "../report/verify";
 import { findGifts } from "../channel3";
@@ -48,7 +48,7 @@ export const TOOLS = [
     name: "check_gift",
     title: "Check a gift",
     description:
-      "Before giving money or paying a bill for someone who receives SSI (Supplemental Security Income), check how the gift changes their monthly check and the benefit-safe way to give it. Cash usually counts as income; paying a shop directly for something other than housing usually does not. Uses the 2026 federal SSI amount and cites the regulation or SSA manual section for every answer.",
+      `Before giving money or paying a bill for someone who receives SSI (Supplemental Security Income), check how the gift changes their monthly check and the benefit-safe way to give it. Cash usually counts as income; paying a shop directly for something other than housing usually does not. Uses the federal SSI amount for the month the check is paid (${fullCheckByYear()} for one person), names that month and year in every answer, and cites the regulation or SSA manual section.`,
     input: z.object({
       amount: z.number().min(0).max(100000).describe("Gift amount in US dollars."),
       delivery: DeliverySchema,

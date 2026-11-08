@@ -5,7 +5,7 @@ import sources from "../../../content/sources.json";
 import { Info } from "@/components/Info";
 import { AskRulebook } from "@/components/learn/AskRulebook";
 import { Toc } from "@/components/learn/Toc";
-import { DEFAULT_PROFILE, evaluateGift, usd, type Gift } from "@/lib/rules";
+import { DEFAULT_PROFILE, checkMonthName, evaluateGift, fullCheckByYear, usd, type Gift } from "@/lib/rules";
 import "../pages.css";
 import "./toc.css";
 import "./disclosure.css";
@@ -45,11 +45,10 @@ const SOURCES_GROUPED = (() => {
 })();
 const SOURCE_COUNT = SOURCES_GROUPED.reduce((n, g) => n + g.items.length, 0);
 
-const monthName = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleString("en-US", { month: "long", timeZone: "UTC" });
 
 /** The four words every section leans on, in plain words, before the rules start. The full glossary is at the end. */
 const WORDS = [
-  { term: "SSI check", plain: "The money Social Security pays her each month. In 2026 it is up to $994 for one person." },
+  { term: "SSI check", plain: `The money Social Security pays her each month: up to ${fullCheckByYear()} for one person.` },
   { term: "Countable income", plain: "The part of her income that lowers the check, after a few small amounts are left out." },
   { term: "In-kind support", plain: "Help with housing that someone else pays for, such as rent or utilities. It can lower the check by up to $351.33 a month in 2026." },
   { term: "ABLE account", plain: "A savings account for people whose disability began before age 46. Money others put into it does not lower the check." },
@@ -71,7 +70,7 @@ const TOPICS: Topic[] = [
     id: "payment",
     title: "The monthly payment",
     plain: [
-      "SSI pays one person up to $994 a month in 2026. A couple can receive up to $1,491.",
+      `SSI pays one person a monthly check of up to ${fullCheckByYear()}. A couple can receive up to ${fullCheckByYear(true)}.`,
       "Some states add a small supplement. Giftwise uses the federal amount, so real checks can be a little higher.",
     ],
     technical: "Federal benefit rate (FBR), 2026 COLA. The engine reads it from content/facts.json, with a verified flag for each value.",
@@ -222,7 +221,7 @@ export default function LearnPage() {
                   <div className="example" data-ui>
                     <p className="example-label">{t.example.label}</p>
                     <p className="example-figure tabular">
-                      Her check in {monthName(r.paymentMonth)}: <strong data-kept={kept ? "" : undefined}>{usd(r.checkAfter)}</strong>
+                      Her check in {checkMonthName(r.paymentMonth)}: <strong data-kept={kept ? "" : undefined}>{usd(r.checkAfter)}</strong>
                       {!kept && <span className="example-full"> (full check {usd(r.checkBaseline)})</span>}
                     </p>
                     <p className="example-note">{r.explanation.plain}</p>

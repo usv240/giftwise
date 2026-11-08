@@ -5,7 +5,7 @@ import { CopyButton } from "@/components/developers/CopyButton";
 import { DevConsole } from "@/components/developers/DevConsole";
 import { LIMITS } from "@/lib/api/keys";
 import { HOSTED_URL } from "@/lib/origin";
-import { DEFAULT_PROFILE, evaluateGift, usd } from "@/lib/rules";
+import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
 import "../pages.css";
 import "./dev.css";
 
@@ -50,7 +50,7 @@ export default function DevelopersPage() {
             {FIRST_CURL}
           </pre>
           <p className="dev-first-note">
-            It answers <code>check_after: {first.checkAfter}</code> and <code>best_route: &quot;{first.bestRoute}&quot;</code>: {usd(FIRST.gift.amount)} in cash would drop her check to {usd(first.checkAfter)}, and giving the item itself keeps all {usd(first.checkWithBestRoute)}.
+            It answers <code>check_after: {first.checkAfter}</code> and <code>best_route: &quot;{first.bestRoute}&quot;</code>: {usd(FIRST.gift.amount)} in cash would drop her {checkMonthName(first.paymentMonth)} check to {usd(first.checkAfter)}, and giving the item itself keeps all {usd(first.checkWithBestRoute)}, the full check that year.
           </p>
         </figure>
       </div>

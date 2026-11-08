@@ -3,9 +3,10 @@ import { describe, expect, it } from "vitest";
 import results from "../content/test-results.json";
 import { API, MCP_TOOLS, PATH } from "../workflows/src/checks";
 import { CASES } from "@/lib/cases/list";
-import { ASKED_SENTENCE, IMPACT, KEPT_SENTENCE, payItYourself, sampleYearSplit } from "@/lib/impact";
+import held from "../content/eval/held-out-results.json";
+import { ASKED_SENTENCE, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
-import { usd } from "@/lib/rules";
+import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
 
 /**
  * Every number the README, its docs/ pages and TESTING.md state about tests, checks, tools and dollars has one source: test counts in
@@ -95,6 +96,40 @@ describe("one source for every dollar figure", () => {
     expect(ASKED_SENTENCE).toContain(cents(IMPACT.askedCases[0].amount));
   });
 
+  it("the README leads with what the engine keeps each family over the months its court case covers, then the sample year", () => {
+    const top = readme.slice(0, readme.indexOf("## The problem in one number"));
+    expect(top).toContain(FAMILY_SENTENCE);
+    expect(IMPACT.familyTotal).toBe(38103.32);
+    expect(top.indexOf(FAMILY_SENTENCE)).toBeLessThan(top.indexOf(KEPT_SENTENCE));
+    const y = payItYourself();
+    expect(top).toContain(`${y.monthsLowered} of her monthly checks, ${cents(y.totalLowered)} in all`);
+    expect(sampleYearSentence()).toContain(cents(y.totalLowered));
+    expect(resultsDoc).toContain(`${cents(IMPACT.familyTotal)} in all`);
+  });
+
+  it("the README's one-number example is what the Gift Checker shows for a gift made in November 2026", () => {
+    const cash = evaluateGift({ id: "p", date: "2026-11-10", amount: 1000, delivery: "cash", category: "other" }, DEFAULT_PROFILE);
+    const shop = evaluateGift({ id: "p", date: "2026-11-10", amount: 1000, delivery: "vendor", category: "equipment" }, DEFAULT_PROFILE);
+    expect(readme).toContain(`her ${checkMonthName(cash.paymentMonth)} check drops from ${usd(cash.checkBaseline)} to ${usd(cash.checkAfter)}`);
+    expect(readme).toContain(`leaves that ${checkMonthName(shop.paymentMonth)} check at ${usd(shop.checkAfter)}`);
+    expect(readme).not.toContain("youtu.be");
+  });
+
+  it("the README's housing reach is the engine's, with and without ABLE", () => {
+    const h = housingReach();
+    const later = h.years[h.years.length - 1];
+    expect(readme).toContain(`leaves her ${checkMonthName(later.paymentMonth)} check at ${usd(later.rentWithoutAble)} of ${usd(later.full)}, and through ABLE it stays ${usd(later.rentThroughAble)}`);
+    expect(later.rentWithoutAble).toBeLessThan(later.full);
+    expect(later.rentThroughAble).toBe(later.full);
+  });
+
+  it("the README and docs/results.md state the held-out result as recorded", () => {
+    expect(readme).toContain(`**${held.summary.engine_matches} of ${held.summary.cases} examples the engine never saw**`);
+    expect(readme).toContain(`commit \`${held.engine.commit}\``);
+    expect(resultsDoc).toContain(`It matches ${held.summary.engine_matches} of ${held.summary.cases}.`);
+    expect(resultsDoc).toContain(`frozen at commit \`${held.engine.commit}\``);
+  });
+
   it("the README and docs/real-world.md answer why not pay the shop yourself with the engine's figures", () => {
     const y = payItYourself();
     for (const doc of [readme, realWorld]) {
@@ -126,6 +161,6 @@ describe("one source for every dollar figure", () => {
     expect(new Set(decided.votes.map((v) => v.answer))).toEqual(new Set(["shelter", "not_shelter"]));
     expect(routed.route).toBe("able");
     expect(able.check).toBeGreaterThan(shop.check);
-    expect(resultsDoc).toContain(`sends the ${usd(BILL_RUN.amount)} to her ABLE account, where her check is ${usd(able.check)} either way (paid to the insurer, it could be ${usd(shop.check)})`);
+    expect(resultsDoc).toContain(`sends the ${usd(BILL_RUN.amount)} to her ABLE account, where her ${checkMonthName(able.paymentMonth)} check is ${usd(able.check)} either way (paid to the insurer, it could be ${usd(shop.check)})`);
   });
 });

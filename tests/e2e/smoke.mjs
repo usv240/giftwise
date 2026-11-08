@@ -104,8 +104,40 @@ check("security headers", Boolean(head.headers.get("strict-transport-security") 
 // The recorded assistant on /agents names the same two checks Maya's page computes for a $300 cash gift today.
 const giftHtml = (await (await fetch(`${B}/g/maya`)).text()).replace(/<!-- -->/g, "");
 const agentsHtml = await (await fetch(`${B}/agents`)).text();
-const cashLine = /A \$300 cash gift would lower her check to (\$[\d,]+)\. Paying for one of these needs instead keeps her full (\$[\d,]+)/.exec(giftHtml);
+const cashLine = /A \$300 cash gift would lower her \w+ \d{4} check to (\$[\d,]+)\. Paying for one of these needs instead keeps her full \w+ \d{4} check of (\$[\d,]+)/.exec(giftHtml);
 check("/agents and /g/maya name the same checks for $300 in cash", Boolean(cashLine) && agentsHtml.includes(cashLine[1]) && agentsHtml.includes(cashLine[2]), cashLine ? `${cashLine[2]} and ${cashLine[1]}` : "no cash line on /g/maya");
+
+// Every full check a page states carries its year ($994 in 2026, $1,029 from January 2027): in the same sentence, or, for
+// a recorded run or a page of API examples, in the year note its container (data-check-year) opens with.
+{
+  const FULL = /\$(994|1,029|1,491|1,544)(?![\d,])(?!\.\d)/;
+  const text = (html) =>
+    html
+      .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ")
+      .replace(/<!-- -->/g, "")
+      .replace(/<(br|\/p|\/li|\/h\d|\/dd|\/dt|\/td|\/th|\/div|\/summary|\/figcaption|\/pre)[^>]*>/g, "\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&rsquo;|&#x27;|&#39;/g, "'")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"');
+  const NOTE = /full amount is \$[\d,]+|\$994 in 2026, \$1,029 from January 2027/;
+  for (const [path] of pages) {
+    const html = await (await fetch(B + path)).text();
+    const bad = /data-check-year/.test(html)
+      ? NOTE.test(text(html))
+        ? []
+        : ["the page's year note is missing"]
+      : text(html)
+          .split(/\n+/)
+          .map((l) => l.trim())
+          .filter(Boolean)
+          // A figure alone on its line reads with its label and the heading of its small group just above it ("Her
+          // January 2027 check", then "As cash $0", "With Giftwise $1,029"), so one of those lines carries the year.
+          .flatMap((l, i, all) => (/^\$[\d,.]+$/.test(l) ? (FULL.test(l) ? [`${all.slice(Math.max(0, i - 4), i).join(" ")} ${l}`] : []) : l.split(/(?<=[.!?])\s+/)))
+          .filter((s) => FULL.test(s) && !/\b20(2[6-9])\b/.test(s));
+    check(`page ${path} names the year of every full check it states`, bad.length === 0, bad.slice(0, 2).join(" | ").slice(0, 200));
+  }
+}
 
 console.log(`\n${total - failed} passed, ${failed} failed`);
 process.exitCode = failed ? 1 : 0;

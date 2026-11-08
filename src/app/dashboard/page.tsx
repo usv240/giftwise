@@ -6,7 +6,7 @@ import { Info } from "@/components/Info";
 import { FamilyDashboard } from "@/components/dashboard/FamilyDashboard";
 import { dashboardData } from "@/lib/dashboard/data";
 import { ROUTE_LABEL } from "@/lib/dashboard/labels";
-import { usd, type Delivery } from "@/lib/rules";
+import { P, addMonths, fbr, fullCheckByYear, usd, type Delivery } from "@/lib/rules";
 import "../pages.css";
 import "./dashboard.css";
 
@@ -19,6 +19,10 @@ async function Dashboard() {
   const given = gifts.reduce((s, g) => s + g.amount, 0);
   const checks = months.map((m) => m.checkWithGiftwise);
   const lowest = Math.min(...checks);
+  // Each check is paid two months after its gifts, at that year's federal amount, so the full check is named with its year.
+  const payMonths = months.map((m) => addMonths(m.month.slice(0, 7), P.rmaLagMonths));
+  const checkYears = [...new Set(payMonths.map((m) => m.slice(0, 4)))];
+  const fullAll = months.every((m, i) => m.checkWithGiftwise >= fbr(false, payMonths[i]));
   const lowestCash = Math.min(...months.map((m) => m.checkIfCash));
   const routes = (Object.keys(ROUTE_LABEL) as Delivery[])
     .map((d) => ({ d, label: ROUTE_LABEL[d], amount: gifts.filter((g) => g.delivery === d).reduce((s, g) => s + g.amount, 0) }))
@@ -53,7 +57,7 @@ async function Dashboard() {
           <div>
             <dt>Her SSI check with Giftwise</dt>
             <dd className="tabular" data-kept="">
-              {checks.every((c) => c === lowest) ? `${usd(lowest)} every month` : `${usd(lowest)} at the lowest`}
+              {fullAll ? (checkYears.length === 1 ? `${usd(lowest)} every month of ${checkYears[0]}` : `Full every month (${fullCheckByYear()})`) : `${usd(lowest)} at the lowest`}
             </dd>
           </div>
           <div>

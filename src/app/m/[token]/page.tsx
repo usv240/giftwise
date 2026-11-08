@@ -7,7 +7,7 @@ import { Info } from "@/components/Info";
 import { PayMonth, PlanNext } from "@/components/gift/MonthlyActions";
 import { today } from "@/lib/api/envelope";
 import { monthlyView } from "@/lib/monthly";
-import { P, addMonths, monthName, pronounWords, usd } from "@/lib/rules";
+import { P, addMonths, checkMonthName, monthName, pronounWords, usd } from "@/lib/rules";
 import "../../pages.css";
 import "./monthly.css";
 
@@ -57,7 +57,7 @@ async function Monthly({ params }: { params: Promise<{ token: string }> }) {
               </ul>
               {r.plan.baseline > 0 && (
                 <p className="mo-check">
-                  {w.Poss} {monthName(addMonths(r.month, P.rmaLagMonths))} check {r.plan.checkWithRouting === r.plan.baseline ? "stays" : "is"} <span className="tabular">{usd(r.plan.checkWithRouting)}</span>. As cash it
+                  {w.Poss} {checkMonthName(addMonths(r.month, P.rmaLagMonths))} check {r.plan.checkWithRouting === r.plan.baseline ? "stays" : "is"} <span className="tabular">{usd(r.plan.checkWithRouting)}</span>. As cash it
                   would be <span className="tabular">{usd(r.plan.checkIfCash)}</span>.
                 </p>
               )}

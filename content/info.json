@@ -47,7 +47,7 @@
   },
   "gift-checker.result": {
     "title": "Her check",
-    "what": "Her SSI payment after this gift. The 2026 full amount for one person is $994 a month.",
+    "what": "Her SSI payment after this gift. The full amount for one person is $994 a month in 2026 and $1,029 from January 2027.",
     "why": "Counted income lowers the check dollar for dollar after small exclusions.",
     "technical": "check = federal benefit rate minus countable income (after the $60 quarterly and $20 monthly exclusions)."
   },
@@ -171,7 +171,7 @@
   },
   "rules.fbr": {
     "title": "Full SSI payment",
-    "what": "The most SSI pays one person in 2026 is $994 a month, before any state supplement.",
+    "what": "The most SSI pays one person is $994 a month in 2026 and $1,029 from January 2027, before any state supplement.",
     "why": "Counted income lowers this amount.",
     "technical": "Federal benefit rate, 2026 COLA."
   },
@@ -208,7 +208,7 @@
   "stats.example": {
     "title": "A sample year",
     "what": "Each bar is the help a sample household received in one month through Giftwise.",
-    "why": "Every gift was routed the benefit-safe way, so none of it was counted and her check stayed $994 every month.",
+    "why": "Every gift was routed the benefit-safe way, so none of it was counted and her check stayed $994 every month of 2026.",
     "technical": "Sample data. Each gift was evaluated with the rules engine (v2026.1); counted income was $0 in every month. Not a forecast for any real person."
   },
   "research.row": {
@@ -409,7 +409,7 @@
   },
   "page.evidence": {
     "title": "About this page",
-    "what": "Three numbers, a five-minute path through the product, and every result on its own page: how the rules were checked, how it runs, and what it changes.",
+    "what": "Three numbers, a five-minute path through the product, and every result in five groups: whether it gets the rules right, whether the money goes only where the rules say, what it changes, how it runs, and how it is built.",
     "why": "So you can check every claim yourself in a few minutes.",
     "technical": "The failure-case runner is POST /api/cases/run. It creates small PayPal sandbox orders and runs the same capture and order code the gift page uses."
   },

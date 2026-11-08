@@ -151,6 +151,31 @@ function Answer({ v }: { v: Vote }) {
   );
 }
 
+/**
+ * What the second reviewer adds, as measured: each reviewer alone on the recorded run, and the stress test where one
+ * reviewer is wrong. Built from the numbers, so it says plainly when one reviewer alone did as well on this run.
+ */
+export function secondReviewer() {
+  const s = R.summary;
+  const w = NC.wrong_routes_accepted;
+  const t = stressTest();
+  const safest = (["poms", "regs"] as const).filter((k) => w[k] === w.referee && s[k].check_kept_whole === s.referee.check_kept_whole);
+  const riskier = (["poms", "regs"] as const).filter((k) => w[k] > w.referee);
+  const parts: string[] = [];
+  for (const k of safest)
+    parts.push(
+      `On this run ${NAME[k]} was as safe as the referee: ${n(w[k], "wrong route", "wrong routes")}, her check whole on ${s[k].check_kept_whole} of ${s[k].all_cases}, and it settled more clear bills, ${s[k].correct} of ${s[k].clear_cases} against the referee's ${s.referee.correct}.`,
+    );
+  for (const k of riskier) {
+    const ids = (R.summary[k] as Summary & { wrong_route_ids?: string[] }).wrong_route_ids ?? [];
+    parts.push(`${NAME[k].charAt(0).toUpperCase()}${NAME[k].slice(1)} accepted ${n(w[k], "route", "routes")} that would lower her check${ids.length ? ` (${ids.join(", ").replace(/-/g, " ")})` : ""}, which the referee did not.`);
+  }
+  parts.push(
+    `Which reviewer errs is not known before a bill arrives, so Giftwise acts only on a reading both checked quotes support. With one reviewer wrong, trusting it alone keeps her check whole on ${t.aloneWhole} of ${t.bills} bills; with both reviewers and the referee, ${t.refereeRealQuoteWhole} of ${t.bills}. The cost: ${s.referee.abstained} clear bills go to the route that keeps her check whole under either reading instead of being settled, each with her check whole.`,
+  );
+  return parts.join(" ");
+}
+
 /** The section's intro: what the two reviewers are, in the words the README uses. */
 export function EvalIntro() {
   return (
@@ -185,6 +210,50 @@ export function EvalResults() {
           word.
         </p>
       </div>
+      {/* Each reviewer alone beside the referee, from the same recorded run: no model call. */}
+      <div className="doc-table-wrap ev-alone" tabIndex={0} role="region" aria-label="Each reviewer alone and the referee, all bills">
+        <table className="doc-table ev-table">
+          <thead>
+            <tr>
+              <th scope="col">All {R.cases.length} bills</th>
+              {COLS.map(([key, label]) => (
+                <th key={key} scope="col" title={label} data-ref={key === "referee" ? "" : undefined}>
+                  {SHORT[key]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Her check kept whole</th>
+              {COLS.map(([key]) => (
+                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                  {s[key].check_kept_whole} of {s[key].all_cases}
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <th scope="row">Wrong routes accepted</th>
+              {COLS.map(([key]) => (
+                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                  {w[key]}
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <th scope="row">Clear bills settled right</th>
+              {COLS.map(([key]) => (
+                <td key={key} className="tabular" data-label={SHORT[key]} data-ref={key === "referee" ? "" : undefined}>
+                  {s[key].correct} of {s[key].clear_cases}
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="page-prose" id="second-reviewer">
+        <strong>What the second reviewer adds.</strong> {secondReviewer()}
+      </p>
       <div className="jx-more">
         <details className="jx-disc">
           <summary>Both tables, and what happens when one reviewer is wrong</summary>

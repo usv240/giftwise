@@ -4,10 +4,13 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
 import { PresetResult } from "@/components/try/PresetResult";
+import { LiveBillRead } from "@/components/try/LiveBillRead";
 import { ReviewPanel } from "@/components/try/ReviewPanel";
+import { AI_DAILY_CAP_USD } from "@/lib/ai/claude";
+import { SAMPLE_BILL } from "@/lib/ai/sample-bill";
 import { reviewForPreset } from "@/lib/review/cases";
 import { PRESETS, getPreset } from "@/lib/presets";
-import { usd } from "@/lib/rules";
+import { fullCheckByYear, usd } from "@/lib/rules";
 import "../../try.css";
 
 export function generateStaticParams() {
@@ -39,7 +42,7 @@ async function Preset({ params }: { params: Promise<{ id: string }> }) {
           <Info id="try.presets" />
         </div>
         <p className="lede">{p.summary}</p>
-        <p className="muted">Sample household: Maya, 29, lives on her own, receives $994 a month, has an ABLE account and $1,240 in savings.</p>
+        <p className="muted">Sample household: Maya, 29, lives on her own, has an ABLE account and $1,240 in savings. Her full SSI check is {fullCheckByYear()}.</p>
       </header>
 
       <div className="try-split preset-body">
@@ -78,6 +81,7 @@ async function Preset({ params }: { params: Promise<{ id: string }> }) {
         </section>
         <PresetResult id={p.id} />
       </div>
+      {p.document === SAMPLE_BILL && <LiveBillRead cap={AI_DAILY_CAP_USD} />}
       {review && <ReviewPanel input={review.input} recorded={review.recorded} />}
     </div>
   );

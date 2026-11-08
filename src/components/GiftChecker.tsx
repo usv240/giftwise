@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import sources from "../../content/sources.json";
 import { parseDollars } from "@/lib/parseDollars";
 import { CHECKER_PROFILE, checkerGift, type CheckerMode } from "@/lib/checker";
-import { evaluateGift, monthName, usd, type Delivery, type GiftResult } from "@/lib/rules";
+import { checkMonthName, evaluateGift, monthName, usd, type Delivery, type GiftResult } from "@/lib/rules";
 import { Info } from "./Info";
 import { usePrefs } from "./prefs";
 import { TOUR_KEY } from "./tour/steps";
@@ -28,7 +28,7 @@ const ROUTE_PHRASE: Record<Delivery, string> = {
 
 /** The reason in plain words, without the exclusion arithmetic (that is in the technical view). */
 function plainReason(r: GiftResult, mode: Mode): string {
-  const better = r.checkWithBestRoute > r.checkAfter ? ` ${ROUTE_PHRASE[r.bestRoute]} keeps all ${usd(r.checkWithBestRoute)}.` : "";
+  const better = r.checkWithBestRoute > r.checkAfter ? ` ${ROUTE_PHRASE[r.bestRoute]} keeps her ${checkMonthName(r.paymentMonth)} check at ${usd(r.checkWithBestRoute)}.` : "";
   if (r.treatment.kind === "unearned_cash")
     return r.countedAmount > 0 ? `Cash counts as income, so ${usd(r.countedAmount)} of it is counted.${better}` : "Cash counts as income, but a small one-off gift like this is not counted.";
   // The ABLE route has its own line under the figure, so the rent reason stops at the rule.
@@ -88,7 +88,8 @@ export function GiftChecker() {
   }, [touched]);
 
   const stop = () => setTouched(true);
-  const pay = monthName(result.paymentMonth);
+  // The check is named with its year: the full amount is $994 in 2026 and $1,029 from January 2027.
+  const pay = checkMonthName(result.paymentMonth);
   const inc = monthName(result.incomeMonth);
   const kept = result.checkAfter >= result.checkBaseline;
   // Say what was read when it is not exactly what was typed: "1,000", "1k" or more than the checker's limit.

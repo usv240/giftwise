@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import facts from "../../content/facts.json";
 import billResults from "../../content/eval-results.json";
 import fieldResults from "../../content/eval/field-cases-results.json";
 import ssaResults from "../../content/eval/ssa-examples-results.json";
+import facts from "../../content/facts.json";
 import sampleYear from "../../content/sample-year.json";
 import sources from "../../content/sources.json";
 import { GiftChecker } from "@/components/GiftChecker";
@@ -15,22 +15,12 @@ import { HowNav } from "@/components/landing/HowNav";
 import { LoopVideo } from "@/components/landing/LoopVideo";
 import { ShowcaseBoard } from "@/components/landing/ShowcaseBoard";
 import { WhatIsNew } from "@/components/WhatIsNew";
-import { IMPACT } from "@/lib/impact";
-import { usd } from "@/lib/rules";
+import { IMPACT, housingReach, payItYourself } from "@/lib/impact";
+import { checkMonthName, usd } from "@/lib/rules";
 import "./landing.css";
 
-const V = facts.values;
 const SRC = sources as Record<string, { title: string; url: string }>;
-
-const RULE_ROWS = [
-  { id: "rules.limit", name: "Savings limit on the first of each month", value: usd(V.resource_limit_individual.value), href: "/learn#savings" },
-  { id: "rules.fbr", name: `SSI federal payment, 2026 (2027: ${usd(V.fbr_individual_2027.value)})`, value: usd(V.fbr_individual.value), href: "/learn#payment" },
-  { id: "rules.infrequent", name: "One-off gifts not counted, per quarter", value: `first ${usd(V.infrequent_unearned_per_quarter.value)}`, href: "/learn#exclusions" },
-  { id: "rules.gie", name: "General monthly exclusion", value: usd(V.general_income_exclusion.value), href: "/learn#exclusions" },
-  { id: "rules.pmv", name: "Most that housing help can lower the check", value: usd(V.pmv_individual.value), href: "/learn#housing" },
-  { id: "rules.able-limit", name: "ABLE contributions per year", value: usd(V.able_annual_limit.value), href: "/learn#able" },
-  { id: "rules.able-balance", name: "ABLE balance not counted toward savings", value: `first ${usd(V.able_resource_exclusion.value)}`, href: "/learn#able" },
-];
+const A = facts.audience;
 
 /** `tech` is the citation, shown in the technical view only. */
 const HOW = [
@@ -40,21 +30,14 @@ const HOW = [
   { clause: "Her month stays steady.", card: { title: "Her check", meta: "Stays whole. Savings: $1,240 of $2,000", tech: "", status: "Steady" } },
 ];
 
-const BUILT = [
-  { id: "paypal", tool: "PayPal", job: "Pays the shop directly, and keeps the month's ledger" },
-  { id: "claude", tool: "Claude Opus 5.5", job: "Reads bills and runs the two reviewers" },
-  { id: "ag-studio", tool: "AG Studio", job: "The dashboard of Maya's year, with a rules-engine widget" },
-  { id: "bryntum", tool: "Bryntum", job: "Her benefit calendar, where gifts can be dragged between months" },
-  { id: "render", tool: "Render", job: "Hosts the site and its database" },
-  { id: "apimatic", tool: "APIMatic", job: "Generated the PayPal SDK Giftwise builds with" },
-];
-
-/** Published counts only, each from the source it links to. */
-const REACH = [
+/** The two published counts that show why housing help matters, each from the source it links to. */
+const HOUSING_HARM = [
   { fig: "793,000", text: "people on SSI whose check Social Security lowered in a single month for food or housing someone else provided.", src: "fr-88-9779-ism-count", srcLabel: "SSA, January 2022" },
-  { fig: "$410 million", text: "in SSI overpayments in one year from in-kind support: help with food or housing that should have lowered the check, found after it was paid. Giftwise checks every gift before PayPal moves it.", src: "ssa-oig-152601", srcLabel: "SSA Inspector General, FY 2024" },
-  { fig: "14 million", text: "people who can open an ABLE account: about 8 million under the original law and an estimated 6 million more since January 1, 2026.", src: "able-nrc-age-case-summary", srcLabel: "ABLE National Resource Center" },
-  { fig: "246,000", text: "ABLE accounts open so far, holding over $3.2 billion. Every Giftwise gift with money left over goes to one.", src: "able-nrc-accounts-2026", srcLabel: "ABLE NRC, March 31, 2026" },
+  { fig: "$410 million", text: "in SSI overpayments in one year from in-kind support: help with food or housing that should have lowered the check, found after it was paid.", src: "ssa-oig-152601", srcLabel: "SSA Inspector General, FY 2024" },
+];
+const ABLE_COUNTS = [
+  { fig: "8 million", text: `people potentially eligible for an ABLE account under the original law, and ${A.able_newly_eligible.value} more since January 1, 2026.`, src: "able-nrc-age-case-summary", srcLabel: "ABLE National Resource Center, 2025" },
+  { fig: "246,000", text: "ABLE accounts opened by March 31, 2026, holding over $3.2 billion. Every Giftwise gift with money left over goes to one.", src: "able-nrc-accounts-2026", srcLabel: "ABLE NRC, June 2026" },
 ];
 const RESEARCH = ["cfr-416-1103-g", "poms-si-00815-400", "poms-si-01130-740", "fr-89-21199", "ssa-understanding-ssi-living", "sna-crowdfunding", "hhl-survey-2026", "berliner-kenworthy-2017"];
 const RESEARCH_LABEL: Record<string, string> = {
@@ -68,20 +51,31 @@ const RESEARCH_LABEL: Record<string, string> = {
   "berliner-kenworthy-2017": "Berliner and Kenworthy (2017)",
 };
 
-// Sample household: help delivered each month through Giftwise (all routed benefit-safe).
 /** Help delivered each month in the sample year, summed from content/sample-year.json (the same gifts as the dashboard and the report). */
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const HELP = [...new Set(sampleYear.gifts.map((g) => g.date.slice(0, 7)))].sort().map((month) => ({
   m: MONTH_ABBR[Number(month.slice(5, 7)) - 1],
   v: sampleYear.gifts.filter((g) => g.date.startsWith(month)).reduce((s, g) => s + g.amount, 0),
 }));
-const HELP_SPAN = `${["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][MONTH_ABBR.indexOf(HELP[0].m)]} to ${["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][MONTH_ABBR.indexOf(HELP[HELP.length - 1].m)]} 2026`;
+const HELP_SPAN = `${MONTH_FULL[MONTH_ABBR.indexOf(HELP[0].m)]} to ${MONTH_FULL[MONTH_ABBR.indexOf(HELP[HELP.length - 1].m)]} 2026`;
 const HELP_TOTAL = HELP.reduce((s, h) => s + h.v, 0);
 const HELP_MAX = HELP.reduce((mi, h, i, arr) => (h.v > arr[mi].v ? i : mi), 0);
 const PRINTED = [...new Set([HELP_MAX, 0, HELP.length - 1])];
+const YEAR = payItYourself();
+const HOUSING = housingReach();
+const cents = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+
+/** For developers and anyone running it: one entry, four pages. */
+const FOR_DEVELOPERS = [
+  { href: "/developers", label: "Developers", what: "API keys, the docs, and the MCP server for AI agents" },
+  { href: "/status", label: "Status", what: "Every service, checked live" },
+  { href: "/ops", label: "Operations", what: "Latency, errors, payments and webhooks" },
+  { href: "/stack", label: "How it is built", what: "Every PayPal API and tool, with its file" },
+];
 
 /** One published count: the figure leading its line, then what it counts and its source. */
-function ReachRow({ r }: { r: (typeof REACH)[number] }) {
+function ReachRow({ r }: { r: { fig: string; text: string; src: string; srcLabel: string } }) {
   return (
     <li className="reach-row">
       <span className="reach-fig tabular">{r.fig}</span>
@@ -96,6 +90,7 @@ function ReachRow({ r }: { r: (typeof REACH)[number] }) {
 }
 
 export default function Home() {
+  const later = HOUSING.years[HOUSING.years.length - 1];
   return (
     <>
       {/* Hero: "Column on one line" beside the live Gift Checker */}
@@ -106,25 +101,32 @@ export default function Home() {
             her full check
           </h1>
           <p className="hero-sub">
-            For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules and pays the shop directly through PayPal. Claude reads the bills and fundraiser pages; the rules do the math.
+            For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules, and PayPal pays only the shops, clinics and ABLE account the
+            rules picked, in one order, captured once. Claude reads the bills; the rules do the math.
           </p>
-          <ul className="hero-impact" aria-label="What routing would have changed, in real federal court cases">
+          <ul className="hero-impact" aria-label="What routing keeps, measured by the rules engine">
             <li>
               <Link className="hero-impact-link" href="/evidence/impact#kept">
                 <span className="hero-impact-fig tabular" data-kept="">
-                  {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))}
+                  {usd(Math.round(IMPACT.familyTotal))}
                 </span>
                 <span className="hero-impact-what">
-                  a month the same help would have kept, routed through Giftwise, in {IMPACT.routedCases} of {IMPACT.scoredCases} real court cases, at 2026 rates
+                  kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families in real court cases, over the {IMPACT.familyCases.map((c) => c.months).join(" and ")} months their
+                  cases cover, routed through Giftwise at 2026 rates
+                </span>
+                <span className="hero-impact-base tabular">
+                  {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month in {IMPACT.routedCases} of {IMPACT.scoredCases} cases
                 </span>
               </Link>
             </li>
             <li>
-              <Link className="hero-impact-link" href="/evidence/impact#asked">
-                <span className="hero-impact-fig tabular">{IMPACT.askedCases.map((c) => usd(Math.round(c.amount))).join(" and ")}</span>
-                <span className="hero-impact-what">
-                  SSA asked back in {IMPACT.askedBackCases === 2 ? "two" : IMPACT.askedBackCases} cases for money family gave; paid into ABLE, the engine keeps her savings under the limit in{" "}
-                  {IMPACT.askedAvoidedThroughAble === IMPACT.askedBackCases ? "both" : IMPACT.askedAvoidedThroughAble}
+              <Link className="hero-impact-link" href="/evidence/impact#why">
+                <span className="hero-impact-fig tabular" data-kept="">
+                  {cents(YEAR.totalLowered)}
+                </span>
+                <span className="hero-impact-what">kept in Maya&rsquo;s sample year by one shared page, against {YEAR.givers} givers each paying on their own</span>
+                <span className="hero-impact-base tabular">
+                  {YEAR.monthsLowered} monthly checks whole that would have dropped
                 </span>
               </Link>
             </li>
@@ -143,10 +145,24 @@ export default function Home() {
         </div>
         <div className="hero-fragment">
           <GiftChecker />
+          {/* PayPal as the place the rules are enforced, with the two proofs anyone can open beside the checker. */}
+          <div className="hero-proof">
+            <p className="hero-proof-line">
+              Money can reach only a payee the rules picked: one PayPal order, captured once, with a report anyone can check.
+            </p>
+            <p className="hero-proof-links">
+              <Link className="text-link" href="/g/maya/report?month=2026-10#rp-verify-h">
+                Verify a report
+              </Link>
+              <Link className="text-link" href="/evidence/rules#referee">
+                See the referee
+              </Link>
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* What is new, in the first two screens: the referee, the report anyone can check, and the agent that asks first. */}
+      {/* What is new, in the first two screens: the report anyone can check, the referee, and the agent that asks first. */}
       <div className="frame grid-12 home-new">
         <WhatIsNew headingId="new-title" />
       </div>
@@ -217,49 +233,32 @@ export default function Home() {
         <ShowcaseBoard />
       </section>
 
-      {/* The rules, simply: two-ended rows */}
-      <section className="section frame rules" aria-labelledby="rules-title">
-        <div className="rules-col">
-          <h2 id="rules-title" className="rules-title">
-            Seven numbers
-          </h2>
-          <p className="muted rules-sub">Most of the rules come down to these. Each links to its source.</p>
-          <ul className="rules-list">
-            {RULE_ROWS.map((r, i) => (
-              <li key={r.id} className="rules-row" data-reveal style={{ ["--reveal-i" as string]: i }}>
-                <span className="rules-name">
-                  <Link href={r.href} className="rules-link">
-                    {r.name}
-                  </Link>
-                  <Info id={r.id} label="" />
-                </span>
-                <span className="rules-value tabular">{r.value}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <figure className="rules-figure">
-          <Image
-            src="/images/india-kolkata-electricity-meters-3832.jpg"
-            alt="A wall of household electricity meters"
-            width={960}
-            height={638}
-            sizes="(max-width: 900px) 100vw, 40vw"
-          />
-          <figcaption className="muted">Utilities count as housing support when someone else pays them.</figcaption>
-        </figure>
-      </section>
-
-      {/* Evidence: the strongest published counts and the three checks open, then one disclosure for the ABLE counts,
-          the sample year month by month and every source. */}
+      {/* The proof: who each route reaches, measured, then the three checks open, then one disclosure for the published
+          counts, the sample year month by month and every source. */}
       <section className="section frame evidence" aria-labelledby="reach-title">
         <h2 id="reach-title" className="section-title">
           Who it reaches
         </h2>
         <ul className="reach-list">
-          {REACH.slice(0, 2).map((r) => (
-            <ReachRow key={r.fig} r={r} />
-          ))}
+          <li className="reach-row">
+            <span className="reach-fig tabular">{A.ssi_jan2025_total.value}</span>
+            <span className="reach-text">
+              people on SSI keep their full check when a gift pays the shop, the clinic, the pharmacy or the school. Items, care and school costs reach everyone.{" "}
+              <a className="text-link muted reach-src" href={SRC["crs-if10482"].url} target="_blank" rel="noreferrer">
+                CRS, January 2025
+              </a>
+            </span>
+          </li>
+          <li className="reach-row">
+            <span className="reach-fig tabular">Rent</span>
+            <span className="reach-text">
+              stays whole through an ABLE account, for anyone whose disability began before {HOUSING.onsetAge}, including all {A.ssi_jan2025_children.value} children on SSI. Without one, the rules cap the cut:{" "}
+              {usd(HOUSING.amount)} of rent from family leaves the {checkMonthName(later.paymentMonth)} check at {usd(later.rentWithoutAble)} of {usd(later.full)}, and Giftwise says so first.{" "}
+              <Link className="text-link muted reach-src" href="/evidence/impact#reach">
+                Measured
+              </Link>
+            </span>
+          </li>
         </ul>
         <div className="ev-checks">
           <h3 className="ev-sub">How the rules were checked</h3>
@@ -291,10 +290,10 @@ export default function Home() {
           </ul>
         </div>
         <details id="evidence-more" className="ev-more">
-          <summary>ABLE figures, the sample year month by month, and all {RESEARCH.length} sources</summary>
+          <summary>Housing and ABLE counts, the sample year month by month, and all {RESEARCH.length} sources</summary>
           <div className="ev-more-body">
             <ul className="reach-list">
-              {REACH.slice(2).map((r) => (
+              {[...HOUSING_HARM, ...ABLE_COUNTS].map((r) => (
                 <ReachRow key={r.fig} r={r} />
               ))}
             </ul>
@@ -306,7 +305,8 @@ export default function Home() {
                   <span className="stats-figure tabular">$0</span> <span className="stats-claim">counted against her all year</span>
                 </h3>
                 <p className="stats-sub">
-                  Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {new Set(sampleYear.gifts.map((g) => g.giver)).size} people, every gift through Giftwise. Her check stayed $994 every month.
+                  Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {YEAR.givers} people, every gift through Giftwise. Her check stayed {usd(facts.values.fbr_individual.value)} every month, the
+                  full 2026 check.
                 </p>
               </div>
               <div className="bars" data-ui role="list" aria-label="Help delivered each month in the sample year">
@@ -357,58 +357,6 @@ export default function Home() {
         </details>
       </section>
 
-      {/* For developers, and how it is built: side by side on a wide screen */}
-      <div className="section frame dev-built">
-        <section className="dev" aria-labelledby="dev-title">
-          <h2 id="dev-title" className="section-title">
-            Make any gift benefit-safe
-          </h2>
-          <p className="lede">One API call, or add the Giftwise MCP server to your AI agent.</p>
-          <div className="hero-actions">
-            <Link href="/developers" className="btn btn-primary">
-              Get an API key
-            </Link>
-            <Link href="/developers/docs" className="text-link">
-              Read the docs
-            </Link>
-          </div>
-          <div className="dev-code" data-ui>
-            <pre>
-              <code>{`POST /api/v1/check-gift
-Authorization: Bearer gw_test_...
-{ "gift": { "amount": 1000, "delivery": "cash",
-            "date": "2026-04-10" } }
-
-200 OK
-{ "data": {
-    "check_after": 74.00,
-    "best_route": "item",
-    "check_with_best_route": 994.00,
-    "rule_ids": ["R-CASH-01", "R-INFREQ-01", "R-GIE-01"]
-} }`}</code>
-            </pre>
-          </div>
-        </section>
-
-        <section className="built" aria-labelledby="built-title">
-          <h2 id="built-title" className="section-title">
-            How it is built
-          </h2>
-          <ul className="built-list">
-            {BUILT.map((b) => (
-              <li key={b.id} className="built-row">
-                <span className="built-tool">
-                  <Link href={`/stack#${b.id}`} className="rules-link">
-                    {b.tool}
-                  </Link>
-                </span>
-                <span className="built-job">{b.job}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
       {/* FAQ: question index, one answer */}
       <section className="section frame faq-section" aria-labelledby="faq-title">
         <h2 id="faq-title" className="section-title">
@@ -428,6 +376,23 @@ Authorization: Bearer gw_test_...
         </div>
         <CtaDialog />
       </section>
+
+      {/* For developers and anyone running it: one row, out of the giver's way. */}
+      <nav className="frame home-dev" aria-labelledby="home-dev-title">
+        <h2 id="home-dev-title" className="home-dev-h">
+          For developers
+        </h2>
+        <ul className="home-dev-list">
+          {FOR_DEVELOPERS.map((d) => (
+            <li key={d.href}>
+              <Link className="text-link home-dev-link" href={d.href}>
+                {d.label}
+              </Link>
+              <span className="muted home-dev-what">{d.what}</span>
+            </li>
+          ))}
+        </ul>
+      </nav>
       {/* A link to anything inside the evidence disclosure opens it first. */}
       <OpenOnHash />
     </>

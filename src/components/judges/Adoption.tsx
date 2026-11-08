@@ -29,7 +29,7 @@ const ROUTES = [
     count: "46 states and DC",
     size: (
       <>
-        run an ABLE program, 31 plans accept people from any state, and more than 246,000 accounts are open (
+        run an ABLE program, 31 plans accept people from any state, and more than 246,000 accounts had been opened by March 31, 2026 (
         <a className="text-link" href="https://www.ablenrc.org/choose-plan/" target="_blank" rel="noreferrer">
           ABLE National Resource Center
         </a>

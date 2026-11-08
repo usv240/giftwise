@@ -222,3 +222,11 @@
     row-gap: 0;
   }
 }
+
+/* What a real deployment does with the ABLE share: one plain sentence under the lines, with its source. */
+.rc-handoff {
+  margin-top: 1rem;
+  max-width: 68ch;
+  font-size: var(--step-small);
+  line-height: 1.5;
+}

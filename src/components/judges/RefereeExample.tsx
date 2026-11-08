@@ -2,7 +2,7 @@ import Link from "next/link";
 import { modelName } from "@/lib/ai/model-name";
 import { AUTHORITY } from "@/lib/review/referee";
 import { R, refereeExample } from "@/lib/review/example";
-import { usd } from "@/lib/rules";
+import { checkMonthName, usd } from "@/lib/rules";
 
 const ANSWER: Record<string, string> = { shelter: "A housing cost", not_shelter: "Not a housing cost", unclear: "Not settled" };
 
@@ -55,8 +55,8 @@ export function RefereeExample() {
       <div className="jref-call">
         <p className="jref-k">The referee, in code</p>
         <p className="jref-decision">
-          {decided.agreed ? decided.summary : "Both quotes check out and the answers differ, so neither reading is acted on."} The rules engine scores each route under both readings: paying {payee} leaves her
-          check at <span className="tabular">{usd(shop.check)}</span> if the bill is a housing cost; {where} keeps it at <span className="tabular">{usd(able.check)}</span> either way. The{" "}
+          {decided.agreed ? decided.summary : "Both quotes check out and the answers differ, so neither reading is acted on."} The rules engine scores each route under both readings: paying {payee} leaves her{" "}
+          {checkMonthName(able.paymentMonth)} check at <span className="tabular">{usd(shop.check)}</span> if the bill is a housing cost; {where} keeps it at <span className="tabular">{usd(able.check)}</span> either way. The{" "}
           <span className="tabular">{usd(R.amount)}</span> goes to {where}.
         </p>
         <p className="jref-tech tech-only">

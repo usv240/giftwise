@@ -10,7 +10,7 @@ import { StartMonthly } from "./MonthlyActions";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
 import { DEFAULT_PROFILE, P, addMonths, monthOf, pronounWords, usd, type Profile } from "@/lib/rules";
-import { giftText, monthIn, payeeIn, payeeInline, type Lang } from "@/lib/i18n/gift";
+import { checkMonthIn, giftText, monthIn, payeeIn, payeeInline, type Lang } from "@/lib/i18n/gift";
 
 /**
  * "Give any amount": the donor types a number; the rules engine routes it across the open needs and the ABLE account,
@@ -72,7 +72,8 @@ export function GiveAny({
   const total = round2(plan.lines.reduce((s, l) => s + l.amount, 0));
   const ready = payable && plan.lines.length > 0;
   const giftMonth = monthIn(lang, monthOf(date));
-  const checkMonth = monthIn(lang, addMonths(monthOf(date), P.rmaLagMonths));
+  const checkMonthKey = addMonths(monthOf(date), P.rmaLagMonths);
+  const checkMonth = checkMonthIn(lang, checkMonthKey);
   const hint = typed.kind === "invalid" ? t.hintNumber : value < 1 ? t.hintMin : t.unplaced(usd(plan.unplaced));
 
   if (receipt) {
@@ -176,7 +177,7 @@ export function GiveAny({
             <>
               <div className="give-check">
                 <p className="give-k">{t.checkSetBy(w, checkMonth, giftMonth)}</p>
-                <p className="give-verdict tabular">{plan.checkWithRouting === plan.baseline ? t.checkStays(usd(plan.checkWithRouting)) : t.checkIs(usd(plan.checkWithRouting))}</p>
+                <p className="give-verdict tabular">{plan.checkWithRouting === plan.baseline ? t.checkStays(usd(plan.checkWithRouting), checkMonthKey.slice(0, 4)) : t.checkIs(usd(plan.checkWithRouting))}</p>
               </div>
               <div className="give-compare">
                 <div>

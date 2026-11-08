@@ -6,7 +6,7 @@
       "id": "shop-paypal",
       "q": "Does every shop need a PayPal account?",
       "a": "Yes, a PayPal business account, because PayPal pays the shop directly and Giftwise never holds the money. In this demo the shops are PayPal sandbox accounts. For real, Giftwise would send each new shop a PayPal sign-up link. The shop signs up, or links the business account it already has, in PayPal's own flow, and PayPal hands back the shop's merchant ID. Every order then names that merchant ID as the payee, so a gift can only go to a shop that finished PayPal's sign-up.",
-      "tech": "Partner Referrals API: POST /v2/customer/partner-referrals returns an action_url for the shop, and PayPal's return URL carries merchantIdInPayPal. Orders v2 then sets purchase_units[].payee.merchant_id in place of the sandbox email_address. A platform takes live payments once PayPal approves it.",
+      "tech": "Partner Referrals API: POST /v2/customer/partner-referrals returns an action_url for the shop, and PayPal's return URL carries merchantIdInPayPal. Orders v2 then sets purchase_units[].payee.merchant_id in place of the sandbox email_address. This sandbox app's call returns 403 NOT_AUTHORIZED (November 8, 2026, scripts/partner-referrals-probe.ts): PayPal opens the API once it approves the platform as a partner.",
       "sources": ["paypal-seller-onboarding", "paypal-pay-another-account", "paypal-multiparty"]
     },
     {
@@ -36,6 +36,36 @@
       "a": "The giver pays the gift amount and nothing more: PayPal charges US buyers no fee when no currency conversion is involved, and Ugift is free to use. The shop pays PayPal's usual fee for receiving a payment, as it would for any PayPal sale. This demo adds nothing on top. A platform on PayPal's partner program can add its own fee to each order, which the shop sees as partner commissions, so Giftwise could cover its costs without charging the giver or the person on SSI.",
       "tech": "Partner fees are set per purchase unit in purchase_units[].payment_instruction.platform_fees on the Orders v2 create call. PayPal does not support platform fees for first-party integrations, so this needs the partner onboarding above.",
       "sources": ["paypal-consumer-fees", "paypal-business-fees", "ugift-iable", "paypal-multiparty"]
+    }
+  ],
+  "partner_referrals": {
+    "probed_at": "2026-11-08T08:56:45.786Z",
+    "call": "POST /v2/customer/partner-referrals",
+    "status": 403,
+    "name": "NOT_AUTHORIZED",
+    "script": "scripts/partner-referrals-probe.ts",
+    "what": "PayPal opens Partner Referrals to an app once it approves the app as a partner, so this sandbox app pays each shop by payee.email_address."
+  },
+  "going_live": [
+    {
+      "what": "Where PayPal is",
+      "change": "PAYPAL_ENV=live moves the REST API, the JavaScript SDK and PayPal's MCP server together",
+      "file": "src/lib/paypal/env.ts"
+    },
+    {
+      "what": "The app's keys",
+      "change": "The live app's PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, NEXT_PUBLIC_PAYPAL_CLIENT_ID and PAYPAL_WEBHOOK_ID",
+      "file": ".env (render.yaml lists each)"
+    },
+    {
+      "what": "Each shop",
+      "change": "A Partner Referrals call per new shop, its merchant ID stored as the need's payee account, and payee.merchant_id in place of payee.email_address in each order",
+      "file": "src/lib/households.ts (payeeEmail), src/lib/paypal/orders.ts (createPayeeOrder, createRoutedOrder)"
+    },
+    {
+      "what": "The ABLE share",
+      "change": "Sent through the ABLE plan's own gift page instead of a PayPal payee",
+      "file": "src/lib/routing.ts decides the amount; the receipt links the plan's page"
     }
   ]
 }

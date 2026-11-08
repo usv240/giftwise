@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePrefs } from "../prefs";
 import { modelName } from "@/lib/ai/model-name";
+import { addMonths, checkMonthName, fbr, usd } from "@/lib/rules";
 
 type Step =
   { kind: "ask"; text: string } | { kind: "say"; text: string } | { kind: "call"; tool: string; input: unknown } | { kind: "result"; tool: string; text: string; isError: boolean };
@@ -151,12 +152,16 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
   }
 
   const calls = run.steps.filter((s) => s.kind === "call").length;
+  // A gift given on the day of the run sets the check paid two months later, at that year's federal amount.
+  const runDay = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(run.recorded_at && !live ? new Date(run.recorded_at) : new Date());
+  const payMonth = addMonths(runDay.slice(0, 7), 2);
   return (
-    <div className="ag">
+    <div className="ag" data-check-year="">
       <p className="muted ag-source">
         {live
           ? `Run live just now with ${modelName(run.model)}: ${calls} tool calls in ${Math.round(run.ms / 1000)} seconds.`
-          : `Recorded ${run.recorded_at ? new Date(run.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" }) : ""} with ${modelName(run.model)}: ${calls} tool calls. The PayPal link from the recording is removed; a live run makes a fresh one.`}
+          : `Recorded ${run.recorded_at ? new Date(run.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" }) : ""} with ${modelName(run.model)}: ${calls} tool calls. The PayPal link from the recording is removed; a live run makes a fresh one.`}{" "}
+        Every check named below is Maya&rsquo;s {checkMonthName(payMonth)} check, whose full amount is {usd(fbr(false, payMonth))}.
       </p>
       <ol className="ag-steps" aria-live="polite">
         {run.steps.map((s, i) => {

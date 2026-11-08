@@ -5,12 +5,16 @@
  * Client-safe: the components import it directly, so only the language crosses from server to client.
  */
 
+import { fullCheckByYear } from "@/lib/rules/params";
+
 export type Lang = "en" | "es";
 export const asLang = (v: unknown): Lang => (v === "es" ? "es" : "en");
 
 const MONTHS_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const monthIn = (lang: Lang, month: string) => (lang === "es" ? MONTHS_ES : MONTHS_EN)[Number(month.slice(5, 7)) - 1];
+/** A check's month with its year ("January 2027", "enero de 2027"): the full check differs by year, so it is always named with it. */
+export const checkMonthIn = (lang: Lang, month: string) => `${monthIn(lang, month)}${lang === "es" ? " de " : " "}${month.slice(0, 4)}`;
 
 /** "Maya's ABLE account" reads "Cuenta ABLE de Maya" in Spanish. */
 export function payeeIn(lang: Lang, payee: string) {
@@ -48,7 +52,7 @@ const EN = {
   help: (n: string) => `Help ${n}`,
   sampleNote: "Sample household for the demo. Names and shops are fictional.",
   madeNote:
-    "Made from a fundraiser page, in the PayPal sandbox. Figures use the federal SSI amount for the month each check is paid ($994 in 2026, $1,029 from January 2027) and assume no other income. In the sandbox, every shop is paid through one test business account.",
+    `Made from a fundraiser page, in the PayPal sandbox. Figures use the federal SSI amount for the month each check is paid (${fullCheckByYear()}) and assume no other income. In the sandbox, every shop is paid through one test business account.`,
   needsH: (n: string) => `What ${n} needs`,
   paidStraightTo: "Paid straight to",
   givenToGo: (g: string, r: string) => `${g} given, ${r} to go`,
@@ -69,7 +73,7 @@ const EN = {
   overMax: "One gift can be up to $10,000. Type $10,000 or less.",
   sendsHere: "Giftwise sends it here",
   checkSetBy: (w: Words, month: string, giftMonth: string) => `${w.Poss} ${month} check (set by gifts in ${giftMonth})`,
-  checkStays: (amt: string) => `It stays ${amt} with Giftwise.`,
+  checkStays: (amt: string, year: string) => `It stays ${amt} with Giftwise, the full ${year} check.`,
   checkIs: (amt: string) => `With Giftwise it is ${amt}.`,
   asCash: "As cash",
   withGiftwise: "With Giftwise",
@@ -105,7 +109,7 @@ const EN = {
   calendarLink: (n: string) => `${n}'s benefit calendar`,
   yearLink: (n: string) => `See ${n}'s year`,
   cashQ: "Prefer to give cash?",
-  cashText: (w: Words, cashCheck: string, full: string) => `Cash counts as ${w.poss} income. A $300 cash gift would lower ${w.poss} check to ${cashCheck}. Paying for one of these needs instead keeps ${w.poss} full ${full}.`,
+  cashText: (w: Words, cashCheck: string, full: string, month: string) => `Cash counts as ${w.poss} income. A $300 cash gift would lower ${w.poss} ${month} check to ${cashCheck}. Paying for one of these needs instead keeps ${w.poss} full ${month} check of ${full}.`,
   checkAny: "Check any gift",
   sandboxTitle: "Testing in the sandbox",
   sandboxText: "No real money moves. In the PayPal window, log in with this sandbox buyer:",
@@ -130,6 +134,9 @@ const EN = {
   ppFailed: "PayPal could not complete the payment.",
   ppRetry: "Try again",
   realWorldNote: "",
+  /** What a real deployment does with the ABLE share (IAble's Ugift page, ABLE United's gifting page). */
+  ableReal: (w: Words) => `For real, the ABLE share goes to ${w.poss} ABLE plan's own gift page, by a six-character Ugift code or the account's gifting link; in this sandbox it is a PayPal test account.`,
+  ableRealSource: "How a Ugift code works (IAble)",
   seeItem: (host: string) => `See it at ${host}`,
   closed: (n: string) => `${n}'s page is closed to new gifts. Thank you to everyone who gave; the receipts below stay public.`,
 };
@@ -141,7 +148,7 @@ const ES: GiftText = {
   help: (n) => `Ayude a ${n}`,
   sampleNote: "Hogar de muestra para la demostración. Los nombres y las tiendas son ficticios.",
   madeNote:
-    "Hecha a partir de una página de recaudación de fondos, en el sandbox de PayPal. Las cifras usan el monto federal de SSI del mes en que se paga cada cheque ($994 en 2026, $1,029 desde enero de 2027) y suponen que no hay otros ingresos. En el sandbox, todas las tiendas reciben el pago en una sola cuenta comercial de prueba.",
+    `Hecha a partir de una página de recaudación de fondos, en el sandbox de PayPal. Las cifras usan el monto federal de SSI del mes en que se paga cada cheque (${fullCheckByYear().replace(" in ", " en ").replace(" from January ", " desde enero de ")}) y suponen que no hay otros ingresos. En el sandbox, todas las tiendas reciben el pago en una sola cuenta comercial de prueba.`,
   needsH: (n) => `Lo que ${n} necesita`,
   paidStraightTo: "Se paga directamente a",
   givenToGo: (g, r) => `${g} dado, faltan ${r}`,
@@ -161,7 +168,7 @@ const ES: GiftText = {
   overMax: "Un regalo puede ser de hasta $10,000. Escriba $10,000 o menos.",
   sendsHere: "Giftwise lo envía aquí",
   checkSetBy: (_w, month, giftMonth) => `Su cheque de ${month} (según los regalos de ${giftMonth})`,
-  checkStays: (amt) => `Con Giftwise se mantiene en ${amt}.`,
+  checkStays: (amt, year) => `Con Giftwise se mantiene en ${amt}, el cheque completo de ${year}.`,
   checkIs: (amt) => `Con Giftwise es de ${amt}.`,
   asCash: "En efectivo",
   withGiftwise: "Con Giftwise",
@@ -195,7 +202,7 @@ const ES: GiftText = {
   calendarLink: (n) => `El calendario de beneficios de ${n} (en inglés)`,
   yearLink: (n) => `Ver el año de ${n} (en inglés)`,
   cashQ: "¿Prefiere dar efectivo?",
-  cashText: (_w, cashCheck, full) => `El efectivo cuenta como ingreso. Un regalo de $300 en efectivo bajaría su cheque a ${cashCheck}. Pagar una de estas necesidades, en cambio, mantiene su cheque completo de ${full}.`,
+  cashText: (_w, cashCheck, full, month) => `El efectivo cuenta como ingreso. Un regalo de $300 en efectivo bajaría su cheque de ${month} a ${cashCheck}. Pagar una de estas necesidades, en cambio, mantiene su cheque completo de ${month}, de ${full}.`,
   checkAny: "Revisar cualquier regalo (en inglés)",
   sandboxTitle: "Pruebas en el sandbox",
   sandboxText: "No se mueve dinero real. En la ventana de PayPal, inicie sesión con este comprador de prueba:",
@@ -220,6 +227,8 @@ const ES: GiftText = {
   ppFailed: "PayPal no pudo completar el pago.",
   ppRetry: "Intentar de nuevo",
   realWorldNote: "Estas respuestas están en inglés, cada una con sus fuentes.",
+  ableReal: () => "En la vida real, la parte de ABLE va a la página de regalos de su plan ABLE, con un código Ugift de seis caracteres o el enlace de regalos de la cuenta; en este sandbox es una cuenta de prueba de PayPal.",
+  ableRealSource: "Cómo funciona un código Ugift (IAble, en inglés)",
   seeItem: (host) => `Verlo en ${host}`,
   closed: (n) => `La página de ${n} ya no recibe regalos. Gracias a todas las personas que dieron; los recibos siguen públicos.`,
 };
@@ -248,6 +257,8 @@ const RECEIPT_EN = {
   routeVendor: "Paid straight to the shop",
   routeAble: "Paid to the ABLE account",
   savingsIn: (hers: string) => `Savings in ${hers} ABLE account`,
+  ableHandoff: (hers: string) => `In this sandbox, ${hers} ABLE account is a PayPal test account. For real, Giftwise sends the giver to the ABLE plan's own gift page for the ABLE share: with a Ugift plan, the giver types the account's six-character Ugift code (shown like 1A2-B3C) at UgiftABLE.com, which opens the owner's personal gifting page; plans such as ABLE United give each account its own gifting link. The shops are still paid through PayPal.`,
+  ableHandoffSource: "How a Ugift code works (IAble)",
   capture: (id: string) => `PayPal capture ${id}`,
   order: (id: string, status: string) => `PayPal order ${id}, ${status}`,
   why: (hers: string) => `Why ${hers} check stays the same`,
@@ -311,6 +322,8 @@ const RECEIPT_ES: ReceiptText = {
   routeVendor: "Se pagó directamente a la tienda",
   routeAble: "Se pagó a la cuenta ABLE",
   savingsIn: () => "Ahorro en su cuenta ABLE",
+  ableHandoff: () => "En este sandbox, su cuenta ABLE es una cuenta de prueba de PayPal. En la vida real, Giftwise lleva a quien regala a la página de regalos del propio plan ABLE para la parte de ABLE: con un plan Ugift, se escribe el código Ugift de seis caracteres de la cuenta (como 1A2-B3C) en UgiftABLE.com, que abre su página personal de regalos; planes como ABLE United dan a cada cuenta su propio enlace de regalos. Las tiendas se siguen pagando con PayPal.",
+  ableHandoffSource: "Cómo funciona un código Ugift (IAble, en inglés)",
   capture: (id) => `Cobro de PayPal ${id}`,
   order: (id, status) => `Orden de PayPal ${id}, ${status}`,
   why: () => "Por qué su cheque no cambia",

@@ -93,7 +93,8 @@ function explainAble(lang: EasyLang, groups: EasyLine[][]) {
 export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
   const en = lang === "en";
   const m = monthIn(lang, r.month);
-  const checkM = monthIn(lang, r.totals.checkMonth);
+  // The check is named with its year: the full amount is $994 in 2026 and $1,029 from January 2027.
+  const checkM = monthYearIn(lang, r.totals.checkMonth);
   const due = dateIn(lang, r.due.date);
   const tell = r.lines.filter((l) => l.section === "tell");
   const records = r.lines.filter((l) => l.section === "records");
@@ -113,7 +114,7 @@ export function easyRead(r: SsaReport, lang: EasyLang): EasyRead {
       text: en ? `Tell them about ${tell.length === 1 ? "1 gift" : `${tell.length} gifts`}.` : `Hábleles de ${tell.length === 1 ? "1 regalo" : `${tell.length} regalos`}.`,
     });
     answer.push({ picture: "check", text: en ? `Your SSI check in ${checkM} will be ${usd(r.totals.check)}.` : `Su cheque de SSI de ${checkM} será de ${usd(r.totals.check)}.` });
-    if (less > 0) answer.push({ text: en ? `That is ${usd(less)} less than your usual ${usd(r.totals.fullCheck)}.` : `Son ${usd(less)} menos que sus ${usd(r.totals.fullCheck)} de siempre.` });
+    if (less > 0) answer.push({ text: en ? `That is ${usd(less)} less than usual.` : `Son ${usd(less)} menos de lo normal.` });
   }
 
   const sections: EasySection[] = [];

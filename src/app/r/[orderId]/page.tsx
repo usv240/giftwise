@@ -8,7 +8,7 @@ import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { dbConfigured } from "@/lib/db";
 import { loadReceipt } from "@/lib/receipt";
 import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
-import { asLang, monthIn, payeeIn, payeeInline, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
+import { asLang, checkMonthIn, monthIn, payeeIn, payeeInline, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "../../pages.css";
 import "./receipt.css";
@@ -17,6 +17,7 @@ import "./receipt.css";
 export const metadata: Metadata = { title: "Receipt", description: "Where a Giftwise gift went, the rule that kept the SSI check whole, and a live check against PayPal.", robots: { index: false } };
 
 const SRC = sources as Record<string, { title: string; url: string; publisher?: string }>;
+const SRC_UGIFT = SRC["ugift-iable"];
 const when = (d: Date, lang: Lang = "en") => d.toLocaleString(lang === "es" ? "es-US" : "en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" });
 type Search = { lang?: string };
 
@@ -53,7 +54,7 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
     profile,
   );
   const checkAfter = trace.check;
-  const checkMonth = monthIn(lang, trace.paymentMonth);
+  const checkMonth = checkMonthIn(lang, trace.paymentMonth);
   const baseline = computeMonth(monthOf(date), [], profile).check;
   const payer = rows.find((r) => r.payerName)?.payerName?.split(" ")[0];
 
@@ -117,6 +118,14 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
             </li>
           ))}
         </ul>
+        {lines.some(({ row }) => row.route === "able") && (
+          <p className="rc-handoff muted">
+            {t.ableHandoff(hers)}{" "}
+            <a className="text-link" href={SRC_UGIFT.url} target="_blank" rel="noreferrer">
+              {t.ableHandoffSource}
+            </a>
+          </p>
+        )}
       </section>
 
       <section className="page-section" aria-labelledby="rc-why">

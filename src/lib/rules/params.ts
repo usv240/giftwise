@@ -66,3 +66,23 @@ export function vtr(couple: boolean, payMonth?: string) {
 export function resourceLimit(couple: boolean) {
   return couple ? P.resourceLimitCouple : P.resourceLimitIndividual;
 }
+
+const dollars = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
+
+/**
+ * The full federal check, by year: the one source pages, the README test and the MCP tool use when they name it.
+ * [{ year: 2026, individual: 994, couple: 1491 }, { year: 2027, individual: 1029, couple: 1544 }]
+ */
+export const FULL_CHECKS = RATE_YEARS.map((year) => ({ year, individual: RATES[year].fbr[0], couple: RATES[year].fbr[1] }));
+
+/** "$994 in 2026, $1,029 from January 2027": the full check for one person (or a couple), each amount with its year. */
+export function fullCheckByYear(couple = false) {
+  return FULL_CHECKS.map((r, i) => `${dollars(couple ? r.couple : r.individual)} ${i === 0 ? "in" : "from January"} ${r.year}`).join(", ");
+}
+
+/** The full check paid in `payMonth` (YYYY-MM), with its year: { amount: 1029, year: 2027, label: "$1,029 (2027)" }. */
+export function fullCheck(payMonth?: string, couple = false) {
+  const r = ratesFor(payMonth);
+  const amount = r.fbr[couple ? 1 : 0];
+  return { amount, year: r.year, label: `${dollars(amount)} (${r.year})` };
+}

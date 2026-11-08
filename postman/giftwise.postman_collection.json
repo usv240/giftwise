@@ -56,7 +56,7 @@
               ],
               "query": []
             },
-            "description": "Cash counts as income: two months later the $994 check drops to $74."
+            "description": "Cash counts as income: two months later her June 2026 check drops from $994 to $74."
           },
           "event": [
             {
@@ -103,7 +103,7 @@
               ],
               "query": []
             },
-            "description": "Paid straight to the shop, the check stays $994."
+            "description": "Paid straight to the shop, her June 2026 check stays $994."
           },
           "event": [
             {
@@ -111,7 +111,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"the check stays $994\", () => pm.expect(pm.response.json().data.check_after).to.eql(994));"
+                  "pm.test(\"her June 2026 check stays $994\", () => pm.expect(pm.response.json().data.check_after).to.eql(994));"
                 ]
               }
             }
@@ -293,7 +293,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const d = pm.response.json().data;",
-                  "pm.test(\"nothing counts and the check stays $994\", () => { pm.expect(d.status).to.eql(\"nothing_counts\"); pm.expect(d.totals.check).to.eql(994); });",
+                  "pm.test(\"nothing counts and her December 2026 check stays $994\", () => { pm.expect(d.status).to.eql(\"nothing_counts\"); pm.expect(d.totals.check).to.eql(994); });",
                   "pm.test(\"the report carries its check code\", () => pm.expect(d.verify.code).to.match(/^[0-9A-Z]{5}-[0-9A-Z]{5}$/));",
                   "pm.collectionVariables.set(\"verifyPath\", \"/\" + d.verify.url.split(\"/\").slice(3).join(\"/\"));"
                 ]

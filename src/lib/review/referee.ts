@@ -78,7 +78,7 @@ export function routeForDecision(gift: Gift, decision: Decision, profile: Profil
   const routes = BILL_ROUTES.map((delivery) => {
     const results = readings.map((category) => evaluateGift({ ...gift, delivery, category }, profile));
     const possible = results.every((r) => r.treatment.kind !== "not_possible");
-    return { delivery, possible, check: Math.min(...results.map((r) => r.checkAfter)), ruleIds: [...new Set(results.flatMap((r) => r.ruleIds))] };
+    return { delivery, possible, check: Math.min(...results.map((r) => r.checkAfter)), paymentMonth: results[0].paymentMonth, ruleIds: [...new Set(results.flatMap((r) => r.ruleIds))] };
   });
   const best = routes.filter((r) => r.possible).reduce<(typeof routes)[number] | null>((a, b) => (!a || b.check > a.check ? b : a), null);
   return { readings, routes, route: best?.delivery ?? null, check: best?.check ?? null, ruleIds: best?.ruleIds ?? [] };

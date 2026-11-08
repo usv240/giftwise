@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import results from "../../../../content/eval/ssa-examples-results.json";
+import { HeldOut } from "@/components/judges/HeldOut";
 import { SsaExampleList } from "@/components/judges/SsaExamples";
+import { P, usd } from "@/lib/rules";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../evidence.css";
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
 /** The worked examples one by one, kept off the Evidence page so it stays light. */
 export default function SsaExamplesPage() {
   return (
-    <div className="page frame evidence evidence-sub">
+    <div className="page frame evidence evidence-sub" data-check-year="">
       <header className="page-head">
         <p className="jx-crumb">
           <Link className="text-link" href="/evidence/rules#ssa-examples">
@@ -34,8 +36,10 @@ export default function SsaExamplesPage() {
           </span>
           . Each example shows SSA&rsquo;s passage, its answer, and both answers to it.
         </p>
+        <p className="page-prose muted">Each example&rsquo;s dates are moved to 2026, so its checks use the 2026 amounts: the full amount is {usd(P.fbrIndividual)} for one person.</p>
       </header>
       <SsaExampleList />
+      <HeldOut />
     </div>
   );
 }

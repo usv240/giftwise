@@ -1,5 +1,6 @@
 import bills from "../../../content/eval-results.json";
 import field from "../../../content/eval/field-cases-results.json";
+import heldOut from "../../../content/eval/held-out-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import inv from "../../../content/eval/invariants-results.json";
 import { IMPACT } from "@/lib/impact";
@@ -24,7 +25,8 @@ export function Results() {
           </span>
           <span className="jr-what">of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer.</span>
           <span className="jr-base">
-            Claude with no rulebook: <span className="tabular">{ex.claude_matches} of {ex.claude_answered}</span>.
+            Claude with no rulebook: <span className="tabular">{ex.claude_matches} of {ex.claude_answered}</span>. New examples the engine never saw, run
+            on it frozen: <span className="tabular">{heldOut.summary.engine_matches} of {heldOut.summary.cases}</span>.
           </span>
         </a>
       </li>
@@ -35,11 +37,11 @@ export function Results() {
           </span>
           <span className="jr-what">real SSI cases from federal courts reach the outcome SSA and the court did.</span>
           <span className="jr-base">
-            In <span className="tabular">{routed.cases_where_routing_keeps_money}</span> of them, the engine finds the same help routed through Giftwise would have kept{" "}
+            Routed through Giftwise, the same help would have kept two families <span className="tabular">{usd(Math.round(IMPACT.familyTotal))}</span> over the months their opinions cover, and{" "}
             <span className="tabular">
               {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))}
             </span>{" "}
-            a month at 2026 rates.
+            a month in <span className="tabular">{routed.cases_where_routing_keeps_money}</span> of them, at 2026 rates.
           </span>
         </a>
       </li>

@@ -4,7 +4,7 @@ import { evaluateGift, usd } from "@/lib/rules";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const alt = "Giftwise: $1,000 given as cash leaves a $74 SSI check; paid to the shop, she keeps $994";
+export const alt = "Giftwise: $1,000 given as cash leaves her June 2026 SSI check at $74; paid to the shop, she keeps the full $994";
 
 /** The site's share image: the problem in one number, computed by the rules engine (the same gift as the home page's Gift Checker). */
 export default async function Image() {
@@ -25,8 +25,8 @@ export default async function Image() {
           <div style={{ fontSize: 68, fontWeight: 500, letterSpacing: -2, lineHeight: 1.05 }}>Give so she keeps her full check.</div>
           <div style={{ fontSize: 30, color: C.muted, marginTop: 16 }}>{`The same ${usd(gift.amount)} gift, and her SSI check two months later:`}</div>
           <div style={{ display: "flex", gap: 24, marginTop: 30 }}>
-            {tile("Sent as cash", usd(cash.checkAfter), false)}
-            {tile("Paid to the shop", usd(shop.checkAfter), true)}
+            {tile("June 2026 check, sent as cash", usd(cash.checkAfter), false)}
+            {tile("June 2026 check, paid to the shop", usd(shop.checkAfter), true)}
           </div>
         </div>
       </OgFrame>

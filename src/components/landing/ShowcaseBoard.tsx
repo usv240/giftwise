@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { DEFAULT_PROFILE, evaluateGift, usd, type Gift } from "@/lib/rules";
+import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd, type Gift } from "@/lib/rules";
 
 type Row = { id: string; name: string; amount: number; giver: string; route: string; status: string; gift: Gift; detail?: string; link?: string };
 
@@ -61,7 +61,7 @@ export function ShowcaseBoard() {
               <div className="board-detail">
                 <p>{r.detail ?? res.explanation.plain}</p>
                 <p className="board-detail-meta tabular">
-                  Her check: {usd(res.checkAfter)}.<span className="board-tech"> Rules {res.ruleIds.filter((x) => x !== "R-RES-01").join(", ")}.</span>
+                  Her {checkMonthName(res.paymentMonth)} check: {usd(res.checkAfter)}.<span className="board-tech"> Rules {res.ruleIds.filter((x) => x !== "R-RES-01").join(", ")}.</span>
                   {r.link && (
                     <>
                       {" "}

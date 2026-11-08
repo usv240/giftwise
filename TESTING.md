@@ -87,6 +87,11 @@ The runner can be started again 20 seconds after the last run.
 3. Open the PayPal link from the live run and approve it with the sandbox buyer login above. PayPal sends you back to Giftwise, which captures the payment and opens the receipt.
 4. To connect your own agent, use the command on the page: `claude mcp add --transport http giftwise <hosted URL>/api/mcp`.
 
+## Claude reads a bill, live
+
+1. Open `/try/presets/electric-bill` and press **Read this bill live**. Claude reads the sample electric bill now (one call, about 5 seconds, counted against the site's daily AI budget, `AI_DAILY_CAP_USD`), and the rules engine prices what it read: her June 2026 check paid to the company, and through her ABLE account.
+2. The line above the result says whether it was live. With no `ANTHROPIC_API_KEY`, or once the day's AI spend reaches the budget, the recorded run from `content/reviews/electric-bill-read.json` is shown with its date and the reason. `npx tsx --env-file=.env.local scripts/record-bill-read.ts` records a new one.
+
 ## Maya's benefit calendar, in Bryntum
 
 Open `/g/maya/calendar`. Gifts are green when they do not count and orange when they do; Social Security's dates are blue (the check on the 1st, the report due on the 10th). Press **As cash**, then drag Aunt June's $150 on October 28 to November 2, or use **Move a gift** below the calendar. **What moving it did** lists each check that changed: December rises from $456 to $606 and January drops from $1,029 to $899, because the gift moved to a later income month (January is paid at the 2027 rate). The calendar is Bryntum Calendar 7.3.7 (the free trial, so it shows a trial watermark), and its theme follows the site's light and dark mode.
@@ -165,7 +170,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 243 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 257 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
@@ -173,10 +178,10 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
 | API end to end | `npm run e2e:api` | 99 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
-| The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 assertions |
-| Browser end to end | `npm run e2e:ui` | 65 passed |
+| The Postman collection, with Newman | `npm run test:postman` | 20 requests, 20 assertions |
+| Browser end to end (with no AI key, the three steps where Claude reads a document are skipped) | `npm run e2e:ui` | 61 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 136 page views pass |
-| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 43 passed |
+| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 68 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |

@@ -1715,8 +1715,12 @@
   }
 }
 .ev-index h3 {
-  margin: 0 0 8px;
-  font-size: 1.0625rem;
+  margin: 0 0 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-2);
+  font-size: var(--step-lead);
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 .ev-index ul {
   list-style: none;
@@ -1741,4 +1745,9 @@
 .ev-load-where {
   font-weight: 500;
   margin: 14px 0 6px;
+}
+
+/* A paragraph between two lists of figures: the same room above it as above a list. */
+.why-next {
+  margin-top: clamp(1.5rem, 1rem + 1vw, 2.25rem);
 }

@@ -10,7 +10,7 @@ import { usePrefs } from "../prefs";
 import { modelName } from "@/lib/ai/model-name";
 import { parseDollars, parseOptionalDollars } from "@/lib/parseDollars";
 import { billDescription } from "@/lib/review/bill-route";
-import { DEFAULT_PROFILE, evaluateGift, monthName, planMonths, usd, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, checkMonthName, evaluateGift, fbr, monthName, planMonths, usd, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
 
 const CATEGORIES: { value: Category; label: string }[] = [
   { value: "equipment", label: "Equipment or repair" },
@@ -278,9 +278,9 @@ function MonthTab() {
         {plan?.months.map((m) => (
           <div key={m.month} className="month-row">
             <p className="month-name">
-              {monthName(m.month)} gifts, counted for the {monthName(m.paymentMonth)} check
+              {monthName(m.month)} gifts, counted for the {checkMonthName(m.paymentMonth)} check
             </p>
-            <p className="month-check tabular" data-kept={m.check >= 994 ? "" : undefined}>
+            <p className="month-check tabular" data-kept={m.check >= fbr(false, m.paymentMonth) ? "" : undefined}>
               {usd(m.check)}
             </p>
             <p className="month-detail tabular">

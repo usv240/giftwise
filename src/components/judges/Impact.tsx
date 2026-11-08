@@ -1,12 +1,13 @@
 import Link from "next/link";
+import heldOut from "../../../content/eval/held-out-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import { ERROR_RATES } from "@/lib/error-rates";
-import { IMPACT, KEPT_BASIS } from "@/lib/impact";
+import { FAMILY_BASIS, IMPACT, KEPT_SENTENCE } from "@/lib/impact";
 
 const whole = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 /**
- * The Evidence page opens with three numbers: what the rules engine says routing would have kept in real court cases,
+ * The Evidence page opens with three numbers: what the rules engine says routing would have kept two families in real court cases,
  * how it does on Social Security's own worked examples, and the error that costs money. Each opens its page.
  */
 export function Impact() {
@@ -19,14 +20,14 @@ export function Impact() {
       <ul className="jr ji-list ji-three">
         <li className="jr-item">
           <Link className="jr-link" href="/evidence/impact#kept">
-            <span className="jr-fig tabular">
-              {whole(IMPACT.keptMin)} to {whole(IMPACT.keptMax)}
-            </span>
+            <span className="jr-fig tabular">{whole(IMPACT.familyTotal)}</span>
             <span className="jr-what">
-              a month the same help would have kept, routed through Giftwise, in <span className="tabular">{IMPACT.routedCases}</span> of{" "}
-              <span className="tabular">{IMPACT.scoredCases}</span> real SSI cases from federal courts, at 2026 rates.
+              kept by <span className="tabular">{IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length}</span> families in real SSI court cases, over the{" "}
+              <span className="tabular">{IMPACT.familyCases.map((c) => c.months).join(" and ")}</span> months their cases cover, with the same help routed through Giftwise at 2026 rates.
             </span>
-            <span className="jr-base">{KEPT_BASIS}</span>
+            <span className="jr-base">
+              {FAMILY_BASIS} {KEPT_SENTENCE}
+            </span>
           </Link>
         </li>
         <li className="jr-item">
@@ -36,7 +37,8 @@ export function Impact() {
             </span>
             <span className="jr-what">of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer.</span>
             <span className="jr-base">
-              Claude with no rulebook: <span className="tabular">{ssa.summary.claude_matches} of {ssa.summary.claude_answered}</span>.
+              Claude with no rulebook: <span className="tabular">{ssa.summary.claude_matches} of {ssa.summary.claude_answered}</span>. New examples the engine
+              never saw, run on it frozen: <span className="tabular">{heldOut.summary.engine_matches} of {heldOut.summary.cases}</span>.
             </span>
           </Link>
         </li>

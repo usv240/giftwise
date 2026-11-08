@@ -98,7 +98,7 @@ export const NIGHTLY_UTC = { hour: 9, minute: 0 } as const;
 export const API = [
   { id: "health", title: "Service status: PayPal, Claude and the database live" },
   { id: "ledger", title: "The audit ledger's hash chain verifies end to end" },
-  { id: "ssa-report", title: "October's report: nothing counts, her check stays $994" },
+  { id: "ssa-report", title: "October's report: nothing counts, her December 2026 check stays $994" },
   { id: "mcp", title: `The MCP server lists its ${COUNT_WORDS[MCP_TOOLS.length] ?? MCP_TOOLS.length} tools` },
   { id: "rules-watch", title: "Every Federal Register change to SSI's income rules and amounts is reviewed" },
   { id: "openapi", title: "OpenAPI names the public address, not the internal port" },
