@@ -8,11 +8,15 @@ import { ENDPOINTS, ERRORS } from "@/lib/api/endpoints";
 import { LIMITS } from "@/lib/api/keys";
 import { openapi } from "@/lib/api/openapi";
 import { fullCheckByYear } from "@/lib/rules";
+import results from "../../../../content/test-results.json";
 import { RECORDED_ON, docExamples } from "./examples";
 import "../../pages.css";
 import "../../learn/toc.css";
 import "../../learn/disclosure.css";
 import "../dev.css";
+
+/** The Postman suite as last run, the one source every page and document quotes for its request count. */
+const POSTMAN = results.suites.find((s) => s.id === "postman") as { requests: number };
 
 export const metadata: Metadata = { title: "API docs", description: "Every Giftwise endpoint, its fields, errors and limits." };
 
@@ -67,7 +71,7 @@ export default function DocsPage() {
           <a className="text-link" href="/postman/giftwise.postman_environment.json" download>
             environment
           </a>
-          : 16 requests in five folders, each with tests, from checking a gift to calling the MCP server. The same collection runs in our test suite with Newman.
+          : {POSTMAN.requests} requests in five folders, each with tests, from checking a gift to calling the MCP server. The same collection runs in our test suite with Newman.
         </p>
       </header>
 

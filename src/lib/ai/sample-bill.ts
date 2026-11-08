@@ -10,7 +10,7 @@ import { AI_DAILY_CAP_USD, aiAvailable } from "./claude";
 import { readBill, type Bill } from "./tasks";
 
 /**
- * The one live AI step on the judge's path: Claude reads the sample electric bill (public/samples) now, and the rules
+ * The one live AI step on the visitor's path: Claude reads the sample electric bill (public/samples) now, and the rules
  * engine prices it. It runs only while the day's AI spend is under the site's daily budget (AI_DAILY_CAP_USD, the
  * figure /ops shows), and otherwise shows the recorded reading in content/reviews/electric-bill-read.json, labelled.
  */

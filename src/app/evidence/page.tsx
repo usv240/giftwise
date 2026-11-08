@@ -13,6 +13,7 @@ import { Impact } from "@/components/judges/Impact";
 import { TourStart } from "@/components/tour/Tour";
 import { SandboxLogin } from "@/components/SandboxLogin";
 import { WhatIsNew } from "@/components/WhatIsNew";
+import { WhatIsFirst } from "@/components/judges/WhatIsFirst";
 import { CASES } from "@/lib/cases/list";
 import { ERROR_RATES } from "@/lib/error-rates";
 import heldOut from "../../../content/eval/held-out-results.json";
@@ -70,11 +71,12 @@ const INDEX = [
     title: "What it changes",
     href: "/evidence/impact",
     rows: [
+      { id: "stake", href: "/evidence/impact#stake", label: "The problem, measured by Social Security", what: "454,843 checks lowered for shelter help in December 2024, by $247 a month on average; in-kind support 8.59 percent of SSI improper payments; no tools to find living arrangement errors; the $2,000 limit and ABLE's reach, each from its source with the date." },
       { id: "kept", href: "/evidence/impact#kept", label: "What routing would have kept", what: `${FAMILY_SENTENCE} ${KEPT_SENTENCE}` },
       { id: "why", href: "/evidence/impact#why", label: "Why not pay the shop yourself?", what: sampleYearSentence() },
       { id: "asked", href: "/evidence/impact#asked", label: "What SSA asked back", what: ASKED_SENTENCE },
       { id: "reach", href: "/evidence/impact#reach", label: "Who each route reaches", what: `Items, care and school for all ${facts.audience.ssi_jan2025_total.value} people on SSI; rent and utilities through ABLE, where the disability began before ${facts.values.able_onset_age.value}.` },
-      { id: "compare", href: "/evidence/impact#compare", label: "How it compares", what: "Prepaid cards, trusts, benefits calculators and counselors, fundraising sites and more, from their own pages." },
+      { id: "compare", href: "/evidence/impact#compare", label: "How it compares", what: "True Link, Purple, Talli, TrustHelm, Giftly, ABLE gift pages, trusts, DB101, WIPA counselors and fundraising sites, each from its own pages with the one step Giftwise adds." },
       { id: "adoption", href: "/evidence/impact#adoption", label: "Who runs it first", what: "Benefits counselors, state ABLE programs and payee organizations, and a 120-day pilot." },
     ],
   },
@@ -159,6 +161,8 @@ export default function EvidencePage() {
       </section>
 
       <WhatIsNew headingId="new-h" className="page-section" />
+
+      <WhatIsFirst headingId="first-h" className="page-section" />
 
       <section id="results" className="page-section" aria-labelledby="index-h">
         <h2 id="index-h">Every result, in five groups</h2>

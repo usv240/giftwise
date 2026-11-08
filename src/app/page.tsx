@@ -34,6 +34,9 @@ const HOW = [
 const HOUSING_HARM = [
   { fig: "793,000", text: "people on SSI whose check Social Security lowered in a single month for food or housing someone else provided.", src: "fr-88-9779-ism-count", srcLabel: "SSA, January 2022" },
   { fig: "$410 million", text: "in SSI overpayments in one year from in-kind support: help with food or housing that should have lowered the check, found after it was paid.", src: "ssa-oig-152601", srcLabel: "SSA Inspector General, FY 2024" },
+  { fig: "454,843", text: "people on SSI whose check was lowered in December 2024 for shelter someone else helped with, by an average of $247 a month; Giftwise exists so help from family does not become that line.", src: "ssa-asr-2024-sect02", srcLabel: "SSI Annual Statistical Report 2024" },
+  { fig: "9 percent", text: "of SSI overpayments in fiscal years 2020 through 2023 that SSA attributed to unreported living arrangements or in-kind support; Giftwise pays the shop or the ABLE account, so there is nothing in-kind to report.", src: "ssa-oig-062405", srcLabel: "SSA Inspector General, February 2025" },
+  { fig: "$132 a month", text: "the average rise SSA projected for about 41,000 people when its rental subsidy rule took effect: the agency's own pricing of how much housing help from others lowers a check.", src: "fr-89-25507-rental-subsidy", srcLabel: "89 FR 25507, April 2024" },
 ];
 const ABLE_COUNTS = [
   { fig: "8 million", text: `people potentially eligible for an ABLE account under the original law, and ${A.able_newly_eligible.value} more since January 1, 2026.`, src: "able-nrc-age-case-summary", srcLabel: "ABLE National Resource Center, 2025" },

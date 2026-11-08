@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
 import { Adoption, Pilot } from "@/components/judges/Adoption";
 import { Compare } from "@/components/judges/Compare";
+import { Stake } from "@/components/judges/Stake";
 import { PayPalShare, PayYourself, Reach } from "@/components/judges/WhyGiftwise";
 import { ASKED_BASIS, ASKED_SENTENCE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_BASIS, KEPT_SENTENCE } from "@/lib/impact";
 import "../../pages.css";
@@ -29,6 +31,9 @@ export default function ImpactPage() {
         <h1 className="page-title">What it changes, and for whom</h1>
         <p className="lede">Each figure is the rules engine run on real cases or on the sample year, or a published count with its source.</p>
       </header>
+
+      <Stake />
+
 
       <section id="kept" className="page-section" aria-labelledby="kept-h">
         <h2 id="kept-h">What routing would have kept, family by family</h2>
@@ -107,8 +112,11 @@ export default function ImpactPage() {
       </section>
 
       <section id="compare" className="page-section" aria-labelledby="cmp-h">
-        <h2 id="cmp-h">How it compares</h2>
-        <p className="page-prose jp-intro">Each of these does its own job well, from its own published pages. Giftwise is built for the moment a gift is given, and works alongside them.</p>
+        <div className="title-row">
+          <h2 id="cmp-h">How it compares</h2>
+          <Info id="evidence.compare" label="" />
+        </div>
+        <p className="page-prose jp-intro">Each of these does its own job well, described from its own published pages with the date it was read. Beside each is the one step it does not do that Giftwise does; Giftwise is built for the moment a gift is given, and works alongside them.</p>
         <Compare />
       </section>
 

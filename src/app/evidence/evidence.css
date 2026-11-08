@@ -1751,3 +1751,59 @@
 .why-next {
   margin-top: clamp(1.5rem, 1rem + 1vw, 2.25rem);
 }
+
+/* What is first here: the same label-and-sentence rows as Who it reaches, under a quiet heading. */
+.evidence .first-h {
+  margin: 0;
+}
+
+/* Where the two-reviewer design comes from: each idea as who, what it does, and how this design differs. */
+.lin-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 14px;
+  max-width: 76ch;
+}
+.lin-item::marker {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.evidence .lin-item p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.lin-who {
+  font-weight: 500;
+}
+.lin-here {
+  color: var(--muted);
+}
+.evidence .lin-credit {
+  margin: 0;
+  max-width: 76ch;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-2);
+}
+
+/* The problem, measured by Social Security: each figure's "In Giftwise" line and, in Technical, the code. */
+.stake-here {
+  display: block;
+  margin-top: 8px;
+}
+.evidence .stake-code,
+.evidence .law-code {
+  display: none;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+:root[data-mode="technical"] .evidence .stake-code,
+:root[data-mode="technical"] .evidence .law-code {
+  display: block;
+}
+.cmp.law tbody th {
+  width: 22%;
+}

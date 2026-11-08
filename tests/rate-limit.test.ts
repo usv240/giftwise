@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { decide, hit, prune, release } from "@/lib/rate-limit";
+import { have, suiteName } from "./helpers/needs";
 
 describe("rate limit decisions", () => {
   it("allows up to the limit in a window and says when it reopens", () => {
@@ -13,19 +13,12 @@ describe("rate limit decisions", () => {
   });
 });
 
-/** The table itself, when a database is reachable (DATABASE_URL in .env.local; CI's Postgres has it too). */
-const localEnv = (() => {
-  try {
-    return readFileSync(".env.local", "utf8");
-  } catch {
-    return "";
-  }
-})();
-const url = process.env.DATABASE_URL || localEnv.match(/^DATABASE_URL=(.+)$/m)?.[1];
-describe.skipIf(!url)("the rate_limit table", () => {
+/** The table itself, when a database answers (DATABASE_URL in .env.local; CI's Postgres has it too). Otherwise these skip and say why. */
+const database = await have("database");
+describe.skipIf(!database.ok)(suiteName("the rate_limit table", "database", database), () => {
   const bucket = `test:${Date.now()}`;
   beforeAll(() => {
-    process.env.DATABASE_URL ??= url;
+    process.env.DATABASE_URL ??= database.url;
   });
   afterAll(async () => {
     await release(bucket, 60);

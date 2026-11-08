@@ -49,7 +49,7 @@ What stays the same: structured JSON logs with a request id on every line, limit
 
 ## Who runs it first
 
-Three groups already help people on SSI with money every month, and each can run Giftwise as it is today. How it compares with prepaid cards, special needs and pooled trusts, benefits calculators, benefits counselors, fundraising sites, PayPal.me, ABLE gift pages and paying the shop yourself, each from its own pages, is on [`/evidence/impact#compare`](https://giftwise-405i.onrender.com/evidence/impact#compare).
+Three groups already help people on SSI with money every month, and each can run Giftwise as it is today. How it compares with True Link, Purple, Talli, TrustHelm, Giftly, special needs and pooled trusts, benefits calculators, benefits counselors, fundraising sites, ABLE gift pages and paying the shop yourself, each from its own pages with the date it was read, is on [`/evidence/impact#compare`](https://giftwise-405i.onrender.com/evidence/impact#compare).
 
 - **Benefits counselors.** Social Security funds free benefits counseling nationwide through its Work Incentives Planning and Assistance projects; its current round planned 75 projects and $20 million ([WIPA-WIP-21-001](https://www.highergov.com/grant-opportunity/ssa-work-incentives-planning-and-assistance-program-wipa-331605/)). A counselor makes the gift page with the family, and each month the family has the report to file by the 10th.
 - **State ABLE programs.** 46 states and DC run one, and 31 plans accept people from any state ([ABLE National Resource Center](https://www.ablenrc.org/choose-plan/)). The ABLE share of each gift goes to the plan's own gift link; needs better paid to a shop are paid there through PayPal.

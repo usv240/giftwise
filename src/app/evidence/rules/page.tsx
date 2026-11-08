@@ -9,6 +9,7 @@ import { EvalIntro, EvalResults } from "@/components/judges/EvalResults";
 import { FieldCases } from "@/components/judges/FieldCases";
 import { Invariants, InvariantsIntro } from "@/components/judges/Invariants";
 import { NeverDecides } from "@/components/judges/NeverDecides";
+import { Lineage } from "@/components/judges/Lineage";
 import { RefereeExample } from "@/components/judges/RefereeExample";
 import { Results } from "@/components/judges/Results";
 import { RulesWatch } from "@/components/judges/RulesWatch";
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
 const TOC = [
   ["#errors", "The two errors that cost money"],
   ["#referee", "One bill, two reviewers"],
+  ["#lineage", "Where it comes from"],
   ["#evaluation", "The two reviewers, measured"],
   ["#ssa-examples", "SSA's examples"],
   ["#field-cases", "Court cases"],
@@ -70,6 +72,8 @@ export default function RulesCheckedPage() {
       </nav>
 
       <RefereeExample />
+
+      <Lineage />
 
       <section id="evaluation" className="page-section jx" aria-labelledby="eval-h">
         <div className="jx-head">

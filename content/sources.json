@@ -1,74 +1,563 @@
 {
-  "cfr-416-1103-g": { "title": "20 CFR 416.1103(g): bills paid directly to the supplier are not income", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103", "publisher": "eCFR" },
-  "cfr-416-1103": { "title": "20 CFR 416.1103: what is not income", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103", "publisher": "eCFR" },
-  "cfr-416-1130": { "title": "20 CFR 416.1130: in-kind support and maintenance (shelter)", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1130", "publisher": "eCFR" },
-  "cfr-416-1121": { "title": "20 CFR 416.1121: types of unearned income, including gifts", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1121", "publisher": "eCFR" },
-  "poms-si-00815-400": { "title": "POMS SI 00815.400: Bills Paid by Third Party", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400", "publisher": "Social Security Administration" },
-  "poms-si-00815-550": { "title": "POMS SI 00815.550: Receipt of certain noncash items", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815550", "publisher": "Social Security Administration" },
-  "poms-si-00810-410": { "title": "POMS SI 00810.410: Infrequent or Irregular Income Exclusion", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500810410", "publisher": "Social Security Administration" },
-  "poms-si-00810-420": { "title": "POMS SI 00810.420: $20 General Income Exclusion", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500810420", "publisher": "Social Security Administration" },
-  "poms-si-00820-500": { "title": "POMS SI 00820.500: Earned Income Exclusions", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500820500", "publisher": "Social Security Administration" },
-  "poms-si-00830-455": { "title": "POMS SI 00830.455: Grants, Scholarships, Fellowships, and Gifts (education)", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830455", "publisher": "Social Security Administration" },
-  "poms-si-00830-520": { "title": "POMS SI 00830.520: Gifts", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830520", "publisher": "Social Security Administration" },
-  "poms-si-00835-020": { "title": "POMS SI 00835.020: Definitions for ISM (food and shelter)", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835020", "publisher": "Social Security Administration" },
-  "poms-si-00835-200": { "title": "POMS SI 00835.200: The one-third reduction (VTR)", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835200", "publisher": "Social Security Administration" },
-  "poms-si-00835-350": { "title": "POMS SI 00835.350: Computing ISM from outside the household", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835350", "publisher": "Social Security Administration" },
-  "poms-si-00835-360": { "title": "POMS SI 00835.360: Charging ISM from third-party vendor payments", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835360", "publisher": "Social Security Administration" },
-  "poms-si-00835-300": { "title": "POMS SI 00835.300: Presumed maximum value (PMV) rule", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835300", "publisher": "Social Security Administration" },
-  "poms-si-00835-310": { "title": "POMS SI 00835.310: Telling in-kind support apart from other in-kind income", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835310", "publisher": "Social Security Administration" },
-  "poms-si-00835-400": { "title": "POMS SI 00835.400: In-kind support given only to the claimant", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835400", "publisher": "Social Security Administration" },
-  "poms-si-00835-901": { "title": "POMS SI 00835.901: ISM values for 2006 and later", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835901", "publisher": "Social Security Administration" },
-  "poms-si-01110-003": { "title": "POMS SI 01110.003: Resource limits", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501110003", "publisher": "Social Security Administration" },
-  "poms-si-01110-600": { "title": "POMS SI 01110.600: When income becomes a resource", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501110600", "publisher": "Social Security Administration" },
-  "poms-si-01130-430": { "title": "POMS SI 01130.430: Household goods and personal effects", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130430", "publisher": "Social Security Administration" },
-  "poms-si-01130-740": { "title": "POMS SI 01130.740: ABLE accounts", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740", "publisher": "Social Security Administration" },
-  "poms-si-01120-220": { "title": "POMS SI 01120.220: Cash loans", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120220", "publisher": "Social Security Administration" },
-  "poms-si-02005-001": { "title": "POMS SI 02005.001: Retrospective monthly accounting", "url": "https://secure.ssa.gov/poms.nsf/lnx/0502005001", "publisher": "Social Security Administration" },
-  "fr-89-21199": { "title": "89 FR 21199 (2024): Omitting food from in-kind support and maintenance", "url": "https://www.federalregister.gov/documents/2024/03/27/2024-06464/omitting-food-from-in-kind-support-and-maintenance-calculations", "publisher": "Federal Register" },
-  "ssa-cola-2026": { "title": "SSA: 2026 cost-of-living adjustment and SSI payment amounts", "url": "https://www.ssa.gov/cola/", "publisher": "Social Security Administration" },
-  "ssa-cola-2027": { "title": "Cost-of-Living Increase and Other Determinations for 2027, 91 FR 67380 (October 26, 2026)", "url": "https://www.federalregister.gov/documents/2026/10/26/2026-21796/cost-of-living-increase-and-other-determinations-for-2027", "publisher": "Social Security Administration, Federal Register" },
-  "ssa-spotlight-able-2026": { "title": "SSA: Spotlight on ABLE accounts (2026 edition)", "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html", "publisher": "Social Security Administration" },
-  "ssa-understanding-ssi-living": { "title": "SSA: Understanding SSI, Living Arrangements", "url": "https://www.ssa.gov/ssi/text-living-ussi.htm", "publisher": "Social Security Administration" },
-  "ssa-monthly-snapshot": { "title": "SSA: Monthly Statistical Snapshot", "url": "https://www.ssa.gov/policy/docs/quickfacts/stat_snapshot/", "publisher": "Social Security Administration" },
-  "able-nrc-age-adjustment": { "title": "ABLE National Resource Center: ABLE Age Adjustment Act fact sheet", "url": "https://www.ablenrc.org/the-able-age-adjustment-act-fact-sheet/", "publisher": "ABLE National Resource Center" },
-  "fr-88-9779-ism-count": { "title": "88 FR 9779 (2023): Omitting food from in-kind support and maintenance, proposed rule, with SSA's count of recipients whose payment was reduced for ISM in January 2022", "url": "https://www.govinfo.gov/content/pkg/FR-2023-02-15/html/2023-02731.htm", "publisher": "Social Security Administration, Federal Register" },
-  "able-nrc-accounts-2026": { "title": "ABLE National Resource Center: AchievABLE newsletter, June 2026, ABLE by the numbers (as of March 31, 2026)", "url": "https://www.ablenrc.org/achievable-newsletter-june-2026-issue/", "publisher": "ABLE National Resource Center" },
-  "able-nrc-age-case-summary": { "title": "ABLE National Resource Center: The ABLE Case Summary Series, the ABLE Age Adjustment Act (October 2025)", "url": "https://www.ablenrc.org/wp-content/uploads/2025/10/ABLECaseSummary-ExpansionOfABLEeligibility.pdf", "publisher": "ABLE National Resource Center" },
-  "ssa-oig-152601": { "title": "SSA Office of the Inspector General: The Social Security Administration's Compliance with the Payment Integrity Information Act of 2019 in Fiscal Year 2025 (152601), Figure 5, SSI in-kind support and maintenance overpayment dollars, FYs 2020 through 2024", "url": "https://oig.ssa.gov/~assets/uploads/152601.pdf", "publisher": "Social Security Administration, Office of the Inspector General" },
-  "hhl-survey-2026": { "title": "Help Hope Live: Medical Fundraising Survey (May 2026)", "url": "https://helphopelive.org/latest/medical-fundraising-survey-2026/", "publisher": "Help Hope Live" },
-  "sna-crowdfunding": { "title": "Special Needs Alliance: Crowdfunding should be handled with care", "url": "https://www.specialneedsalliance.org/blog/crowdfunding-should-be-handled-with-care/", "publisher": "Special Needs Alliance" },
-  "berliner-kenworthy-2017": { "title": "Berliner and Kenworthy, Producing a worthy illness: personal crowdfunding amidst financial crisis, Social Science and Medicine (2017)", "url": "https://doi.org/10.1016/j.socscimed.2017.02.008", "publisher": "Elsevier" },
-  "du-2023-debate": { "title": "Du et al., Improving Factuality and Reasoning in Language Models through Multiagent Debate (ICML 2024)", "url": "https://arxiv.org/abs/2305.14325", "publisher": "arXiv" },
-  "khan-2024-debate": { "title": "Khan et al., Debating with More Persuasive LLMs Leads to More Truthful Answers (ICML 2024)", "url": "https://arxiv.org/abs/2402.06782", "publisher": "arXiv" },
-  "cfr-416-708": { "title": "20 CFR 416.708: what you must report", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.708", "publisher": "eCFR" },
-  "cfr-416-714": { "title": "20 CFR 416.714: when reports are due", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.714", "publisher": "eCFR" },
-  "cfr-416-724": { "title": "20 CFR 416.724: amounts of penalty deductions", "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.724", "publisher": "eCFR" },
-  "ssa-ssi-reporting": { "title": "SSA: Understanding SSI, Reporting Responsibilities", "url": "https://www.ssa.gov/ssi/text-report-ussi.htm", "publisher": "Social Security Administration" },
-  "ssa-spotlight-rights": { "title": "SSA: Spotlight on Rights and Responsibilities (2026 edition)", "url": "https://www.ssa.gov/ssi/spotlights/spot-rights-responsibilities.htm", "publisher": "Social Security Administration" },
-  "poms-si-00835-465": { "title": "POMS SI 00835.465: Household costs (shelter items)", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835465", "publisher": "Social Security Administration" },
-  "poms-si-00830-522": { "title": "POMS SI 00830.522: Gift cards and gift certificates", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830522", "publisher": "Social Security Administration" },
-  "poms-si-00830-521": { "title": "POMS SI 00830.521: Gifts of travel tickets", "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830521", "publisher": "Social Security Administration" },
-  "paypal-pay-another-account": { "title": "PayPal Developer: Pay another account (the payee object)", "url": "https://developer.paypal.com/docs/checkout/standard/customize/pay-another-account/", "publisher": "PayPal" },
-  "paypal-seller-onboarding": { "title": "PayPal Developer: Onboard sellers before payment (Partner Referrals API)", "url": "https://developer.paypal.com/docs/multiparty/seller-onboarding/before-payment/", "publisher": "PayPal" },
-  "paypal-multiparty": { "title": "PayPal Developer: Multiparty platforms, including partner fees", "url": "https://developer.paypal.com/docs/multiparty/", "publisher": "PayPal" },
-  "paypal-payouts-processing": { "title": "PayPal Developer: Payouts payment processing (unclaimed payouts)", "url": "https://developer.paypal.com/docs/payouts/standard/reference/payment-processing/", "publisher": "PayPal" },
-  "paypal-consumer-fees": { "title": "PayPal: Consumer fees (buying in the US)", "url": "https://www.paypal.com/us/digital-wallet/paypal-consumer-fees", "publisher": "PayPal" },
-  "paypal-business-fees": { "title": "PayPal: Merchant fees (receiving payments)", "url": "https://www.paypal.com/us/business/paypal-business-fees", "publisher": "PayPal" },
-  "irs-able-qde": { "title": "IRS Tax Tip 2022-112: what ABLE accounts can pay for", "url": "https://www.irs.gov/newsroom/able-accounts-can-help-people-with-disabilities-pay-for-disability-related-expenses", "publisher": "Internal Revenue Service" },
-  "ugift-iable": { "title": "IAble: Give a gift with a Ugift code", "url": "https://www.iable.gov/resources/give-a-gift", "publisher": "Iowa Treasurer, IAble" },
-  "ablenow-contributions": { "title": "ABLEnow: Contributions", "url": "https://www.ablenow.com/saving-investments/contributions/", "publisher": "ABLEnow" },
-  "stable-gifting": { "title": "STABLE: Gifting", "url": "https://stableaccount.com/benefits/gifting", "publisher": "STABLE Account, Ohio Treasurer" },
-  "calable-gifting": { "title": "CalABLE: Gifting", "url": "https://calable.ca.gov/how-it-works/gifting", "publisher": "CalABLE" },
-  "able-united-gifting": { "title": "ABLE United: Gifting", "url": "https://www.ableunited.com/usage/gifting", "publisher": "ABLE United" },
-  "asan-easy-read": { "title": "ASAN: One Idea Per Line, a guide to making Easy Read resources (2021)", "url": "https://autisticadvocacy.org/wp-content/uploads/2021/07/One-Idea-Per-Line.pdf", "publisher": "Autistic Self Advocacy Network" },
-  "ssa-asr-2024-under65": { "title": "SSA: SSI Annual Statistical Report, 2024, recipients under age 65 by diagnostic group", "url": "https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect06.html", "publisher": "Social Security Administration" },
-  "ssa-espanol-telefono": { "title": "SSA: llame al 1-800-772-1213 y oprima 7 para español", "url": "https://www.ssa.gov/espanol/estadodecuenta/", "publisher": "Social Security Administration" },
-  "crs-if10482": { "title": "Congressional Research Service: Supplemental Security Income (SSI), IF10482, updated February 26, 2025", "url": "https://www.congress.gov/crs-product/IF10482", "publisher": "Congressional Research Service" },
-  "true-link-card": { "title": "True Link: Prepaid Visa card for people on benefits and their trustees", "url": "https://www.truelinkfinancial.com/prepaid-card", "publisher": "True Link Financial" },
-  "poms-si-01120-200": { "title": "POMS SI 01120.200: Information on trusts, including trusts established prior to 1/1/2000", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120200", "publisher": "Social Security Administration" },
-  "poms-si-01120-203": { "title": "POMS SI 01120.203: Exceptions to counting trusts established on or after January 1, 2000 (special needs and pooled trusts)", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120203", "publisher": "Social Security Administration" },
-  "arc-texas-pooled-fees": { "title": "The Arc of Texas Master Pooled Trust: enrollment and fees", "url": "https://www.thearcoftexas.org/trust/enrollment/", "publisher": "The Arc of Texas" },
-  "db101": { "title": "Disability Benefits 101: benefits and work estimators (13 states)", "url": "https://www.db101.org/", "publisher": "World Institute on Disability" },
-  "ssa-wipa": { "title": "SSA Ticket to Work: benefits counseling and the path to employment (WIPA)", "url": "https://choosework.ssa.gov/library/fact-sheet-benefits-counseling-and-the-path-to-employment", "publisher": "Social Security Administration" },
-  "ssa-wipa-findhelp": { "title": "SSA Ticket to Work: Find Help (WIPA benefits counselors near you)", "url": "https://choosework.ssa.gov/findhelp", "publisher": "Social Security Administration" }
+  "cfr-416-1103-g": {
+    "title": "20 CFR 416.1103(g): bills paid directly to the supplier are not income",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+    "publisher": "eCFR"
+  },
+  "cfr-416-1103": {
+    "title": "20 CFR 416.1103: what is not income",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+    "publisher": "eCFR"
+  },
+  "cfr-416-1130": {
+    "title": "20 CFR 416.1130: in-kind support and maintenance (shelter)",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1130",
+    "publisher": "eCFR"
+  },
+  "cfr-416-1121": {
+    "title": "20 CFR 416.1121: types of unearned income, including gifts",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1121",
+    "publisher": "eCFR"
+  },
+  "poms-si-00815-400": {
+    "title": "POMS SI 00815.400: Bills Paid by Third Party",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00815-550": {
+    "title": "POMS SI 00815.550: Receipt of certain noncash items",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815550",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00810-410": {
+    "title": "POMS SI 00810.410: Infrequent or Irregular Income Exclusion",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500810410",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00810-420": {
+    "title": "POMS SI 00810.420: $20 General Income Exclusion",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500810420",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00820-500": {
+    "title": "POMS SI 00820.500: Earned Income Exclusions",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500820500",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00830-455": {
+    "title": "POMS SI 00830.455: Grants, Scholarships, Fellowships, and Gifts (education)",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830455",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00830-520": {
+    "title": "POMS SI 00830.520: Gifts",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830520",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-020": {
+    "title": "POMS SI 00835.020: Definitions for ISM (food and shelter)",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835020",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-200": {
+    "title": "POMS SI 00835.200: The one-third reduction (VTR)",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835200",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-350": {
+    "title": "POMS SI 00835.350: Computing ISM from outside the household",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835350",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-360": {
+    "title": "POMS SI 00835.360: Charging ISM from third-party vendor payments",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835360",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-300": {
+    "title": "POMS SI 00835.300: Presumed maximum value (PMV) rule",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835300",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-310": {
+    "title": "POMS SI 00835.310: Telling in-kind support apart from other in-kind income",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835310",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-400": {
+    "title": "POMS SI 00835.400: In-kind support given only to the claimant",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835400",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-901": {
+    "title": "POMS SI 00835.901: ISM values for 2006 and later",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835901",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-01110-003": {
+    "title": "POMS SI 01110.003: Resource limits",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501110003",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-01110-600": {
+    "title": "POMS SI 01110.600: When income becomes a resource",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501110600",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-01130-430": {
+    "title": "POMS SI 01130.430: Household goods and personal effects",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130430",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-01130-740": {
+    "title": "POMS SI 01130.740: ABLE accounts",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-01120-220": {
+    "title": "POMS SI 01120.220: Cash loans",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120220",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-02005-001": {
+    "title": "POMS SI 02005.001: Retrospective monthly accounting",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0502005001",
+    "publisher": "Social Security Administration"
+  },
+  "fr-89-21199": {
+    "title": "89 FR 21199 (2024): Omitting food from in-kind support and maintenance",
+    "url": "https://www.federalregister.gov/documents/2024/03/27/2024-06464/omitting-food-from-in-kind-support-and-maintenance-calculations",
+    "publisher": "Federal Register",
+    "date": "March 27, 2024"
+  },
+  "ssa-cola-2026": {
+    "title": "SSA: 2026 cost-of-living adjustment and SSI payment amounts",
+    "url": "https://www.ssa.gov/cola/",
+    "publisher": "Social Security Administration"
+  },
+  "ssa-cola-2027": {
+    "title": "Cost-of-Living Increase and Other Determinations for 2027, 91 FR 67380 (October 26, 2026)",
+    "url": "https://www.federalregister.gov/documents/2026/10/26/2026-21796/cost-of-living-increase-and-other-determinations-for-2027",
+    "publisher": "Social Security Administration, Federal Register"
+  },
+  "ssa-spotlight-able-2026": {
+    "title": "SSA: Spotlight on ABLE accounts (2026 edition)",
+    "url": "https://www.ssa.gov/ssi/spotlights/spot-able.html",
+    "publisher": "Social Security Administration"
+  },
+  "ssa-understanding-ssi-living": {
+    "title": "SSA: Understanding SSI, Living Arrangements",
+    "url": "https://www.ssa.gov/ssi/text-living-ussi.htm",
+    "publisher": "Social Security Administration"
+  },
+  "ssa-monthly-snapshot": {
+    "title": "SSA: Monthly Statistical Snapshot",
+    "url": "https://www.ssa.gov/policy/docs/quickfacts/stat_snapshot/",
+    "publisher": "Social Security Administration"
+  },
+  "able-nrc-age-adjustment": {
+    "title": "ABLE National Resource Center: ABLE Age Adjustment Act fact sheet",
+    "url": "https://www.ablenrc.org/the-able-age-adjustment-act-fact-sheet/",
+    "publisher": "ABLE National Resource Center"
+  },
+  "fr-88-9779-ism-count": {
+    "title": "88 FR 9779 (2023): Omitting food from in-kind support and maintenance, proposed rule, with SSA's count of recipients whose payment was reduced for ISM in January 2022",
+    "url": "https://www.govinfo.gov/content/pkg/FR-2023-02-15/html/2023-02731.htm",
+    "publisher": "Social Security Administration, Federal Register"
+  },
+  "able-nrc-accounts-2026": {
+    "title": "ABLE National Resource Center: AchievABLE newsletter, June 2026, ABLE by the numbers (as of March 31, 2026)",
+    "url": "https://www.ablenrc.org/achievable-newsletter-june-2026-issue/",
+    "publisher": "ABLE National Resource Center"
+  },
+  "able-nrc-age-case-summary": {
+    "title": "ABLE National Resource Center: The ABLE Case Summary Series, the ABLE Age Adjustment Act (October 2025)",
+    "url": "https://www.ablenrc.org/wp-content/uploads/2025/10/ABLECaseSummary-ExpansionOfABLEeligibility.pdf",
+    "publisher": "ABLE National Resource Center"
+  },
+  "ssa-oig-152601": {
+    "title": "SSA Office of the Inspector General: The Social Security Administration's Compliance with the Payment Integrity Information Act of 2019 in Fiscal Year 2025 (152601), Figure 5, SSI in-kind support and maintenance overpayment dollars, FYs 2020 through 2024",
+    "url": "https://oig.ssa.gov/~assets/uploads/152601.pdf",
+    "publisher": "Social Security Administration, Office of the Inspector General",
+    "date": "July 14, 2026"
+  },
+  "hhl-survey-2026": {
+    "title": "Help Hope Live: Medical Fundraising Survey (May 2026)",
+    "url": "https://helphopelive.org/latest/medical-fundraising-survey-2026/",
+    "publisher": "Help Hope Live"
+  },
+  "sna-crowdfunding": {
+    "title": "Special Needs Alliance: Crowdfunding should be handled with care",
+    "url": "https://www.specialneedsalliance.org/blog/crowdfunding-should-be-handled-with-care/",
+    "publisher": "Special Needs Alliance"
+  },
+  "berliner-kenworthy-2017": {
+    "title": "Berliner and Kenworthy, Producing a worthy illness: personal crowdfunding amidst financial crisis, Social Science and Medicine (2017)",
+    "url": "https://doi.org/10.1016/j.socscimed.2017.02.008",
+    "publisher": "Elsevier"
+  },
+  "du-2023-debate": {
+    "title": "Du et al., Improving Factuality and Reasoning in Language Models through Multiagent Debate (ICML 2024)",
+    "url": "https://arxiv.org/abs/2305.14325",
+    "publisher": "arXiv"
+  },
+  "khan-2024-debate": {
+    "title": "Khan et al., Debating with More Persuasive LLMs Leads to More Truthful Answers (ICML 2024)",
+    "url": "https://arxiv.org/abs/2402.06782",
+    "publisher": "arXiv"
+  },
+  "cfr-416-708": {
+    "title": "20 CFR 416.708: what you must report",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.708",
+    "publisher": "eCFR"
+  },
+  "cfr-416-714": {
+    "title": "20 CFR 416.714: when reports are due",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.714",
+    "publisher": "eCFR"
+  },
+  "cfr-416-724": {
+    "title": "20 CFR 416.724: amounts of penalty deductions",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-G/section-416.724",
+    "publisher": "eCFR"
+  },
+  "ssa-ssi-reporting": {
+    "title": "SSA: Understanding SSI, Reporting Responsibilities",
+    "url": "https://www.ssa.gov/ssi/text-report-ussi.htm",
+    "publisher": "Social Security Administration"
+  },
+  "ssa-spotlight-rights": {
+    "title": "SSA: Spotlight on Rights and Responsibilities (2026 edition)",
+    "url": "https://www.ssa.gov/ssi/spotlights/spot-rights-responsibilities.htm",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-465": {
+    "title": "POMS SI 00835.465: Household costs (shelter items)",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835465",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00830-522": {
+    "title": "POMS SI 00830.522: Gift cards and gift certificates",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830522",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00830-521": {
+    "title": "POMS SI 00830.521: Gifts of travel tickets",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830521",
+    "publisher": "Social Security Administration"
+  },
+  "paypal-pay-another-account": {
+    "title": "PayPal Developer: Pay another account (the payee object)",
+    "url": "https://developer.paypal.com/docs/checkout/standard/customize/pay-another-account/",
+    "publisher": "PayPal"
+  },
+  "paypal-seller-onboarding": {
+    "title": "PayPal Developer: Onboard sellers before payment (Partner Referrals API)",
+    "url": "https://developer.paypal.com/docs/multiparty/seller-onboarding/before-payment/",
+    "publisher": "PayPal"
+  },
+  "paypal-multiparty": {
+    "title": "PayPal Developer: Multiparty platforms, including partner fees",
+    "url": "https://developer.paypal.com/docs/multiparty/",
+    "publisher": "PayPal"
+  },
+  "paypal-payouts-processing": {
+    "title": "PayPal Developer: Payouts payment processing (unclaimed payouts)",
+    "url": "https://developer.paypal.com/docs/payouts/standard/reference/payment-processing/",
+    "publisher": "PayPal"
+  },
+  "paypal-consumer-fees": {
+    "title": "PayPal: Consumer fees (buying in the US)",
+    "url": "https://www.paypal.com/us/digital-wallet/paypal-consumer-fees",
+    "publisher": "PayPal"
+  },
+  "paypal-business-fees": {
+    "title": "PayPal: Merchant fees (receiving payments)",
+    "url": "https://www.paypal.com/us/business/paypal-business-fees",
+    "publisher": "PayPal"
+  },
+  "irs-able-qde": {
+    "title": "IRS Tax Tip 2022-112: what ABLE accounts can pay for",
+    "url": "https://www.irs.gov/newsroom/able-accounts-can-help-people-with-disabilities-pay-for-disability-related-expenses",
+    "publisher": "Internal Revenue Service"
+  },
+  "ugift-iable": {
+    "title": "IAble: Give a gift with a Ugift code",
+    "url": "https://www.iable.gov/resources/give-a-gift",
+    "publisher": "Iowa Treasurer, IAble"
+  },
+  "ablenow-contributions": {
+    "title": "ABLEnow: Contributions",
+    "url": "https://www.ablenow.com/saving-investments/contributions/",
+    "publisher": "ABLEnow"
+  },
+  "stable-gifting": {
+    "title": "STABLE: Gifting",
+    "url": "https://stableaccount.com/benefits/gifting",
+    "publisher": "STABLE Account, Ohio Treasurer"
+  },
+  "calable-gifting": {
+    "title": "CalABLE: Gifting",
+    "url": "https://calable.ca.gov/how-it-works/gifting",
+    "publisher": "CalABLE"
+  },
+  "able-united-gifting": {
+    "title": "ABLE United: Gifting",
+    "url": "https://www.ableunited.com/usage/gifting",
+    "publisher": "ABLE United"
+  },
+  "asan-easy-read": {
+    "title": "ASAN: One Idea Per Line, a guide to making Easy Read resources (2021)",
+    "url": "https://autisticadvocacy.org/wp-content/uploads/2021/07/One-Idea-Per-Line.pdf",
+    "publisher": "Autistic Self Advocacy Network"
+  },
+  "ssa-asr-2024-under65": {
+    "title": "SSA: SSI Annual Statistical Report, 2024, recipients under age 65 by diagnostic group",
+    "url": "https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect06.html",
+    "publisher": "Social Security Administration"
+  },
+  "ssa-espanol-telefono": {
+    "title": "SSA: llame al 1-800-772-1213 y oprima 7 para español",
+    "url": "https://www.ssa.gov/espanol/estadodecuenta/",
+    "publisher": "Social Security Administration"
+  },
+  "crs-if10482": {
+    "title": "Congressional Research Service: Supplemental Security Income (SSI), IF10482, updated February 26, 2025",
+    "url": "https://www.congress.gov/crs-product/IF10482",
+    "publisher": "Congressional Research Service"
+  },
+  "true-link-card": {
+    "title": "True Link: Prepaid Visa card for people on benefits and their trustees",
+    "url": "https://www.truelinkfinancial.com/prepaid-card",
+    "publisher": "True Link Financial",
+    "date": "read November 8, 2026"
+  },
+  "poms-si-01120-200": {
+    "title": "POMS SI 01120.200: Information on trusts, including trusts established prior to 1/1/2000",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120200",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-01120-203": {
+    "title": "POMS SI 01120.203: Exceptions to counting trusts established on or after January 1, 2000 (special needs and pooled trusts)",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120203",
+    "publisher": "Social Security Administration"
+  },
+  "arc-texas-pooled-fees": {
+    "title": "The Arc of Texas Master Pooled Trust: enrollment and fees",
+    "url": "https://www.thearcoftexas.org/trust/enrollment/",
+    "publisher": "The Arc of Texas"
+  },
+  "db101": {
+    "title": "Disability Benefits 101: benefits and work estimators (13 states)",
+    "url": "https://www.db101.org/",
+    "publisher": "World Institute on Disability"
+  },
+  "ssa-wipa": {
+    "title": "SSA Ticket to Work: benefits counseling and the path to employment (WIPA)",
+    "url": "https://choosework.ssa.gov/library/fact-sheet-benefits-counseling-and-the-path-to-employment",
+    "publisher": "Social Security Administration"
+  },
+  "ssa-wipa-findhelp": {
+    "title": "SSA Ticket to Work: Find Help (WIPA benefits counselors near you)",
+    "url": "https://choosework.ssa.gov/findhelp",
+    "publisher": "Social Security Administration"
+  },
+  "purple-bank": {
+    "title": "Purple: banking for people with disabilities (SSI resource limit alerts, representative payee accounts, an ABLE account in the app)",
+    "url": "https://www.withpurple.com/",
+    "publisher": "Purple",
+    "date": "2026 pages"
+  },
+  "talli-snt": {
+    "title": "Talli: Distributing special needs trust funds to beneficiaries",
+    "url": "https://www.talli.ai/blog/distributing-special-needs-trust-beneficiaries",
+    "publisher": "Talli",
+    "date": "read November 8, 2026"
+  },
+  "trusthelm-snt": {
+    "title": "TrustHelm: Special needs trust management, a guide for trustees and caregivers",
+    "url": "https://trusthelm.ai/guides/trustee-duties/special-needs-trust-management",
+    "publisher": "TrustHelm",
+    "date": "read November 8, 2026"
+  },
+  "giftly-how": {
+    "title": "Giftly: How does Giftly work",
+    "url": "https://www.giftly.com/blog/giftly-101/how-does-giftly-work",
+    "publisher": "Giftly",
+    "date": "read November 8, 2026"
+  },
+  "ablenow-gifting": {
+    "title": "ABLEnow: Gifting with Ugift",
+    "url": "https://www.ablenow.com/saving-investments/gifting/",
+    "publisher": "ABLEnow (Virginia529)",
+    "date": "read November 8, 2026"
+  },
+  "ugiftable": {
+    "title": "UgiftABLE: give a gift to an ABLE account",
+    "url": "https://www.ugiftable.com/",
+    "publisher": "Ugift (Ascensus)",
+    "date": "read November 8, 2026"
+  },
+  "paable-gift": {
+    "title": "PA ABLE: Give a gift",
+    "url": "https://paable.gov/gift/",
+    "publisher": "PA ABLE (Pennsylvania Treasury)",
+    "date": "read November 8, 2026"
+  },
+  "zheng-2023-judge": {
+    "title": "Zheng et al., Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena, NeurIPS 2023",
+    "url": "https://arxiv.org/abs/2306.05685",
+    "publisher": "arXiv",
+    "date": "2023"
+  },
+  "verga-2024-poll": {
+    "title": "Verga et al., Replacing Judges with Juries: Evaluating LLM Generations with a Panel of Diverse Models (2024)",
+    "url": "https://arxiv.org/abs/2404.18796",
+    "publisher": "arXiv",
+    "date": "2024"
+  },
+  "kohli-2026-panels": {
+    "title": "Kohli, Nine Judges, Two Effective Votes: Correlated Errors Undermine LLM Evaluation Panels (2026)",
+    "url": "https://arxiv.org/abs/2605.29800",
+    "publisher": "arXiv",
+    "date": "May 28, 2026"
+  },
+  "jung-2024-trust-escalate": {
+    "title": "Jung, Brahman and Choi, Trust or Escalate: LLM Judges with Provable Guarantees for Human Agreement (2024)",
+    "url": "https://arxiv.org/abs/2407.18370",
+    "publisher": "arXiv",
+    "date": "2024"
+  },
+  "badshah-2026-abstain": {
+    "title": "Badshah, Emami and Sajjad, Judge, Retrieve, or Abstain: Uncertainty-Guarded LLM Judging with Provable Risk Guarantees, COLM 2026",
+    "url": "https://arxiv.org/abs/2608.17994",
+    "publisher": "arXiv",
+    "date": "August 2026"
+  },
+  "madras-2018-defer": {
+    "title": "Madras, Pitassi and Zemel, Predict Responsibly: Improving Fairness and Accuracy by Learning to Defer, NeurIPS 2018",
+    "url": "https://arxiv.org/abs/1711.06664",
+    "publisher": "arXiv",
+    "date": "2018"
+  },
+  "geifman-2017-selective": {
+    "title": "Geifman and El-Yaniv, Selective Classification for Deep Neural Networks (2017)",
+    "url": "https://arxiv.org/abs/1705.08500",
+    "publisher": "arXiv",
+    "date": "2017"
+  },
+  "anthropic-building-agents": {
+    "title": "Anthropic, Building effective agents (Schluntz and Zhang)",
+    "url": "https://www.anthropic.com/research/building-effective-agents",
+    "publisher": "Anthropic",
+    "date": "December 19, 2024"
+  },
+  "fr-89-25507-rental-subsidy": {
+    "title": "Expansion of the Rental Subsidy Policy for SSI Applicants and Recipients, final rule, 89 FR 25507 (April 11, 2024; effective September 30, 2024)",
+    "url": "https://www.govinfo.gov/content/pkg/FR-2024-04-11/html/2024-07675.htm",
+    "publisher": "Federal Register (govinfo)",
+    "date": "April 11, 2024"
+  },
+  "ssa-oig-062405": {
+    "title": "SSA Office of the Inspector General: Overpayments Assessed in Fiscal Years 2020 Through 2023, informational report 062405",
+    "url": "https://oig.ssa.gov/~assets/uploads/062405.pdf",
+    "publisher": "SSA Office of the Inspector General",
+    "date": "February 20, 2025"
+  },
+  "ssa-em-25029-rev": {
+    "title": "SSA Emergency Message EM-25029 REV: Change to Title II Overpayment Default Benefit Withholding Rate to 50 Percent Withholding (the Title XVI recovery rate stays at 10 percent)",
+    "url": "https://secure.ssa.gov/apps10/reference.nsf/links/08282025031929PM",
+    "publisher": "Social Security Administration",
+    "date": "August 28, 2025"
+  },
+  "ssa-asr-2024-sect02": {
+    "title": "SSA: SSI Annual Statistical Report, 2024, section 2, Federally Administered Payments (Tables 4, 6, 7, 8 and 12)",
+    "url": "https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect02.html",
+    "publisher": "Social Security Administration",
+    "date": "released 2025, data for December 2024"
+  },
+  "ssa-asr-2024-sect11": {
+    "title": "SSA: SSI Annual Statistical Report, 2024, section 11, Suspensions, Terminations, and Duration of Eligibility (Tables 75 to 77)",
+    "url": "https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect11.html",
+    "publisher": "Social Security Administration",
+    "date": "released 2025, data for 2024"
+  },
+  "ssa-afr-2025-payment-integrity": {
+    "title": "SSA: FY 2025 Agency Financial Report, Other Reporting Requirements, Payment Integrity, SSI improper payment causes and corrective actions (pages 184 and 186)",
+    "url": "https://www.ssa.gov/finance/2025/Other%20Reporting%20Requirements.pdf",
+    "publisher": "Social Security Administration",
+    "date": "FY 2025 report, January 2026"
+  },
+  "ssa-oact-cassidy-2026": {
+    "title": "SSA Office of the Chief Actuary: letter to Senator Cassidy on the SSI Savings Penalty Elimination Act (S. 1234)",
+    "url": "https://www.ssa.gov/oact/solvency/BCassidy_20260807.pdf",
+    "publisher": "Social Security Administration",
+    "date": "August 7, 2026"
+  },
+  "iss-able-2q-2026": {
+    "title": "ISS Market Intelligence: 2Q 2026 529 and ABLE Market Sizing Highlights",
+    "url": "https://www.529conference.com/2q-2026-529-and-able-market-sizing-highlights/",
+    "publisher": "ISS Market Intelligence (529conference.com)",
+    "date": "August 7, 2026"
+  },
+  "poms-si-01120-201": {
+    "title": "POMS SI 01120.201: Trusts established with the assets of an individual on or after 01/01/00 (I.1.e names administrator-managed prepaid cards such as True Link)",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120201",
+    "publisher": "Social Security Administration",
+    "date": "rev. May 23, 2022"
+  },
+  "guardian-trust-pooled-fees": {
+    "title": "Guardian Trust (Florida): Fee schedule, pooled (d)(4)(C) special needs trust administration",
+    "url": "https://guardiantrusts.org/wp-content/uploads/2025/02/Pooled-D4C-Fee-Schedule.pdf",
+    "publisher": "Guardian Trust",
+    "date": "effective February 1, 2025"
+  },
+  "plan-ma-ri-fees": {
+    "title": "PLAN of MA and RI: Comparing PLAN’s trusts (fees, minimums and distribution times)",
+    "url": "https://www.planofma-ri.org/special-needs-professionals/comparing-plans-trusts/",
+    "publisher": "PLAN of Massachusetts and Rhode Island",
+    "date": "read November 8, 2026"
+  },
+  "db101-il-ssi-limits": {
+    "title": "DB101 Illinois: Supplemental Security Income, resource and income limits (2026 figures, with the rent and ABLE examples)",
+    "url": "https://il.db101.org/il/programs/income_support/ssi2/program2d.htm",
+    "publisher": "World Institute on Disability",
+    "date": "2026 edition, read November 8, 2026"
+  },
+  "ableforall-gifting": {
+    "title": "ABLE for ALL: gifting FAQs (personal gifting page, no fee for bank transfers)",
+    "url": "https://ableforall.com/faqs?tag=gifting",
+    "publisher": "ABLE for ALL (Oregon)",
+    "date": "read November 8, 2026"
+  },
+  "finkelstein-notowidigdo-2019": {
+    "title": "Finkelstein and Notowidigdo, Take-Up and Targeting: Experimental Evidence from SNAP, Quarterly Journal of Economics 134(3)",
+    "url": "https://economics.mit.edu/sites/default/files/2022-08/aaFinkelstein_Noto_QJE_August_2019%20%281%29.pdf",
+    "publisher": "Quarterly Journal of Economics",
+    "date": "2019"
+  },
+  "bendtsen-2026-takeup": {
+    "title": "Bendtsen, Increasing Take-Up of Social Benefits: A Meta-Analysis of Field Experiments, Journal of Policy Analysis and Management 45(2)",
+    "url": "https://ideas.repec.org/a/wly/jpamgt/v45y2026i2ne70085.html",
+    "publisher": "Journal of Policy Analysis and Management",
+    "date": "March 2026"
+  },
+  "wright-2017-medicaid": {
+    "title": "Wright, Garcia-Alexander, Weller and Baicker, Low-Cost Behavioral Nudges Increase Medicaid Take-Up Among Eligible Residents of Oregon, Health Affairs 36(5)",
+    "url": "https://www.healthaffairs.org/doi/10.1377/hlthaff.2016.1325",
+    "publisher": "Health Affairs",
+    "date": "May 2017"
+  },
+  "fannin-2024-wic": {
+    "title": "Fannin, Heflin and Lopoo, The Effects of Waiving WIC Physical Presence Requirements on Program Caseloads, Social Service Review 98(3)",
+    "url": "https://doi.org/10.1086/730818",
+    "publisher": "Social Service Review",
+    "date": "September 2024"
+  },
+  "manoli-turner-2014": {
+    "title": "Manoli and Turner, Nudges and Learning: Evidence from Informational Interventions for Low-Income Taxpayers, NBER Working Paper 20718 (working paper)",
+    "url": "https://www.nber.org/papers/w20718",
+    "publisher": "NBER",
+    "date": "November 2014, revised January 2016"
+  }
 }

@@ -26,6 +26,9 @@ vi.mock("@/lib/agent/demo", () => ({
     throw leak.thrown;
   }),
 }));
+// These tests are about redaction. The rate limit and the request log are kept off any database the shell names, so a
+// DATABASE_URL that does not answer cannot stall them; the database paths have their own tests.
+vi.mock("@/lib/db", async (orig) => ({ ...(await orig<typeof import("@/lib/db")>()), dbConfigured: () => false }));
 
 const lines: string[] = [];
 beforeAll(async () => {

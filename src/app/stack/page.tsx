@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import results from "../../../content/test-results.json";
 import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
 import "../pages.css";
@@ -10,6 +11,8 @@ import "./stack.css";
 export const metadata: Metadata = { title: "How it is built", description: "Every tool in Giftwise, the one job it does, and where it lives in the code." };
 
 const REPO = "https://github.com/usv240/giftwise/blob/main/";
+/** The Postman suite as last run (requests and assertions), the one source every page and document quotes. */
+const POSTMAN = results.suites.find((s) => s.id === "postman") as { requests: number; passed: number; total: number };
 
 type Tool = { id: string; name: string; job: string; how: string; files: string[] };
 
@@ -67,7 +70,7 @@ const TOOLS: Tool[] = [
     id: "postman",
     name: "Postman",
     job: "The Giftwise API as a collection anyone can import and run.",
-    how: "16 requests in five folders, each with tests: gift checks, a quarter's exclusions, the report and the page that checks it, the rulebook, the MCP server and its discovery documents. The same collection runs in the test suite with Newman.",
+    how: `${POSTMAN.requests} requests in five folders, each with tests: gift checks, a quarter's exclusions, the report and the page that checks it, the rulebook, the MCP server and its discovery documents. The same collection runs in the test suite with Newman, ${POSTMAN.passed} of ${POSTMAN.total} assertions.`,
     files: ["scripts/postman-collection.mjs", "scripts/run-postman.mjs", "postman/giftwise.postman_collection.json"],
   },
   {

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
 import { and, eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { have, suiteName } from "./helpers/needs";
 
 /**
  * The shared sample page can be reset by anyone at any moment. A reset reopens the needs but never deletes a payment:
@@ -25,16 +25,10 @@ vi.mock("@/lib/paypal/client", () => ({
 }));
 vi.mock("@/lib/audit", () => ({ audit: vi.fn(async () => "test") }));
 
-const localEnv = (() => {
-  try {
-    return readFileSync(".env.local", "utf8");
-  } catch {
-    return "";
-  }
-})();
-const url = process.env.DATABASE_URL || localEnv.match(/^DATABASE_URL=(.+)$/m)?.[1];
+// A database that answers (DATABASE_URL in .env.local; CI's Postgres has it too); otherwise these skip and say why.
+const database = await have("database");
 
-describe.skipIf(!url)("resetting the sample page keeps every payment", () => {
+describe.skipIf(!database.ok)(suiteName("resetting the sample page keeps every payment", "database", database), () => {
   const slug = `reset-test-${randomBytes(4).toString("hex")}`;
   const orderId = () => `TEST${randomBytes(7).toString("hex").toUpperCase()}`;
   let householdId = 0;
@@ -48,7 +42,7 @@ describe.skipIf(!url)("resetting the sample page keeps every payment", () => {
   };
 
   beforeAll(async () => {
-    process.env.DATABASE_URL ??= url;
+    process.env.DATABASE_URL ??= database.url;
     m = {
       db: await import("@/lib/db"),
       households: await import("@/lib/households"),

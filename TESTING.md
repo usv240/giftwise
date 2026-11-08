@@ -170,7 +170,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 257 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 269 passed with a database and keys; with nothing set, 263 pass and 6 skip (6 need a database) |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
@@ -178,7 +178,7 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
 | API end to end | `npm run e2e:api` | 99 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
-| The Postman collection, with Newman | `npm run test:postman` | 20 requests, 20 assertions |
+| The Postman collection, with Newman | `npm run test:postman` | 20 assertions over 16 requests |
 | Browser end to end (with no AI key, the three steps where Claude reads a document are skipped) | `npm run e2e:ui` | 61 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 136 page views pass |
 | Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 68 passed |

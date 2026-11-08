@@ -679,7 +679,7 @@
   "page.ops": {
     "title": "About this page",
     "what": "How Giftwise is running, read live from the tables it already writes: every service, requests and errors by route, payments and webhooks by status, a stream of events, a week of history, and the alert conditions it watches.",
-    "why": "Anyone can see the demo is healthy without a login, and a judge can paste a request id from any API answer to see what that request did.",
+    "why": "Anyone can see the demo is healthy without a login, and anyone can paste a request id from any API answer to see what that request did.",
     "technical": "Reads request_log (route, status, ms, request id; kept seven days), audit_events, payments, payouts, ai_usage and check_runs. No addresses, bodies, keys or names are stored in request_log, and ids are shortened before they leave the server."
   },
   "ops.now": {
@@ -709,7 +709,7 @@
   "ops.trace": {
     "title": "Trace a request",
     "what": "Paste a request id from any API response and see that request's log line, the ledger entries it made and the AI calls it paid for.",
-    "why": "One id ties a judge's call to everything it caused, with nothing private in the answer.",
+    "why": "One id ties a caller's request to everything it caused, with nothing private in the answer.",
     "technical": "The id comes from meta.request_id (or the end of any error message); api() in src/lib/api/handler.ts gives each request one, reusing an incoming x-request-id. audit() stores it in each ledger entry's detail. GET /api/ops/trace?id=."
   },
   "ops.alerts": {
@@ -747,5 +747,47 @@
     "what": "One concrete pilot and the two outcomes it measures, each with what it is compared with and where Giftwise already records it.",
     "why": "SSI pays each month's check two months later, so the pilot runs long enough to see the checks for its gifts. Both outcomes come from records Giftwise already keeps for every family, so no new tracking is needed.",
     "technical": "Outcome 1: audit_events rows with action paypal.routed_order.created hold checkIfCash and checkWithRouting for each order, joined to captured payments rows by order id. Outcome 2: buildReport() in src/lib/report/ssa.ts gives totals.check for each month, rebuilt from the payments table; the family's SSA notice gives the amount paid."
+  },
+  "evidence.first": {
+    "title": "What is first here",
+    "what": "Four things none of the compared products does, each read from that product’s own pages, with the comparison rows they rest on.",
+    "why": "A claim of novelty should name the nearest existing thing and the one step it does not do, so it can be checked.",
+    "technical": "src/components/judges/WhatIsFirst.tsx; the rows are src/components/judges/Compare.tsx, with each source and its date in content/sources.json."
+  },
+  "evidence.lineage": {
+    "title": "Where the two-reviewer design comes from",
+    "what": "The published ideas the referee builds on, each with what it does and how this design differs from it.",
+    "why": "Naming the lineage makes the new part exact: two rulebooks, quotes checked by code, and a referee that keeps the check whole when the reviewers disagree.",
+    "technical": "referee() and routeForDecision() in src/lib/review/referee.ts; tests/referee.test.ts. Sources in content/sources.json."
+  },
+  "evidence.compare": {
+    "title": "How it compares",
+    "what": "Other ways people help someone on SSI with money, each described from its own published pages, and the one step Giftwise adds beside it.",
+    "why": "Each of these does its own job well. The comparison shows the moment Giftwise is built for: when a gift is given.",
+    "technical": "src/components/judges/Compare.tsx; each source and the date it was read are in content/sources.json."
+  },
+  "evidence.stake": {
+    "title": "The problem, measured by Social Security",
+    "what": "Figures from SSA, its Inspector General and the Federal Register, each stated as what it measures, with the page date, and beside each the part of Giftwise that answers it.",
+    "why": "The case for routing a gift should rest on what the agency itself has measured, not on a description of the problem.",
+    "technical": "src/lib/research.ts (SCALE); each source has a url, publisher and date in content/sources.json; tests/research.test.ts."
+  },
+  "evidence.law": {
+    "title": "The law, the code and the test",
+    "what": "For each route, the regulation and manual section that make it count or not, the rule in the engine that implements them, and the test that holds it.",
+    "why": "Anyone checking the rules can see the law, the code and the test on one line, and open any of the three.",
+    "technical": "src/lib/research.ts (LAW); RULES in src/lib/rules/table.ts carries each rule’s source keys; tests/rules.test.ts."
+  },
+  "evidence.uptake": {
+    "title": "Simpler processes raise take-up",
+    "what": "Randomized trials and a meta-analysis of benefit programs: help that removes the steps raises take-up more than information alone. Each is stated as what it measured, in its own program.",
+    "why": "None of these studied SSI gifts. They are the published evidence that a tool which does the routing beats a page that explains it.",
+    "technical": "UPTAKE in src/lib/research.ts; sources in content/sources.json; tests/research.test.ts."
+  },
+  "evidence.limit": {
+    "title": "The $2,000 limit, and ABLE’s reach",
+    "what": "How many people lost payments in 2024 for savings over a limit unchanged since 1989, what raising it would cost by the Chief Actuary’s estimate, and how many ABLE accounts exist against the people who could open one.",
+    "why": "The limit is why a cash gift is a problem twice: as income the month it arrives and as savings the month after. ABLE is the route around it for housing help.",
+    "technical": "LIMIT in src/lib/research.ts; the limit itself is resource_limit_individual in content/facts.json, read by src/lib/rules/params.ts."
   }
 }
