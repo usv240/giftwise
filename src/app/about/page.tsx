@@ -5,6 +5,7 @@ import videoCredits from "../../../public/media/credits.json";
 import { Info } from "@/components/Info";
 import Image from "next/image";
 import { RealWorld } from "@/components/RealWorld";
+import { PayPalShare, PayYourself, Reach } from "@/components/judges/WhyGiftwise";
 import { sampleYearSplit } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 import "../pages.css";
@@ -42,7 +43,7 @@ export default function AboutPage() {
           <p>Every answer shows the rule it comes from. Fixed rules do the money math; AI reads documents and explains.</p>
           <p>
             How much each payee gets, the check, when money moves and who gets paid are decided by code, never by the AI.{" "}
-            <Link className="text-link" href="/evidence#ai">
+            <Link className="text-link" href="/evidence/rules#ai">
               What the AI never decides
             </Link>
           </p>
@@ -94,6 +95,22 @@ export default function AboutPage() {
           ))}
         </ul>
         <p className="muted about-year-src">Each gift runs through the rules engine; the gifts are the ones on the dashboard and in her reports.</p>
+        <PayPalShare />
+      </section>
+
+      <section id="why" className="page-section" aria-labelledby="why-h">
+        <h2 id="why-h">Why not pay the shop yourself?</h2>
+        <PayYourself short />
+        <p>
+          <Link className="text-link" href="/evidence/impact#why">
+            The full answer, with ABLE&rsquo;s yearly limit and PayPal&rsquo;s ten recipients
+          </Link>
+        </p>
+      </section>
+
+      <section id="reach" className="page-section" aria-labelledby="reach-h">
+        <h2 id="reach-h">Who it reaches</h2>
+        <Reach />
       </section>
 
       <div id="real" className="page-section">

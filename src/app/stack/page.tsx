@@ -99,15 +99,15 @@ const PAYPAL_APIS: { api: string; call: string; job: string; file: string }[] = 
   { api: "Orders v2: create", call: "POST /v2/checkout/orders", job: "One order with a purchase unit and payee for each recipient, through the APIMatic-generated Server SDK.", file: "src/lib/paypal/orders.ts" },
   { api: "Orders v2: capture", call: "POST /v2/checkout/orders/{id}/capture", job: "Captures every payee once, with PayPal-Request-Id, so a double click cannot pay twice.", file: "src/lib/paypal/capture.ts" },
   { api: "Orders v2: show", call: "GET /v2/checkout/orders/{id}", job: "Check with PayPal now on every receipt, and the assistant's read of the order.", file: "src/lib/paypal/capture.ts" },
-  { api: "Orders v2: confirm payment source", call: "POST /v2/checkout/orders/{id}/confirm-payment-source", job: "Pays with a sandbox test card in the failure cases, standing in for the giver.", file: "src/lib/cases/scenarios.ts" },
+  { api: "Orders v2: confirm payment source", call: "POST /v2/checkout/orders/{id}/confirm-payment-source", job: "Pays with a sandbox test card in the failure cases and in the nightly check that pays a gift split across its payees, standing in for the giver.", file: "src/lib/card-check.ts" },
   { api: "Payments v2: refund", call: "POST /v2/payments/captures/{id}/refund", job: "The refund failure case: PayPal lets only the shop send money back.", file: "src/lib/cases/scenarios.ts" },
-  { api: "JavaScript SDK v6", call: "web-sdk/v6/core", job: "The PayPal button on each need.", file: "src/components/gift/PayPalPay.tsx" },
+  { api: "JavaScript SDK v6", call: "web-sdk/v6/core", job: "The PayPal button on each need and on Give any amount, and PayPal's guest Debit or Credit Card button where the SDK finds it eligible.", file: "src/components/gift/PayPalPay.tsx" },
   { api: "Payouts", call: "POST /v1/payments/payouts, GET /v1/payments/payouts/{id}", job: "A fund pays many households' needs in one batch.", file: "src/lib/paypal/payouts.ts" },
   { api: "Transaction Search", call: "GET /v1/reporting/transactions", job: "Confirms each payout in PayPal's own transaction report.", file: "src/lib/paypal/reporting.ts" },
   { api: "Balances", call: "GET /v1/reporting/balances", job: "Shows the fund's PayPal balance before it sends a batch.", file: "src/lib/paypal/reporting.ts" },
   { api: "Webhooks", call: "POST /v1/notifications/verify-webhook-signature", job: "Captures a payment if the giver never comes back, after checking PayPal's signature.", file: "src/app/api/paypal/webhook/route.ts" },
   { api: "Negative testing", call: "PayPal-Mock-Response header", job: "Makes the sandbox decline on purpose, for the failure cases.", file: "src/lib/paypal/capture.ts" },
-  { api: "PayPal MCP server", call: "@paypal/mcp over stdio, tool get_order", job: "Asked first when the assistant on /agents reads an order back. Giftwise runs PayPal's own server package; PayPal's hosted server is the second choice (AI-Toolkit issue 34 tracks its sandbox setup). If neither answers, the Orders API does, and the page says which one did.", file: "src/lib/agent/paypal-mcp.ts" },
+  { api: "PayPal MCP server", call: "@paypal/mcp over stdio, tool get_order", job: "Reads orders back from PayPal itself, twice: the assistant on /agents reads each checkout it starts before June approves it, and the nightly card check reads every gift it pays to confirm each capture, amount and payee. Giftwise runs PayPal's own server package; PayPal's hosted server is the second choice. If neither answers, the Orders API does, and the page says which one did.", file: "src/lib/agent/paypal-mcp.ts" },
 ];
 
 /** A short name for a file link: its last two path parts, plus the folder above when that part is src or a [param]. */
@@ -187,7 +187,7 @@ export default function StackPage() {
           <Info id="stack.paypal_apis" label="" />
         </div>
         <p className="page-prose">
-          {PAYPAL_APIS.length} PayPal APIs and tools, each with one job. All run against the PayPal sandbox. Going live changes only the base URL, the client ID and the secret.
+          {PAYPAL_APIS.length} PayPal APIs and tools, each with one job. All run against the PayPal sandbox. Going live is one setting, PAYPAL_ENV=live, which moves the REST API, the JavaScript SDK and PayPal&rsquo;s MCP server together, plus the live app&rsquo;s client ID, secret and webhook ID and each payee&rsquo;s live account.
         </p>
         <details id="paypal-apis-all" className="dsc pp-apis">
           <summary>

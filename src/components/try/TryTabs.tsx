@@ -5,9 +5,11 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Info } from "../Info";
 import { ResultCard } from "../ResultCard";
 import { MakeGiftPage } from "./MakeGiftPage";
-import { ReviewPanel } from "./ReviewPanel";
+import { ReviewPanel, type ReviewData } from "./ReviewPanel";
 import { usePrefs } from "../prefs";
+import { modelName } from "@/lib/ai/model-name";
 import { parseDollars, parseOptionalDollars } from "@/lib/parseDollars";
+import { billDescription } from "@/lib/review/bill-route";
 import { DEFAULT_PROFILE, evaluateGift, monthName, planMonths, usd, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
 
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -308,7 +310,7 @@ function MonthTab() {
 }
 
 function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
-  const [state, setState] = useState<{ status: "idle" | "working" | "done" | "unavailable" | "error"; message?: string; data?: unknown }>({ status: "idle" });
+  const [state, setState] = useState<{ status: "idle" | "working" | "done" | "unavailable" | "error"; message?: string; data?: unknown; model?: string }>({ status: "idle" });
   const [url, setUrl] = useState("");
   // "Start a gift page" on the home page asks who it is for and passes it as ?name=, so the page it makes starts with that name.
   // This tab only renders in the browser (the open tab comes from the address), so reading the address here is safe.
@@ -324,7 +326,7 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
       const json = await res.json();
       if (res.status === 503) setState({ status: "unavailable", message: json.error?.message });
       else if (!res.ok) setState({ status: "error", message: json.error?.message ?? "Something went wrong. Please try again." });
-      else setState({ status: "done", data: json.data });
+      else setState({ status: "done", data: json.data, model: json.meta?.model });
     } catch {
       setState({ status: "error", message: "Could not reach Giftwise. Check your connection and try again." });
     }
@@ -387,12 +389,12 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
       </div>
       <div className="ai-state" aria-live="polite">
         {state.status === "idle" && <p className="muted">Your result appears here. You can also open the {kind === "bill" ? "Wheelchair repair or Electric bill" : "Accessible van fundraiser"} example on the right.</p>}
-        {state.status === "working" && <p>{kind === "bill" ? "Reading the bill and checking the rule…" : "Reading the page and planning each use…"}</p>}
+        {state.status === "working" && <p>{kind === "bill" ? "Reading the bill and checking the rule. A bill near housing also goes to the two reviewers, about 20 seconds more…" : "Reading the page and planning each use…"}</p>}
         {state.status === "unavailable" && (
           <p className="result-attention">{state.message ?? "The live AI service is not connected on this server yet. The ready-made examples show the full result."}</p>
         )}
         {state.status === "error" && <p className="result-attention">{state.message}</p>}
-        {state.status === "done" && kind === "bill" && <BillResult data={state.data as BillData} />}
+        {state.status === "done" && kind === "bill" && <BillResult data={state.data as BillData} model={state.model} />}
         {state.status === "done" && kind === "fundraiser" && <FundraiserResult data={state.data as FundraiserData} url={url} forName={forName} />}
       </div>
     </div>
@@ -410,16 +412,23 @@ type BillData = {
     line_items: { description: string; amount: number }[];
     explanation: { plain: string; technical: string };
   };
+  /** How Giftwise pays it: on the one reading, or after the two reviewers (sent by servers since the reviewers joined bill reading). */
+  route?: { delivery: "vendor" | "able" | null; check_after: number | null; decided_by: "reading" | "reviewers" | "both_readings"; readings: Category[]; reviewed_because: string[]; note: string | null };
+  review?: ReviewData | null;
 };
 
-/** What Claude read, side by side with the engine's answer for paying that bill. */
-function BillResult({ data }: { data: BillData }) {
+/** What Claude read, side by side with the engine's answer for paying that bill, and the two reviewers when the bill is near housing. */
+function BillResult({ data, model }: { data: BillData; model?: string }) {
   const { prefs } = usePrefs();
   const b = data.bill;
+  // The reading the route rests on: the referee's when the reviewers ran (the worse one when it was unsure), else Claude's.
+  const category = data.route?.readings[0] ?? b.vendor_category;
   const result = evaluateGift(
-    { id: "bill", date: b.due_date ?? "2026-11-20", amount: b.amount_due, delivery: "vendor", category: b.vendor_category, label: `Pay ${b.vendor_name}` },
+    { id: "bill", date: b.due_date ?? "2026-11-20", amount: b.amount_due, delivery: "vendor", category, label: `Pay ${b.vendor_name}` },
     DEFAULT_PROFILE,
   );
+  const input = { description: billDescription(b), amount: b.amount_due, category: b.vendor_category, date: result.gift.date };
+  const asked = data.route?.reviewed_because.length ? `Asked automatically. ${data.route.reviewed_because.join(" ")} ` : "";
   return (
     <div className="ai-result">
       <div className="read-card" data-ui>
@@ -446,15 +455,15 @@ function BillResult({ data }: { data: BillData }) {
         {prefs.mode === "technical" && <p className="result-tech">{b.explanation.technical} Confidence {Math.round(b.confidence * 100)}%.</p>}
       </div>
       <ResultCard result={result} title={`If someone pays ${b.vendor_name}`} />
-      {result.ambiguous && result.treatment.kind === "ism_shelter" && (
-        <ReviewPanel
-          input={{
-            description: [`${b.vendor_name}.`, ...(b.line_items ?? []).map((l) => `${l.description}: ${usd(l.amount)}`)].join(" "),
-            amount: b.amount_due,
-            category: b.vendor_category,
-            date: result.gift.date,
-          }}
-        />
+      {data.review ? (
+        <ReviewPanel input={input} ran={{ data: data.review, source: `${asked}Run live just now with ${modelName(model)}.` }} />
+      ) : data.route?.decided_by === "both_readings" ? (
+        <>
+          {data.route.note && <p className="result-attention">{data.route.note}</p>}
+          <ReviewPanel input={input} />
+        </>
+      ) : (
+        result.ambiguous && result.treatment.kind === "ism_shelter" && <ReviewPanel input={input} />
       )}
     </div>
   );

@@ -6,6 +6,8 @@ import { captureAndRecord } from "../paypal/capture";
 import { paypalRest } from "../paypal/client";
 import { routeGift } from "../routing";
 import { DEFAULT_PROFILE, evaluateGift, usd } from "../rules";
+import { log } from "../log";
+import { failureKind } from "../scrub";
 import { CASES, type CaseId } from "./list";
 import electricReview from "../../../content/reviews/electric-bill.json";
 import type { RecordedReview } from "@/components/try/ReviewPanel";
@@ -90,9 +92,11 @@ async function timed(fn: () => Promise<{ ok: boolean; evidence: string[] }>): Pr
       ms: Date.now() - t,
     };
   } catch (e) {
+    // The page shows the kind of failure; the full error, which can quote request headers, goes to the masked log.
+    log.error("failure case did not finish", { err: e });
     return {
       outcome: "problem",
-      evidence: [(e as Error).message],
+      evidence: [`The check did not finish (${failureKind(e)}).`],
       ms: Date.now() - t,
     };
   }

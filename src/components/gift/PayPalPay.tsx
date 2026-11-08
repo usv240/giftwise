@@ -3,17 +3,21 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { giftText, type Lang } from "@/lib/i18n/gift";
+import { paypalEnv, paypalHosts } from "@/lib/paypal/env";
 import "./paypal.css";
 
 /* Minimal typings for the PayPal JavaScript SDK v6 surface we use. */
-type Session = { start: (opts: { presentationMode: "auto" | "popup" | "modal" | "redirect" }, order: Promise<{ orderId: string }>) => Promise<void> };
+type Session = { start: (opts: { presentationMode: "auto" | "popup" | "modal" | "redirect"; targetElement?: EventTarget }, order: Promise<{ orderId: string }>) => Promise<void> };
+type SessionOptions = {
+  onApprove: (d: { orderId: string }) => Promise<void> | void;
+  onCancel?: (d: { orderId?: string }) => void;
+  onError?: (e: Error) => void;
+};
 type SdkInstance = {
   findEligibleMethods: (o: { currencyCode: string }) => Promise<{ isEligible: (m: string) => boolean }>;
-  createPayPalOneTimePaymentSession: (o: {
-    onApprove: (d: { orderId: string }) => Promise<void> | void;
-    onCancel?: (d: { orderId?: string }) => void;
-    onError?: (e: Error) => void;
-  }) => Session;
+  createPayPalOneTimePaymentSession: (o: SessionOptions) => Session;
+  /** PayPal's guest card form (the "paypal-guest-payments" component): a debit or credit card, no PayPal account. */
+  createPayPalGuestOneTimePaymentSession?: (o: SessionOptions) => Session;
 };
 declare global {
   interface Window {
@@ -25,11 +29,14 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       "paypal-button": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & { type?: string; hidden?: boolean };
+      "paypal-basic-card-container": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      "paypal-basic-card-button": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & { hidden?: boolean };
     }
   }
 }
 
-const SDK_SRC = "https://www.sandbox.paypal.com/web-sdk/v6/core";
+/** The same PayPal the server calls: next.config.ts copies PAYPAL_ENV into NEXT_PUBLIC_PAYPAL_ENV at build. */
+const SDK_SRC = paypalHosts(paypalEnv(process.env.NEXT_PUBLIC_PAYPAL_ENV)).sdk;
 
 /**
  * PayPal's SDK is about 300 ms of script on a mid-range phone, and no one pays before touching the page. So it loads at
@@ -56,8 +63,11 @@ function whenWanted() {
   });
   return wanted;
 }
-/** One SDK instance per language: PayPal draws its button and checkout in the page's language. */
-const instances = new Map<Lang, Promise<{ sdk: SdkInstance; eligible: boolean }>>();
+/**
+ * One SDK instance per language: PayPal draws its buttons and checkout in the page's language. It carries PayPal
+ * checkout and PayPal's guest card form; findEligibleMethods says which of the two this app and buyer may use.
+ */
+const instances = new Map<Lang, Promise<{ sdk: SdkInstance; eligible: boolean; card: boolean }>>();
 let scriptPromise: Promise<void> | null = null;
 
 function loadSdk(clientId: string, lang: Lang) {
@@ -76,9 +86,9 @@ function loadSdk(clientId: string, lang: Lang) {
   let p = instances.get(lang);
   if (!p) {
     p = scriptPromise.then(async () => {
-      const sdk = await window.paypal!.createInstance({ clientId, components: ["paypal-payments"], pageType: "checkout", locale: lang === "es" ? "es-US" : "en-US" });
+      const sdk = await window.paypal!.createInstance({ clientId, components: ["paypal-payments", "paypal-guest-payments"], pageType: "checkout", locale: lang === "es" ? "es-US" : "en-US" });
       const methods = await sdk.findEligibleMethods({ currencyCode: "USD" });
-      return { sdk, eligible: methods.isEligible("paypal") };
+      return { sdk, eligible: methods.isEligible("paypal"), card: methods.isEligible("card") && typeof sdk.createPayPalGuestOneTimePaymentSession === "function" };
     });
     p.catch(() => instances.delete(lang));
     instances.set(lang, p);
@@ -99,7 +109,9 @@ const unloaded = new Set<() => void>();
  * PayPal JavaScript SDK v6 button. `createOrder` asks our server for an order (the server decides amounts and payees);
  * on approval the server captures it. `describedBy` names the line just above the button that says what this payment
  * is; the button's own description reads it too. `look` is PayPal's own color: gold for the main way to give, white
- * for a need in a list.
+ * for a need in a list. `card` adds PayPal's own "Debit or Credit Card" button under it, where PayPal says this buyer
+ * may use it: PayPal's guest card form pays the same order with a card and no PayPal account, and the server captures
+ * it the same way.
  */
 export function PayPalPay({
   createOrder,
@@ -108,6 +120,7 @@ export function PayPalPay({
   lang = "en",
   describedBy,
   look = "gold",
+  card = false,
 }: {
   createOrder: () => Promise<string>;
   onPaid?: (r: Receipt) => void;
@@ -115,10 +128,12 @@ export function PayPalPay({
   lang?: Lang;
   describedBy?: string;
   look?: "gold" | "white";
+  card?: boolean;
 }) {
   const t = giftText(lang);
   const router = useRouter();
   const ref = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
   const createRef = useRef(createOrder);
   const paidRef = useRef(onPaid);
   /** Our server's own words for the last failed order, so a PayPal error that follows it does not replace them. */
@@ -136,21 +151,29 @@ export function PayPalPay({
     paidRef.current = onPaid;
   });
 
-  // PayPal's real button lives in its shadow DOM, so it is told directly when it cannot be used and what it pays for.
+  // PayPal's real buttons live in their shadow DOM, so each is told directly when it cannot be used and what it pays for.
   useEffect(() => {
     const sync = () => {
-      const inner = ref.current?.shadowRoot?.querySelector("button");
-      if (!inner) return false;
-      if (disabled) inner.setAttribute("aria-disabled", "true");
-      else inner.removeAttribute("aria-disabled");
       const said = (describedBy ?? "")
         .split(" ")
         .map((id) => (id ? (document.getElementById(id)?.textContent?.replace(/\s+/g, " ").trim() ?? "") : ""))
         .filter(Boolean)
         .join(" ");
-      if (said) inner.setAttribute("aria-description", said);
-      else inner.removeAttribute("aria-description");
-      return true;
+      // Done once every button PayPal has shown has drawn its own inner button.
+      let done = true;
+      for (const host of [ref.current, cardRef.current]) {
+        if (!host || host.hidden) continue;
+        const inner = host.shadowRoot?.querySelector("button");
+        if (!inner) {
+          done = false;
+          continue;
+        }
+        if (disabled) inner.setAttribute("aria-disabled", "true");
+        else inner.removeAttribute("aria-disabled");
+        if (said) inner.setAttribute("aria-description", said);
+        else inner.removeAttribute("aria-description");
+      }
+      return done && Boolean(ref.current?.shadowRoot?.querySelector("button"));
     };
     if (sync() || (state !== "ready" && state !== "error")) return;
     const frame = window.requestAnimationFrame(sync);
@@ -170,7 +193,7 @@ export function PayPalPay({
         if (!cancelled && !drawnRef.current) setState("loading");
         return loadSdk(clientId, lang);
       })
-      .then(({ sdk, eligible }) => {
+      .then(({ sdk, eligible, card: cardEligible }) => {
         if (cancelled || !ref.current) return;
         if (!eligible) {
           setState("unavailable");
@@ -180,7 +203,8 @@ export function PayPalPay({
           setState("error");
           setMessage(plainRef.current ?? t.ppStopped);
         };
-        const session = sdk.createPayPalOneTimePaymentSession({
+        // PayPal checkout and the guest card form end the same way: Giftwise's server captures the approved order.
+        const handlers: SessionOptions = {
           async onApprove({ orderId }) {
             setState("working");
             setMessage(t.ppCompleting);
@@ -206,22 +230,27 @@ export function PayPalPay({
             setMessage(t.ppCancelled);
           },
           onError: stopped,
-        });
-        const btn = ref.current;
-        btn.removeAttribute("hidden");
-        drawnRef.current = true;
-        btn.onclick = () => {
-          if (btn.getAttribute("aria-disabled") === "true") return;
-          setMessage("");
-          plainRef.current = null;
-          // Do not await before start(): the browser needs the click to open PayPal.
-          const orderPromise = createRef.current().then((orderId) => ({ orderId }));
-          orderPromise.catch((err: unknown) => {
-            plainRef.current = err instanceof PlainError ? err.message : null;
-            stopped();
-          });
-          session.start({ presentationMode: "auto" }, orderPromise).catch(stopped);
         };
+        /** Each press asks the server for a fresh order and opens PayPal's own window for it. */
+        const wire = (btn: HTMLElement, session: Session, guest = false) => {
+          btn.removeAttribute("hidden");
+          btn.onclick = () => {
+            if (btn.getAttribute("aria-disabled") === "true") return;
+            setMessage("");
+            plainRef.current = null;
+            // Do not await before start(): the browser needs the click to open PayPal.
+            const orderPromise = createRef.current().then((orderId) => ({ orderId }));
+            orderPromise.catch((err: unknown) => {
+              plainRef.current = err instanceof PlainError ? err.message : null;
+              stopped();
+            });
+            // The card form opens over the page next to its own button (targetElement); PayPal checkout opens as before.
+            session.start(guest ? { presentationMode: "auto", targetElement: btn } : { presentationMode: "auto" }, orderPromise).catch(stopped);
+          };
+        };
+        wire(ref.current, sdk.createPayPalOneTimePaymentSession(handlers));
+        if (card && cardEligible && cardRef.current && sdk.createPayPalGuestOneTimePaymentSession) wire(cardRef.current, sdk.createPayPalGuestOneTimePaymentSession(handlers), true);
+        drawnRef.current = true;
         setState("ready");
       })
       .catch(() => {
@@ -233,7 +262,7 @@ export function PayPalPay({
     return () => {
       cancelled = true;
     };
-  }, [clientId, router, lang, t, attempt]);
+  }, [clientId, router, lang, t, attempt, card]);
 
   /** Start over: load PayPal again if it never loaded, or make a fresh checkout session for the button on screen. */
   const retry = () => {
@@ -268,12 +297,27 @@ export function PayPalPay({
         aria-disabled={disabled ? "true" : undefined}
         data-disabled={disabled ? "" : undefined}
       />
+      {/* PayPal's guest card form: a debit or credit card, no PayPal account. Hidden until PayPal says it may be used. */}
+      {card && (
+        <paypal-basic-card-container className="pp-card-wrap">
+          <paypal-basic-card-button
+            ref={cardRef}
+            hidden
+            className="pp-button pp-card"
+            aria-describedby={describedBy}
+            aria-disabled={disabled ? "true" : undefined}
+            data-disabled={disabled ? "" : undefined}
+          />
+        </paypal-basic-card-container>
+      )}
       {/* Holds the button's place until PayPal draws it, so nothing below moves. A failed load keeps the same place. */}
       {(state === "waiting" || state === "loading") && (
         <p className="pp-slot" data-loading={state === "loading" ? "" : undefined}>
           {t.ppLoading}
         </p>
       )}
+      {/* The card button's place too, so nothing below moves when PayPal draws it. */}
+      {card && (state === "waiting" || state === "loading") && <span className="pp-slot" aria-hidden="true" />}
       {state === "failed" && (
         <div className="pp-slot pp-failed" role="status">
           <span>{message}</span>

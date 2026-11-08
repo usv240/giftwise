@@ -1,0 +1,56 @@
+{
+  "measured_at": "2026-11-08T07:30:34.888Z",
+  "base_url": "http://localhost:3100",
+  "viewport": "1440x900",
+  "pages": [
+    {
+      "path": "/",
+      "words_shown": 962,
+      "words_with_sections_open": 967,
+      "screens_1440x900": 7.1,
+      "html_kb": 84
+    },
+    {
+      "path": "/evidence",
+      "words_shown": 1131,
+      "words_with_sections_open": 1247,
+      "screens_1440x900": 3.8,
+      "html_kb": 60
+    },
+    {
+      "path": "/evidence/rules",
+      "words_shown": 1337,
+      "words_with_sections_open": 2429,
+      "screens_1440x900": 5,
+      "html_kb": 96
+    },
+    {
+      "path": "/evidence/operations",
+      "words_shown": 763,
+      "words_with_sections_open": 2637,
+      "screens_1440x900": 4,
+      "html_kb": 72
+    },
+    {
+      "path": "/evidence/impact",
+      "words_shown": 1931,
+      "words_with_sections_open": 1865,
+      "screens_1440x900": 6.1,
+      "html_kb": 69
+    },
+    {
+      "path": "/about",
+      "words_shown": 1020,
+      "words_with_sections_open": 1644,
+      "screens_1440x900": 4.8,
+      "html_kb": 65
+    },
+    {
+      "path": "/g/maya",
+      "words_shown": 438,
+      "words_with_sections_open": 1116,
+      "screens_1440x900": 2,
+      "html_kb": 68
+    }
+  ]
+}

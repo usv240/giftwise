@@ -1,10 +1,12 @@
 import Link from "next/link";
 import data from "../../../content/eval/field-cases.json";
 import results from "../../../content/eval/field-cases-results.json";
+import { ASKED_BASIS, IMPACT, KEPT_BASIS, KEPT_SENTENCE } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 
 type Dataset = { id: string; status: string; title: string; not_scored_reason?: string; source: { court: string; citation: string; url: string; date: string }; determination?: { held?: string } };
-type Result = { id: string; title: string; url: string; engine: { match: boolean; rule_ids: string[] }; determination: { held?: string; overpayment?: number | null }; dollars?: { computed?: boolean; kept_per_month?: number | null } };
+type Result = { id: string; title: string; url: string; engine: { match: boolean; rule_ids: string[] }; determination: { held?: string; overpayment?: { amount: number; period: string } | null }; dollars?: { computed?: boolean; kept_per_month?: number | null } };
+const cents = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 const CASES = data.cases as unknown as Dataset[];
 const ROWS = results.cases as unknown as Result[];
@@ -67,11 +69,16 @@ export function FieldCaseList() {
         <h2 id="scored-h">All {scored.length} scored cases</h2>
 <div className="jx-sheet">
         <p className="sx-vs">
-          In {D.as_shown_in_the_opinions.cases_where_routing_keeps_money} of these cases the facts allow a route Giftwise uses. The same help, routed that way, keeps{" "}
-          <strong className="tabular">{usd(D.as_shown_in_the_opinions.kept_per_month_2026)} a month</strong> at 2026 rates. If each person qualified for an ABLE account,{" "}
-          {D.if_each_person_is_able_eligible.cases_where_routing_keeps_money} cases and <span className="tabular">{usd(D.if_each_person_is_able_eligible.kept_per_month_2026)}</span> a month. In{" "}
-          {S.overpayments_stated.scored.length} of the cases the opinion states what SSA asked to be paid back: <strong className="tabular">{usd(S.overpayments_stated.scored_total)}</strong>, from money
-          family members gave or deposited for them.
+          {KEPT_SENTENCE} {KEPT_BASIS} If each person qualified for an ABLE account, {D.if_each_person_is_able_eligible.cases_where_routing_keeps_money} of the cases would keep money.
+        </p>
+        <p className="sx-vs">
+          In {IMPACT.askedBackCases} of the cases the opinion states what SSA asked to be paid back:{" "}
+          {IMPACT.askedCases.map((c, i) => (
+            <span key={c.id}>
+              <strong className="tabular">{cents(c.amount)}</strong> ({c.title.charAt(0).toLowerCase() + c.title.slice(1)}){i < IMPACT.askedCases.length - 1 ? " and " : ". "}
+            </span>
+          ))}
+          {ASKED_BASIS}
         </p>
         <p className="sx-meta muted">
           Every scored case is one where SSA counted the help and the court agreed; the other opinions turn on loans, shared rent, trusts or deeming, separate questions from a gift, so they are listed
@@ -118,7 +125,15 @@ export function FieldCaseList() {
                     <p>
                       <strong>Held:</strong> {r.determination.held ?? c.determination?.held}
                     </p>
-                    {r.determination.overpayment ? <p className="muted">Overpayment SSA assessed: {usd(r.determination.overpayment)}.</p> : null}
+                    {r.determination.overpayment ? (
+                      <p className="muted">
+                        SSA asked for {cents(r.determination.overpayment.amount)} back
+                        {r.determination.overpayment.period !== "not stated" ? `, for ${r.determination.overpayment.period}` : ""}.{" "}
+                        {IMPACT.askedCases.find((a) => a.id === r.id)?.avoidedThroughAble
+                          ? "Run through the engine, the same help paid into an ABLE account keeps her savings under $2,000 every month, so there would be nothing to ask back."
+                          : null}
+                      </p>
+                    ) : null}
                     <p className="sx-rules tech-only">Rules {r.engine.rule_ids.join(", ")}</p>
                     <p>
                       <a className="text-link" href={c.source.url} target="_blank" rel="noreferrer">

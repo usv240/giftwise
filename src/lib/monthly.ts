@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
-import { getHousehold } from "@/lib/households";
+import { getHousehold, withAbleSoFar } from "@/lib/households";
 import { routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
 import { DEFAULT_PROFILE, addMonths, computeMonth, evaluateGift, monthName, monthOf, usd, type Profile } from "@/lib/rules";
 
@@ -124,7 +124,7 @@ export async function planMonth(token: string, month: string) {
   if (!s) return null;
   const existing = s.runs.find((r) => r.month === month);
   if (existing) return existing;
-  const profile = { ...DEFAULT_PROFILE, ...(s.data.household.profile as Partial<Profile>) };
+  const profile = withAbleSoFar({ ...DEFAULT_PROFILE, ...(s.data.household.profile as Partial<Profile>) }, s.data.payments);
   const ableName = `${s.data.household.name}'s ABLE account`;
   const needs = needsForMonth(s.data.needs, s.data.payments, month, await orderMonths(s.data.household.id));
   const plan = planFor(Number(s.gift.amount), needs, month, profile, ableName);
@@ -160,8 +160,8 @@ export async function startMonthly(o: { slug: string; amount: number; giverName?
     .returning();
   if (o.firstOrderId) {
     const rows = await db().select().from(schema.payments).where(eq(schema.payments.orderId, o.firstOrderId));
-    // Only an order for this household, already captured, becomes the first month.
-    if (rows.length && rows.every((r) => r.householdId === data.household.id && r.status === "captured")) {
+    // Only an order for this household, already captured and part of the page's current round, becomes the first month.
+    if (rows.length && rows.every((r) => r.householdId === data.household.id && r.status === "captured" && !r.archivedAt)) {
       const profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
       const date = `${o.month}-01`;
       const lines: RoutedGift["lines"] = rows.map((r) => {

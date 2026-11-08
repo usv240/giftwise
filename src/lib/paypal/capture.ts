@@ -1,4 +1,4 @@
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, eq, isNull, ne, sql } from "drizzle-orm";
 import { audit } from "../audit";
 import { db, schema } from "../db";
 import { log } from "../log";
@@ -23,7 +23,7 @@ type PayPalOrder = {
   purchase_units?: { reference_id?: string; payments?: { captures?: { id?: string; amount?: { value?: string } }[] } }[];
 };
 type PaymentRow = typeof schema.payments.$inferSelect;
-type Actor = "person" | "webhook";
+type Actor = "person" | "webhook" | "system";
 
 /**
  * Capture an approved order and record it. An order can pay several recipients (one purchase unit each);
@@ -95,6 +95,11 @@ export async function syncFromPayPal(orderId: string, actor: Actor = "webhook"):
  * webhook and the return page); PayPal answers both, because they share a PayPal-Request-Id. Only the call that moves a
  * row from not captured to captured counts it toward the need, so the money is never counted twice, and both calls
  * return the captures as recorded. A repeated answer can leave out the captures, so then PayPal's own copy is read.
+ *
+ * Each row's flip and its need's total change together, in one transaction holding a share of the household row. A
+ * reset of the sample page (resetSample in src/lib/households.ts) takes that row for itself, so the two never cross: a
+ * payment the reset moved to an earlier round is still recorded as captured, and its receipt still opens, but it does
+ * not count toward the reopened needs.
  */
 async function record(orderId: string, rows: PaymentRow[], body: PayPalOrder, actor: Actor): Promise<CaptureOutcome> {
   const d = db();
@@ -107,21 +112,26 @@ async function record(orderId: string, rows: PaymentRow[], body: PayPalOrder, ac
       const row = rows.find((r) => r.referenceId === pu.reference_id) ?? (rows.length === 1 ? rows[0] : undefined);
       const cap = pu.payments?.captures?.[0];
       if (!row || !cap) continue;
-      const flipped = await d
-        .update(schema.payments)
-        .set({ status: "captured", captureId: cap.id ?? null, payerName: payer, capturedAt: now })
-        .where(and(eq(schema.payments.id, row.id), ne(schema.payments.status, "captured")))
-        .returning({ id: schema.payments.id });
-      if (!flipped.length) continue;
-      if (row.needId) {
-        await d
-          .update(schema.needs)
-          .set({
-            funded: sql`${schema.needs.funded} + ${row.amount}`,
-            status: sql`case when ${schema.needs.funded} + ${row.amount} >= ${schema.needs.amount} then 'paid' else 'partial' end`,
-          })
-          .where(eq(schema.needs.id, row.needId));
-      }
+      const flipped = await d.transaction(async (tx) => {
+        if (row.householdId) await tx.select({ id: schema.households.id }).from(schema.households).where(eq(schema.households.id, row.householdId)).for("share");
+        const [f] = await tx
+          .update(schema.payments)
+          .set({ status: "captured", captureId: cap.id ?? null, payerName: payer, capturedAt: now })
+          .where(and(eq(schema.payments.id, row.id), ne(schema.payments.status, "captured")))
+          .returning({ id: schema.payments.id, archivedAt: schema.payments.archivedAt });
+        // Only a payment of the page's current round counts toward its need.
+        if (f && row.needId && !f.archivedAt) {
+          await tx
+            .update(schema.needs)
+            .set({
+              funded: sql`${schema.needs.funded} + ${row.amount}`,
+              status: sql`case when ${schema.needs.funded} + ${row.amount} >= ${schema.needs.amount} then 'paid' else 'partial' end`,
+            })
+            .where(and(eq(schema.needs.id, row.needId), isNull(schema.needs.archivedAt)));
+        }
+        return f ?? null;
+      });
+      if (!flipped) continue;
       flippedHere.push({ reference_id: row.referenceId, capture_id: cap.id ?? null, amount: cap.amount?.value ?? null, payee: row.payeeName });
     }
   };

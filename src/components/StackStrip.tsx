@@ -18,7 +18,7 @@ export const STACK = [
   { id: "apimatic", name: "APIMatic" },
 ] as const;
 
-/** Shown above the footer on every page but the printable records: every tool used, with what it does here. */
+/** Every tool used, with what it does here, above the footer of /stack and /evidence. */
 export function StackStrip() {
   return (
     <Suspense fallback={null}>
@@ -29,8 +29,9 @@ export function StackStrip() {
 
 function StackStripAt() {
   const path = usePathname() ?? "/";
-  // The month's report, its Easy Read version and the page that checks a report are documents; they end with the record.
-  if (/^\/g\/[^/]+\/report|^\/v\//.test(path)) return null;
+  // Every tool, by name, on the two pages about how Giftwise is built and checked. Product pages carry one quiet "How
+  // it is built" link in the footer instead.
+  if (!/^\/(stack|evidence)(\/|$)/.test(path)) return null;
   return (
     <section className="stack-strip frame" aria-labelledby="stack-strip-title">
       <h2 id="stack-strip-title" className="sr-only">

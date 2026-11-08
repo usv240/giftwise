@@ -295,7 +295,7 @@
     "title": "A bill or quote",
     "what": "Upload or photograph a bill or a quote. Claude reads it and Giftwise checks the rule.",
     "why": "Most needs start as a piece of paper. This turns it into a safe payment plan.",
-    "technical": "POST /api/v1/read-bill: Claude Opus 5.5 vision with a structured output schema, then the rules engine and its cited sources.",
+    "technical": "POST /api/v1/read-bill: Claude Opus 5.5 vision with a structured output schema, then a bill at or near housing, or read with under 90% confidence, goes to the two reviewers and the referee (src/lib/ai/bill-review.ts); the rules engine routes it, with its cited sources.",
     "sponsor": [
       "Claude"
     ]
@@ -388,7 +388,7 @@
     "title": "Testing with PayPal sandbox",
     "what": "This demo uses PayPal's sandbox, a practice version of PayPal where no real money moves.",
     "why": "Anyone can try the full payment safely, with the sandbox buyer login shown beside it. Each sample shop is paid to its own sandbox business account and her ABLE account to another, so PayPal's record names every payee separately.",
-    "technical": "api-m.sandbox.paypal.com and the sandbox JavaScript SDK at www.sandbox.paypal.com/web-sdk/v6/core. Payees resolve on the server: vendor:riverside, vendor:eastgate and vendor:northside each to their own PAYPAL_VENDOR_EMAIL_* account, able to PAYPAL_ABLE_EMAIL (payeeEmail() in src/lib/households.ts); /status shows how many accounts that is."
+    "technical": "PAYPAL_ENV (sandbox here) sets PayPal's REST API, the JavaScript SDK and PayPal's MCP server together. A guest can pay with Debit or Credit Card and PayPal's test card, with no sandbox login. Payees resolve on the server: vendor:riverside, vendor:eastgate and vendor:northside each to their own PAYPAL_VENDOR_EMAIL_* account, able to PAYPAL_ABLE_EMAIL (payeeEmail() in src/lib/households.ts); /status shows how many accounts that is."
   },
   "real.world": {
     "title": "How this works for real",
@@ -409,7 +409,7 @@
   },
   "page.evidence": {
     "title": "About this page",
-    "what": "Every number on this site and where it comes from, a five-minute path through the product, the failure cases run live, and the latest test results.",
+    "what": "Three numbers, a five-minute path through the product, and every result on its own page: how the rules were checked, how it runs, and what it changes.",
     "why": "So you can check every claim yourself in a few minutes.",
     "technical": "The failure-case runner is POST /api/cases/run. It creates small PayPal sandbox orders and runs the same capture and order code the gift page uses."
   },
@@ -490,7 +490,7 @@
     "title": "An assistant that asks first",
     "what": "A Claude assistant answering a real question from June, Maya’s aunt. It has no knowledge of SSI rules beyond what the Giftwise tools return.",
     "why": "It shows the whole path: what cash would do, the safer way, a PayPal checkout June approves herself, and PayPal’s own record of what that order pays.",
-    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Giftwise tools are discovered with tools/list and called with tools/call over HTTP to /api/mcp. paypal_get_order asks PayPal’s own MCP server: the @paypal/mcp package (PayPal Agent Toolkit), which Giftwise runs as a child process over stdio with a sandbox access token. PayPal’s hosted server (mcp.sandbox.paypal.com, SSE) is the second choice (github.com/paypal/AI-Toolkit/issues/34). GET /v2/checkout/orders/{id} answers when neither can."
+    "technical": "claude-opus-5-5 with adaptive thinking in a manual tool-use loop. Giftwise tools are discovered with tools/list and called with tools/call over HTTP to /api/mcp. paypal_get_order asks PayPal’s own MCP server: the @paypal/mcp package (PayPal Agent Toolkit), which Giftwise runs as a child process over stdio with a sandbox access token. PayPal’s hosted server is the second choice, and GET /v2/checkout/orders/{id} answers when neither can. The nightly card check reads every gift it pays through the same get_order tool."
   },
   "agents.connect": {
     "title": "Connect your agent",
@@ -692,7 +692,7 @@
     "title": "Last 24 hours",
     "what": "Requests by route with median and 95th percentile latency and the share that failed, payments by status, webhooks counted once, and AI calls with their cost.",
     "why": "Latency and errors per route show where to look; counting webhooks once shows duplicates were seen and not reapplied.",
-    "technical": "percentile_cont over request_log.ms by route; payments and payouts grouped by status and folded into five words; audit_events whose action starts with paypal.webhook, counted by distinct event id; ai_usage grouped by route."
+    "technical": "percentile_cont over request_log.ms by route; payments and payouts grouped by status and folded into five words; audit_events whose action starts with paypal.webhook, counted by distinct event id; ai_usage grouped by route. The outside checks' $12 test orders are named on their own line, not counted as gifts."
   },
   "ops.stream": {
     "title": "Live stream",
@@ -720,9 +720,9 @@
   },
   "evidence.load": {
     "title": "Under load",
-    "what": "A hundred visitors at once, each checking a gift and opening a gift page, with the time each request took and how many failed.",
+    "what": "Visitors at once, each checking a gift and opening a gift page, on the deployed site and on a laptop, with the time each request took and how many failed.",
     "why": "The two paths every visitor uses must hold up when a link is shared. The numbers say how fast, and on what machine.",
-    "technical": "scripts/load-test.mjs: 100 concurrent runs for 3 rounds against the local production build, each run its own visitor (x-forwarded-for in 198.51.100.0/24), p50, p95 and p99 measured by the client. Written to content/public/load-test.json. npm run test:ledger-race fires 60 ledger appends at once for the hash chain."
+    "technical": "scripts/load-test.mjs: on the deployed site, 10 visitors at once for 3 rounds, stopping at the first error (LOAD_WHERE=hosted, content/public/load-test-hosted.json); on a laptop, 100 at once for 3 rounds against the local production build (content/public/load-test.json). Each run is its own visitor (x-forwarded-for in 198.51.100.0/24); p50, p95 and p99 are measured by the client, and one visitor at a time is measured first. npm run test:ledger-race fires 60 ledger appends at once for the hash chain."
   },
   "evidence.real": {
     "title": "Running it for real",

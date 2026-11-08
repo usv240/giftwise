@@ -13,6 +13,7 @@ const need = (o: Partial<NeedRow> & Pick<NeedRow, "id" | "title" | "category" | 
   status: "open",
   funded: "0",
   sortOrder: o.id,
+  archivedAt: null,
   createdAt: at("2026-10-01"),
   ...o,
 });

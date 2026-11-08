@@ -14,6 +14,7 @@ import { Faq } from "@/components/landing/Faq";
 import { HowNav } from "@/components/landing/HowNav";
 import { LoopVideo } from "@/components/landing/LoopVideo";
 import { ShowcaseBoard } from "@/components/landing/ShowcaseBoard";
+import { WhatIsNew } from "@/components/WhatIsNew";
 import { IMPACT } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 import "./landing.css";
@@ -36,7 +37,7 @@ const HOW = [
   { clause: "First a need arrives.", card: { title: "Wheelchair repair", meta: "$420 to Riverside Mobility (sample)", tech: "", status: "Reading the quote" } },
   { clause: "Then the rule is checked.", card: { title: "Wheelchair repair", meta: "Paid to the shop: not counted.", tech: "POMS SI 00815.400", status: "Rule found" } },
   { clause: "Then PayPal pays the shop.", card: { title: "Wheelchair repair", meta: "Dan paid $420 with PayPal. Sandbox ID 8RT41...", tech: "", status: "Paid" } },
-  { clause: "Her month stays steady.", card: { title: "June check", meta: "$994. Savings on July 1: $1,240 of $2,000", tech: "", status: "Steady" } },
+  { clause: "Her month stays steady.", card: { title: "Her check", meta: "Stays whole. Savings: $1,240 of $2,000", tech: "", status: "Steady" } },
 ];
 
 const BUILT = [
@@ -107,19 +108,24 @@ export default function Home() {
           <p className="hero-sub">
             For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules and pays the shop directly through PayPal. Claude reads the bills and fundraiser pages; the rules do the math.
           </p>
-          <ul className="hero-impact" aria-label="What routing keeps, in real federal court cases">
+          <ul className="hero-impact" aria-label="What routing would have changed, in real federal court cases">
             <li>
-              <Link className="hero-impact-link" href="/evidence#field-cases">
+              <Link className="hero-impact-link" href="/evidence/impact#kept">
                 <span className="hero-impact-fig tabular" data-kept="">
-                  {usd(IMPACT.keptMonthlyPerPerson)} a month
+                  {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))}
                 </span>
-                <span className="hero-impact-what">kept for each person in real federal court cases, when the help is routed the benefit-safe way</span>
+                <span className="hero-impact-what">
+                  a month the same help would have kept, routed through Giftwise, in {IMPACT.routedCases} of {IMPACT.scoredCases} real court cases, at 2026 rates
+                </span>
               </Link>
             </li>
             <li>
-              <Link className="hero-impact-link" href="/evidence#field-cases">
-                <span className="hero-impact-fig tabular">{IMPACT.askedBack.toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
-                <span className="hero-impact-what">SSA asked to be paid back in {IMPACT.askedBackCases === 2 ? "two" : IMPACT.askedBackCases} of those cases, for money family gave</span>
+              <Link className="hero-impact-link" href="/evidence/impact#asked">
+                <span className="hero-impact-fig tabular">{IMPACT.askedCases.map((c) => usd(Math.round(c.amount))).join(" and ")}</span>
+                <span className="hero-impact-what">
+                  SSA asked back in {IMPACT.askedBackCases === 2 ? "two" : IMPACT.askedBackCases} cases for money family gave; paid into ABLE, the engine keeps her savings under the limit in{" "}
+                  {IMPACT.askedAvoidedThroughAble === IMPACT.askedBackCases ? "both" : IMPACT.askedAvoidedThroughAble}
+                </span>
               </Link>
             </li>
           </ul>
@@ -139,6 +145,11 @@ export default function Home() {
           <GiftChecker />
         </div>
       </section>
+
+      {/* What is new, in the first two screens: the referee, the report anyone can check, and the agent that asks first. */}
+      <div className="frame grid-12 home-new">
+        <WhatIsNew headingId="new-title" />
+      </div>
 
       {/* Intro: a statement with inline pictures */}
       <section className="intro frame" aria-labelledby="intro-title">
@@ -254,7 +265,7 @@ export default function Home() {
           <h3 className="ev-sub">How the rules were checked</h3>
           <ul className="research-proof">
             <li>
-              <Link className="research-proof-link" href="/evidence#ssa-examples">
+              <Link className="research-proof-link" href="/evidence/ssa-examples">
                 <span className="research-proof-fig tabular">
                   {ssaResults.summary.engine_matches} of {ssaResults.summary.cases}
                 </span>
@@ -262,7 +273,7 @@ export default function Home() {
               </Link>
             </li>
             <li>
-              <Link className="research-proof-link" href="/evidence#field-cases">
+              <Link className="research-proof-link" href="/evidence/court-cases">
                 <span className="research-proof-fig tabular">
                   {fieldResults.summary.agreed} of {fieldResults.summary.scored}
                 </span>
@@ -270,7 +281,7 @@ export default function Home() {
               </Link>
             </li>
             <li>
-              <Link className="research-proof-link" href="/evidence#evaluation">
+              <Link className="research-proof-link" href="/evidence/rules#evaluation">
                 <span className="research-proof-fig tabular">
                   {billResults.summary.referee.check_kept_whole} of {billResults.summary.referee.all_cases}
                 </span>

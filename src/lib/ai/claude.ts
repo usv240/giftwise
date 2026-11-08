@@ -55,17 +55,74 @@ let client: Anthropic | null = null;
  */
 const PAUSE_MS = 3 * 60_000;
 let pausedUntil = 0;
+/**
+ * A key with a space or a second line in it (a pasted .env block, say) is never sent: the SDK would put the whole value,
+ * secrets and all, into a header, and the error that comes back would quote it.
+ */
+export function apiKeyState(env: Record<string, string | undefined> = process.env): "ok" | "missing" | "malformed" {
+  const key = env.ANTHROPIC_API_KEY?.trim();
+  if (!key) return "missing";
+  return /\s/.test(key) ? "malformed" : "ok";
+}
 export function aiAvailable() {
-  return Boolean(process.env.ANTHROPIC_API_KEY) && Date.now() >= pausedUntil;
+  return apiKeyState() === "ok" && Date.now() >= pausedUntil;
 }
 /** True while the account is paused after the API turned it away. */
 export function aiPaused() {
-  return Boolean(process.env.ANTHROPIC_API_KEY) && Date.now() < pausedUntil;
+  return apiKeyState() === "ok" && Date.now() < pausedUntil;
 }
 export function claude() {
   if (!aiAvailable()) return null;
-  client ??= new Anthropic();
+  client ??= new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY!.trim() });
   return client;
+}
+
+let keyCheck: { at: number; ok: boolean; detail: string } | null = null;
+/**
+ * Whether the API accepts this server's key, from a models lookup (no tokens, no cost), asked at most every ten minutes
+ * so /status and /api/health report what the API says, not only that a key is set.
+ */
+export async function keyAccepted(): Promise<{ ok: boolean; detail: string }> {
+  const c = claude();
+  if (!c) {
+    const state = apiKeyState();
+    return {
+      ok: false,
+      detail:
+        state === "malformed"
+          ? "The API key on this server has more than one line or a space, so it is not used; enter it again as one line"
+          : state === "missing"
+            ? "No API key; ready-made examples show saved results"
+            : "Paused after the API turned the account away; ready-made examples show saved results",
+    };
+  }
+  if (keyCheck && Date.now() - keyCheck.at < 10 * 60_000) return keyCheck;
+  try {
+    await c.models.retrieve(MODEL, undefined, { timeout: 6000, maxRetries: 0 });
+    keyCheck = { at: Date.now(), ok: true, detail: "The API accepted the key; bill and fundraiser reading are live" };
+  } catch (e) {
+    log.warn("Claude key check did not pass", { err: e });
+    keyCheck = { at: Date.now(), ok: false, detail: publicAiError(e, "key check") };
+  }
+  return keyCheck;
+}
+/** The last key check, if one ran in the past ten minutes (Render's frequent health probe reads this, never waits). */
+export function cachedKeyCheck(): { ok: boolean; detail: string } | null {
+  return keyCheck && Date.now() - keyCheck.at < 10 * 60_000 ? keyCheck : null;
+}
+/** Tests clear the cached key check. */
+export function resetKeyCheck() {
+  keyCheck = null;
+}
+
+/**
+ * What a visitor may read about a model call that did not finish: the kind of failure, never the raw error text, which
+ * can carry request headers. The full error goes to the masked server log.
+ */
+export function publicAiError(e: unknown, what = "AI check"): string {
+  if (e instanceof AiUnavailableError) return e.message;
+  if (e instanceof Anthropic.APIError && e.status) return `The ${what} did not finish: the AI service answered ${e.status}.`;
+  return `The ${what} could not run just now.`;
 }
 
 export class AiUnavailableError extends Error {

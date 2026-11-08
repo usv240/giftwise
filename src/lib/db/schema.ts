@@ -43,6 +43,11 @@ export const needs = pgTable("needs", {
   status: text("status").notNull().default("open"),
   funded: numeric("funded", { precision: 10, scale: 2 }).notNull().default("0"),
   sortOrder: integer("sort_order").notNull().default(0),
+  /**
+   * Set when a reset of the sample page took this need off the page while gifts still point to it (an organizer's own
+   * need, or one removed after an earlier round paid toward it). The row stays so those receipts keep their title.
+   */
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -67,6 +72,11 @@ export const payments = pgTable(
     debugId: text("debug_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     capturedAt: timestamp("captured_at", { withTimezone: true }),
+    /**
+     * Set when the sample page was reset after this payment began: it belongs to an earlier round of the sample. The row
+     * is never deleted, so its receipt still opens, but it no longer counts toward the page's needs, report or totals.
+     */
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
   },
   (t) => [uniqueIndex("payments_order_ref_idx").on(t.orderId, t.referenceId)],
 );

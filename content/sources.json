@@ -62,5 +62,13 @@
   "able-united-gifting": { "title": "ABLE United: Gifting", "url": "https://www.ableunited.com/usage/gifting", "publisher": "ABLE United" },
   "asan-easy-read": { "title": "ASAN: One Idea Per Line, a guide to making Easy Read resources (2021)", "url": "https://autisticadvocacy.org/wp-content/uploads/2021/07/One-Idea-Per-Line.pdf", "publisher": "Autistic Self Advocacy Network" },
   "ssa-asr-2024-under65": { "title": "SSA: SSI Annual Statistical Report, 2024, recipients under age 65 by diagnostic group", "url": "https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect06.html", "publisher": "Social Security Administration" },
-  "ssa-espanol-telefono": { "title": "SSA: llame al 1-800-772-1213 y oprima 7 para español", "url": "https://www.ssa.gov/espanol/estadodecuenta/", "publisher": "Social Security Administration" }
+  "ssa-espanol-telefono": { "title": "SSA: llame al 1-800-772-1213 y oprima 7 para español", "url": "https://www.ssa.gov/espanol/estadodecuenta/", "publisher": "Social Security Administration" },
+  "crs-if10482": { "title": "Congressional Research Service: Supplemental Security Income (SSI), IF10482, updated February 26, 2025", "url": "https://www.congress.gov/crs-product/IF10482", "publisher": "Congressional Research Service" },
+  "true-link-card": { "title": "True Link: Prepaid Visa card for people on benefits and their trustees", "url": "https://www.truelinkfinancial.com/prepaid-card", "publisher": "True Link Financial" },
+  "poms-si-01120-200": { "title": "POMS SI 01120.200: Information on trusts, including trusts established prior to 1/1/2000", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120200", "publisher": "Social Security Administration" },
+  "poms-si-01120-203": { "title": "POMS SI 01120.203: Exceptions to counting trusts established on or after January 1, 2000 (special needs and pooled trusts)", "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120203", "publisher": "Social Security Administration" },
+  "arc-texas-pooled-fees": { "title": "The Arc of Texas Master Pooled Trust: enrollment and fees", "url": "https://www.thearcoftexas.org/trust/enrollment/", "publisher": "The Arc of Texas" },
+  "db101": { "title": "Disability Benefits 101: benefits and work estimators (13 states)", "url": "https://www.db101.org/", "publisher": "World Institute on Disability" },
+  "ssa-wipa": { "title": "SSA Ticket to Work: benefits counseling and the path to employment (WIPA)", "url": "https://choosework.ssa.gov/library/fact-sheet-benefits-counseling-and-the-path-to-employment", "publisher": "Social Security Administration" },
+  "ssa-wipa-findhelp": { "title": "SSA Ticket to Work: Find Help (WIPA benefits counselors near you)", "url": "https://choosework.ssa.gov/findhelp", "publisher": "Social Security Administration" }
 }

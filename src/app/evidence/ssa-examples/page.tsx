@@ -19,7 +19,7 @@ export default function SsaExamplesPage() {
     <div className="page frame evidence evidence-sub">
       <header className="page-head">
         <p className="jx-crumb">
-          <Link className="text-link" href="/evidence#ssa-examples">
+          <Link className="text-link" href="/evidence/rules#ssa-examples">
             Evidence
           </Link>
         </p>

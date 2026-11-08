@@ -1,6 +1,8 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { AiUnavailableError, MODEL, aiError, claude, recordAiUsage, replayableWithSource } from "@/lib/ai/claude";
+import { log } from "@/lib/log";
 import { paypalRest } from "@/lib/paypal/client";
+import { failureKind } from "@/lib/scrub";
 import { connectPayPalMcp, type PayPalMcpClient } from "./paypal-mcp";
 
 /**
@@ -81,7 +83,9 @@ async function readPayPalOrder(id: string, session: { mcp?: PayPalMcpClient | nu
     mcpNote = parsed.code ?? "an error";
   } catch (e) {
     session.mcp = null;
-    mcpNote = (e as Error).message.slice(0, 80);
+    // The kind of failure only: the error's own text can quote request headers. The full error goes to the masked log.
+    log.warn("PayPal MCP get_order did not run", { err: e });
+    mcpNote = failureKind(e);
   }
   const res = await paypalRest<PayPalOrder>(`/v2/checkout/orders/${encodeURIComponent(id)}`, { method: "GET" });
   if (res.status !== 200) return { text: `PayPal could not find order ${id} (HTTP ${res.status}).`, isError: true };

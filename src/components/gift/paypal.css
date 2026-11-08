@@ -42,3 +42,15 @@
     min-height: 44px;
   }
 }
+
+/* PayPal's own "Debit or Credit Card" button, under the PayPal button where PayPal offers its guest card form. PayPal
+   draws it in its shadow DOM, with its own keyboard focus ring in both themes, as it does the PayPal button; the page
+   gives it the same 48px row, the same gap and the same disabled look (.pp-button). Until PayPal says it may be used,
+   it takes no space. */
+.pp-card-wrap {
+  display: block;
+  width: 100%;
+}
+.pp-card-wrap:has(> .pp-card[hidden]) {
+  display: none;
+}

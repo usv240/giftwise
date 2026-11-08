@@ -206,6 +206,8 @@ j = await r.json();
 ok("checks: the workflow can list the eight failure cases", r.status === 200 && j.data?.length === 8, `${j.data?.length}`);
 r = await post("/api/checks/case/declined", {});
 ok("checks: running a case without the secret -> 401 (or 503 if the server has none)", r.status === 401 || r.status === 503, `${r.status}`);
+r = await post("/api/checks/card-gift", {}, { Authorization: "Bearer not-the-secret" });
+ok("checks: paying the card check without the secret -> 401 (or 503 if the server has none)", r.status === 401 || r.status === 503, `${r.status}`);
 r = await post("/api/checks", { source: "local" }, { "Content-Type": "application/json", Authorization: "Bearer not-the-secret" });
 ok("checks: filing a run with the wrong secret -> 401 (or 503 if the server has none)", r.status === 401 || r.status === 503, `${r.status}`);
 if (process.env.CHECKS_SECRET && /localhost|127\.0\.0\.1/.test(B)) {

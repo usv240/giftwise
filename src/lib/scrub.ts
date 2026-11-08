@@ -1,7 +1,8 @@
 /**
  * Masking shared by the logger and error tracking. No Node imports, so the client bundle can use it too.
  * Emails become a***@domain, phone numbers and photo bytes become markers, payees become "[payee]", amounts
- * "[amount]", and any key that names a secret is hidden whatever it holds.
+ * "[amount]", any key that names a secret is hidden whatever it holds, and credential-shaped text (an Anthropic key,
+ * a bearer token, a PayPal access token, a pasted NAME=value line) is redacted wherever it appears.
  */
 
 export type Fields = Record<string, unknown>;
@@ -20,11 +21,52 @@ const PAYEE = /(payee|receiver|recipient|payer|giver|caregiver)/i;
 const AMOUNT = /(amount|total|balance|funded|value)$/i;
 const EMAILKEY = /e-?mail/i;
 
+/**
+ * Credentials that must never reach a page, an API response, a log line or a stored row, whatever carries them: an
+ * Anthropic key, a bearer or basic credential, a PayPal access token, and NAME=value lines from a pasted .env block.
+ */
+const SECRETS: [RegExp, (m: string) => string][] = [
+  [/sk-ant-[A-Za-z0-9_-]+/g, () => "[redacted key]"],
+  [/\b(?:Bearer|Basic|ApiKey)\s+(?=[A-Za-z0-9._~+/=-]*\d)[A-Za-z0-9._~+/=-]{16,}/g, (m) => `${m.split(/\s+/)[0]} [redacted]`],
+  [/\bA21AA[A-Za-z0-9_-]{16,}/g, () => "[redacted token]"],
+  [/\b([A-Z][A-Z0-9]*_[A-Z0-9_]+)=[^\s"',;]{8,}/g, (m) => `${m.slice(0, m.indexOf("="))}=[redacted]`],
+];
+
+/** The same text with every credential-looking run replaced. Plain words, numbers and ids pass through unchanged. */
+export function redactSecrets(s: string): string {
+  let out = s;
+  for (const [re, to] of SECRETS) out = out.replace(re, to);
+  return out;
+}
+
+/** A copy of any JSON-like value with redactSecrets applied to every string in it. */
+export function redactDeep<T>(value: T, depth = 0): T {
+  if (typeof value === "string") return redactSecrets(value) as T;
+  if (value === null || typeof value !== "object" || depth > 12) return value;
+  if (Array.isArray(value)) return value.map((v) => redactDeep(v, depth + 1)) as T;
+  if (value instanceof Date || ArrayBuffer.isView(value) || value instanceof ArrayBuffer) return value;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = redactDeep(v, depth + 1);
+  return out as T;
+}
+
+/**
+ * The kind of a failure, safe to show anyone: "timed out", "answered 502", or "an unexpected error". Never the error's
+ * own text, which from an upstream service or SDK can quote request headers. Log the full error alongside it.
+ */
+export function failureKind(e: unknown): string {
+  const err = e as { name?: string; message?: string; status?: unknown; statusCode?: unknown } | null;
+  if (err && (err.name === "TimeoutError" || err.name === "AbortError" || /timed out$/i.test(err.message ?? ""))) return "timed out";
+  const status = typeof err?.status === "number" ? err.status : typeof err?.statusCode === "number" ? err.statusCode : null;
+  if (status) return `answered ${status}`;
+  return "an unexpected error";
+}
+
 export const maskEmail = (s: string) => s.replace(EMAIL, (m) => `${m[0]}***@${m.slice(m.indexOf("@") + 1)}`);
 
-/** Mask one string: emails to a***@domain, phone numbers and photo bytes to markers, and long text cut short. */
+/** Mask one string: credentials redacted, emails to a***@domain, phone numbers and photo bytes to markers, and long text cut short. */
 export function maskText(s: string) {
-  const out = maskEmail(s).replace(BLOB, "[bytes]").replace(PHONE, "[phone]");
+  const out = maskEmail(redactSecrets(s)).replace(BLOB, "[bytes]").replace(PHONE, "[phone]");
   return out.length > 300 ? `${out.slice(0, 300)}… (${out.length} chars)` : out;
 }
 

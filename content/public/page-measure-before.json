@@ -1,0 +1,36 @@
+{
+  "measured_at": "2026-11-08T06:12:29.088Z",
+  "base_url": "https://giftwise-405i.onrender.com",
+  "note": "The deployed site at commit 1123caa, before /evidence moved its long sections to /evidence/rules, /evidence/operations and /evidence/impact.",
+  "viewport": "1440x900",
+  "pages": [
+    {
+      "path": "/",
+      "words_shown": 801,
+      "words_with_sections_open": 816,
+      "screens_1440x900": 6.9,
+      "html_kb": 81
+    },
+    {
+      "path": "/evidence",
+      "words_shown": 3369,
+      "words_with_sections_open": 6595,
+      "screens_1440x900": 11.3,
+      "html_kb": 207
+    },
+    {
+      "path": "/about",
+      "words_shown": 529,
+      "words_with_sections_open": 1173,
+      "screens_1440x900": 3.5,
+      "html_kb": 56
+    },
+    {
+      "path": "/g/maya",
+      "words_shown": 461,
+      "words_with_sections_open": 1092,
+      "screens_1440x900": 2.2,
+      "html_kb": 69
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { mask, maskEmail, maskText, type Fields } from "./scrub";
+import { mask, maskEmail, maskText, redactSecrets, type Fields } from "./scrub";
 
 /**
  * Structured logging: one JSON line per event, with the request id and route of the API call it happened in.
@@ -42,7 +42,7 @@ export function logLine(level: Level, msg: string, fields: Fields = {}) {
   const line: Fields = {
     ts: new Date().toISOString(),
     level,
-    msg,
+    msg: redactSecrets(msg),
     request_id: ctx?.requestId ?? null,
     route: ctx?.route ?? null,
     ...(ctx ? { ms: Date.now() - ctx.started } : {}),

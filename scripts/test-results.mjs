@@ -1,5 +1,5 @@
 // Run test suites and write each one's count to content/test-results.json: the one file the README, TESTING.md and
-// /evidence take their test numbers from. After recording, the count in each suite's row of the README and TESTING.md
+// /evidence take their test numbers from. After recording, the count in each suite's row of docs/tests.md and TESTING.md
 // tables is rewritten from the file, and tests/docs-numbers.test.ts fails whenever a document states another number.
 //
 //   node scripts/test-results.mjs unit smoke a11y api      run these suites, record them, update the two tables
@@ -37,10 +37,10 @@ if (!ids.length || ids.includes("--list")) {
 
 const n = (x) => x.toLocaleString("en-US");
 
-/** Rewrite the count in every table row that names this suite's command: "N of M" in the README, the first count in TESTING.md. */
+/** Rewrite the count in every table row that names this suite's command: "N of M" in docs/tests.md, the first count in TESTING.md. */
 function writeDocs(suite) {
   for (const [file, re, to] of [
-    ["README.md", /\d[\d,]* of \d[\d,]*/, `${n(suite.passed)} of ${n(suite.total)}`],
+    ["docs/tests.md", /\d[\d,]* of \d[\d,]*/, `${n(suite.passed)} of ${n(suite.total)}`],
     ["TESTING.md", /\d[\d,]*/, n(suite.passed)],
   ]) {
     const text = readFileSync(file, "utf8");
@@ -101,5 +101,5 @@ for (const id of ids) {
 }
 doc.ranAt = doc.suites.map((s) => s.ranAt ?? doc.ranAt).sort().at(-1);
 writeFileSync(FILE, JSON.stringify(doc, null, 2) + "\n");
-console.log(`\nWrote ${FILE}, and the counts in the README and TESTING.md tables.`);
+console.log(`\nWrote ${FILE}, and the counts in the docs/tests.md and TESTING.md tables.`);
 process.exitCode = short ? 1 : 0;

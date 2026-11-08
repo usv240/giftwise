@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 
+/** Every page the header leaves out, so each one stays a link away. */
 const NAV = [
   { href: "/try", label: "Try it" },
   { href: "/try#fundraiser", label: "Make a gift page" },
   { href: "/learn", label: "The rules, explained" },
+  { href: "/agents", label: "For AI agents" },
+  { href: "/organizations", label: "For organizations" },
+  { href: "/dashboard", label: "Maya's year" },
   { href: "/developers", label: "Developers" },
-  { href: "/evidence", label: "Evidence" },
   { href: "/stack", label: "How it is built" },
   { href: "/status", label: "Status" },
   { href: "/ops", label: "Operations" },
@@ -62,6 +65,11 @@ function QuietFooter() {
           <li>
             <Link href="/ops" className="text-link">
               Operations
+            </Link>
+          </li>
+          <li>
+            <Link href="/stack" className="text-link">
+              How it is built
             </Link>
           </li>
         </ul>

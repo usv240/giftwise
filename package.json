@@ -26,6 +26,7 @@
     "test:postman": "node scripts/run-postman.mjs",
     "test:ledger-race": "tsx --env-file=.env.local scripts/ledger-race.ts 60",
     "test:load": "node scripts/load-test.mjs",
+    "measure:pages": "node scripts/measure-pages.mjs",
     "test:results": "node scripts/test-results.mjs",
     "checks:local": "cd workflows && tsx --env-file=../.env.local src/local.ts",
     "eval:ssa": "tsx --env-file=.env.local scripts/run-ssa-examples.ts"

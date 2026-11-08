@@ -6,7 +6,7 @@ export const TOUR: TourStep[] = [
     path: "/",
     target: ".checker",
     title: "The problem in one number",
-    text: "In the Gift Checker, $1,000 sent as cash leaves Maya a $74 check two months later. Press Pay the shop: she keeps all $994.",
+    text: "In the Gift Checker, $1,000 sent as cash cuts her check two months later. Press Pay the shop: she keeps all of it.",
   },
   {
     path: "/g/maya",
@@ -46,9 +46,9 @@ export const TOUR: TourStep[] = [
   },
   {
     path: "/evidence",
-    target: ".jr-band",
-    title: "Checked four ways",
-    text: "Each result opens its cases: Social Security's own examples, federal court cases, labeled bills and 100,000 random gifts. Further down: failure cases run live against PayPal, and the rules watching the Federal Register.",
+    target: ".ji-three",
+    title: "Three numbers first",
+    text: "What routing would have kept in real court cases, Social Security's own examples, and the error that costs money. Each opens its page; every other result has its own page below.",
   },
 ];
 

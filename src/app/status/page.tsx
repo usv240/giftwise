@@ -3,14 +3,13 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
-import { runChecks } from "@/lib/health";
+import { MODE_LABEL, liveSummary, optionalOffSentence, runChecks } from "@/lib/health";
 import { CheckedAt } from "./CheckedAt";
 import "../pages.css";
 import "./status.css";
 
-export const metadata: Metadata = { title: "Status", description: "Every service Giftwise uses, and whether it is live or using its fallback." };
+export const metadata: Metadata = { title: "Status", description: "Every service Giftwise uses, and whether it is live, using its fallback, or optional and off." };
 
-const LABEL = { live: "Live", fallback: "Fallback", not_connected: "Not connected" } as const;
 /** The Info entry that explains each service, when it is not stack.<id>. */
 const INFO: Record<string, string> = { database: "render", webhooks: "paypal", payees: "paypal", checks: "render", "paypal-mcp": "paypal_apis" };
 
@@ -18,13 +17,16 @@ async function Rows() {
   await connection();
   const checks = await runChecks({ probeMcp: true });
   const at = new Date().toISOString();
-  const live = checks.filter((c) => c.mode === "live").length;
+  // Optional services that are off are named, not counted: they are a choice, and nothing depends on them.
+  const s = liveSummary(checks);
+  const off = optionalOffSentence(s.optionalOff);
   return (
     <>
       <p className="status-sum">
         <span className="tabular">
-          {live} of {checks.length} services live, checked at <CheckedAt iso={at} />.
+          {s.live} of {s.of} services live, checked at <CheckedAt iso={at} />.
         </span>{" "}
+        {off && <span className="muted">{off} </span>}
         <a className="text-link" href="/status">
           Check again
         </a>
@@ -40,7 +42,7 @@ async function Rows() {
               {c.ms ? <span className="tabular"> in {c.ms} ms</span> : null}
             </span>
             <span className="status-mode" data-mode={c.mode}>
-              {LABEL[c.mode]}
+              {MODE_LABEL[c.mode]}
             </span>
           </li>
         ))}

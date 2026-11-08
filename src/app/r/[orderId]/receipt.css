@@ -204,6 +204,12 @@
   color: var(--muted);
   overflow-wrap: anywhere;
 }
+/* A gift from before the sample page's last reset: one quiet line, in the same voice as the order line. */
+.rc-earlier {
+  margin-top: 10px;
+  max-width: 40rem;
+  font-size: 0.875rem;
+}
 /* Touch: links on the receipt are at least 44px tall. */
 @media (pointer: coarse) {
   .rc-next .text-link,

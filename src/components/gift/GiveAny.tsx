@@ -224,6 +224,7 @@ export function GiveAny({
       )}
       <PayPalPay
         lang={lang}
+        card
         disabled={!ready}
         describedBy={payId}
         createOrder={() => requestOrder("/api/paypal/gift-orders", { slug, amount: value })}

@@ -1,6 +1,6 @@
 // End-to-end payment test without a buyer login: a sandbox test card pays the shop directly.
 // Exercises the same server pieces the PayPal button uses: order with payee = shop, capture, database, ledger.
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { CheckoutPaymentIntent, orders } from "../src/lib/paypal/client";
 import { describePayPalError } from "../src/lib/paypal/orders";
 import { db, schema } from "../src/lib/db";
@@ -13,7 +13,7 @@ async function main() {
   await fetch(`${B}/api/demo/reset`, { method: "POST" });
 
   // 2. Card order with the shop as payee (PayPal "pay another account"), captured server-side.
-  const need = (await db().select().from(schema.needs).where(eq(schema.needs.title, "Wheelchair repair")).limit(1))[0];
+  const need = (await db().select().from(schema.needs).where(and(eq(schema.needs.title, "Wheelchair repair"), isNull(schema.needs.archivedAt))).limit(1))[0];
   try {
     const { result } = await orders().createOrder({
       paypalRequestId: `card-e2e-${Date.now()}`,

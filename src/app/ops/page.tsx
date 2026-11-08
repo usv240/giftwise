@@ -3,7 +3,8 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
-import { alerts, feed, lastDay, rightNow, week, type HourPoint } from "@/lib/ops";
+import { MODE_LABEL, liveSummary, optionalOffSentence } from "@/lib/health";
+import { alerts, describeCheckPayments, feed, lastDay, rightNow, week, type HourPoint } from "@/lib/ops";
 import { LiveStream } from "./LiveStream";
 import { TraceBox } from "./TraceBox";
 import "../pages.css";
@@ -11,7 +12,6 @@ import "./ops.css";
 
 export const metadata: Metadata = { title: "Operations", description: "How Giftwise is running right now: every service, request latency and errors, payments and webhooks by status, a live event stream, and the alerts it watches. Nothing on it is private." };
 
-const LABEL = { live: "Live", fallback: "Fallback", not_connected: "Not connected" } as const;
 const INFO: Record<string, string> = { database: "render", webhooks: "paypal", checks: "render", "paypal-mcp": "paypal_apis" };
 const usd = (v: number) => `$${v.toFixed(2)}`;
 const pct = (v: number) => `${(v * 100).toFixed(v > 0 && v < 0.01 ? 2 : 1)}%`;
@@ -23,7 +23,15 @@ function Proves({ children }: { children: React.ReactNode }) {
 async function RightNow() {
   await connection();
   const now = await rightNow();
-  const live = now.checks.filter((c) => c.mode === "live").length;
+  // Optional services that are off are named under the count, not counted: the same summary /status and /api/health use.
+  const s = liveSummary(now.checks);
+  const rest = s.of - s.live;
+  const sub = [
+    rest === 0 ? "" : rest === s.fallback ? `${rest} on ${rest === 1 ? "its fallback" : "their fallbacks"}.` : `${rest} not live yet.`,
+    optionalOffSentence(s.optionalOff),
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <>
       <ul className="ops-tiles" aria-label="Right now">
@@ -45,9 +53,9 @@ async function RightNow() {
         <li className="ops-tile">
           <span className="ops-tile-k">Services live</span>
           <span className="ops-tile-v tabular">
-            {live} of {now.checks.length}
+            {s.live} of {s.of}
           </span>
-          <span className="ops-tile-s muted">the rest on their fallbacks</span>
+          <span className="ops-tile-s muted">{sub || "Every service is live."}</span>
         </li>
       </ul>
       <ul className="status-list ops-health">
@@ -61,7 +69,7 @@ async function RightNow() {
               {c.ms ? <span className="tabular"> in {c.ms} ms</span> : null}
             </span>
             <span className="status-mode" data-mode={c.mode}>
-              {LABEL[c.mode]}
+              {MODE_LABEL[c.mode]}
             </span>
           </li>
         ))}
@@ -144,7 +152,8 @@ async function LastDay() {
             </li>
           ))}
         </ul>
-        <p className="ops-note muted">Orders and payout items together, counts only. Paid means captured by PayPal or a payout item that succeeded.</p>
+        <p className="ops-note muted">Gift orders and payout items together, counts only. Paid means captured by PayPal or a payout item that succeeded.</p>
+        {describeCheckPayments(d.checkPayments) && <p className="ops-note muted">{describeCheckPayments(d.checkPayments)}</p>}
       </div>
       <div className="ops-block">
         <h3 className="ops-h3">Webhooks</h3>
@@ -291,7 +300,7 @@ async function Alerts() {
         ) : (
           <>No outside check run has been filed on this server yet. </>
         )}
-        <Link className="text-link" href="/evidence#nightly">
+        <Link className="text-link" href="/evidence/operations#nightly">
           Every check, with its result
         </Link>
       </p>

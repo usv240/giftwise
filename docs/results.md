@@ -1,0 +1,50 @@
+# Results, in depth
+
+Every result below is on [`/evidence`](https://giftwise-405i.onrender.com/evidence) and its pages, case by case, with the sources. Back to the [README](../README.md).
+
+## Two Claude reviewers, two rulebooks, and a referee in code
+
+- **When it runs.** A bill that might be a housing cost goes to two Claude reviewers: one reads only the regulations and the Federal Register, the other only SSA's operating manual. A bill uploaded on `/try` goes to them whenever its category sits at or near housing (insurance, a deposit, HOA dues, water, sewer, trash, internet, a utility or rent) or Claude read it with under 90% confidence (`src/lib/review/bill-route.ts`, `src/lib/ai/bill-review.ts`).
+- **What each must do.** Quote its rulebook word for word. A program checks every quote.
+- **What the referee does.** Giftwise takes a reading only when both checked answers agree; otherwise it uses the route that keeps the check whole under either reading.
+- **One recorded bill.** Homeowners insurance her lender requires. The regulations reviewer says it is not a housing cost, the manual reviewer says it is, both quotes check out, and the referee sends the $150 to her ABLE account, where her check is $994 either way (paid to the insurer, it could be $924). It is on [`/evidence/rules#referee`](https://giftwise-405i.onrender.com/evidence/rules#referee).
+- **Measured on 59 bills** labeled from the rule text (20 plus 39 harder ones: internet, renter's insurance, HOA fees, bundled bills, a utility deposit). The referee and the manual reviewer accepted 0 routes that would lower the check, the regulations reviewer 1, and Claude with no rulebook 3. All 118 quotes were found word for word.
+- **Her check.** The referee kept her check whole on 59 of 59 bills: it settled 43 of 52 clear bills on a shared, checked reading and gave the other 9 the route that keeps the check whole under either reading.
+- **What the second reviewer is for.** If one reviewer is wrong, trusting it alone keeps her check whole on 28 of 59; with both reviewers and the referee, 59 of 59.
+
+## The two errors that cost money
+
+Counted over every case whose right answer is known (`src/lib/error-rates.ts`, from the recorded runs):
+
+- **0 of 55** gifts that would lower the check were let through as given (SSA's examples 0 of 17, court cases 0 of 14, bills 0 of 24). Claude with no rulebook, on the same bills: 1 of 24.
+- **6 of 51** gifts that were fine as given were sent another way (SSA's examples 0 of 23, bills 6 of 28). All 6 are hard bills the two reviewers did not settle, so the money went to her ABLE account instead of the shop, and her check stayed whole. Claude with no rulebook, on the same bills: 4 of 28.
+
+## Checked against Social Security's own examples
+
+40 worked examples from SSA's operating manual and regulations, each with SSA's answer quoted word for word. The rules engine matches all 40. Claude alone, with no rulebook, matches 32: it misses the $60 one-off exclusion six times and housing support twice. Growing the set from 13 to 40 added two finer points the engine now follows: the $60 exclusion applies in order of receipt and before the housing cap, and a prepaid housing bill counts in the months it covers. `npm run eval:ssa` reruns it.
+
+## Real cases, from federal courts
+
+36 SSI cases from GovInfo's public-domain court opinions where SSA counted help from family or friends (14 scored; the rest turn on loans, shared rent or trusts, listed with the reason). The engine reaches the outcome SSA and the court did in all 14.
+
+- **What routing would have kept.** In 4 of 14 real court cases, the same help routed through Giftwise would have kept $331 to $663 a month at 2026 rates: the rules engine's counterfactual on each case's facts (from 1996 to 2014), repriced at 2026 rates, three cases at $331.33 and one at $662.67, $1,656.66 a month across the four. These are counterfactuals, not outcomes anyone saw.
+- **What SSA asked back.** In two cases the opinion states an overpayment: $4,870.00 (a cousin's deposits pushed savings over the limit) and $11,442.20 (children deposited $1,500 to meet a bank's minimum balance). Run through the engine from each case's facts, the same help paid into an ABLE account keeps her savings under $2,000 in every month in both cases, so there would have been nothing to ask back. ABLE needs the disability to have begun before age 46, which these opinions do not state (`overpaymentCheck()` in `scripts/run-field-cases.ts`).
+- **What the cases added.** Since 2024 the one-third reduction applies only when the household provides all meals (20 CFR 416.1131(a)(3)); the engine now asks who provides the meals.
+
+`npx tsx scripts/run-field-cases.ts` reruns it. Fundraiser pages were not used, because GoFundMe's and Givebutter's terms rule out automated reading.
+
+## Random gifts, every promise kept
+
+`npx tsx scripts/run-invariants.ts` routes 100,000 made-up gifts (seeded, so every run is the same), from one cent to $20,000, up to twelve open needs and people in every living arrangement, and holds each answer to twelve promises in [`src/lib/invariants.ts`](../src/lib/invariants.ts): every cent placed, her check exactly as with no gift, ABLE within its yearly limit, at most 10 PayPal recipients, and more. 1,000 of them run with every `npm test`. The first runs sharpened the router: each line is checked together with the lines already chosen, ABLE deposits from one gift share the year's limit, a need marked for ABLE goes only to someone who can have an account, and the month's income is summed to the cent.
+
+## The rules watch the Federal Register
+
+[`/api/rules-watch`](https://giftwise-405i.onrender.com/api/rules-watch) asks the Federal Register, live, for every rule since 2022 that changes how SSI counts income or in-kind support and every notice of the year's amounts, and matches each to what Giftwise does with it ([`content/rules-watch.json`](../content/rules-watch.json)). The nightly outside checks fail on any document not yet reviewed. SSA published the 2027 amounts on October 26, 2026 ([91 FR 67380](https://www.federalregister.gov/documents/2026/10/26/2026-21796/cost-of-living-increase-and-other-determinations-for-2027)), and Giftwise already uses them: November and December income set the January and February checks at $1,029, with the one-third reduction and presumed maximum value following the new rate ([POMS SI 02005.001 E.4.c](https://secure.ssa.gov/poms.nsf/lnx/0502005001)).
+
+## Checked every night, from outside, on Render Workflows
+
+`workflows/` is a Render Workflow that fans out one task per check, in parallel with retries: each failure case against the PayPal sandbox, each page on the five-minute path, and each public API promise, including the Federal Register watch and a gift paid with a sandbox test card across its payees, with no PayPal login, each capture checked at PayPal (25 in all). A Render cron job starts it nightly at 09:00 UTC; **Run the checks now** on `/evidence/operations` starts it on demand, and the results show there and on `/status`.
+
+- **A race it found in the ledger.** Running the checks in parallel surfaced a race in the audit ledger (two appends at once could fork the hash chain); appends now take a Postgres advisory lock, and `npm run test:ledger-race` fires 60 at once to prove it.
+- **A race it found in captures.** Two captures of one order at the same moment get a 500 from PayPal's sandbox on the second request, and the old code took that as final. Captures now retry a 5xx with the same `PayPal-Request-Id`, only the call that records a capture counts it toward the need, and a failure never overwrites a capture.
+- **Eight failure cases, run live** on `/evidence/operations`: declined card, double click, unapproved payment, a browser changing the amount or payee, a gift that would lower her check, an AI reviewer that gets the rule wrong, an edited ledger entry, and refunds.

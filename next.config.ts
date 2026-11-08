@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SENTRY_DSN: process.env.SENTRY_DSN ?? "",
     NEXT_PUBLIC_GIT_COMMIT: process.env.RENDER_GIT_COMMIT ?? "",
+    // The day of the build in US Pacific time: the static home page's Gift Checker paints with it, then moves to the
+    // browser's own today, so the page stays static and names the same check as the gift page.
+    NEXT_PUBLIC_BUILD_DAY: new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date()),
+    // The browser loads PayPal's JavaScript SDK from the same PayPal the server calls (src/lib/paypal/env.ts).
+    NEXT_PUBLIC_PAYPAL_ENV: process.env.PAYPAL_ENV ?? "sandbox",
   },
   serverExternalPackages: ["@sentry/nextjs"],
   // Headers that hold with PayPal's checkout popup, AG Studio and Bryntum: no framing by other sites, no plugins,

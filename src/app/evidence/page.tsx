@@ -6,175 +6,110 @@ import billResults from "../../../content/eval-results.json";
 import fieldResults from "../../../content/eval/field-cases-results.json";
 import ssaResults from "../../../content/eval/ssa-examples-results.json";
 import invResults from "../../../content/eval/invariants-results.json";
-import loadTest from "../../../content/public/load-test.json";
+import loadHosted from "../../../content/public/load-test-hosted.json";
 import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
-import { Adoption, Pilot } from "@/components/judges/Adoption";
-import { CaseRunner } from "@/components/judges/CaseRunner";
-import { Compare } from "@/components/judges/Compare";
-import { ErrorRates } from "@/components/judges/ErrorRates";
 import { Impact } from "@/components/judges/Impact";
-import { EvalIntro, EvalResults } from "@/components/judges/EvalResults";
-import { FieldCases } from "@/components/judges/FieldCases";
-import { Invariants, InvariantsIntro } from "@/components/judges/Invariants";
-import { NeverDecides } from "@/components/judges/NeverDecides";
-import { NightlyChecks } from "@/components/judges/NightlyChecks";
-import { RefereeExample } from "@/components/judges/RefereeExample";
-import { Results } from "@/components/judges/Results";
-import { RulesWatch } from "@/components/judges/RulesWatch";
-import { SsaExamples } from "@/components/judges/SsaExamples";
 import { TourStart } from "@/components/tour/Tour";
 import { SandboxLogin } from "@/components/SandboxLogin";
-import { IMPACT } from "@/lib/impact";
-import { reviewedWatch } from "@/lib/rules-watch";
+import { WhatIsNew } from "@/components/WhatIsNew";
+import { CASES } from "@/lib/cases/list";
+import { ERROR_RATES } from "@/lib/error-rates";
+import { ASKED_SENTENCE, KEPT_SENTENCE, payItYourself } from "@/lib/impact";
 import "../pages.css";
 import "../developers/dev.css";
 import "./evidence.css";
 
-export const metadata: Metadata = { title: "Evidence", description: "Every number on this site, where it comes from, and a five-minute path through the product." };
+export const metadata: Metadata = { title: "Evidence", description: "Three numbers, a five-minute path through the product, and every result on its own page with where it comes from." };
 
 /** The five-minute path: six steps, under a minute and a half each, in the order the story runs. */
 const PATH = [
-  { href: "/", label: "The problem in one number", time: "20 s", look: "In the Gift Checker, $1,000 sent as cash leaves Maya a $74 check two months later. Press Pay the shop: she keeps all $994." },
-  { href: "/g/maya", label: "Give, and pay in the sandbox", time: "90 s", look: "Type $1,500 in Give any amount. The rules split it across her needs and her ABLE account, and one PayPal checkout pays all five recipients. Log in with the sandbox buyer below, then open the receipt." },
+  { href: "/", label: "The problem in one number", time: "20 s", look: "In the Gift Checker, $1,000 sent as cash cuts her check two months later. Press Pay the shop: she keeps all of it." },
+  { href: "/g/maya", label: "Give, and pay in the sandbox", time: "90 s", look: "Type $1,500 in Give any amount. The rules split it across her needs and her ABLE account, and one PayPal checkout pays all five recipients. Pay with the sandbox buyer below, or as a guest with PayPal's test card, then open the receipt." },
   { href: "/g/maya/report?month=2026-10", label: "Her report to Social Security", time: "40 s", look: "SSI asks for changes in income by the 10th. October's report says nothing counts, with the rule behind every gift. Press As cash: the same gifts would have counted $538 and cut her check to $456." },
   { href: "/g/maya/report/easy?month=2026-10", label: "Her own copy, in Easy Read", time: "20 s", look: "The same report written to Maya: the answer first, then one idea per line with a picture beside each. Press En español, and Remind me by the 10th for a calendar reminder." },
   { href: "/agents", label: "An AI assistant asks first", time: "40 s", look: "A Claude assistant with no SSI knowledge calls the Giftwise MCP server, talks June out of sending cash, starts a checkout only she can approve, and reads the order back from PayPal." },
   { href: "/g/maya/calendar?month=2026-10", label: "Her benefit calendar", time: "40 s", look: "Press As cash and drag Aunt June's $150 from October 28 to November 2. A different check drops: SSI counts income by calendar month." },
 ];
 
-/** A YYYY-MM-DD date in words, the same on any server. */
-const day = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
-
-/** The federal court cases where a benefit-safe route exists: what routing keeps a month for each person. */
-const PER_PERSON = IMPACT.keptMonthlyPerPerson;
 const A11Y = results.suites.find((s) => s.id === "a11y")!;
+const YEAR = payItYourself();
+const usd0 = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
-/** Everything else, for a visitor with more time, in three groups of at most five. */
-const MORE = [
+/**
+ * Every result, on the page that shows it in full. Each row keeps the id its section had on this page, so an old
+ * link such as /evidence#field-cases still lands on that result and its link.
+ */
+const INDEX = [
   {
-    title: "The rules, checked",
-    items: [
-      { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
-      { href: "#ssa-examples", label: "Checked against Social Security's own examples", look: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answers; Claude alone, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
+    title: "How the rules were checked",
+    href: "/evidence/rules",
+    rows: [
+      { id: "ssa-examples", href: "/evidence/ssa-examples", label: "Social Security's own examples", what: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answer; Claude with no rulebook, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
+      { id: "field-cases", href: "/evidence/court-cases", label: "Real cases from federal courts", what: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did.` },
+      { id: "evaluation", href: "/evidence/rules#evaluation", label: "The two reviewers, measured", what: `${billResults.summary.referee.check_kept_whole} of ${billResults.summary.referee.all_cases} labeled bills keep her check whole; Claude with no rulebook, ${billResults.summary.baseline.check_kept_whole}.` },
+      { id: "errors", href: "/evidence/rules#errors", label: "The two errors that cost money", what: `${ERROR_RATES.lowered.errors} of ${ERROR_RATES.lowered.of} let through that would lower the check; ${ERROR_RATES.held.errors} of ${ERROR_RATES.held.of} fine gifts sent another way, each with the check whole.` },
+      { id: "invariants", href: "/evidence/rules#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, what: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
+      { id: "rules-watch", href: "/evidence/rules#rules-watch", label: "The rules watch the Federal Register", what: "Asked live for every change to SSI's income rules and amounts since 2022; the 2027 amounts are in use." },
+      { id: "ai", href: "/evidence/rules#ai", label: "What the AI never decides", what: "How much each payee gets, which rule applies, the check, when money moves, who is paid and the report: code, every time." },
+    ],
+  },
+  {
+    title: "Running it",
+    href: "/evidence/operations",
+    rows: [
+      { id: "nightly", href: "/evidence/operations#nightly", label: "Checked every night, from outside", what: "Every page on the path, the public API, a gift paid by test card across its payees, and each failure case, on Render Workflows." },
+      { id: "failure-cases", href: "/evidence/operations#failure-cases", label: `${CASES.length} failure cases, run live`, what: "A declined card, a double click, a browser changing the amount, refunds and more, against the PayPal sandbox." },
+      { id: "tests", href: "/evidence/operations#tests", label: "Test results", what: `${results.suites.length} suites, each with its command and date; WCAG 2.2 AA on ${A11Y.total} page views.` },
+      { id: "load", href: "/evidence/operations#load", label: "Under load", what: `On the deployed site and on a laptop. Deployed, one visitor at a time: Maya's page in ${loadHosted.paths.find((p) => p.id === "gift-page")!.one_at_a_time_p50_ms} ms.` },
+      { id: "real", href: "/evidence/operations#real", label: "Running it for real", what: "What the demo runs on, and what a real deployment changes, row by row." },
+    ],
+  },
+  {
+    title: "What it changes",
+    href: "/evidence/impact",
+    rows: [
+      { id: "kept", href: "/evidence/impact#kept", label: "What routing would have kept", what: KEPT_SENTENCE },
+      { id: "asked", href: "/evidence/impact#asked", label: "What SSA asked back", what: ASKED_SENTENCE },
+      { id: "reach", href: "/evidence/impact#reach", label: "Who each route reaches", what: `A shop route for all ${facts.audience.ssi_jan2025_total.value} people on SSI; ABLE where the disability began before ${facts.values.able_onset_age.value}.` },
+      { id: "why", href: "/evidence/impact#why", label: "Why not pay the shop yourself?", what: `On the sample year, each giver paying alone lowers ${YEAR.monthsLowered} of her checks, ${usd0(YEAR.totalLowered)} in all.` },
+      { id: "compare", href: "/evidence/impact#compare", label: "How it compares", what: "Prepaid cards, trusts, benefits calculators and counselors, fundraising sites and more, from their own pages." },
+      { id: "adoption", href: "/evidence/impact#adoption", label: "Who runs it first", what: "Benefits counselors, state ABLE programs and payee organizations, and a 120-day pilot." },
+    ],
+  },
+  {
+    title: "How it is built and designed",
+    href: "/stack",
+    rows: [
       {
-        href: "#field-cases",
-        label: "Real cases from federal courts",
-        look: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did. In the ${IMPACT.routedCases} cases with a benefit-safe route, the same help keeps about $${PER_PERSON} a month for each person.`,
+        id: "parts",
+        href: "/stack",
+        label: "How it is built",
+        what: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts with Transaction Search, signature-checked webhooks, PayPal's MCP server, and Claude's structured outputs checked by the rules engine.",
       },
-      { href: "#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, look: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
-      { href: "#rules-watch", label: "The rules watch the Federal Register", look: "Asked live: every change to SSI's income rules and amounts since 2022, each with what Giftwise does. The 2027 amounts, published October 26, are in use." },
-    ],
-  },
-  {
-    title: "Paying and reporting",
-    items: [
-      { href: "#failure-cases", label: "Eight failure cases", look: "Declined card, double click, a browser changing the amount, refunds and more, run live." },
-      { href: "/g/maya/report?month=2026-11#rp-verify-h", label: "A report anyone can check", look: "After the gift in step 2, November's report carries a QR code. Open it: Giftwise rebuilds the report, asks PayPal for each payment live and checks the audit ledger, with no login." },
-      { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
-      { href: "/g/maya/calendar?month=2026-10", label: "The calendar's planner", look: "Press As cash, then Plan the cash dates: the planner moves gifts on the Bryntum calendar itself and compares the result with paying the shop." },
-      { href: "/stack#paypal-apis-all", label: "Every PayPal API it calls", look: "13 PayPal APIs and tools, each with its job and file." },
-    ],
-  },
-  {
-    title: "For organizations and agents",
-    items: [
-      { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
-      { href: "/manage/maya-sample-organizer", label: "The organizer's side", look: "Add or change a need and watch Giftwise choose where it is paid, find a product with Channel3 (a gift card is held back), see gifts as they arrive, and send each one to a Zapier webhook." },
-      { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
-      { href: "/learn", label: "Ask the rulebook", look: "A question in plain words: Elasticsearch finds the passages, Claude answers only from them, and every quote is checked word for word." },
+      {
+        id: "design",
+        href: "/g/maya",
+        label: "Designed for the people who use it",
+        what: `Built to W3C's guidance for cognitive and learning disabilities, NHS England and Inclusion Europe Easy Read, GOV.UK confirmation pages and Baymard's checkout research. Light and dark, Large text, Spanish for givers, 44-pixel targets, WCAG 2.2 AA on ${A11Y.total} page views.`,
+      },
+      { id: "status", href: "/status", label: "Status and Operations", what: "Every service, latency and errors by route, payments and webhooks, and the alerts, public on two pages." },
+      { id: "sample", href: "/g/maya", label: "A sample you can reset", what: "Maya's page resets to the same starting point at any time, and every earlier receipt still opens." },
     ],
   },
 ];
 
-const MORE_COUNT = MORE.reduce((n, g) => n + g.items.length, 0);
-
-/** Each part of the product: one line and its links in view, the full account one press away. */
-type Part = { name: string; line: string; where?: string; more?: string; links: readonly (readonly [string, string])[] };
-
-const PARTS: Part[] = [
-
-  {
-    name: "How it is built",
-    line: "One PayPal order pays several payees, and Claude's structured outputs are checked by a deterministic rules engine.",
-    more: "Every part, from capture to webhooks",
-    where: "One PayPal order paying several payees, server-side capture with idempotency, approval links for agents, Payouts for funds with Transaction Search reconciliation, signature-verified webhooks, sandbox negative testing, PayPal's own MCP server, and Claude structured outputs checked by a deterministic rules engine that keeps twelve promises across 100,000 random gifts.",
-    links: [["/status", "Status"], ["/ops", "Operations"], ["/stack", "Stack"], ["#invariants", "100,000 gifts"], ["#load", "Under load"]],
-  },
-
-  {
-    name: "Design",
-    line: `Built to published research for the people who use it, and accessible to WCAG 2.2 AA on ${A11Y.total} page views.`,
-    more: "The standards, themes and languages",
-    where: `Built to published research for the people who use it: W3C's guidance for cognitive and learning disabilities, the NHS England and Inclusion Europe Easy Read standards, GOV.UK confirmation patterns and Baymard's checkout research, so the total sits beside the PayPal button and every tap target is 44 pixels. Light and dark themes, Large text that reaches every part, plain and technical views, accessible to WCAG 2.2 AA on ${A11Y.total} page views. The giver's pages also work in Spanish, each gift page has its own share image and QR code, and the AG Studio dashboard takes its colors and fonts from the same tokens.`,
-    links: [
-      ["/g/maya", "Gift page"],
-      ["/g/maya?lang=es", "En español"],
-      ["/try", "Try it"],
-      ["/dashboard", "Maya's year"],
-      ["/g/maya/calendar", "Her benefit calendar"],
-    ],
-  },
-
-  {
-    name: "Who it helps",
-    line: `About ${facts.audience.ssi_recipients.value} people receive SSI. In the federal court cases where a benefit-safe route exists, routing keeps about $${PER_PERSON} a month for each person.`,
-    more: "The numbers and how it runs for real",
-    where: `About ${facts.audience.ssi_recipients.value} people receive SSI (September 2026). In January 2022 SSA lowered the check of 793,000 of them for food or housing someone else provided (88 FR 9779), and about 14 million people can now open an ABLE account, which more than 246,000 have (ABLE National Resource Center). In the federal court cases where a benefit-safe route exists, routing keeps about $${PER_PERSON} a month for each person, and benefits counselors, state ABLE programs and organizations that manage SSI money can each run it as it is. Every answer cites the regulation or SSA's operating manual. Outside the sandbox, shops join through PayPal's partner onboarding and ABLE gifts go through each plan's own gift page; the answers cite PayPal's and the plans' own documents.`,
-    links: [
-      ["#adoption", "Who runs it first"],
-      ["/learn", "The rules, explained"],
-      ["/about#real", "How this works for real"],
-    ],
-  },
-
-  {
-    name: "What is new",
-    line: "Code referees two Claude reviewers who must quote their rulebooks word for word, one PayPal checkout pays every shop and the ABLE account directly so the check stays whole, and anyone can check a report to Social Security against PayPal and the ledger.",
-    more: "Two more, for AI agents and rule changes",
-    where: "AI assistants ask Giftwise first over MCP and can start a checkout that only the giver can approve, and the rules check the Federal Register for their own updates.",
-    links: [
-      ["#referee", "The two reviewers"],
-      ["/g/maya", "Give any amount"],
-      ["/g/maya/report?month=2026-10#rp-verify-h", "A report anyone can check"],
-      ["/agents", "For AI agents"],
-      ["#compare", "How it compares"],
-    ],
-  },
-
-  { name: "Seeing it work", line: "This page and its guided tour, and a sample household you can reset to the same starting point at any time.", links: [["/about", "About"]] },
-
-];
-
-/** One row of jump links under the results, in page order, so a visitor can go straight to any section. */
-const TOC = [
-  ["#path", "Five-minute path"],
-  ["#parts", "Where to see each part"],
-  ["#ai", "What the AI never decides"],
-  ["#more", "More to try"],
-  ["#nightly", "Nightly checks"],
-  ["#failure-cases", "Failure cases"],
-  ["#evaluation", "Two reviewers"],
-  ["#ssa-examples", "SSA's examples"],
-  ["#field-cases", "Court cases"],
-  ["#invariants", `${invResults.gifts.toLocaleString("en-US")} gifts`],
-  ["#rules-watch", "Rules watch"],
-  ["#compare", "How it compares"],
-  ["#adoption", "Who runs it first"],
-  ["#tests", "Test results"],
-  ["#load", "Under load"],
-  ["#real", "Running it for real"],
-] as const;
-
-/** What the demo runs on, and what a real deployment changes. Each row is an operating range with a known next step. */
-const REAL: [string, string][] = [
-  ["One Render Starter web instance (0.5 CPU, 512 MB), always on", "Several instances with autoscaling; rate limits and the request log already live in Postgres, so nothing is per instance"],
-  ["One 256 MB Postgres with a 1 GB disk, no pooler", "A larger Postgres with a connection pooler, point-in-time recovery, and a restore tested on a schedule"],
-  ["Share images rendered on request; no uploads kept", "Object storage with signed URLs for anything a family uploads, never the database"],
-  ["About $2 of Claude a day, capped and shown on the Operations page", "A budget per organization, with the same per-call accounting"],
-  ["No login: the organizer's page is a private link shown once and stored as a hash; the organizations page is a sample fund", "Login and roles for organizations, with the manage link kept for families"],
-  ["One PayPal sandbox app and one webhook", "A registered webhook per environment, each with its own webhook id"],
-  ["Nightly outside checks on Render Workflows; errors as JSON log lines", "The same checks on every deploy, plus Sentry for server, edge and browser errors with personal data masked"],
+/** More to try, for a visitor with more time. */
+const MORE = [
+  { href: "/try/presets/electric-bill", label: "Claude reads a bill; two reviewers check it", look: "Two Claude reviewers with different rulebooks must quote them word for word. Press What if a reviewer gets it wrong?" },
+  { href: "/g/maya/report?month=2026-11#rp-verify-h", label: "A report anyone can check", look: "After the gift in step 2, November's report carries a QR code. Open it: Giftwise rebuilds the report, asks PayPal for each payment live and checks the audit ledger." },
+  { href: "/g/maya", label: "Give every month", look: "After a gift on Maya's page, press Give this every month: the same amount is routed again each month, with what changed and why." },
+  { href: "/g/maya/calendar?month=2026-10", label: "The calendar's planner", look: "Press As cash, then Plan the cash dates: the planner moves gifts on the Bryntum calendar itself and compares the result with paying the shop." },
+  { href: "/stack#paypal-apis-all", label: "Every PayPal API it calls", look: "Each PayPal API and tool, with its job and file." },
+  { href: "/organizations", label: "A fund pays many families", look: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
+  { href: "/manage/maya-sample-organizer", label: "The organizer's side", look: "Add or change a need and watch Giftwise choose where it is paid, find a product with Channel3, see gifts arrive, and send each one to a Zapier webhook." },
+  { href: "/dashboard", label: "Maya's year in AG Studio", look: "Every gift and her check each month, compared with cash. Press a giver and the Giftwise widget reruns the rules." },
+  { href: "/learn", label: "Ask the rulebook", look: "A question in plain words: Elasticsearch finds the passages, Claude answers only from them, and every quote is checked word for word." },
 ];
 
 export default function EvidencePage() {
@@ -184,47 +119,19 @@ export default function EvidencePage() {
       <header className="page-head">
         <div className="title-row">
           <h1 className="page-title">Evidence</h1>
-
           <Info id="page.evidence" />
-
         </div>
-        <p className="lede">Every number on this site, where it comes from, and a five-minute path through the product.</p>
+        <p className="lede">Three numbers, the five-minute path, and every result on its own page, with where it comes from.</p>
         <p className="jp-tour">
-
           <TourStart /> <span className="muted">Eight stops in this tab, about five minutes. Escape ends it.</span>
-
         </p>
       </header>
 
       <Impact />
 
-      <RefereeExample />
-
-      <section className="jr-band" aria-labelledby="jr-h">
-        <h2 id="jr-h" className="jr-h">
-          How the rules were checked
-        </h2>
-        <Results />
-      </section>
-
-      <ErrorRates />
-
-      <nav className="jp-toc" aria-label="On this page">
-        <ul>
-          {TOC.map(([href, label]) => (
-            <li key={href}>
-              <a className="jp-toc-link" href={href}>
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
       <section id="path" className="page-section" aria-labelledby="path-h">
         <h2 id="path-h">The five-minute path</h2>
         <ol className="jp-path">
-
           {PATH.map((p, i) => (
             <li key={p.label} className="jp-step" data-ui>
               <span className="jp-n tabular" aria-hidden="true">
@@ -241,351 +148,62 @@ export default function EvidencePage() {
               </div>
             </li>
           ))}
-
         </ol>
         <div className="jp-login" data-ui>
           <div>
             <p className="jp-login-k">Sandbox buyer login, for step 2</p>
             <p className="muted">A PayPal sandbox test account. It works only in PayPal&rsquo;s sandbox checkout window, and no real money moves.</p>
           </div>
-
           <SandboxLogin />
-
         </div>
       </section>
 
-      <section id="parts" className="page-section" aria-labelledby="parts-h">
-        <h2 id="parts-h">Where to see each part</h2>
-        <dl className="jp-parts">
+      <WhatIsNew headingId="new-h" className="page-section" />
 
-          {PARTS.map((c) => (
-            <div key={c.name} className="jp-part">
-              <dt>{c.name}</dt>
-              <dd>
-                <p className="jp-part-line">{c.line}</p>
-                <p className="jp-links">
-                  {c.links.map(([href, label]) => (
-                    <Link key={href + label} className="text-link" href={href}>
-                      {label}
+      <section id="results" className="page-section" aria-labelledby="index-h">
+        <h2 id="index-h">Every result, on its own page</h2>
+        <div className="ev-index">
+          {INDEX.map((g) => (
+            <div key={g.title}>
+              <h3>
+                <Link className="text-link" href={g.href}>
+                  {g.title}
+                </Link>
+              </h3>
+              <ul>
+                {g.rows.map((r) => (
+                  <li key={r.id} id={r.id}>
+                    <Link className="text-link" href={r.href}>
+                      {r.label}
                     </Link>
-                  ))}
-                </p>
-                {c.where && (
-                  <details className="jp-disc">
-                    <summary>{c.more}</summary>
-                    <p>{c.where}</p>
-                  </details>
-                )}
-              </dd>
+                    <span className="ev-index-what muted">{r.what}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
-
-        </dl>
-      </section>
-
-      <section id="ai" className="page-section" aria-labelledby="ai-h">
-        <div className="title-row">
-          <h2 id="ai-h">What the AI never decides</h2>
-
-          <Info id="evidence.never_decides" label="" />
-
         </div>
-        <p className="page-prose jp-intro">Claude reads and explains. Each decision about money below is made by code, the same way every time.</p>
-
-        <NeverDecides />
-
       </section>
 
       <section id="more" className="page-section" aria-labelledby="more-h">
         <h2 id="more-h">If you have more time</h2>
-        <p className="page-prose jp-intro">
-          {MORE_COUNT} more places to look, about the rules, paying and reporting, and organizations and agents.
-        </p>
-        <div className="jx-more">
-          {/* Its group headings are link targets: Chrome opens it on a fragment load before hydration, so `open` may differ. */}
-          <details className="jx-disc" suppressHydrationWarning>
-            <summary>All {MORE_COUNT}, with what to look for at each</summary>
-            <div className="jx-body">
-              <div className="jp-more-groups">
-
-                {MORE.map((g, gi) => (
-                  <section key={g.title} className="jp-more-group" aria-labelledby={`more-h-${gi}`}>
-                    <h3 id={`more-h-${gi}`} className="jp-more-h">
-                      {g.title}
-                    </h3>
-                    <ul className="jp-more">
-                      {g.items.map((m) => (
-                        <li key={m.label}>
-                          <Link className="text-link jp-more-link" href={m.href}>
-                            {m.label}
-                          </Link>
-                          <span className="jp-more-look muted">{m.look}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-
-              </div>
-            </div>
-          </details>
-        </div>
-      </section>
-
-      <section id="nightly" className="page-section jx" aria-labelledby="nightly-h">
-        <div className="jx-head">
-          <div className="title-row">
-            <h2 id="nightly-h">Checked every night, from outside</h2>
-
-            <Info id="evidence.nightly" label="" />
-
-          </div>
-          <p className="page-prose jp-intro">
-            A Render Workflow opens every page on the path above, calls the public API, and runs each failure case against the PayPal sandbox. Each check is its own task on its own instance, retried if PayPal&rsquo;s sandbox hiccups, and the results land here.
-          </p>
-        </div>
-
-        <NightlyChecks />
-
-      </section>
-
-      <section id="failure-cases" className="page-section jx" aria-labelledby="cases-h">
-        <div className="jx-head">
-          <div className="title-row">
-            <h2 id="cases-h">Failure cases, run live</h2>
-
-            <Info id="evidence.cases" label="" />
-
-          </div>
-          <p className="page-prose jp-intro">Payments fail in ordinary ways: a declined card, a double click, a browser that sends the wrong amount. Each check below runs the real code against the PayPal sandbox.</p>
-        </div>
-
-        <CaseRunner />
-
-      </section>
-
-      <section id="evaluation" className="page-section jx" aria-labelledby="eval-h">
-        <div className="jx-head">
-          <div className="title-row">
-            <h2 id="eval-h">The two reviewers, measured</h2>
-
-            <Info id="evidence.eval" label="" />
-
-          </div>
-          <EvalIntro />
-        </div>
-
-        <EvalResults />
-
-      </section>
-
-      <section id="ssa-examples" className="page-section jx" aria-labelledby="ssa-ex-h">
-        <div className="jx-head">
-          <div className="title-row">
-            <h2 id="ssa-ex-h">Checked against Social Security&rsquo;s own examples</h2>
-
-            <Info id="evidence.ssa_examples" label="" />
-
-          </div>
-          <p className="page-prose jp-intro">
-            The {billResults.summary.referee.all_cases} bills above were labeled by us from the rule text. These cases come from Social Security&rsquo;s operating manual, with SSA&rsquo;s own answers. Both the rules engine and Claude with no rulebook
-            answered them.
-          </p>
-        </div>
-
-        <SsaExamples />
-
-      </section>
-
-      <section id="field-cases" className="page-section jx" aria-labelledby="field-h">
-        <div className="jx-head">
-          <div className="title-row">
-            <h2 id="field-h">Real cases, from federal courts</h2>
-
-            <Info id="evidence.field_cases" label="" />
-
-          </div>
-          <p className="page-prose jp-intro">
-            The examples above are SSA&rsquo;s teaching cases. These are real people&rsquo;s cases: help from family that SSA counted, appealed to a federal court. Giftwise did not write them.
-          </p>
-        </div>
-
-        <FieldCases />
-
-      </section>
-
-      <section id="invariants" className="page-section jx" aria-labelledby="inv-h">
-        <div className="jx-head">
-          <div className="title-row">
-            <h2 id="inv-h">{invResults.gifts.toLocaleString("en-US")} random gifts, every promise kept</h2>
-
-            <Info id="evidence.invariants" label="" />
-
-          </div>
-          <InvariantsIntro />
-        </div>
-
-        <Invariants />
-
-      </section>
-
-      <section id="rules-watch" className="page-section jx" aria-labelledby="rw-h">
-        <div className="jx-head">
-          <div className="title-row">
-            <h2 id="rw-h">The rules watch the Federal Register</h2>
-
-            <Info id="evidence.rules_watch" label="" />
-
-          </div>
-          <p className="page-prose jp-intro">
-            SSI&rsquo;s rules change in the Federal Register. This asks it, live, for every change to how SSI counts income and in-kind support and every notice of the year&rsquo;s amounts, and shows what
-            Giftwise does with each one.
-          </p>
-        </div>
-
-        <RulesWatch initial={reviewedWatch()} />
-
-      </section>
-
-      <section id="compare" className="page-section" aria-labelledby="cmp-h">
-        <h2 id="cmp-h">How it compares</h2>
-        <p className="page-prose jp-intro">
-          Each of these does its own job well. Giftwise is built for the moment before a gift to someone on SSI, and works alongside them: the ABLE share goes to the plan&rsquo;s own gift page, and shops are paid through PayPal.
-        </p>
-
-        <Compare />
-
-      </section>
-
-      <section id="adoption" className="page-section" aria-labelledby="ad-h">
-        <h2 id="ad-h">Who runs it first</h2>
-        <p className="page-prose jp-intro">Three groups already help people on SSI with money every month. Each can run Giftwise as it is today.</p>
-
-        <Adoption />
-
-        <Pilot />
-
-      </section>
-
-      <section id="tests" className="page-section" aria-labelledby="tests-h">
-        <div className="title-row">
-          <h2 id="tests-h">Test results</h2>
-
-          <Info id="evidence.tests" label="" />
-
-        </div>
-        <p className="page-prose jp-intro">
-          Latest run {day(results.ranAt)}; each suite&rsquo;s own date is with its command. {results.build}. The counts are written by scripts/test-results.mjs after each run, and the README
-          and TESTING.md are checked against the same file.
-        </p>
-        <ul className="jp-tests" aria-label="Each suite, passed of total">
-
-          {results.suites.map((s) => (
-            <li key={s.id} className="jp-test">
-              <span className="jp-test-name">{s.name}</span>
-              <span className="jp-test-score tabular">
-                {s.passed.toLocaleString("en-US")}/{s.total.toLocaleString("en-US")}
-              </span>
-            </li>
-          ))}
-
-        </ul>
         <div className="jx-more">
           <details className="jx-disc">
-            <summary>What each checks, and its command</summary>
+            <summary>{MORE.length} more places to look, with what to look for at each</summary>
             <div className="jx-body">
-              <ul className="jp-test-whats">
-
-                {results.suites.map((s) => (
-                  <li key={s.id}>
-                    <p className="jp-test-name">
-                      {s.name}{" "}
-                      <span className="jp-test-of tabular">
-                        {s.passed.toLocaleString("en-US")}/{s.total.toLocaleString("en-US")}
-                      </span>
-                    </p>
-                    <p className="jp-test-what">{s.what}</p>
-                    <p className="jp-test-cmd tabular">
-                      {s.command}, {day(s.ranAt)}
-                    </p>
+              <ul className="jp-more">
+                {MORE.map((m) => (
+                  <li key={m.label}>
+                    <Link className="text-link jp-more-link" href={m.href}>
+                      {m.label}
+                    </Link>
+                    <span className="jp-more-look muted">{m.look}</span>
                   </li>
                 ))}
-
               </ul>
             </div>
           </details>
         </div>
-      </section>
-
-      <section id="load" className="page-section" aria-labelledby="load-h">
-        <div className="title-row">
-          <h2 id="load-h">Under load</h2>
-
-          <Info id="evidence.load" label="" />
-
-        </div>
-        <p className="page-prose jp-intro">
-          {loadTest.concurrency} visitors at once, each checking a gift and opening Maya&rsquo;s page, {loadTest.rounds} rounds: {loadTest.total_requests.toLocaleString("en-US")} requests in {(loadTest.total_ms / 1000).toFixed(1)} seconds, {loadTest.requests_per_second} a second. Beside it, the ledger race test fires 60 appends at once and the hash chain verifies.
-        </p>
-        <ul className="jp-tests" aria-label="Each path, with its latency and error rate">
-
-          {loadTest.paths.map((p) => (
-            <li key={p.id} className="jp-test">
-              <span className="jp-test-name">{p.label}</span>
-              <span className="jp-test-score jp-load-score tabular">
-                p50 {p.p50_ms} ms, p95 {p.p95_ms} ms, p99 {p.p99_ms} ms, {p.errors} of {p.requests} failed
-              </span>
-            </li>
-          ))}
-
-        </ul>
-        <div className="jx-more">
-          <details className="jx-disc">
-            <summary>The exact method and machine</summary>
-            <div className="jx-body">
-              <p className="jp-test-what">{loadTest.method}</p>
-              <p className="jp-test-what">Machine: {loadTest.machine}.</p>
-              <p className="jp-test-cmd tabular">
-                npm run test:load, {new Date(loadTest.ran_at).toLocaleDateString("en-US", { dateStyle: "long" })}
-              </p>
-            </div>
-          </details>
-        </div>
-      </section>
-
-      <section id="real" className="page-section" aria-labelledby="real-h">
-        <div className="title-row">
-          <h2 id="real-h">Running it for real</h2>
-
-          <Info id="evidence.real" label="" />
-
-        </div>
-        <p className="page-prose jp-intro">What the demo runs on today, and what a real deployment changes. Each row is an operating range with a known next step.</p>
-        <table className="jp-real">
-          <thead>
-            <tr>
-              <th scope="col">The demo runs on</th>
-              <th scope="col">A real deployment changes it to</th>
-            </tr>
-          </thead>
-          <tbody>
-
-            {REAL.map(([now, real]) => (
-              <tr key={now}>
-                <td>{now}</td>
-                <td>{real}</td>
-              </tr>
-            ))}
-
-          </tbody>
-        </table>
-        <p className="page-prose jp-intro">
-          What stays the same: JSON logs with a request id on every line, limits and logs in Postgres, the audit ledger, the{" "}
-          <Link className="text-link" href="/ops">
-            Operations page
-          </Link>
-          , and the Render Workflows fan-out for anything that runs in the background: one task per unit of work, in parallel, with retries.
-        </p>
       </section>
     </div>
   );

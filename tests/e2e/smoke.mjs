@@ -24,6 +24,9 @@ const pages = [
   ["/evidence/ssa-examples", "worked examples"],
   ["/evidence/bills", "labeled bills"],
   ["/evidence/court-cases", "federal court"],
+  ["/evidence/rules", "How the rules were checked"],
+  ["/evidence/operations", "Checked every night"],
+  ["/evidence/impact", "Why not pay the shop yourself"],
   ["/agents", "MCP"],
   ["/dashboard", "Giftwise"],
   ["/organizations", "Giftwise"],
@@ -43,7 +46,12 @@ for (const [path, word] of pages) {
 const health = await (await fetch(`${B}/api/health`)).json();
 const db = health.checks?.find((c) => c.id === "database");
 check("health: the database is live", db?.mode === "live", db?.detail);
-check("health: every integration reports a mode", health.checks?.every((c) => ["live", "fallback", "not_connected"].includes(c.mode)), health.checks?.map((c) => `${c.id}:${c.mode}`).join(" "));
+check("health: every integration reports a mode", health.checks?.every((c) => ["live", "fallback", "not_connected", "off", "checking"].includes(c.mode)), health.checks?.map((c) => `${c.id}:${c.mode}`).join(" "));
+// The count /status and /ops show comes from the same summary: optional services that are off are named, not counted.
+check("health: the summary leaves optional services that are off out of the count", health.summary?.of === health.checks?.filter((c) => c.mode !== "off").length && health.checks?.filter((c) => c.mode === "off").every((c) => c.optional), JSON.stringify(health.summary));
+// The PayPal MCP server line reads the same as on /status: the last check's answer with its time, never a placeholder.
+const mcpLine = health.checks?.find((c) => c.id === "paypal-mcp");
+check("health: the PayPal MCP server reports its last check and when it ran", mcpLine && (["checking", "not_connected"].includes(mcpLine.mode) || (Boolean(mcpLine.checkedAt) && /checked /.test(mcpLine.detail))), mcpLine && `${mcpLine.mode}: ${mcpLine.detail}`);
 
 // The rules engine needs no keys: $1,000 in cash in April 2026 leaves a $994 check at $74 (20 CFR 416.1123, 416.1124).
 const gift = await fetch(`${B}/api/v1/check-gift`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ gift: { amount: 1000, delivery: "cash", date: "2026-04-10" } }) });
@@ -57,6 +65,21 @@ const card = await fetch(`${B}/api/mcp/server-card`);
 check("discovery: MCP server card", card.status === 200 && (await card.json().catch(() => null))?.name !== undefined);
 const llms = await fetch(`${B}/llms.txt`);
 check("discovery: llms.txt", llms.status === 200 && (await llms.text()).includes("Giftwise"));
+const robotsRes = await fetch(`${B}/robots.txt`);
+const robotsTxt = await robotsRes.text();
+check(
+  "discovery: robots.txt keeps private links and the API out and names the sitemap",
+  robotsRes.status === 200 && ["/manage/", "/m/", "/r/", "/v/", "/api/"].every((p) => robotsTxt.includes(`Disallow: ${p}`)) && /Sitemap: \S+\/sitemap\.xml/.test(robotsTxt),
+  `${robotsRes.status}`,
+);
+const sitemapRes = await fetch(`${B}/sitemap.xml`);
+const sitemapXml = await sitemapRes.text();
+const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+check(
+  "discovery: sitemap.xml lists the sample page and no private link",
+  sitemapRes.status === 200 && locs.includes("/g/maya") && locs.includes("/evidence") && !locs.some((p) => /^\/(manage|m|r|v|api)\//.test(p)),
+  `${sitemapRes.status} ${locs.length} urls`,
+);
 
 const ask = await fetch(`${B}/api/v1/ask-rules`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: "Can my mom pay my rent?" }) });
 const askJ = await ask.json().catch(() => null);
@@ -73,7 +96,7 @@ check("observability: /api/ops/trace finds the request's log line", traced?.data
 const feed = await (await fetch(`${B}/api/ops/feed`)).json().catch(() => null);
 check("observability: /api/ops/feed carries no email or payee", Array.isArray(feed?.data?.events) && !/@|payee/i.test(JSON.stringify(feed.data.events)), `${feed?.data?.events?.length ?? 0} events`);
 const errors = health.checks?.find((c) => c.id === "errors");
-check("health: error tracking reports live or not connected", errors && ["live", "not_connected"].includes(errors.mode), errors?.detail);
+check("health: error tracking reports live, or optional and off", errors && ["live", "off"].includes(errors.mode) && errors.optional === true, errors?.detail);
 
 const head = await fetch(B + "/");
 check("security headers", Boolean(head.headers.get("strict-transport-security") && head.headers.get("x-content-type-options") && head.headers.get("content-security-policy")));

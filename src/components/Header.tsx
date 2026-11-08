@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { ViewMenu } from "./ViewMenu";
 
+/** What a person does here: give, organize a page, report to Social Security, and check the evidence. The rest is in the footer. */
 const LINKS = [
-  { href: "/#how", label: "How it works" },
-  { href: "/try", label: "Try it" },
-  { href: "/learn", label: "Learn" },
-  { href: "/developers", label: "Developers" },
-  { href: "/evidence", label: "Evidence" },
+  { href: "/g/maya", label: "Give", match: /^\/(g\/[^/]+(\/calendar)?|r\/.+|m\/.+)$/ },
+  { href: "/manage/maya-sample-organizer", label: "Organize", match: /^\/(manage\/.+|try(\/.*)?|organizations)$/ },
+  { href: "/g/maya/report", label: "Report", match: /^\/(g\/[^/]+\/report(\/.*)?|v\/.+)$/ },
+  { href: "/evidence", label: "Evidence", match: /^\/evidence(\/.*)?$/ },
 ];
 
 /** The header's own words in Spanish, for the Spanish gift page, receipt and Easy Read report. */
@@ -19,8 +19,8 @@ const WORDS = {
   es: { cta: "Crear una página de regalos", menu: "Menú", close: "Cerrar" },
 } as const;
 
-/** The section a path belongs to, so its link can say "you are here". "/#how" is a place on the home page, never a page. */
-const current = (path: string, href: string) => href !== "/#how" && (path === href || path.startsWith(`${href}/`));
+/** The section a path belongs to, so its link can say "you are here". */
+const current = (path: string, match: RegExp) => match.test(path);
 
 /** The path is URL data, so the bar that reads it streams inside Suspense; the fallback is the same bar with no
  *  "you are here" marker, so nothing moves when it resolves. */
@@ -78,7 +78,7 @@ function HeaderBar({ path }: { path: string | null }) {
       </Link>
       <nav aria-label="Main" className="site-nav">
         {LINKS.map((l) => (
-          <Link key={l.href} href={l.href} className="nav-link" aria-current={path && current(path, l.href) ? "page" : undefined}>
+          <Link key={l.href} href={l.href} className="nav-link" aria-current={path && current(path, l.match) ? "page" : undefined}>
             {l.label}
           </Link>
         ))}
@@ -96,7 +96,7 @@ function HeaderBar({ path }: { path: string | null }) {
         <div ref={sheet} id="mobile-menu" className="mobile-menu">
           <nav aria-label="Main mobile">
             {LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className="mobile-link" aria-current={path && current(path, l.href) ? "page" : undefined} onClick={() => setMenu(false)}>
+              <Link key={l.href} href={l.href} className="mobile-link" aria-current={path && current(path, l.match) ? "page" : undefined} onClick={() => setMenu(false)}>
                 {l.label}
               </Link>
             ))}

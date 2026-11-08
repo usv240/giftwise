@@ -1,21 +1,27 @@
 /**
  * Clients for PayPal's own MCP server, so the assistant on /agents can read an order straight from PayPal and the giver
- * can check what Giftwise says against PayPal's own record. Only read tools are offered to the model.
+ * can check what Giftwise says against PayPal's own record. The nightly card check (src/lib/card-check.ts) reads each
+ * gift it pays back the same way. Only read tools are offered to the model.
  *
  * Two ways to reach the same server:
  * - Local (the default): PayPal's published server package, @paypal/mcp, run by Giftwise as a child process over stdio,
- *   with a sandbox access token in its environment. This is PayPal's documented local setup.
+ *   with an access token and PAYPAL_ENVIRONMENT in its environment. This is PayPal's documented local setup.
  * - Hosted: PayPal's remote server over HTTP + SSE. GET {base}/sse opens an event stream whose first "endpoint" event
- *   names a URL; JSON-RPC requests are POSTed there and the answers arrive on the stream, matched by id. Its tool calls
- *   currently answer PAYPAL_API_SETUP_ERROR for this sandbox app (github.com/paypal/AI-Toolkit/issues/34), so it is
- *   tried only when the local server cannot start, or when PAYPAL_MCP_MODE=hosted.
+ *   names a URL; JSON-RPC requests are POSTed there and the answers arrive on the stream, matched by id. Its get_order
+ *   answered PAYPAL_API_SETUP_ERROR for this sandbox app for a time (github.com/paypal/AI-Toolkit/issues/34) and
+ *   answers with the order since November 8, 2026 (scripts/paypal-mcp-probe.ts). It is tried when the local server
+ *   cannot start, or first when PAYPAL_MCP_MODE=hosted.
  */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { accessToken } from "@/lib/paypal/client";
+import { paypalHosts } from "@/lib/paypal/env";
 
-export const PAYPAL_MCP_BASE = process.env.PAYPAL_MCP_URL ?? "https://mcp.sandbox.paypal.com";
+/** PayPal's hosted server for this PAYPAL_ENV (src/lib/paypal/env.ts), unless PAYPAL_MCP_URL names another. */
+export const paypalMcpBase = () => process.env.PAYPAL_MCP_URL ?? paypalHosts().mcp;
+/** What the local @paypal/mcp server reads to pick PayPal's sandbox or live API. */
+export const paypalMcpEnvironment = () => paypalHosts().mcpEnvironment;
 /** PayPal tools the assistant may call. Reading an order changes nothing. */
 export const PAYPAL_READ_TOOLS = new Set(["get_order"]);
 
@@ -88,7 +94,7 @@ export class PayPalMcpLocal implements PayPalMcpClient {
     if (!PayPalMcpLocal.available()) throw new Error("@paypal/mcp is not installed");
     const token = await accessToken();
     // Only what the server needs: the token and the environment, never the client secret.
-    const env: Record<string, string | undefined> = { PATH: process.env.PATH, HOME: process.env.HOME, SystemRoot: process.env.SystemRoot, PAYPAL_ACCESS_TOKEN: token, PAYPAL_ENVIRONMENT: "SANDBOX" };
+    const env: Record<string, string | undefined> = { PATH: process.env.PATH, HOME: process.env.HOME, SystemRoot: process.env.SystemRoot, PAYPAL_ACCESS_TOKEN: token, PAYPAL_ENVIRONMENT: paypalMcpEnvironment() };
     const child = spawn(process.execPath, [LOCAL_SERVER, "--tools=all"], { env: env as NodeJS.ProcessEnv, stdio: ["pipe", "pipe", "pipe"] });
     const c = new PayPalMcpLocal(child);
     try {
@@ -167,7 +173,7 @@ export class PayPalMcp implements PayPalMcpClient {
   }
 
   private async open(timeoutMs: number) {
-    const res = await fetch(`${PAYPAL_MCP_BASE}/sse`, { headers: { accept: "text/event-stream", authorization: `Bearer ${this.token}` }, signal: this.abort.signal });
+    const res = await fetch(`${paypalMcpBase()}/sse`, { headers: { accept: "text/event-stream", authorization: `Bearer ${this.token}` }, signal: this.abort.signal });
     if (!res.ok || !res.body) throw new Error(`PayPal MCP server answered ${res.status}`);
     const reader = res.body.getReader();
     const ready = new Promise<void>((resolve, reject) => {
@@ -200,7 +206,7 @@ export class PayPalMcp implements PayPalMcpClient {
             .map((l) => l.slice(5).replace(/^ /, ""))
             .join("\n");
           if (event === "endpoint") {
-            this.postUrl = new URL(data, PAYPAL_MCP_BASE).toString();
+            this.postUrl = new URL(data, paypalMcpBase()).toString();
             onEndpoint();
           } else if (data) {
             const msg = JSON.parse(data) as { id?: number; result?: unknown; error?: { message?: string } };

@@ -3,17 +3,24 @@ import { describe, expect, it } from "vitest";
 import results from "../content/test-results.json";
 import { API, MCP_TOOLS, PATH } from "../workflows/src/checks";
 import { CASES } from "@/lib/cases/list";
-import { IMPACT, sampleYearSplit } from "@/lib/impact";
+import { ASKED_SENTENCE, IMPACT, KEPT_SENTENCE, payItYourself, sampleYearSplit } from "@/lib/impact";
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
 import { usd } from "@/lib/rules";
 
 /**
- * Every number the README and TESTING.md state about tests, checks, tools and dollars has one source: test counts in
+ * Every number the README, its docs/ pages and TESTING.md state about tests, checks, tools and dollars has one source: test counts in
  * content/test-results.json (written by scripts/test-results.mjs after the suites run), the outside checks and MCP
  * tools in the code that runs them, and the dollar figures in src/lib/impact.ts. These fail when a document disagrees.
  */
 const readme = readFileSync("README.md", "utf8");
 const testing = readFileSync("TESTING.md", "utf8");
+/** The README's detail lives in docs/: the test table, the results, how it works for real, and everything inside. */
+const tests = readFileSync("docs/tests.md", "utf8");
+const resultsDoc = readFileSync("docs/results.md", "utf8");
+const realWorld = readFileSync("docs/real-world.md", "utf8");
+const inside = readFileSync("docs/inside.md", "utf8");
+const measured = JSON.parse(readFileSync("content/public/page-measure.json", "utf8")) as { pages: { path: string; screens_1440x900: number; words_with_sections_open: number }[] };
+const before = JSON.parse(readFileSync("content/public/page-measure-before.json", "utf8")) as typeof measured;
 const n = (x: number) => x.toLocaleString("en-US");
 const cents = (x: number) => x.toLocaleString("en-US", { style: "currency", currency: "USD" });
 const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
@@ -27,10 +34,10 @@ const rows = (doc: string, command: string) =>
 const hasNumber = (text: string, x: number) => new RegExp(`(^|[^\\d,.])${n(x)}([^\\d,]|$)`).test(text);
 
 describe("one source for every test number", () => {
-  it("README's test table gives each suite the count test-results.json records", () => {
+  it("the test table in docs/tests.md gives each suite the count test-results.json records", () => {
     let seen = 0;
     for (const s of results.suites) {
-      for (const row of rows(readme, s.command)) {
+      for (const row of rows(tests, s.command)) {
         expect(row, s.id).toContain(`${n(s.passed)} of ${n(s.total)}`);
         seen++;
       }
@@ -49,14 +56,22 @@ describe("one source for every test number", () => {
     expect(seen).toBeGreaterThanOrEqual(9);
   });
 
-  it("the README's design line counts the page views the accessibility suite checks", () => {
-    expect(readme).toContain(`axe on ${n(suite("a11y").total)} page views`);
+  it("the design line counts the page views the accessibility suite checks", () => {
+    expect(inside).toContain(`axe on ${n(suite("a11y").total)} page views`);
+  });
+
+  it("the screen counts in docs/inside.md are the measured ones", () => {
+    const ev = measured.pages.find((p) => p.path === "/evidence")!;
+    const was = before.pages.find((p) => p.path === "/evidence")!;
+    expect(inside).toContain(`${ev.screens_1440x900} screens at 1440 by 900`);
+    expect(inside).toContain(`${n(ev.words_with_sections_open)} words`);
+    expect(inside).toContain(`${was.screens_1440x900} screens and ${n(was.words_with_sections_open)} words`);
   });
 
   it("README and TESTING.md count the outside checks the workflow runs", () => {
     const total = CASES.length + PATH.length + API.length;
     expect(suite("outside").total).toBe(total);
-    expect(readme).toContain(`(${total} in all)`);
+    expect(resultsDoc).toContain(`(${total} in all)`);
     expect(readme).toContain(`the same ${total} outside checks`);
     expect(testing).toContain(`Workflow: ${total} checks`);
     expect(testing).toContain(`All ${total} checks, with each result`);
@@ -68,19 +83,34 @@ describe("one source for every test number", () => {
 });
 
 describe("one source for every dollar figure", () => {
-  it("the README leads with the court-case figures src/lib/impact.ts computes", () => {
+  it("the README leads with the court-case figures src/lib/impact.ts computes, case by case", () => {
     const top = readme.slice(0, readme.indexOf("## The problem in one number"));
-    expect(top).toContain(`About ${usd(IMPACT.keptMonthlyPerPerson)} a month for each person`);
-    expect(top).toContain(`In ${IMPACT.routedCases} of ${IMPACT.scoredCases} real SSI cases`);
-    expect(top).toContain(cents(IMPACT.keptMonthly));
-    expect(top).toContain(`${cents(IMPACT.askedBack)} asked back`);
+    expect(top).toContain(KEPT_SENTENCE);
+    for (const k of [IMPACT.keptMin, IMPACT.keptMax]) expect(top).toContain(cents(k));
+    for (const c of IMPACT.askedCases) expect(top).toContain(cents(c.amount));
+    expect(top).toContain(`from ${IMPACT.keptFromYear} to ${IMPACT.keptToYear}`);
+    expect(IMPACT.askedAvoidedThroughAble).toBe(IMPACT.askedBackCases);
+    expect(resultsDoc).toContain(`$331 to $663`);
+    expect(resultsDoc).toContain(cents(IMPACT.keptMonthly));
+    expect(ASKED_SENTENCE).toContain(cents(IMPACT.askedCases[0].amount));
+  });
+
+  it("the README and docs/real-world.md answer why not pay the shop yourself with the engine's figures", () => {
+    const y = payItYourself();
+    for (const doc of [readme, realWorld]) {
+      expect(doc).toContain(`${y.monthsLowered} of her monthly checks, ${cents(y.totalLowered)} in all`);
+      expect(doc).toContain(usd(y.ableLimit));
+    }
+    expect(realWorld).toContain(`${y.housingGifts} of the ${y.gifts} gifts (${usd(y.housingAmount)})`);
+    expect(realWorld).toContain(`${y.cashGifts} gifts (${usd(y.cashAmount)})`);
+    expect(realWorld).toContain(`${y.reportMonthsAlone} months with income or housing help to tell Social Security about, against ${y.reportMonthsGiftwise}`);
   });
 
   it("the README splits the sample year the way the rules engine does", () => {
     const y = sampleYearSplit();
     expect(y.checkWhole).toBe(y.gifts);
     expect(y.paypal.amount + y.able.amount + y.item.amount + y.cash.amount).toBe(y.total);
-    for (const text of [readme.slice(0, readme.indexOf("## The problem in one number")), readme.slice(readme.indexOf("## How this works for real"))]) {
+    for (const text of [readme.slice(0, readme.indexOf("## The problem in one number")), realWorld]) {
       expect(text).toContain(`${y.gifts} gifts`);
       expect(text).toContain(usd(y.total));
       expect(text).toContain(`${usd(y.paypal.amount)} (${y.paypal.gifts} gifts)`);
@@ -96,6 +126,6 @@ describe("one source for every dollar figure", () => {
     expect(new Set(decided.votes.map((v) => v.answer))).toEqual(new Set(["shelter", "not_shelter"]));
     expect(routed.route).toBe("able");
     expect(able.check).toBeGreaterThan(shop.check);
-    expect(readme).toContain(`sends the ${usd(BILL_RUN.amount)} to her ABLE account, where her check is ${usd(able.check)} either way (paid to the insurer, it could be ${usd(shop.check)})`);
+    expect(resultsDoc).toContain(`sends the ${usd(BILL_RUN.amount)} to her ABLE account, where her check is ${usd(able.check)} either way (paid to the insurer, it could be ${usd(shop.check)})`);
   });
 });

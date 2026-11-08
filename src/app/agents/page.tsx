@@ -163,7 +163,7 @@ export default function AgentsPage() {
           <li>It never chooses where money goes: the rules engine does, for every dollar.</li>
           <li>
             Every checkout an agent starts is written to the same ledger as everything else, marked as made by an agent. See{" "}
-            <Link className="text-link" href="/evidence#failure-cases">
+            <Link className="text-link" href="/evidence/operations#failure-cases">
               the failure cases
             </Link>
             .

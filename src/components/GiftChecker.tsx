@@ -1,22 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import sources from "../../content/sources.json";
 import { parseDollars } from "@/lib/parseDollars";
-import { DEFAULT_PROFILE, evaluateGift, monthName, usd, type Delivery, type Gift, type GiftResult } from "@/lib/rules";
+import { CHECKER_PROFILE, checkerGift, type CheckerMode } from "@/lib/checker";
+import { evaluateGift, monthName, usd, type Delivery, type GiftResult } from "@/lib/rules";
 import { Info } from "./Info";
 import { usePrefs } from "./prefs";
 import { TOUR_KEY } from "./tour/steps";
 
-type Mode = "cash" | "shop" | "rent";
+type Mode = CheckerMode;
 const MODES: { value: Mode; label: string }[] = [
   { value: "cash", label: "Cash to her" },
   { value: "shop", label: "Pay the shop" },
   { value: "rent", label: "Toward rent" },
 ];
 const SRC = sources as Record<string, { title: string; url: string }>;
-const DATE = "2026-04-10";
 const MAX = 100000;
 const ROUTE_PHRASE: Record<Delivery, string> = {
   vendor: "Paying the shop directly",
@@ -25,11 +25,6 @@ const ROUTE_PHRASE: Record<Delivery, string> = {
   cash: "Giving cash",
 };
 
-function giftFor(mode: Mode, amount: number): Gift {
-  if (mode === "cash") return { id: "hero", date: DATE, amount, delivery: "cash", category: "other", label: "Gift" };
-  if (mode === "shop") return { id: "hero", date: DATE, amount, delivery: "vendor", category: "equipment", label: "Wheelchair repair" };
-  return { id: "hero", date: DATE, amount, delivery: "vendor", category: "rent", recurring: true, label: "Rent, paid by family each month" };
-}
 
 /** The reason in plain words, without the exclusion arithmetic (that is in the technical view). */
 function plainReason(r: GiftResult, mode: Mode): string {
@@ -42,6 +37,12 @@ function plainReason(r: GiftResult, mode: Mode): string {
   return "Paid straight to the shop, so it is not counted.";
 }
 
+/** Today in US Pacific time, YYYY-MM-DD: the same day today() in src/lib/api/envelope.ts gives the gift page. */
+const todayPacific = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+const noSubscribe = () => () => {};
+/** Set in next.config.ts at build time. */
+const BUILD_DAY = process.env.NEXT_PUBLIC_BUILD_DAY || "2026-11-08";
+
 /** True while the guided tour is running: its first stop reads this fragment, so it holds still. */
 function tourRunning() {
   try {
@@ -51,8 +52,13 @@ function tourRunning() {
   }
 }
 
-/** The hero's live fragment: the product doing its job, on the page. */
+/**
+ * The hero's live fragment: the product doing its job, on the page. It prices a gift made today, in the same time zone
+ * as the gift page, so the check it names is the one Maya's gift page names for a gift made today.
+ */
 export function GiftChecker() {
+  // The static page paints with the day it was built (no mismatch on hydration); the browser's today takes over.
+  const date = useSyncExternalStore(noSubscribe, todayPacific, () => BUILD_DAY);
   const { prefs } = usePrefs();
   const technical = prefs.mode === "technical";
   const [raw, setRaw] = useState("1000");
@@ -62,8 +68,8 @@ export function GiftChecker() {
 
   const typed = parseDollars(raw);
   const amount = Math.min(MAX, typed ?? 0);
-  const result: GiftResult = useMemo(() => evaluateGift(giftFor(mode, amount), DEFAULT_PROFILE), [mode, amount]);
-  const viaAble = useMemo(() => (mode === "rent" ? evaluateGift({ ...giftFor("rent", amount), delivery: "able" }, DEFAULT_PROFILE) : null), [mode, amount]);
+  const result: GiftResult = useMemo(() => evaluateGift(checkerGift(mode, amount, date), CHECKER_PROFILE), [mode, amount, date]);
+  const viaAble = useMemo(() => (mode === "rent" ? evaluateGift({ ...checkerGift("rent", amount, date), delivery: "able" }, CHECKER_PROFILE) : null), [mode, amount, date]);
 
   // Signature move: one pass through the other two states, then it rests on cash, where it began (about 17 seconds).
   // It never loops, waits while the tab is hidden, and does not start for reduced motion or during the guided tour.

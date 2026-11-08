@@ -1,11 +1,7 @@
 import Link from "next/link";
-import fieldResults from "../../../content/eval/field-cases-results.json";
 import { Info } from "@/components/Info";
 import { ERROR_RATES } from "@/lib/error-rates";
 
-const routed = fieldResults.summary.dollars.as_shown_in_the_opinions;
-const perPerson = routed.kept_per_month_2026 / routed.cases_where_routing_keeps_money;
-const usd = (n: number, cents = false) => `$${n.toLocaleString("en-US", { minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 })}`;
 
 /** Three groups that already help people on SSI with money, each with its published size and how it would run Giftwise. */
 const ROUTES = [
@@ -70,19 +66,6 @@ export const ADOPTION_ROUTES = ROUTES;
 export function Adoption() {
   return (
     <>
-      <div className="ad-value" data-ui>
-        <p className="ad-value-n tabular">
-          {usd(Math.round(perPerson))}
-          <span className="ad-value-unit"> a month, for each person</span>
-        </p>
-        <p className="ad-value-what">
-          In the {routed.cases_where_routing_keeps_money} federal court cases where the facts allow a benefit-safe route, the same help routed through Giftwise keeps {usd(routed.kept_per_month_2026, true)} a month at 2026 rates: about{" "}
-          {usd(Math.round(perPerson))} for each person, or {usd(Math.round(perPerson * 12 / 10) * 10)} a year.{" "}
-          <a className="text-link" href="#field-cases">
-            The cases
-          </a>
-        </p>
-      </div>
       <ol className="ad-routes">
         {ROUTES.map((r, i) => (
           <li key={r.who} className="ad-route" data-ui>

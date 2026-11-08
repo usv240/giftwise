@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db, schema } from "./db";
 import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Profile, type Pronoun } from "./rules";
 import { SAMPLE_MANAGE_TOKEN, hashToken, newToken, resetSampleManage, routeNeed } from "./manage";
@@ -55,25 +55,45 @@ export async function ensureSample() {
   return household;
 }
 
+/**
+ * ABLE's yearly limit counts every giver's deposits together. The profile carries what went in from elsewhere; the
+ * page's own ABLE gifts captured this calendar year are added to it, so each new gift is routed against the real total.
+ */
+export function withAbleSoFar(profile: Profile, payments: { route: string; amount: string | number; capturedAt: Date | null }[], now = new Date()): Profile {
+  const year = now.getUTCFullYear();
+  const onPage = payments.filter((p) => p.route === "able" && p.capturedAt && p.capturedAt.getUTCFullYear() === year).reduce((s, p) => s + Number(p.amount), 0);
+  return onPage > 0 ? { ...profile, ableContributedThisYear: Math.round((profile.ableContributedThisYear + onPage) * 100) / 100 } : profile;
+}
+
+/** The sample is created once and never deleted (a reset reopens its needs), so each server process checks for it once. */
+let sampleReady = false;
+
 export async function getHousehold(slug: string) {
-  if (slug === SAMPLE.slug) await ensureSample();
   const d = db();
-  const [h] = await d.select().from(schema.households).where(eq(schema.households.slug, slug)).limit(1);
+  // The sample's row is read once: ensureSample already selects it, so the page's first read is one query, not two.
+  let h: typeof schema.households.$inferSelect | undefined;
+  if (slug === SAMPLE.slug && !sampleReady) {
+    h = await ensureSample();
+    sampleReady = Boolean(h);
+  } else {
+    [h] = await d.select().from(schema.households).where(eq(schema.households.slug, slug)).limit(1);
+  }
   if (!h) return null;
-  // The needs and the payments do not depend on each other, so they are read at the same time.
+  // The needs and the payments do not depend on each other, so they are read at the same time. Rows from an earlier
+  // round of the sample page (before its last reset) stay on record for their receipts but are not part of the page.
   const [needs, pays] = await Promise.all([
-    d.select().from(schema.needs).where(eq(schema.needs.householdId, h.id)).orderBy(asc(schema.needs.sortOrder)),
+    d.select().from(schema.needs).where(and(eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt))).orderBy(asc(schema.needs.sortOrder)),
     d
       .select()
       .from(schema.payments)
-      .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured")))
+      .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured"), isNull(schema.payments.archivedAt)))
       .orderBy(desc(schema.payments.capturedAt)),
   ]);
   return { household: h, needs, payments: pays };
 }
 
 export async function getNeedWithHousehold(id: number) {
-  const [n] = await db().select().from(schema.needs).where(eq(schema.needs.id, id)).limit(1);
+  const [n] = await db().select().from(schema.needs).where(and(eq(schema.needs.id, id), isNull(schema.needs.archivedAt))).limit(1);
   return n ?? null;
 }
 
@@ -94,8 +114,9 @@ export function openNeeds(needs: NeedRow[]) {
     }));
 }
 
+/** A need on the page now; one a reset took off the page (kept only for its receipts) is not found. */
 export async function getNeed(id: number) {
-  const [n] = await db().select().from(schema.needs).where(eq(schema.needs.id, id)).limit(1);
+  const [n] = await db().select().from(schema.needs).where(and(eq(schema.needs.id, id), isNull(schema.needs.archivedAt))).limit(1);
   return n ?? null;
 }
 
@@ -131,41 +152,65 @@ export function samplePayees() {
   return { shops: shops.length, shopAccounts: distinct, ableOwn: !shopEmails.includes(able) };
 }
 
-/** Reset the sample so every visitor sees the same starting state. */
-export async function resetSample() {
-  const d = db();
-  const [h] = await d.select().from(schema.households).where(eq(schema.households.slug, SAMPLE.slug)).limit(1);
-  if (!h) return;
-  const needs = await d.select({ id: schema.needs.id }).from(schema.needs).where(eq(schema.needs.householdId, h.id));
-  await d.delete(schema.payments).where(eq(schema.payments.householdId, h.id));
-  // Fund grants to the sample household go too; PayPal and the audit ledger keep their own records.
-  await d.delete(schema.payouts).where(eq(schema.payouts.householdId, h.id));
-  if (needs.length) {
-    await d.delete(schema.payments).where(inArray(schema.payments.needId, needs.map((n) => n.id)));
-    await d.update(schema.needs).set({ status: "open", funded: "0" }).where(eq(schema.needs.householdId, h.id));
-  }
-  // Bring each sample need back in line with the code (title, wording, payee), so a database made by an older build
-  // matches the current sample after one reset. Needs are matched by their place in the list.
-  const rows = await d.select({ id: schema.needs.id, sortOrder: schema.needs.sortOrder }).from(schema.needs).where(eq(schema.needs.householdId, h.id));
-  const kept = new Set<number>();
-  for (const row of rows) {
-    const n = SAMPLE.needs[row.sortOrder];
-    // Needs an organizer added in the manage view go; the sample's own come back exactly as written.
-    if (!n || kept.has(row.sortOrder)) {
-      await d.delete(schema.needs).where(eq(schema.needs.id, row.id));
-      continue;
+/**
+ * Reset the sample so every visitor sees the same starting state. Nothing a giver paid is deleted: the payments made so
+ * far move to an earlier round (archived_at), so every receipt still opens and still matches PayPal's record, while the
+ * needs, the report, the dashboard and the totals start again from zero.
+ *
+ * The reset runs in one transaction that holds the household row. A capture being recorded at the same moment
+ * (src/lib/paypal/capture.ts) holds a share of the same row, so each payment counts in exactly one round: either it was
+ * recorded first and the reset moves it to the earlier round, or the reset went first and the capture is recorded, with
+ * its receipt, as part of the earlier round, leaving the reopened needs untouched.
+ *
+ * `slug` is the sample page; a test passes its own copy of the sample.
+ */
+export async function resetSample(slug: string = SAMPLE.slug) {
+  const found = await db().transaction(async (tx) => {
+    const [h] = await tx.select({ id: schema.households.id }).from(schema.households).where(eq(schema.households.slug, slug)).for("update");
+    if (!h) return false;
+    const current = await tx
+      .select({ id: schema.needs.id, sortOrder: schema.needs.sortOrder })
+      .from(schema.needs)
+      .where(and(eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt)));
+    const ids = current.map((n) => n.id);
+    // Every payment of this round, captured or still in flight, moves to the earlier round. A row from an older build
+    // that names only its need is included too.
+    await tx
+      .update(schema.payments)
+      .set({ archivedAt: sql`now()` })
+      .where(and(isNull(schema.payments.archivedAt), ids.length ? or(eq(schema.payments.householdId, h.id), inArray(schema.payments.needId, ids)) : eq(schema.payments.householdId, h.id)));
+    // Fund grants to the sample household go; PayPal and the audit ledger keep their own records.
+    await tx.delete(schema.payouts).where(eq(schema.payouts.householdId, h.id));
+    // Needs that any payment points to, in any round, are kept for their receipts rather than deleted.
+    const withGifts = new Set(
+      ids.length ? (await tx.select({ id: schema.payments.needId }).from(schema.payments).where(inArray(schema.payments.needId, ids))).map((r) => r.id) : [],
+    );
+    // Bring each sample need back in line with the code (title, wording, payee), reopened, so a database made by an
+    // older build matches the current sample after one reset. Needs are matched by their place in the list.
+    const kept = new Set<number>();
+    for (const row of current) {
+      const n = SAMPLE.needs[row.sortOrder];
+      if (!n || kept.has(row.sortOrder)) {
+        // A need an organizer added in the manage view leaves the page. One that received gifts stays on record, off
+        // the page, so its receipts keep their title; the rest are deleted.
+        if (withGifts.has(row.id)) await tx.update(schema.needs).set({ archivedAt: sql`now()` }).where(eq(schema.needs.id, row.id));
+        else await tx.delete(schema.needs).where(eq(schema.needs.id, row.id));
+        continue;
+      }
+      kept.add(row.sortOrder);
+      await tx
+        .update(schema.needs)
+        .set({ title: n.title, detail: n.detail, category: n.category, route: n.route, payeeName: n.payeeName, payeeAccount: n.payeeAccount, amount: n.amount, recurring: n.recurring, status: "open", funded: "0" })
+        .where(eq(schema.needs.id, row.id));
     }
-    kept.add(row.sortOrder);
-    await d
-      .update(schema.needs)
-      .set({ title: n.title, detail: n.detail, category: n.category, route: n.route, payeeName: n.payeeName, payeeAccount: n.payeeAccount, amount: n.amount, recurring: n.recurring })
-      .where(eq(schema.needs.id, row.id));
-  }
-  // A sample need removed in the manage view comes back too.
-  const missing = SAMPLE.needs.map((n, i) => ({ n, i })).filter(({ i }) => !kept.has(i));
-  if (missing.length) await d.insert(schema.needs).values(missing.map(({ n, i }) => ({ householdId: h.id, ...n, sortOrder: i })));
-  await d.update(schema.households).set({ note: SAMPLE.note }).where(eq(schema.households.id, h.id));
-  await resetSampleManage();
+    // A sample need removed in the manage view comes back too.
+    const missing = SAMPLE.needs.map((n, i) => ({ n, i })).filter(({ i }) => !kept.has(i));
+    if (missing.length) await tx.insert(schema.needs).values(missing.map(({ n, i }) => ({ householdId: h.id, ...n, sortOrder: i })));
+    await tx.update(schema.households).set({ note: SAMPLE.note }).where(eq(schema.households.id, h.id));
+    return true;
+  });
+  // The sample's public organizer link, its open status and an empty webhook come back once the reset is in.
+  if (found && slug === SAMPLE.slug) await resetSampleManage();
 }
 
 export type NewNeed = { title: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean };

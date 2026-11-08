@@ -5,6 +5,7 @@ import { audit } from "@/lib/audit";
 import { workflowTask } from "@/lib/checks";
 import { api } from "@/lib/api/handler";
 import { log } from "@/lib/log";
+import { failureKind } from "@/lib/scrub";
 import { hit, release } from "@/lib/rate-limit";
 
 const COOLDOWN_SEC = 10 * 60;
@@ -32,7 +33,7 @@ async function postRoute() {
   } catch (e) {
     await release("checks:start", COOLDOWN_SEC);
     log.warn("checks did not start", { err: e });
-    return fail("upstream_unavailable", `Render Workflows did not start the run: ${(e as Error).message.slice(0, 160)}`, 502);
+    return fail("upstream_unavailable", `Render Workflows did not start the run (${failureKind(e)}).`, 502);
   }
 }
 

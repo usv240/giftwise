@@ -1,5 +1,5 @@
 {
-  "ran_at": "2026-11-04T04:35:09.856Z",
+  "ran_at": "2026-11-08T05:36:08.799Z",
   "rules_version": "2026.1",
   "tolerance_usd": 1,
   "rates": "Engine amounts are 2026: federal benefit rate $994, presumed maximum value $351.33, one-third reduction $331.33. Dollar figures are what the same help would mean to a person on SSI in 2026.",
@@ -45,12 +45,40 @@
         {
           "id": "cousin-deposits",
           "amount": 4870,
-          "period": "not stated"
+          "period": "not stated",
+          "title": "A cousin's deposits push savings over the limit",
+          "as_given_months_over_limit": [
+            "2002-01",
+            "2003-01",
+            "2004-01"
+          ],
+          "routed": [
+            {
+              "route": "able",
+              "needs_able_eligibility": true,
+              "months_over_limit": [],
+              "months_with_countable_income": [],
+              "avoided": true
+            }
+          ]
         },
         {
           "id": "children-deposit-1500",
           "amount": 11442.2,
-          "period": "March 2013 to March 2015"
+          "period": "March 2013 to March 2015",
+          "title": "Children deposit $1,500 to meet a bank's minimum balance",
+          "as_given_months_over_limit": [
+            "2013-03"
+          ],
+          "routed": [
+            {
+              "route": "able",
+              "needs_able_eligibility": true,
+              "months_over_limit": [],
+              "months_with_countable_income": [],
+              "avoided": true
+            }
+          ]
         }
       ]
     },
@@ -210,7 +238,8 @@
         "months_stated": null,
         "kept_over_stated_months": null,
         "if_able_eligible": null
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "relatives-home-one-third",
@@ -275,7 +304,8 @@
         "months_stated": 41,
         "kept_over_stated_months": 13584.53,
         "if_able_eligible": null
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "children-home-one-third",
@@ -340,7 +370,8 @@
         "months_stated": null,
         "kept_over_stated_months": null,
         "if_able_eligible": null
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "sons-home-own-food",
@@ -427,7 +458,8 @@
           "months_stated": null,
           "kept_over_stated_months": null
         }
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "parents-home-all-expenses",
@@ -513,7 +545,8 @@
           "months_stated": null,
           "kept_over_stated_months": null
         }
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "father-pays-landlord",
@@ -600,7 +633,8 @@
           "months_stated": 32,
           "kept_over_stated_months": 10602.56
         }
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "parents-home-food-shelter",
@@ -686,7 +720,8 @@
           "months_stated": 68,
           "kept_over_stated_months": 22530.44
         }
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "daughter-pays-rent",
@@ -773,7 +808,8 @@
           "months_stated": 16,
           "kept_over_stated_months": 5301.28
         }
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "mother-monthly-cash",
@@ -921,7 +957,8 @@
           "months_stated": 37,
           "kept_over_stated_months": 36778
         }
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "former-husband-monthly-money",
@@ -1058,7 +1095,8 @@
           "months_stated": 40,
           "kept_over_stated_months": 39760
         }
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "cousin-deposits",
@@ -1127,6 +1165,24 @@
       "dollars": {
         "computed": false,
         "note": "She also received Social Security disability benefits and some self-employment income in amounts the opinion does not state, so her check cannot be computed. The stated overpayment is reported instead."
+      },
+      "overpayment": {
+        "amount": 4870,
+        "period": "not stated",
+        "as_given_months_over_limit": [
+          "2002-01",
+          "2003-01",
+          "2004-01"
+        ],
+        "routed": [
+          {
+            "route": "able",
+            "needs_able_eligibility": true,
+            "months_over_limit": [],
+            "months_with_countable_income": [],
+            "avoided": true
+          }
+        ]
       }
     },
     {
@@ -1179,6 +1235,22 @@
       "dollars": {
         "computed": false,
         "note": "The opinion does not give her balance without the deposit, so the check cannot be computed either way. The stated overpayment is reported instead."
+      },
+      "overpayment": {
+        "amount": 11442.2,
+        "period": "March 2013 to March 2015",
+        "as_given_months_over_limit": [
+          "2013-03"
+        ],
+        "routed": [
+          {
+            "route": "able",
+            "needs_able_eligibility": true,
+            "months_over_limit": [],
+            "months_with_countable_income": [],
+            "avoided": true
+          }
+        ]
       }
     },
     {
@@ -1238,7 +1310,8 @@
       "dollars": {
         "computed": false,
         "note": "Retirement benefits, a trust and undisclosed assets also decided her eligibility, so the check from the gifts alone cannot be isolated."
-      }
+      },
+      "overpayment": null
     },
     {
       "id": "son-home-with-dib",
@@ -1282,8 +1355,9 @@
       "dollars": {
         "computed": false,
         "note": "Her Social Security disability benefit amount is not stated, so her SSI check cannot be computed."
-      }
+      },
+      "overpayment": null
     }
   ],
-  "ms": 174
+  "ms": 213
 }

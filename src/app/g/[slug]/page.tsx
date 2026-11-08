@@ -13,7 +13,7 @@ import { SandboxLogin } from "@/components/SandboxLogin";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { cache } from "react";
-import { cashExample, getHousehold, openNeeds } from "@/lib/households";
+import { cashExample, getHousehold, openNeeds, withAbleSoFar } from "@/lib/households";
 import { pageOrigin } from "@/lib/origin";
 import QRCode from "qrcode";
 import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
@@ -78,7 +78,8 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
   const data = await readHousehold(slug);
   if (!data) notFound();
   const { household, needs, payments } = data;
-  const profile: Profile = { ...DEFAULT_PROFILE, ...(household.profile as Partial<Profile>) };
+  // The same profile the server routes with: this year's ABLE gifts on the page count toward ABLE's yearly limit.
+  const profile: Profile = withAbleSoFar({ ...DEFAULT_PROFILE, ...(household.profile as Partial<Profile>) }, payments);
   const w = pronounWords(profile.pronoun);
   const own = (s: string) => sampleIn(lang, s, household.isSample);
   const date = today();
@@ -234,15 +235,17 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
             </Link>
           </p>
         </details>
-        <div className="gift-sandbox">
+        {/* For anyone testing the page: kept one press away, out of the giver's reading path. */}
+        <details className="gift-cash gift-sandbox">
+          <summary>{t.sandboxTitle}</summary>
           <div className="title-row">
-            <p className="gift-sandbox-title">{t.sandboxTitle}</p>
+            <p>{t.sandboxText}</p>
             <Info id="gift.sandbox" label="" topic={t.sandboxTitle} lang={lang} />
           </div>
-          <p>{t.sandboxText}</p>
           <SandboxLogin compact lang={lang} />
+          <p>{t.sandboxCard}</p>
           {household.isSample && <ResetSample slug={slug} lang={lang} />}
-        </div>
+        </details>
       </aside>
       <div className="gift-real" lang="en">
         {lang === "es" && (

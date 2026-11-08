@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { api } from "@/lib/api/handler";
 import { log } from "@/lib/log";
 import { feed } from "@/lib/ops";
+import { redactDeep } from "@/lib/scrub";
 
 /** GET /api/ops/stream: the same feed over server-sent events, one message every two seconds, for up to ten minutes. Public. */
 async function getRoute(req: Request) {
@@ -13,7 +14,8 @@ async function getRoute(req: Request) {
     async start(controller) {
       const tick = async () => {
         try {
-          const json = JSON.stringify(await feed());
+          // The feed is public: no credential-shaped text leaves in it, whatever a row holds.
+          const json = JSON.stringify(redactDeep(await feed()));
           if (json === last) {
             controller.enqueue(encoder.encode(": keep-alive\n\n"));
             return;

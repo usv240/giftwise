@@ -76,6 +76,12 @@
   margin-top: 2rem;
   font-size: 0.875rem;
 }
+/* The page's last link sits right above the footer now, so it carries its own 44 px target. */
+.dev-source .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
 .dev-intro {
   margin-bottom: 1.25rem;
 }

@@ -19,7 +19,7 @@ export default function BillsPage() {
     <div className="page frame evidence evidence-sub">
       <header className="page-head">
         <p className="jx-crumb">
-          <Link className="text-link" href="/evidence#evaluation">
+          <Link className="text-link" href="/evidence/rules#evaluation">
             Evidence
           </Link>
         </p>

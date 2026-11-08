@@ -25,6 +25,50 @@ export function shortId(ref: string) {
 export type RouteStat = { route: string; requests: number; p50: number; p95: number; errors: number; refused: number; errorRate: number };
 export type Counts = Record<string, number>;
 
+/** PayPal's and Giftwise's status words folded into five plain ones: planned, paid, waiting, returned, failed. */
+export function foldStatus(s: string) {
+  const u = s.toUpperCase();
+  if (u === "CREATED") return "planned";
+  if (u === "PENDING" || u === "ONHOLD" || u === "UNCLAIMED") return "waiting";
+  if (u === "CAPTURED" || u === "SUCCESS") return "paid";
+  if (u === "REFUNDED" || u === "RETURNED" || u === "REVERSED") return "returned";
+  return "failed";
+}
+
+/**
+ * The payments the outside checks make on purpose (src/lib/cases/scenarios.ts): $12 test orders with reference "runner"
+ * and no gift page. Each run declines a test card, tries a capture before approval, and pays two (the double-click and
+ * refund checks), so "failed" here is the checks working.
+ */
+export type CheckPayments = { declined: number; refused: number; paid: number; other: number };
+
+export function checkPaymentsOf(rows: { status: string; n: number }[]): CheckPayments {
+  const out: CheckPayments = { declined: 0, refused: 0, paid: 0, other: 0 };
+  for (const r of rows) {
+    const s = r.status.toLowerCase();
+    if (s === "declined") out.declined += r.n;
+    else if (s === "failed") out.refused += r.n;
+    else if (s === "captured" || s === "refunded") out.paid += r.n;
+    else out.other += r.n;
+  }
+  return out;
+}
+
+/** One plain sentence for the outside checks' test payments; empty when there were none. */
+export function describeCheckPayments(c: CheckPayments) {
+  const total = c.declined + c.refused + c.paid + c.other;
+  if (!total) return "";
+  const n = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many}`;
+  const parts = [
+    c.declined ? n(c.declined, "test card declined on purpose (the declined-card check)", "test cards declined on purpose (the declined-card check)") : "",
+    c.refused ? n(c.refused, "capture refused because the giver had not approved yet (the unapproved-order check)", "captures refused because the giver had not approved yet (the unapproved-order check)") : "",
+    c.paid ? n(c.paid, "test order of $12 paid (the double-click and refund checks)", "test orders of $12 paid (the double-click and refund checks)") : "",
+    c.other ? n(c.other, "test order started", "test orders started") : "",
+  ].filter(Boolean);
+  const list = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
+  return `Not counted above: ${n(total, "test payment", "test payments")} the outside checks made in the sandbox: ${list}.`;
+}
+
 export async function rightNow() {
   const checks: Check[] = await runChecks();
   if (!dbConfigured()) return { checks, aiToday: 0, aiCap: AI_DAILY_CAP_USD, aiCallsToday: 0, lastHour: 0, lastHourErrors: 0 };
@@ -36,7 +80,7 @@ export async function rightNow() {
 }
 
 export async function lastDay() {
-  if (!dbConfigured()) return { routes: [] as RouteStat[], payments: {} as Counts, webhooks: { received: 0, handledOnce: 0, duplicates: 0, unverified: 0 }, ai: [] as { route: string; calls: number; inputTokens: number; outputTokens: number; cost: number; replayed: number }[] };
+  if (!dbConfigured()) return { routes: [] as RouteStat[], payments: {} as Counts, checkPayments: checkPaymentsOf([]), webhooks: { received: 0, handledOnce: 0, duplicates: 0, unverified: 0 }, ai: [] as { route: string; calls: number; inputTokens: number; outputTokens: number; cost: number; replayed: number }[] };
   const [routes, pay, payouts, hooks, ai] = await Promise.all([
     q<{ route: string; n: string; p50: string; p95: string; errors: string; refused: string }>(sql`
       select route, count(*) as n,
@@ -46,7 +90,8 @@ export async function lastDay() {
         count(*) filter (where status >= 400 and status < 500) as refused
       from request_log where created_at >= now() - interval '24 hours'
       group by route order by n desc`),
-    q<{ status: string; n: string }>(sql`select status, count(*) as n from payments where created_at >= now() - interval '24 hours' group by status`),
+    // A gift has a page; the outside checks' $12 test orders carry reference "runner" and none.
+    q<{ status: string; test: boolean; n: string }>(sql`select status, (reference_id = 'runner' and household_id is null) as test, count(*) as n from payments where created_at >= now() - interval '24 hours' group by 1, 2`),
     q<{ status: string; n: string }>(sql`select status, count(*) as n from payouts where updated_at >= now() - interval '24 hours' group by status`),
     q<{ received: string; distinct_events: string; unverified: string }>(sql`
       select count(*) filter (where action like 'paypal.webhook.%' and action <> 'paypal.webhook.unverified') as received,
@@ -57,23 +102,17 @@ export async function lastDay() {
       select route, count(*) as calls, sum(input_tokens) as input_tokens, sum(output_tokens) as output_tokens, sum(cost_usd) as cost, count(*) filter (where replayed) as replayed
       from ai_usage where created_at >= now() - interval '24 hours' group by route order by cost desc`),
   ]);
-  // Payments by status, with PayPal's words folded into five plain ones.
+  // Gifts and payout items by status, with PayPal's words folded into five plain ones; the checks' test orders on their own.
   const payments: Counts = { planned: 0, paid: 0, waiting: 0, returned: 0, failed: 0 };
-  const fold = (s: string) => {
-    const u = s.toUpperCase();
-    if (u === "CREATED" || u === "PENDING" || u === "ONHOLD") return u === "CREATED" ? "planned" : "waiting";
-    if (u === "CAPTURED" || u === "SUCCESS") return "paid";
-    if (u === "UNCLAIMED") return "waiting";
-    if (u === "REFUNDED" || u === "RETURNED" || u === "REVERSED") return "returned";
-    return "failed";
-  };
-  for (const r of [...pay, ...payouts]) payments[fold(r.status)] += n(r.n);
+  for (const r of [...pay.filter((p) => !p.test), ...payouts]) payments[foldStatus(r.status)] += n(r.n);
+  const checkPayments = checkPaymentsOf(pay.filter((p) => p.test).map((p) => ({ status: p.status, n: n(p.n) })));
   const h = hooks[0];
   const received = n(h?.received);
   const handledOnce = n(h?.distinct_events);
   return {
     routes: routes.map((r) => ({ route: r.route, requests: n(r.n), p50: Math.round(n(r.p50)), p95: Math.round(n(r.p95)), errors: n(r.errors), refused: n(r.refused), errorRate: n(r.n) ? n(r.errors) / n(r.n) : 0 })),
     payments,
+    checkPayments,
     webhooks: { received, handledOnce, duplicates: Math.max(0, received - handledOnce), unverified: n(h?.unverified) },
     ai: ai.map((r) => ({ route: r.route || "(outside a request)", calls: n(r.calls), inputTokens: n(r.input_tokens), outputTokens: n(r.output_tokens), cost: n(r.cost), replayed: n(r.replayed) })),
   };

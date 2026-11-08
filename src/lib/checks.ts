@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
+import { redactDeep } from "./scrub";
 import { desc } from "drizzle-orm";
 import { z } from "zod";
 import { db, dbConfigured, schema } from "./db";
@@ -42,7 +43,8 @@ export async function saveRun(b: z.infer<typeof CheckRunBody>) {
   const passed = b.results.filter((r) => r.ok).length;
   const [row] = await db()
     .insert(schema.checkRuns)
-    .values({ source: b.source, runId: b.runId, appUrl: b.appUrl, passed, total: b.results.length, results: b.results, startedAt: new Date(b.startedAt) })
+    // Results are shown on /evidence and /status: no credential-shaped text is stored, whatever a check reported.
+    .values({ source: b.source, runId: b.runId, appUrl: b.appUrl, passed, total: b.results.length, results: redactDeep(b.results), startedAt: new Date(b.startedAt) })
     .returning();
   return row;
 }
@@ -51,7 +53,7 @@ export async function latestRun(): Promise<CheckRun | null> {
   if (!dbConfigured()) return null;
   const [r] = await db().select().from(schema.checkRuns).orderBy(desc(schema.checkRuns.finishedAt)).limit(1);
   if (!r) return null;
-  return { id: r.id, source: r.source, runId: r.runId, appUrl: r.appUrl, passed: r.passed, total: r.total, results: r.results as CheckResult[], startedAt: r.startedAt.toISOString(), finishedAt: r.finishedAt.toISOString(), ageMinutes: Math.max(0, Math.round((Date.now() - r.finishedAt.getTime()) / 60_000)) };
+  return { id: r.id, source: r.source, runId: r.runId, appUrl: r.appUrl, passed: r.passed, total: r.total, results: redactDeep(r.results as CheckResult[]), startedAt: r.startedAt.toISOString(), finishedAt: r.finishedAt.toISOString(), ageMinutes: Math.max(0, Math.round((Date.now() - r.finishedAt.getTime()) / 60_000)) };
 }
 
 /** The workflow's task slug, from render.yaml (the workflow service's slug plus the task name). */

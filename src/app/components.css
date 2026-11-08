@@ -452,3 +452,51 @@
 .page-loading {
   min-height: 100svh;
 }
+
+/* What is new: three short cards, the same on the home page and the Evidence page. */
+.new3-h {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.new3-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 960px) {
+  .new3-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.new3-item {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 6px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+.new3-item p {
+  margin: 0;
+}
+.new3-k {
+  font-weight: 500;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+}
+.new3-v {
+  line-height: 1.5;
+  max-width: 60ch;
+}
+.new3-link {
+  justify-self: start;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}

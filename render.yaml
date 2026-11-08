@@ -38,6 +38,8 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: PAYPAL_ENV # sandbox or live: every PayPal address (API, JavaScript SDK, MCP server) follows it; rebuild after a change
+        value: sandbox
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET

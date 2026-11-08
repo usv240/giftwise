@@ -3,7 +3,7 @@ import { aiAvailable } from "@/lib/ai/claude";
 import { reviewPayload, runReviewers } from "@/lib/ai/reviewers";
 import { today } from "@/lib/api/envelope";
 import { CategorySchema, DeliverySchema } from "@/lib/api/schemas";
-import { getHousehold, openNeeds } from "@/lib/households";
+import { getHousehold, openNeeds, withAbleSoFar } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
 import { routeGift } from "@/lib/routing";
 import { giftSubject } from "@/lib/report/data";
@@ -39,7 +39,7 @@ const slug = z.string().trim().min(1).max(60).describe('The gift page id, the pa
 async function page(id: string) {
   const data = await getHousehold(id);
   if (!data) return null;
-  const profile: Profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
+  const profile: Profile = withAbleSoFar({ ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) }, data.payments);
   return { ...data, profile };
 }
 

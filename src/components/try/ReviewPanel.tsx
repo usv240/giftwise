@@ -39,11 +39,14 @@ const MADE_UP_QUOTE = "Electric bills paid by a family member are never counted 
 
 const toReview = (r: ReviewOut): Review => ({ authority: r.authority, answer: r.answer, passage_id: r.passage_id, quote: r.quote, reason_plain: r.reason.plain, reason_technical: r.reason.technical, confidence: r.confidence });
 
-/** The two reviewers, the referee's verdict, and the rules engine's route. Shows a recorded run and can run live. */
-export function ReviewPanel({ input, recorded }: { input: ReviewInput; recorded?: RecordedReview }) {
+/**
+ * The two reviewers, the referee's verdict, and the rules engine's route. Shows a recorded run, or one that already ran
+ * live (a bill upload asks them on its own), and can run live again.
+ */
+export function ReviewPanel({ input, recorded, ran }: { input: ReviewInput; recorded?: RecordedReview; ran?: { data: ReviewData; source: string } }) {
   const { prefs } = usePrefs();
-  const [data, setData] = useState<ReviewData | null>(recorded?.data ?? null);
-  const [source, setSource] = useState(recorded ? `Recorded ${new Date(recorded.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" })} with ${modelName(recorded.model)}.` : "");
+  const [data, setData] = useState<ReviewData | null>(ran?.data ?? recorded?.data ?? null);
+  const [source, setSource] = useState(ran?.source ?? (recorded ? `Recorded ${new Date(recorded.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium" })} with ${modelName(recorded.model)}.` : ""));
   const [status, setStatus] = useState<"idle" | "running" | "error">("idle");
   const [note, setNote] = useState("");
   const [test, setTest] = useState(false);

@@ -2,6 +2,7 @@ import bills from "../../../content/eval-results.json";
 import field from "../../../content/eval/field-cases-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import inv from "../../../content/eval/invariants-results.json";
+import { IMPACT } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 
 /**
@@ -17,7 +18,7 @@ export function Results() {
   return (
     <ul className="jr" aria-label="Results">
       <li className="jr-item">
-        <a className="jr-link" href="#ssa-examples">
+        <a className="jr-link" href="/evidence/ssa-examples">
           <span className="jr-fig tabular">
             {ex.engine_matches} of {ex.cases}
           </span>
@@ -28,19 +29,22 @@ export function Results() {
         </a>
       </li>
       <li className="jr-item">
-        <a className="jr-link" href="#field-cases">
+        <a className="jr-link" href="/evidence/court-cases">
           <span className="jr-fig tabular">
             {fc.agreed} of {fc.scored}
           </span>
           <span className="jr-what">real SSI cases from federal courts reach the outcome SSA and the court did.</span>
           <span className="jr-base">
-            In the <span className="tabular">{routed.cases_where_routing_keeps_money}</span> cases with a benefit-safe route, the same help keeps about{" "}
-            <span className="tabular">{usd(Math.round(routed.kept_per_month_2026 / routed.cases_where_routing_keeps_money))}</span> a month for each person.
+            In <span className="tabular">{routed.cases_where_routing_keeps_money}</span> of them, the engine finds the same help routed through Giftwise would have kept{" "}
+            <span className="tabular">
+              {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))}
+            </span>{" "}
+            a month at 2026 rates.
           </span>
         </a>
       </li>
       <li className="jr-item">
-        <a className="jr-link" href="#evaluation">
+        <a className="jr-link" href="/evidence/rules#evaluation">
           <span className="jr-fig tabular">
             {b.referee.check_kept_whole} of {bills_n}
           </span>
@@ -51,7 +55,7 @@ export function Results() {
         </a>
       </li>
       <li className="jr-item">
-        <a className="jr-link" href="#invariants">
+        <a className="jr-link" href="/evidence/rules#invariants">
           <span className="jr-fig tabular">{inv.gifts.toLocaleString("en-US")}</span>
           <span className="jr-what">random gifts to made-up people, and every one keeps all {inv.results.length} promises.</span>
           <span className="jr-base">

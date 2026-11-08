@@ -19,7 +19,7 @@ export default function CourtCasesPage() {
     <div className="page frame evidence evidence-sub">
       <header className="page-head">
         <p className="jx-crumb">
-          <Link className="text-link" href="/evidence#field-cases">
+          <Link className="text-link" href="/evidence/rules#field-cases">
             Evidence
           </Link>
         </p>

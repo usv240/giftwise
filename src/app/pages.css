@@ -80,6 +80,13 @@
   background: var(--surface-2);
   color: var(--ink);
 }
+/* An optional service that is turned off, or a first check still running: quiet, not a warning. */
+.status-mode[data-mode="off"],
+.status-mode[data-mode="checking"] {
+  background: transparent;
+  color: var(--muted);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent);
+}
 @media (max-width: 760px) {
   .status-row {
     grid-template-columns: 1fr auto;
@@ -161,4 +168,87 @@
 /* About: the real-world questions read at the width of the gift page's column. */
 #real {
   max-width: 52rem;
+}
+
+/* Why Giftwise, and who it reaches: label and figure on the left, the measured sentence on the right; one column on a phone. */
+.why-lead {
+  max-width: 68ch;
+  margin: 0 0 14px;
+  line-height: 1.55;
+}
+.why-list {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.why-row {
+  display: grid;
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+  gap: 6px 28px;
+  padding: 14px 18px;
+  background: var(--surface);
+}
+.why-row dt {
+  font-weight: 500;
+  line-height: 1.35;
+}
+.why-row dd {
+  margin: 0;
+  max-width: 68ch;
+  line-height: 1.5;
+}
+.why-fig {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--positive);
+}
+.why-src {
+  margin: 10px 0 0;
+  font-size: 0.875rem;
+}
+@media (max-width: 720px) {
+  .why-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* How it compares: one card per alternative, what it does well and what Giftwise adds, its sources under them. */
+.cmp-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 860px) {
+  .cmp-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.cmp-item {
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+.cmp-item p {
+  margin: 0;
+  line-height: 1.5;
+}
+.cmp-item p + p {
+  margin-top: 6px;
+}
+.cmp-name {
+  font-weight: 500;
+  font-size: 1.0625rem;
+}
+.cmp-k {
+  font-weight: 500;
+}
+.cmp-src {
+  font-size: 0.875rem;
 }

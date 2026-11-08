@@ -153,6 +153,33 @@ function dollars(c: Scored) {
   return { computed: true as const, able_eligible_per_opinion: profile.ableEligible, ...shown, if_able_eligible: ifAble };
 }
 
+/**
+ * For a case where SSA assessed an overpayment: the months the help put her savings over the limit as it was given,
+ * and the same help given today on each Giftwise route the case allows. ABLE needs the disability to have begun before
+ * age 46; where the opinion does not say when it began, the route is computed as if she qualifies, and says so.
+ */
+function overpaymentCheck(c: Scored) {
+  const gifts = c.gifts.map(toGift);
+  const asGiven = planMonths(gifts, profileOf(c));
+  const routes = [...new Set(gifts.flatMap((g) => c.giftwise_routes[g.id] ?? []))];
+  return {
+    amount: c.determination.overpayment!.amount,
+    period: c.determination.overpayment!.period,
+    as_given_months_over_limit: asGiven.months.filter((m) => m.overResourceLimit).map((m) => m.month),
+    routed: routes.map((route) => {
+      const needsAble = route === "able" && !profileOf(c).ableEligible;
+      const profile = profileOf(c, route === "able" ? { ableEligible: true } : {});
+      const plan = planMonths(
+        gifts.map((g) => ({ ...g, delivery: (c.giftwise_routes[g.id] ?? []).includes(route) ? route : g.delivery })),
+        profile,
+      );
+      const over = plan.months.filter((m) => m.overResourceLimit).map((m) => m.month);
+      const counted = plan.months.filter((m) => m.countableIncome > 0).map((m) => m.month);
+      return { route, needs_able_eligibility: needsAble, months_over_limit: over, months_with_countable_income: counted, avoided: over.length === 0 && counted.length === 0 };
+    }),
+  };
+}
+
 /** What the engine would need, for each known miss. */
 const GAPS: Record<string, string> = {
   "sons-home-own-food":
@@ -178,6 +205,7 @@ function main() {
       determination: c.determination,
       engine: e,
       dollars: d,
+      overpayment: c.determination.overpayment ? overpaymentCheck(c) : null,
     };
   });
 
@@ -187,7 +215,10 @@ function main() {
   const ableKept = shownKept.map((d) => d.if_able_eligible ?? d);
   const overpay = (cs: { id: string; determination: { overpayment?: Overpayment } }[]) =>
     cs.filter((c) => c.determination.overpayment).map((c) => ({ id: c.id, amount: c.determination.overpayment!.amount, period: c.determination.overpayment!.period }));
-  const scoredOverpay = overpay(SCORED);
+  const scoredOverpay = overpay(SCORED).map((o) => {
+    const check = rows.find((r) => r.id === o.id)!.overpayment!;
+    return { ...o, title: SCORED.find((c) => c.id === o.id)!.title, as_given_months_over_limit: check.as_given_months_over_limit, routed: check.routed };
+  });
   const specific = rows.filter((r) => SPECIFIC.includes(r.determination.basis));
 
   const result = {

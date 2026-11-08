@@ -3,7 +3,7 @@
 Giftwise runs on PayPal's sandbox, a practice version of PayPal where no real money moves. You do not need a Giftwise account.
 
 - **Hosted demo:** [giftwise-405i.onrender.com](https://giftwise-405i.onrender.com), hosted on Render.
-- **Start here:** [`/evidence`](https://giftwise-405i.onrender.com/evidence) has the five-minute path, the failure cases you can run live, and the latest test results.
+- **Start here:** [`/evidence`](https://giftwise-405i.onrender.com/evidence) has three numbers and the five-minute path; [`/evidence/operations`](https://giftwise-405i.onrender.com/evidence/operations) has the failure cases you can run live and the latest test results.
 
 ## PayPal sandbox buyer login
 
@@ -20,24 +20,24 @@ Use this login in the PayPal window that opens when you press a PayPal button on
 
 ## Make a payment (about 3 minutes)
 
-1. Open `/g/maya`. If any need already shows as paid, press **Reset the sample page** at the bottom of the right column.
+1. Open `/g/maya`. If any need already shows as paid, open **Testing in the sandbox** at the bottom of the right column and press **Reset the sample page**.
 2. In **Give any amount**, type `1500`. The preview shows where each dollar will go:
 
    | Paid to | For | Amount |
    |---|---|---|
    | Riverside Mobility Repair | Wheelchair repair | $420 |
    | Eastgate College Bookstore | Laptop for college | $649 |
-   | Maya's ABLE account | Electric bill, November | $138 |
+   | Maya's ABLE account | Electric bill, this month | $138 |
    | Northside Physical Therapy | Therapy co-pay | $90 |
    | Maya's ABLE account | Savings for later | $203 |
 
    Her January check (set by gifts in November) stays $1,029 this way, the 2027 amount. The same $1,500 given as cash would bring it to $0.
-3. Press the PayPal button under the preview. In the PayPal window, log in with the sandbox login above and press **Complete Purchase**. PayPal asks for no shipping address, because nothing is shipped to you.
+3. Press the PayPal button under the preview. In the PayPal window, log in with the sandbox login above and press **Complete Purchase**. PayPal asks for no shipping address, because nothing is shipped to you. No PayPal login needed: choose **Debit or Credit Card** instead and use PayPal's test card `4012 8888 8888 1881`, any future expiry and any CVV.
 4. The box thanks you and lists all five payments. The need cards update to **Paid by John**, and **Still needed** drops to $0.
 5. Press **See the receipt**. It lists every payee with its PayPal capture ID, the rules that applied, and their sources.
 6. On the receipt, press **Check with PayPal now** to ask PayPal for the order live, then **Verify the ledger** to recompute the audit trail's hash chain.
 
-To pay for a single need instead, press the PayPal button on its card. You can reset the sample page at any time; PayPal keeps its own sandbox records.
+To pay for a single need instead, press the PayPal button on its card. You can reset the sample page at any time: its needs reopen, and every earlier receipt still opens.
 
 ### Who receives the money
 
@@ -55,17 +55,17 @@ The server picks the account from the need, never from the browser (`payeeEmail(
 
 ## Checked every night, on Render Workflows
 
-On `/evidence`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 24 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and seven public API promises (status, the ledger, the SSA report, the MCP tools, the Federal Register watch, the OpenAPI address and PayPal's return link).
+On `/evidence/operations`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 25 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and eight public API promises (status, the ledger, the SSA report, the MCP tools, the Federal Register watch, the OpenAPI address, PayPal's return link, and a gift paid with a sandbox test card across its payees with no PayPal login, each capture checked at PayPal).
 
 1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
-2. In about a minute the run files its results and the panel refreshes with the time of the run and its count. Open **All 24 checks, with each result**, or set **Display** to Technical to see what each check found.
+2. In about a minute the run files its results and the panel refreshes with the time of the run and its count. Open **All 25 checks, with each result**, or set **Display** to Technical to see what each check found.
 3. `/status` shows the same run under **Outside checks**.
 
 A run can start every 10 minutes. The nightly run starts from a Render cron job at 09:00 UTC.
 
 ## Failure cases, live
 
-On `/evidence`, under **Failure cases**, press **Run all eight checks**. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer.
+On `/evidence/operations`, under **Failure cases**, press **Run all eight checks**. Seven create real sandbox orders and show what PayPal answered; one shows the referee catching a wrong AI answer.
 
 | Case | What you should see |
 |---|---|
@@ -165,18 +165,18 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 189 passed |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 243 passed |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
 | The rules watch, asked live | `GET /api/rules-watch` | Every Federal Register document reviewed; 2026 and 2027 amounts in use |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
-| API end to end | `npm run e2e:api` | 98 passed |
+| API end to end | `npm run e2e:api` | 99 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
 | The Postman collection, with Newman | `npm run test:postman` | 16 requests, 20 assertions |
-| Browser end to end | `npm run e2e:ui` | 64 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 124 page views pass |
-| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 36 passed |
+| Browser end to end | `npm run e2e:ui` | 65 passed |
+| Accessibility and layout | `npm run e2e:a11y` | All 136 page views pass |
+| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 43 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |
@@ -191,6 +191,6 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 ## If something looks off
 
 - **The PayPal window does not appear:** allow pop-ups for the site, then press the button again.
-- **"This need is already paid. Thank you!":** press **Reset the sample page**.
+- **"This need is already paid. Thank you!":** open **Testing in the sandbox** on the gift page and press **Reset the sample page**.
 - **Completing a payment takes a few seconds:** PayPal captures each payee in turn.
 - **The failure-case runner asks you to wait:** runs are 20 seconds apart.

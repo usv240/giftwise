@@ -1689,3 +1689,56 @@
   flex-wrap: wrap;
   gap: 8px 20px;
 }
+
+/* The three numbers that open the page sit in one row on a wide screen. */
+.evidence .ji-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 1080px) {
+  .evidence .ji-three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.evidence .ji-three .jr-fig {
+  font-size: clamp(2.25rem, 1.6rem + 2vw, 3.25rem);
+}
+
+/* Every result by its page: short rows, each a link to the page that shows it in full; an old #link lands on its row. */
+.ev-index {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 40px;
+}
+@media (max-width: 960px) {
+  .ev-index {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.ev-index h3 {
+  margin: 0 0 8px;
+  font-size: 1.0625rem;
+}
+.ev-index ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.ev-index li {
+  scroll-margin-top: 96px;
+  line-height: 1.45;
+}
+.ev-index li:target {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.ev-index-what {
+  display: block;
+  font-size: 0.9375rem;
+}
+.ev-load-where {
+  font-weight: 500;
+  margin: 14px 0 6px;
+}

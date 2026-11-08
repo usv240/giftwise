@@ -1,52 +1,95 @@
-/**
- * How giving to someone on SSI works today, side by side. Each of these does its own job well; Giftwise is built for the
- * moment before the gift, and hands the ABLE share to the plan's own gift page and the rest to shops through PayPal.
- */
-const OPTIONS = ["Giftwise", "Fundraising sites", "PayPal.me or a bank transfer", "An ABLE plan's gift page", "Paying the shop yourself"] as const;
+import sources from "../../../content/sources.json";
 
-const ROWS: { label: string; cells: [string, string, string, string, string] }[] = [
-  { label: "Built for", cells: ["Giving to someone on SSI so the check stays whole", "Raising money from many people for one cause", "Sending money to someone you know", "Saving for disability expenses, tax-free", "One giver who knows the shop"] },
-  { label: "Where the money lands", cells: ["The shop, the clinic or the ABLE account", "The organizer's or the person's bank account", "The person's account", "The ABLE account", "The shop"] },
-  { label: "Checks SSI's rules for that month first", cells: ["Yes, with the rule and its source", "", "", "", ""] },
-  { label: "Several recipients in one checkout", cells: ["Up to 10 in one PayPal order", "", "", "", ""] },
-  { label: "Many givers, one list", cells: ["One list of needs", "One goal", "", "One account", ""] },
-  { label: "The month's report for Social Security", cells: ["Written, with a code anyone can check", "", "", "", ""] },
-  { label: "AI assistants can ask first", cells: ["Yes, over MCP", "", "", "", ""] },
+const SRC = sources as Record<string, { title: string; url: string }>;
+
+/**
+ * The other ways people help someone on SSI with money, each from its own published pages: what it does well, and what
+ * Giftwise adds beside it. Each of these does its own job well; Giftwise is built for the moment a gift is given.
+ */
+type Option = { name: string; well: string; adds: string; src?: [string, string][] };
+
+const OPTIONS: Option[] = [
+  {
+    name: "Prepaid cards for people on benefits",
+    well: "True Link's card lets a trustee or representative payee load money, set spending rules across more than 50 categories, block or allow shops and watch each purchase. It is used to pay a personal needs allowance and to spend from a special needs trust.",
+    adds: "Giftwise works one step earlier: a family member's gift is routed before it arrives, to the shop or the ABLE account, so it never becomes money the person holds.",
+    src: [["true-link-card", "True Link"]],
+  },
+  {
+    name: "Special needs and pooled trusts",
+    well: "A trustee pays shops and providers for the person, which SSA does not count as income, and a pooled trust, run by a nonprofit, has no age limit. They hold money for the long term; one pooled trust lists a $600 enrollment fee and a yearly fee from 1.75%.",
+    adds: "For everyday gifts from many givers, Giftwise needs no account to set up: each gift is checked and paid where it keeps the check whole, and a family can use it alongside a trust.",
+    src: [
+      ["poms-si-01120-200", "POMS SI 01120.200"],
+      ["poms-si-01120-203", "SI 01120.203"],
+      ["arc-texas-pooled-fees", "The Arc of Texas"],
+    ],
+  },
+  {
+    name: "Benefits calculators",
+    well: "Disability Benefits 101 estimates how a job may change a person's total income, benefits and health coverage, in 13 states.",
+    adds: "Giftwise answers the same kind of question for a gift, before it is given, and then pays it the way that keeps the check whole.",
+    src: [["db101", "DB101"]],
+  },
+  {
+    name: "Benefits counselors",
+    well: "Work Incentives Planning and Assistance counselors, funded by Social Security, give free, one-to-one counseling to people on Social Security and SSI.",
+    adds: "A counselor can make the gift page with the family, and check every month's report against PayPal and the ledger from its link, with no login.",
+    src: [
+      ["ssa-wipa", "SSA"],
+      ["ssa-wipa-findhelp", "Find help"],
+    ],
+  },
+  {
+    name: "Fundraising sites",
+    well: "Raise money from many people for one cause, with a goal and updates.",
+    adds: "Each stated use is paid straight to its shop or to the ABLE account, so the money raised does not arrive as cash. A fundraiser link can become a gift page.",
+  },
+  {
+    name: "PayPal.me or a bank transfer",
+    well: "Send money to someone you know, quickly.",
+    adds: "The same PayPal checkout, paying the shop, the clinic and the ABLE account instead of the person, up to 10 recipients in one order.",
+  },
+  {
+    name: "An ABLE plan's gift page",
+    well: "Takes gifts straight into the person's ABLE account, by the plan's own gift link or Ugift code.",
+    adds: "Giftwise works out the ABLE share of each gift and sends the giver to that page for it, and pays needs better paid at a shop through PayPal.",
+  },
+  {
+    name: "Paying the shop yourself",
+    well: "For one repair from one giver, it keeps the check whole, and it is what Giftwise does.",
+    adds: "Rent and utility bills, which count even when paid straight to the landlord, go through ABLE instead, and many givers share one list, one ABLE limit and one monthly report.",
+  },
 ];
 
 export function Compare() {
   return (
-    <div className="cmp-wrap" data-ui>
-      <table className="cmp">
-        <caption className="sr-only">How Giftwise compares with other ways to give to someone on SSI</caption>
-        <thead>
-          <tr>
-            <td />
-            {OPTIONS.map((o, i) => (
-              <th key={o} scope="col" data-gw={i === 0 ? "" : undefined}>
-                {o}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {ROWS.map((r) => (
-            <tr key={r.label}>
-              <th scope="row">{r.label}</th>
-              {r.cells.map((c, i) => (
-                <td key={OPTIONS[i]} data-label={OPTIONS[i]} data-gw={i === 0 ? "" : undefined} data-empty={c ? undefined : ""}>
-                  {c || (
-                    <>
-                      <span className="cmp-none" aria-hidden="true" />
-                      <span className="sr-only">Not part of what it does</span>
-                    </>
-                  )}
-                </td>
+    <ul className="cmp-list">
+      {OPTIONS.map((o) => (
+        <li key={o.name} className="cmp-item" data-ui>
+          <p className="cmp-name">{o.name}</p>
+          <p className="cmp-well">
+            <span className="cmp-k">What it does well. </span>
+            {o.well}
+          </p>
+          <p className="cmp-adds">
+            <span className="cmp-k">What Giftwise adds. </span>
+            {o.adds}
+          </p>
+          {o.src && (
+            <p className="cmp-src muted">
+              {o.src.map(([id, label], i) => (
+                <span key={id}>
+                  {i > 0 ? ", " : "Sources: "}
+                  <a className="text-link" href={SRC[id].url} target="_blank" rel="noreferrer">
+                    {label}
+                  </a>
+                </span>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            </p>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }

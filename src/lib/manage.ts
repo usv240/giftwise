@@ -54,11 +54,12 @@ export async function manageView(token: string) {
   const h = await householdByToken(token);
   if (!h) return null;
   const d = db();
-  const needs = await d.select().from(schema.needs).where(eq(schema.needs.householdId, h.id)).orderBy(asc(schema.needs.sortOrder), asc(schema.needs.id));
+  // The page as it stands: rows from an earlier round of the sample page stay on record for their receipts only.
+  const needs = await d.select().from(schema.needs).where(and(eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt))).orderBy(asc(schema.needs.sortOrder), asc(schema.needs.id));
   const payments = await d
     .select()
     .from(schema.payments)
-    .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured")))
+    .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured"), isNull(schema.payments.archivedAt)))
     .orderBy(sql`${schema.payments.capturedAt} desc nulls last`);
   const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
   const today = new Date().toISOString().slice(0, 10);
@@ -97,7 +98,7 @@ export async function addNeed(token: string, input: NeedInput) {
 export async function editNeed(token: string, id: number, input: NeedInput) {
   const h = await householdByToken(token);
   if (!h) return null;
-  const [cur] = await db().select().from(schema.needs).where(and(eq(schema.needs.id, id), eq(schema.needs.householdId, h.id))).limit(1);
+  const [cur] = await db().select().from(schema.needs).where(and(eq(schema.needs.id, id), eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt))).limit(1);
   if (!cur) return null;
   const n = sanitize(input);
   if (n.amount < Number(cur.funded)) return { error: `Givers have already paid $${Number(cur.funded).toFixed(2)} toward this need, so the amount can be no lower.` } as const;
@@ -114,15 +115,22 @@ export async function editNeed(token: string, id: number, input: NeedInput) {
   return row;
 }
 
-/** Remove a need nobody has paid toward yet. A need with gifts stays, so its receipts keep pointing somewhere. */
+/**
+ * Remove a need nobody has paid toward yet. A need with gifts stays, so its receipts keep pointing somewhere. On the
+ * sample page, a need paid only in an earlier round (before a reset) leaves the page but stays on record for those receipts.
+ */
 export async function removeNeed(token: string, id: number) {
   const h = await householdByToken(token);
   if (!h) return null;
-  const [cur] = await db().select().from(schema.needs).where(and(eq(schema.needs.id, id), eq(schema.needs.householdId, h.id))).limit(1);
+  const [cur] = await db().select().from(schema.needs).where(and(eq(schema.needs.id, id), eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt))).limit(1);
   if (!cur) return null;
-  const [paid] = await db().select({ n: sql<number>`count(*)` }).from(schema.payments).where(eq(schema.payments.needId, id));
-  if (Number(cur.funded) > 0 || Number(paid?.n ?? 0) > 0) return { error: "Givers have paid toward this need, so it stays on the page with its receipts. To stop new gifts, close the page." } as const;
-  await db().delete(schema.needs).where(eq(schema.needs.id, id));
+  const [paid] = await db()
+    .select({ now: sql<number>`count(*) filter (where ${schema.payments.archivedAt} is null)`, earlier: sql<number>`count(*) filter (where ${schema.payments.archivedAt} is not null)` })
+    .from(schema.payments)
+    .where(eq(schema.payments.needId, id));
+  if (Number(cur.funded) > 0 || Number(paid?.now ?? 0) > 0) return { error: "Givers have paid toward this need, so it stays on the page with its receipts. To stop new gifts, close the page." } as const;
+  if (Number(paid?.earlier ?? 0) > 0) await db().update(schema.needs).set({ archivedAt: new Date() }).where(eq(schema.needs.id, id));
+  else await db().delete(schema.needs).where(eq(schema.needs.id, id));
   await audit("person", "gift_page.need_removed", `household:${h.id}`, { need: id });
   return { ok: true } as const;
 }

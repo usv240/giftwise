@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { routeGift, type OpenNeed } from "@/lib/routing";
+import { DEFAULT_PROFILE } from "@/lib/rules";
 
 const needs: OpenNeed[] = [
   { id: 1, title: "Wheelchair repair", category: "equipment", route: "vendor", payeeName: "Riverside", payeeAccount: "vendor", amount: 420, funded: 0, recurring: false },
@@ -37,5 +38,21 @@ describe("routeGift", () => {
     const r = routeGift(300, [], "2026-11-10", { couple: false, livesInAnothersHousehold: false, otherUnearnedMonthly: 0, earnedMonthly: 0, ableEligible: false, ableBalance: 0, ableContributedThisYear: 0, savings: 1240 });
     expect(r.lines).toHaveLength(0);
     expect(r.unplaced).toBe(300);
+  });
+});
+
+describe("ABLE's yearly limit counts the page's own ABLE gifts", () => {
+  it("adds this year's captured ABLE gifts to the profile, and nothing else", async () => {
+    const { withAbleSoFar } = await import("@/lib/households");
+    const base = { ...DEFAULT_PROFILE, ableContributedThisYear: 1000 };
+    const now = new Date("2026-11-08T12:00:00Z");
+    const pays = [
+      { route: "able", amount: "250.00", capturedAt: new Date("2026-03-01T00:00:00Z") },
+      { route: "able", amount: "100.00", capturedAt: new Date("2025-12-30T00:00:00Z") },
+      { route: "vendor", amount: "420.00", capturedAt: new Date("2026-04-01T00:00:00Z") },
+      { route: "able", amount: "50.00", capturedAt: null },
+    ];
+    expect(withAbleSoFar(base, pays, now).ableContributedThisYear).toBe(1250);
+    expect(withAbleSoFar(base, [], now)).toBe(base);
   });
 });

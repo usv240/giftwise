@@ -1,4 +1,3 @@
-import { asc, eq, inArray, or, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,14 +5,16 @@ import { Suspense } from "react";
 import sources from "../../../../content/sources.json";
 import { Info } from "@/components/Info";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
-import { db, dbConfigured, schema } from "@/lib/db";
+import { dbConfigured } from "@/lib/db";
+import { loadReceipt } from "@/lib/receipt";
 import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import { asLang, monthIn, payeeIn, payeeInline, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "../../pages.css";
 import "./receipt.css";
 
-export const metadata: Metadata = { title: "Receipt", description: "Where a Giftwise gift went, the rule that kept the SSI check whole, and a live check against PayPal." };
+// A receipt is one gift's public record, reached by its link; search engines leave it out (see also /robots.txt).
+export const metadata: Metadata = { title: "Receipt", description: "Where a Giftwise gift went, the rule that kept the SSI check whole, and a live check against PayPal.", robots: { index: false } };
 
 const SRC = sources as Record<string, { title: string; url: string; publisher?: string }>;
 const when = (d: Date, lang: Lang = "en") => d.toLocaleString(lang === "es" ? "es-US" : "en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" });
@@ -25,17 +26,9 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
   const t = receiptText(lang);
   if (!/^[A-Z0-9]{10,24}$/.test(orderId)) notFound();
   if (!dbConfigured()) return <p className="page-loading">The receipt needs its database. See the README to start it.</p>;
-  const d = db();
-  const rows = await d.select().from(schema.payments).where(eq(schema.payments.orderId, orderId)).orderBy(asc(schema.payments.id));
-  if (rows.length === 0) notFound();
-  const [household] = rows[0].householdId ? await d.select().from(schema.households).where(eq(schema.households.id, rows[0].householdId)).limit(1) : [];
-  const needIds = rows.flatMap((r) => (r.needId ? [r.needId] : []));
-  const needs = needIds.length ? await d.select().from(schema.needs).where(inArray(schema.needs.id, needIds)) : [];
-  const events = await d
-    .select()
-    .from(schema.auditEvents)
-    .where(or(eq(schema.auditEvents.ref, `order:${orderId}`), sql`${schema.auditEvents.detail}->>'orderId' = ${orderId}`))
-    .orderBy(asc(schema.auditEvents.id));
+  const receipt = await loadReceipt(orderId);
+  if (!receipt) notFound();
+  const { rows, household, needs, events, earlierRound } = receipt;
 
   const name = household?.name ?? "the person";
   const hers = t.possessive(household?.name);
@@ -84,6 +77,8 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
             rows.every((r) => r.status === "created") && <p className="rc-next-line">{t.nextStarted}</p>
           )}
           <p className="rc-order tabular">{t.orderLine(orderId)}</p>
+          {/* The sample page was reset after this gift: it stays on record here and at PayPal, outside the page's current round. */}
+          {earlierRound && <p className="rc-earlier muted">{t.earlierRound}</p>}
         </div>
         <dl className="rc-facts">
           <div>
@@ -188,9 +183,11 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
 
       {household && (
         <p className="page-section rc-next">
-          <Link className="text-link" href={lang === "es" ? `/g/${household.slug}/report/easy?month=${monthOf(date)}&lang=es` : `/g/${household.slug}/report?month=${monthOf(date)}`}>
-            {t.onReport(hers, monthIn(lang, monthOf(date)))}
-          </Link>
+          {!earlierRound && (
+            <Link className="text-link" href={lang === "es" ? `/g/${household.slug}/report/easy?month=${monthOf(date)}&lang=es` : `/g/${household.slug}/report?month=${monthOf(date)}`}>
+              {t.onReport(hers, monthIn(lang, monthOf(date)))}
+            </Link>
+          )}
           <Link className="text-link" href={`/g/${household.slug}${lang === "es" ? "?lang=es" : ""}`}>
             {t.back(name)}
           </Link>

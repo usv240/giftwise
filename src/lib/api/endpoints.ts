@@ -44,7 +44,8 @@ export const ENDPOINTS: Endpoint[] = [
     method: "POST",
     path: "/api/v1/read-bill",
     title: "Read a bill",
-    summary: "Upload a photo or PDF of a bill (multipart field file). Claude reads it, then the rules engine checks the benefit-safe way to pay it.",
+    summary:
+      "Upload a photo or PDF of a bill (multipart field file). Claude reads it. A bill at or near housing, or one Claude is less than 90% sure of, also goes to the two reviewers, and the referee decides; then the rules engine picks the benefit-safe way to pay it.",
     upload: true,
     ai: true,
     keyed: true,

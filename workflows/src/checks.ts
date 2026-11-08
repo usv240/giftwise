@@ -24,7 +24,9 @@ async function call(url: string, init: RequestInit = {}, timeoutMs = 60_000) {
   try {
     r = await fetch(url, { ...init, redirect: "manual", signal: AbortSignal.timeout(timeoutMs) });
   } catch (e) {
-    throw new Transient(`${url}: ${(e as Error).message}`);
+    // The kind of failure only: a fetch error can quote the request headers, CHECKS_SECRET among them.
+    const name = (e as Error).name;
+    throw new Transient(`${url}: ${name === "TimeoutError" || name === "AbortError" ? "timed out" : "no answer"}`);
   }
   if (r.status >= 500 || r.status === 429) throw new Transient(`${url}: HTTP ${r.status}`);
   return r;
@@ -101,6 +103,7 @@ export const API = [
   { id: "rules-watch", title: "Every Federal Register change to SSI's income rules and amounts is reviewed" },
   { id: "openapi", title: "OpenAPI names the public address, not the internal port" },
   { id: "paypal-return", title: "PayPal's return link sends people to the public address" },
+  { id: "card-gift", title: "A sandbox test card pays a gift split across its payees, no PayPal login, each capture checked at PayPal" },
 ] as const;
 
 export async function checkApi(e: Env, id: string): Promise<Omit<CheckResult, "attempts">> {
@@ -144,6 +147,16 @@ export async function checkApi(e: Env, id: string): Promise<Omit<CheckResult, "a
         const to = res.headers.get("location") ?? "";
         return { ok: res.status === 303 && to.startsWith(`${e.app}/`), detail: `HTTP ${res.status} to ${to}` };
       }
+      case "card-gift": {
+        // The app routes, pays and checks the split (src/lib/card-check.ts); from outside, the receipt must then open.
+        const res = await call(`${e.app}/api/checks/card-gift`, { method: "POST", headers: { Authorization: `Bearer ${e.secret}` } }, 120_000);
+        const j = (await res.json()) as { data?: { ok: boolean; order_id: string | null; evidence: string[] }; error?: { message: string } };
+        if (!j.data) return { ok: false, detail: j.error?.message ?? `HTTP ${res.status}` };
+        const id = j.data.order_id ?? "";
+        const receipt = id ? await call(`${e.app}/r/${encodeURIComponent(id)}`) : null;
+        const shown = receipt?.status === 200 && (await receipt.text()).includes(id);
+        return { ok: j.data.ok && shown, detail: [...j.data.evidence, `Public receipt /r/${id}: ${receipt ? `HTTP ${receipt.status}` : "no order"}${receipt && !shown ? ", order not shown" : ""}`].join(" | ").slice(0, 600) };
+      }
       default:
         throw new Error(`Unknown API check ${id}`);
     }
@@ -163,7 +176,7 @@ export type Runner = {
 export async function runAll(e: Env, runner: Runner): Promise<CheckResult[]> {
   const cases = await listCases(e);
   const settle = (p: Promise<CheckResult>, id: string, group: Group, title: string) =>
-    p.catch((err: Error) => ({ id, group, title, ok: false, detail: `Did not finish after retries: ${err.message}`.slice(0, 600), ms: 0, attempts: 1 }));
+    p.catch((err: Error) => ({ id, group, title, ok: false, detail: `Did not finish after retries: ${err instanceof Transient ? err.message : /timed out$/i.test(err.message) ? "timed out" : "an unexpected error"}`.slice(0, 600), ms: 0, attempts: 1 }));
   return Promise.all([
     ...cases.map((c) => settle(runner.runCase(c.id, c.title), `case:${c.id}`, "case", c.title)),
     ...PATH.map((p) => settle(runner.checkPage(p.id), `path:${p.id}`, "path", p.title)),

@@ -1,4 +1,4 @@
-import { and, desc, eq, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -38,7 +38,7 @@ async function Fund({ searchParams }: { searchParams: Promise<{ batch?: string }
     .limit(LIMITS.households);
   const households: OrgHousehold[] = [];
   for (const h of rows) {
-    const needs = await d.select().from(schema.needs).where(eq(schema.needs.householdId, h.id));
+    const needs = await d.select().from(schema.needs).where(and(eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt)));
     const open = openNeeds(needs).reduce((s, n) => s + Math.max(0, n.amount - n.funded), 0);
     households.push({ slug: h.slug, name: h.name, open });
   }

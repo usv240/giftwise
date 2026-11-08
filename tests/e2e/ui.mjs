@@ -25,15 +25,38 @@ await page.goto(B + "/", { waitUntil: "networkidle" });
 ok("landing has one h1", (await page.locator("h1").count()) === 1);
 const fig = page.locator(".checker-figure");
 await page.locator(".checker").click({ position: { x: 5, y: 5 } }); // stop the auto-cycle
+// The checker prices a gift made today, as Maya's gift page does: the expected checks come from the API for the same date.
+const todayPT = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+const usdOf = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: Number.isInteger(n) ? 0 : 2 });
+const priced = async (gift) => (await (await page.request.post(B + "/api/v1/check-gift", { data: { gift: { date: todayPT, ...gift } }, headers: { "x-forwarded-for": "198.51.100.77" } })).json()).data;
+const cash1000 = await priced({ amount: 1000, delivery: "cash", category: "other" });
+const shop1000 = await priced({ amount: 1000, delivery: "vendor", category: "equipment" });
+const rent1000 = await priced({ amount: 1000, delivery: "vendor", category: "rent", recurring: true });
+const rentAble = await priced({ amount: 1000, delivery: "able", category: "rent", recurring: true });
+const cash50 = await priced({ amount: 50, delivery: "cash", category: "other" });
 await page.getByRole("radio", { name: "Cash to her" }).check();
-ok("Gift Checker cash $1,000 shows $74", (await fig.textContent()) === "$74", await fig.textContent());
+ok(`Gift Checker cash $1,000 shows ${usdOf(cash1000.check_after)}`, (await fig.textContent()) === usdOf(cash1000.check_after), await fig.textContent());
 await page.getByRole("radio", { name: "Pay the shop" }).check();
-ok("Gift Checker pay the shop shows $994", (await fig.textContent()) === "$994", await fig.textContent());
+const shopLine = (await page.locator(".checker-verdict").innerText()).replace(/\s+/g, " ");
+ok(`Gift Checker pay the shop shows ${usdOf(shop1000.check_after)}`, (await fig.textContent()) === usdOf(shop1000.check_after), await fig.textContent());
 await page.getByRole("radio", { name: "Toward rent" }).check();
-ok("Gift Checker rent shows $662.67 and ABLE $994", (await fig.textContent()) === "$662.67" && (await page.locator(".checker-alt").textContent()).includes("$994"));
+ok(
+  `Gift Checker rent shows ${usdOf(rent1000.check_after)} and ABLE ${usdOf(rentAble.check_after)}`,
+  (await fig.textContent()) === usdOf(rent1000.check_after) && (await page.locator(".checker-alt").textContent()).includes(usdOf(rentAble.check_after)),
+  await fig.textContent(),
+);
+// The same month and the same check Maya's gift page names for a gift made today.
+{
+  const gp = await ctx.newPage();
+  await gp.goto(B + "/g/maya", { waitUntil: "domcontentloaded" });
+  const month = (await gp.locator(".gift-k").first().innerText()).match(/January|February|March|April|May|June|July|August|September|October|November|December/)?.[0];
+  const check = (await gp.locator(".gift-check").first().innerText()).trim();
+  await gp.close();
+  ok("Gift Checker names the same month and check as Maya's page", Boolean(month) && shopLine.includes(month) && shopLine.includes(check), `${shopLine} | ${month} ${check}`);
+}
 await page.getByLabel("Gift amount in dollars").fill("50");
 await page.getByRole("radio", { name: "Cash to her" }).check();
-ok("Gift Checker $50 cash stays $994 (under exclusions)", (await fig.textContent()) === "$994", await fig.textContent());
+ok(`Gift Checker $50 cash stays ${usdOf(cash50.check_after)} (under exclusions)`, (await fig.textContent()) === usdOf(cash50.check_after), await fig.textContent());
 await page.getByRole("button", { name: "Show the rule" }).click();
 ok("Show the rule lists source links", (await page.locator(".checker-rules a").count()) > 0);
 
@@ -187,7 +210,10 @@ const moved = (await page.locator(".bc-moves").innerText()).replace(/\s+/g, " ")
 ok("Benefit calendar shows the gifts, and moving a cash gift into November changes which check it lowers", calEvents >= 5 && /check \$[\d,.]+ to \$[\d,.]+/.test(moved), `${calEvents} events; ${moved.slice(0, 120)}`);
 
 // 8c. The gift page in Spanish: the page, a need's rule, the giving card's split and the check, all in Spanish.
-await page.goto(B + "/g/maya?lang=es", { waitUntil: "networkidle" });
+// PayPal's SDK (with its guest card form) loads at once when the pointer is already over the page, and its frames keep
+// the network from going idle, so this step waits for the page's own giving card instead.
+await page.goto(B + "/g/maya?lang=es", { waitUntil: "load" });
+await page.locator(".give-input").waitFor({ timeout: 30000 });
 await page.locator(".give-input").fill("1500");
 await page.waitForTimeout(400);
 const es = (await page.locator("main").innerText()).replace(/\s+/g, " ");
