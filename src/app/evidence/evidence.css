@@ -2058,3 +2058,8 @@
 .ev-ai .page-prose {
   margin: 0;
 }
+
+/* A held-out set that follows the previous set's case table starts a new block: the same space as between sections of prose. */
+.dsc + .ev-sub {
+  margin-top: clamp(1.75rem, 1.25rem + 1.5vw, 2.5rem);
+}

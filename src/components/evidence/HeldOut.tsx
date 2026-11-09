@@ -3,7 +3,9 @@ import r from "../../../content/eval/held-out-results.json";
 import main from "../../../content/eval/ssa-examples-results.json";
 import second from "../../../content/eval/held-out-2-results.json";
 import secondSet from "../../../content/eval/held-out-2.json";
-import { HELD_OUT_2_NEW_FIELDS, heldOut2AfterFix, type HeldOutCase } from "@/lib/held-out";
+import third from "../../../content/eval/held-out-3-results.json";
+import thirdSet from "../../../content/eval/held-out-3.json";
+import { HELD_OUT_2_NEW_FIELDS, HELD_OUT_3_NEW_FIELDS, heldOut2AfterFix, heldOut3AfterFix, type HeldOutCase } from "@/lib/held-out";
 import * as rules from "@/lib/rules";
 
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" });
@@ -20,6 +22,10 @@ export function HeldOut() {
   // The current engine on the second set, after the rules it showed were added: labelled as such, never as held out.
   const after = heldOut2AfterFix(secondSet.cases as unknown as HeldOutCase[], rules);
   const titleOf = (id: string) => secondSet.cases.find((c) => c.id === id)?.title.toLowerCase() ?? id;
+  // The third set the same way: the frozen run from its results file, and the current engine labelled as after the fix.
+  const after3 = heldOut3AfterFix(thirdSet.cases as unknown as HeldOutCase[], rules);
+  const titleOf3 = (id: string) => thirdSet.cases.find((c) => c.id === id)?.title.toLowerCase() ?? id;
+  const s3 = third.summary;
   return (
     <section id="held-out" className="page-section" aria-labelledby="held-out-h">
       <h2 id="held-out-h">Examples the engine never saw</h2>
@@ -118,6 +124,73 @@ export function HeldOut() {
                   <td>{c.ssa_answer}</td>
                   <td>
                     {c.match ? "Matches" : "Differs"}
+                    {c.values.map((v) => `; ${MEASURE[v.measure]} ${v.month} ${money(v.got)}`).join("")}.
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <h3 id="held-out-3" className="ev-sub">
+        A third five, written before the run
+      </h3>
+      <p className="page-prose">
+        A third set, from sections of SSA&rsquo;s manual neither earlier set used, was written and fixed first with SSA&rsquo;s answers and the way each gift is entered (content/eval/held-out-3.json, git blob{" "}
+        <code>{third.set.git_blob.slice(0, 10)}</code>), then run once on the engine frozen at commit <code>{third.engine.commit}</code>, {date(third.ran_at)}.{" "}
+        <strong className="tabular">
+          {s3.engine_matches} of {s3.cases}
+        </strong>{" "}
+        match on every value, and{" "}
+        <strong className="tabular">
+          {s3.counts_matches} of {s3.cases}
+        </strong>{" "}
+        agree with SSA on whether the gift counts. The others showed three rules, now in the engine, each citing SSA&rsquo;s section: a housing bill paid by the week counts as a monthly amount, the weekly amount
+        times 13 divided by 3 (<span className="rule-id">R-SHEL-06</span>, POMS SI 00835.474 B.3); housing help for the whole household is divided among the people who live there (
+        <span className="rule-id">R-SHEL-07</span>, SI 00835.350 B.4); and the part of an ABLE account over $100,000 counts toward savings, so a month over the savings limit pays no SSI, with Medicaid continuing
+        when the ABLE balance is the reason (<span className="rule-id">R-ABLE-03</span> with <span className="rule-id">R-RES-01</span>, SI 01130.740 D.1).
+      </p>
+      <p className="page-prose" id="held-out-3-after">
+        <strong>After the fix, not a held-out result:</strong> these rules were written after seeing the five, so this line shows only that the current engine now follows them. On the same five as written,{" "}
+        <strong className="tabular">
+          {after3.asWritten.matches} of {after3.asWritten.cases}
+        </strong>{" "}
+        match. The other {WORDS[after3.asWritten.misses.length]} ({after3.asWritten.misses.map(titleOf3).join("; ")}) turn on a fact the engine had no field for when the set was written; with that fact from
+        each case&rsquo;s own situation in the new field ({after3.newFields.map((id) => `“${HELD_OUT_3_NEW_FIELDS[id].fact}”`).join(" and ")}),{" "}
+        <strong className="tabular">
+          {after3.withFields.matches} of {after3.withFields.cases}
+        </strong>{" "}
+        match. The frozen run&rsquo;s record is unchanged.
+      </p>
+      <details className="dsc">
+        <summary>
+          <span className="dsc-k">The third five, SSA&rsquo;s answer and the frozen engine&rsquo;s</span>
+        </summary>
+        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Third held-out set, case by case">
+          <table className="doc-table">
+            <thead>
+              <tr>
+                <th scope="col">SSA&rsquo;s example</th>
+                <th scope="col">SSA&rsquo;s answer</th>
+                <th scope="col">The frozen engine</th>
+              </tr>
+            </thead>
+            <tbody>
+              {third.cases.map((c) => (
+                <tr key={c.id}>
+                  <td>
+                    {c.title}
+                    <span className="ev-basis">
+                      <a className="text-link" href={c.url} target="_blank" rel="noreferrer">
+                        {c.cite}
+                      </a>
+                      , {c.part}
+                    </span>
+                  </td>
+                  <td>{c.ssa_answer}</td>
+                  <td>
+                    {c.match ? "Matches" : "Differs"}: {c.engine_counts ? "counts" : "does not count"}
                     {c.values.map((v) => `; ${MEASURE[v.measure]} ${v.month} ${money(v.got)}`).join("")}.
                   </td>
                 </tr>

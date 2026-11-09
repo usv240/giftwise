@@ -19,6 +19,9 @@ export type Category =
 
 export const SHELTER_CATEGORIES: readonly Category[] = ["rent", "mortgage", "property_tax", "utility"];
 
+/** How often a housing bill is paid when it is not paid by the month: weekly, or every two weeks (POMS SI 00835.474 B.3). */
+export type Every = "week" | "two_weeks";
+
 /** Whose check it is, for the wording only: she/her, he/him or they/them. */
 export type Pronoun = "she" | "he" | "they";
 
@@ -41,6 +44,13 @@ export interface Profile {
   ableContributedThisYear: number;
   /** Countable savings at the start of the month the gift arrives. */
   savings: number;
+  /**
+   * The people in her household, herself included (both members of a couple). Housing paid from outside the household
+   * is divided equally among them, and she is charged her share (POMS SI 00835.350 B.4); for a couple, one member's
+   * share times two (C). A rental subsidy is divided the same way (SI 00835.380 D.1.d). Leave it unset for one person,
+   * or a couple, with no one else in the household (R-SHEL-07).
+   */
+  householdSize?: number;
 }
 
 export interface Gift {
@@ -71,6 +81,13 @@ export interface Gift {
    * for a household of one; SSA divides it among the household's members.
    */
   rentPaid?: number;
+  /**
+   * For rent or another housing bill paid to the landlord or company weekly or every two weeks: the amount is one
+   * payment. The month counts the converted monthly amount, the weekly amount times 13 divided by 3, a two-week amount
+   * halved first, however many payment days fall in the month (POMS SI 00835.474 B.3). The payments one giver makes
+   * toward one bill in a month are one weekly amount (R-SHEL-06).
+   */
+  every?: Every;
   label?: string;
 }
 
@@ -85,6 +102,30 @@ export interface Treatment {
   ambiguous: boolean;
   ambiguityReason?: string;
   note?: string;
+}
+
+/**
+ * Countable resources on the 1st of a month (R-RES-01): the savings and other resources she states, and the part of her
+ * ABLE account over $100,000 (R-ABLE-03, POMS SI 01130.740 D.1).
+ */
+export interface ResourceTest {
+  /** The 1st of the month the test is for, YYYY-MM-01. */
+  on: string;
+  /** Countable savings and other resources, before any ABLE balance. */
+  other: number;
+  /** Her ABLE balance that day, with the deposits the gifts made before it. */
+  ableBalance: number;
+  /** The part of the ABLE balance over $100,000, which counts as a resource. */
+  ableExcess: number;
+  countable: number;
+  limit: number;
+  over: boolean;
+  /**
+   * under: at or below the limit. able_suspension: over only because of the ABLE balance, so SSI cash stops while it
+   * stays over and Medicaid continues (SI 01130.740 D.1.c). excess: her other resources alone are over the limit, so she
+   * is not eligible that month (SI 01110.003 A.1, SI 01130.740 D.1.b).
+   */
+  status: "under" | "able_suspension" | "excess";
 }
 
 export interface MonthTrace {
@@ -104,6 +145,10 @@ export interface MonthTrace {
   earnedCountable: number;
   otherUnearned: number;
   countableIncome: number;
+  /** The check her income alone gives, before the resource test. */
+  incomeCheck: number;
+  /** Her countable resources on the 1st of the month the check is paid. Over the limit, the check is $0 (R-RES-01). */
+  resources: ResourceTest;
   check: number;
   paymentMonth: string;
 }
@@ -126,8 +171,13 @@ export interface GiftResult {
   checkAfter: number;
   bestRoute: Delivery;
   checkWithBestRoute: number;
+  /** Countable resources on the 1st of next month with the gift as given: cash kept, an ABLE deposit in the account. */
   resourcesNextFirst: number;
   overResourceLimit: boolean;
+  /** The resource test on the 1st of next month from the balances she states, without the gift (R-RES-01). */
+  resourcesBefore: ResourceTest;
+  /** The same test with the gift as given: cash she keeps adds to savings, an ABLE deposit to the account (R-ABLE-03). */
+  resourcesAfter: ResourceTest;
   ambiguous: boolean;
   ambiguityReason?: string;
   explanation: Explanation;

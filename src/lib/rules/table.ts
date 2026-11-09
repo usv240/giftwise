@@ -61,6 +61,18 @@ export const RULES: Record<string, RuleRow> = {
     plain: "When the landlord is the person's parent or child and charges less than market rent, the subsidy counted each month is the lesser of the market rent and the monthly cap, less the rent paid. Rent at or above the cap is a business arrangement, and nothing is counted.",
     sourceKeys: ["poms-si-00835-380", "fr-89-25507-rental-subsidy", "poms-si-00835-300"],
   },
+  "R-SHEL-06": {
+    id: "R-SHEL-06",
+    name: "Housing bills paid by the week",
+    plain: "Rent or another housing bill paid weekly is converted to a monthly amount: the weekly amount times 13, divided by 3. A bill paid every two weeks is halved first. The month counts the converted amount, however many payment days fall in it, up to the monthly cap.",
+    sourceKeys: ["poms-si-00835-474", "poms-si-00835-350"],
+  },
+  "R-SHEL-07": {
+    id: "R-SHEL-07",
+    name: "Housing help shared by the household",
+    plain: "Housing paid from outside the household for the whole household, such as its rent or property tax, is divided equally among the people who live there, and she is charged her share, up to the monthly cap. For a couple, one member's share times two. A rental subsidy is divided the same way.",
+    sourceKeys: ["poms-si-00835-350", "poms-si-00835-474", "poms-si-00835-380"],
+  },
   "R-SHEL-VTR": {
     id: "R-SHEL-VTR",
     name: "Living in another person's household",
@@ -103,10 +115,16 @@ export const RULES: Record<string, RuleRow> = {
     plain: "Money taken from an ABLE account for housing is not income when it is spent in the same month it is taken out.",
     sourceKeys: ["poms-si-01130-740"],
   },
+  "R-ABLE-03": {
+    id: "R-ABLE-03",
+    name: "An ABLE balance over $100,000",
+    plain: "The part of an ABLE account over $100,000 counts toward savings. When that puts her over the savings limit, SSI cash stops while it stays over and Medicaid continues; when her other savings alone are over the limit, no SSI is paid that month.",
+    sourceKeys: ["poms-si-01130-740", "poms-si-01110-003"],
+  },
   "R-RES-01": {
     id: "R-RES-01",
     name: "Savings limit on the first of the month",
-    plain: "Countable savings must be $2,000 or less at the start of each month ($3,000 for a couple).",
+    plain: "Countable savings must be $2,000 or less at the start of each month ($3,000 for a couple). Over the limit on the 1st, no SSI is paid for that month.",
     sourceKeys: ["poms-si-01110-003", "poms-si-01110-600"],
   },
   "R-RMA-01": {

@@ -34,6 +34,7 @@ async function handle(req: Request) {
       covers: gift.covers,
       payerCoOwns: gift.payerCoOwns,
       rentPaid: gift.rentPaid,
+      every: gift.every,
     },
     { ...DEFAULT_PROFILE, ...profile },
   );
@@ -49,6 +50,8 @@ async function handle(req: Request) {
       routes: r.alternatives,
       savings_on_next_first: r.resourcesNextFirst,
       over_savings_limit: r.overResourceLimit,
+      able_balance_on_next_first: r.resourcesAfter.ableBalance,
+      resource_status: r.trace.resources.status,
       ambiguous: r.ambiguous,
       ambiguity_reason: r.ambiguityReason ?? null,
       rule_ids: r.ruleIds,

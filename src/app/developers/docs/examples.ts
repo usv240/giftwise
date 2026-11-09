@@ -26,7 +26,7 @@ const example = (id: string) => ENDPOINTS.find((e) => e.id === id)?.example;
 export function checkGiftData(body: unknown) {
   const { gift, profile } = CheckGiftRequest.parse(body);
   const r = evaluateGift(
-    { id: "api", date: gift.date ?? today(), amount: gift.amount, delivery: gift.delivery, category: gift.category, recurring: gift.recurring, giver: gift.giver, label: gift.label },
+    { id: "api", date: gift.date ?? today(), amount: gift.amount, delivery: gift.delivery, category: gift.category, recurring: gift.recurring, giver: gift.giver, label: gift.label, covers: gift.covers, payerCoOwns: gift.payerCoOwns, rentPaid: gift.rentPaid, every: gift.every },
     { ...DEFAULT_PROFILE, ...profile },
   );
   return {
@@ -40,6 +40,8 @@ export function checkGiftData(body: unknown) {
     routes: r.alternatives,
     savings_on_next_first: r.resourcesNextFirst,
     over_savings_limit: r.overResourceLimit,
+    able_balance_on_next_first: r.resourcesAfter.ableBalance,
+    resource_status: r.trace.resources.status,
     ambiguous: r.ambiguous,
     ambiguity_reason: r.ambiguityReason ?? null,
     rule_ids: r.ruleIds,

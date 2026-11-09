@@ -6,15 +6,15 @@
       "id": "unit",
       "name": "Rules engine, routing, the SSA report, the checks workflow and the cited answers",
       "command": "npm test",
-      "passed": 355,
-      "total": 355,
+      "passed": 386,
+      "total": 386,
       "what": "Every rule row, the 2026 values and the 2027 values for January and February checks, 1,000 random gifts held to twelve promises, the report code that lets anyone check a report, the Spanish rule sentences, the $60 quarterly exclusion in the order gifts arrive, shelter and the one-third reduction's meals test, prepaid housing bills, ABLE, gift routing, monthly gifts month by month, the Easy Read report in English and Spanish (every sentence 15 words or fewer) and its calendar reminder, pronouns, the reviewers' referee and what it does when one reviewer is wrong, the monthly report to Social Security, the checks workflow's fan-out and retries, the AG Studio to Claude translation, a known source behind every real-world answer, Social Security's own worked examples, and the benefit calendar, the logger's masking, the Postgres rate-limit table, the operations page's id shortening, the For agents recording against the gift page, the outside checks against the MCP server and render.yaml, and every test number in the README and TESTING.md against this file",
       "ranAt": "2026-11-09",
       "bare": {
-        "passed": 348,
+        "passed": 379,
         "failed": 0,
         "skipped": 7,
-        "total": 355,
+        "total": 386,
         "needs": {
           "database": 7,
           "claude": 0,
@@ -22,7 +22,7 @@
         }
       },
       "with_database": {
-        "passed": 355,
+        "passed": 386,
         "failed": 0,
         "skipped": 0,
         "needs": {
@@ -36,8 +36,8 @@
       "id": "api",
       "name": "API end to end",
       "command": "npm run e2e:api",
-      "passed": 111,
-      "total": 111,
+      "passed": 116,
+      "total": 116,
       "what": "Gift checks, presets, bill and fundraiser reading, the two reviewers, gift pages, the monthly SSA report and its CSV, the MCP server and every tool it lists, a monthly gift started by an agent, the rules watch asked live, the report check page, the MCP Server Card and AI Catalog, llms.txt, security headers, share images, the outside checks and their shared secret, PayPal orders, routed gifts, fund payouts and their reconciliation, receipts, webhook signature checks, the ledger, developer keys and every error path",
       "transcript": "content/eval/e2e-transcripts.json",
       "ranAt": "2026-11-09"

@@ -96,6 +96,14 @@ export const INVARIANTS: { id: string; promise: string; holds: (k: Case, g: Rout
     },
   },
   {
+    id: "able-balance",
+    promise: "ABLE deposits never take the account past $100,000, where they would count toward savings",
+    holds: (k, g) => {
+      const able = g.lines.filter((l) => l.route === "able").reduce((a, l) => a + c(l.amount), 0);
+      return able === 0 || c(k.profile.ableBalance) + able <= c(P.ableResourceExclusion);
+    },
+  },
+  {
     id: "able-eligible",
     promise: "Money goes to an ABLE account only for someone who can have one",
     holds: (k, g) => k.profile.ableEligible || g.lines.every((l) => l.route !== "able"),

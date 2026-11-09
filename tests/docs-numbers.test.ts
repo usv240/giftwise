@@ -10,7 +10,11 @@ import { ASKED_SENTENCE, COMPUTED_CASES, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, 
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
 import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
 import held2Set from "../content/eval/held-out-2.json";
-import { heldOut2AfterFix, type HeldOutCase } from "@/lib/held-out";
+import held3 from "../content/eval/held-out-3-results.json";
+import held3Set from "../content/eval/held-out-3.json";
+import invariantRun from "../content/eval/invariants-results.json";
+import { INVARIANTS } from "@/lib/invariants";
+import { heldOut2AfterFix, heldOut3AfterFix, type HeldOutCase } from "@/lib/held-out";
 import * as rules from "@/lib/rules";
 
 /**
@@ -29,7 +33,7 @@ const measured = JSON.parse(readFileSync("content/public/page-measure.json", "ut
 const before = JSON.parse(readFileSync("content/public/page-measure-before.json", "utf8")) as typeof measured;
 const n = (x: number) => x.toLocaleString("en-US");
 const cents = (x: number) => x.toLocaleString("en-US", { style: "currency", currency: "USD" });
-const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen"];
 const suite = (id: string) => results.suites.find((s) => s.id === id)!;
 /** The rows of a document's test table whose command column (the one before the result) is this command. */
 const rows = (doc: string, command: string) =>
@@ -208,20 +212,27 @@ describe("one source for every dollar figure", () => {
   });
 
   it("the README and docs/results.md state the held-out result as recorded", () => {
-    expect(readme).toContain(`**${held.summary.engine_matches} of ${held.summary.cases} examples the engine never saw**`);
-    expect(readme).toContain(`commit \`${held.engine.commit}\``);
+    // One README line for the three sets together, each figure from its results file.
+    const lines = readme.split(/\r?\n/).filter((l) => l.includes("content/eval/held-out"));
+    expect(lines).toHaveLength(1);
+    const [line] = lines;
+    const tally = (r: { summary: { engine_matches: number; cases: number } }) => `${r.summary.engine_matches} of ${r.summary.cases}`;
+    expect(line).toContain(`**Three held-out sets of SSA examples, each run once on a frozen engine: ${tally(held)}, ${tally(held2)} and ${tally(held3)}.**`);
+    expect(line).toContain(`commit \`${held.engine.commit}\``);
+    for (const [r, file] of [[held2, "held-out-2.json"], [held3, "held-out-3.json"]] as const) {
+      expect(line).toContain(`\`content/eval/${file}\` (git blob \`${r.set.git_blob.slice(0, 7)}\``);
+      expect(line).toContain(`frozen at \`${r.engine.commit}\``);
+    }
+    expect(line).toContain(`${held3.summary.counts_matches} of ${held3.summary.cases} on whether the gift counts`);
     expect(resultsDoc).toContain(`It matches ${held.summary.engine_matches} of ${held.summary.cases}.`);
     expect(resultsDoc).toContain(`frozen at commit \`${held.engine.commit}\``);
     // Both documents carry the first run's result and say that two expected answers were corrected afterwards, with the reasons in the set.
     const firstRun = `${held.first_run.engine_matches} of ${held.first_run.cases}`;
-    expect(readme).toContain(`The first run matched ${firstRun}; two expected answers were then corrected`);
-    expect(readme).toContain("content/eval/held-out.json");
+    expect(line).toContain(`its first run matched ${firstRun}, and two expected answers were then corrected`);
+    expect(line).toContain("content/eval/held-out.json");
     expect(resultsDoc).toContain(`corrected after the first run (${firstRun})`);
     expect(heldOutSet.corrections).toHaveLength(2);
-    // The second set, written before its run: its result and the blob that ran, in both documents.
-    expect(readme).toContain(`**${held2.summary.engine_matches} of ${held2.summary.cases} in a second set written before its run**`);
-    expect(readme).toContain(`git blob \`${held2.set.git_blob.slice(0, 7)}\``);
-    expect(readme).toContain(`frozen at \`${held2.engine.commit}\``);
+    // The second set, written before its run: its result and the blob that ran.
     expect(resultsDoc).toContain(`It matches ${held2.summary.engine_matches} of ${held2.summary.cases}`);
     expect(resultsDoc).toContain(`(\`${held2.set.git_blob.slice(0, 7)}\`)`);
     // The current engine on the second set after the fix, labelled as not a held-out result, from src/lib/held-out.ts.
@@ -230,6 +241,28 @@ describe("one source for every dollar figure", () => {
     expect(resultsDoc).toContain(`On the same ${WORDS[after.asWritten.cases]} as written, the current engine matches ${after.asWritten.matches} of ${after.asWritten.cases}.`);
     expect(resultsDoc).toContain(`The other ${WORDS[after.asWritten.misses.length]} turn on a fact the engine had no field for`);
     expect(resultsDoc).toContain(`in the new field, ${after.withFields.matches} of ${after.withFields.cases}`);
+  });
+
+  it("docs/results.md states the third set's frozen run and its after-fix line", () => {
+    const s = held3.summary;
+    expect(resultsDoc).toContain(`run once on the engine frozen at commit \`${held3.engine.commit}\``);
+    expect(resultsDoc).toContain(`git blob hash (\`${held3.set.git_blob.slice(0, 7)}\`)`);
+    expect(resultsDoc).toContain(`It matches ${s.engine_matches} of ${s.cases} on every value and ${s.counts_matches} of ${s.cases} on whether the gift counts`);
+    expect(resultsDoc).toContain(`The ${WORDS[s.misses.length]} that differ showed three rules`);
+    const after = heldOut3AfterFix(held3Set.cases as unknown as HeldOutCase[], rules);
+    expect(resultsDoc).toContain("**After the fix on the third set, not a held-out result.**");
+    expect(resultsDoc).toContain(`On the third set's ${WORDS[after.asWritten.cases]} as written, the current engine matches ${after.asWritten.matches} of ${after.asWritten.cases}`);
+    expect(resultsDoc).toContain(`The other ${WORDS[after.asWritten.misses.length]} turn on a fact the engine had no field for when the set was written (the rent is paid by the week`);
+    expect(resultsDoc).toContain(`in the new field, ${after.withFields.matches} of ${after.withFields.cases} (\`heldOut3AfterFix()\``);
+  });
+
+  it("every document names the number of promises the invariant run holds each gift to", () => {
+    expect(invariantRun.results).toHaveLength(INVARIANTS.length);
+    const word = WORDS[INVARIANTS.length];
+    expect(resultsDoc).toContain(`holds each answer to ${word} promises`);
+    expect(tests).toContain(`keep all ${word} promises`);
+    expect(testing).toContain(`All ${word} promises kept`);
+    expect(readFileSync("docs/evidence-index.md", "utf8")).toContain(`keep all ${word} promises`);
   });
 
   it("docs/real-world.md answers why not pay the shop yourself with the engine's figures", () => {

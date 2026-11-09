@@ -66,20 +66,44 @@ export function scoreHeldOut(cases: HeldOutCase[], engine: Engine) {
  * run in held-out-2-results.json. Two cases turn on a fact the engine had no field for when the set was written, so
  * they are scored twice: as written, and with that fact, quoted from the case's own situation, in the new field.
  */
-export const HELD_OUT_2_NEW_FIELDS: Record<string, { fact: string; fields: Partial<Gift> }> = {
+export const HELD_OUT_2_NEW_FIELDS: Record<string, { fact: string; fields: Partial<Gift>; profile?: Partial<Profile> }> = {
   "co-owner-mortgage": { fact: "a house he owns jointly with his sibling", fields: { payerCoOwns: true } },
   "rent-below-market-from-child": { fact: "paying the required rent of $280 a month", fields: { rentPaid: 280 } },
 };
 
-export function heldOut2AfterFix(cases: HeldOutCase[], engine: Engine) {
+type NewFields = Record<string, { fact: string; fields?: Partial<Gift>; profile?: Partial<Profile> }>;
+
+/** A set scored as written, and again with each new field's fact, quoted from the case's own situation, in the field. */
+function afterFix(cases: HeldOutCase[], engine: Engine, extra: NewFields) {
   const asWritten = scoreHeldOut(cases, engine);
   const withFields = scoreHeldOut(
     cases.map((c) => {
-      const extra = HELD_OUT_2_NEW_FIELDS[c.id];
-      return extra ? { ...c, gifts: c.gifts.map((g) => ({ ...g, ...extra.fields })) } : c;
+      const e = extra[c.id];
+      return e ? { ...c, profile: { ...c.profile, ...e.profile }, gifts: c.gifts.map((g) => ({ ...g, ...e.fields })) } : c;
     }),
     engine,
   );
   const tally = (s: ReturnType<typeof scoreHeldOut>) => ({ matches: s.filter((c) => c.match).length, cases: s.length, misses: s.filter((c) => !c.match).map((c) => c.id) });
-  return { asWritten: tally(asWritten), withFields: tally(withFields), newFields: Object.keys(HELD_OUT_2_NEW_FIELDS), cases: withFields };
+  return { asWritten: tally(asWritten), withFields: tally(withFields), newFields: Object.keys(extra), cases: withFields };
+}
+
+export function heldOut2AfterFix(cases: HeldOutCase[], engine: Engine) {
+  return afterFix(cases, engine, HELD_OUT_2_NEW_FIELDS);
+}
+
+/**
+ * The third set (content/eval/held-out-3.json) after the rules it showed were added: R-SHEL-06 (a housing bill paid by
+ * the week, converted to a monthly amount), R-SHEL-07 (housing help divided among the household) and R-ABLE-03 with
+ * R-RES-01 (an ABLE balance over $100,000 counted toward savings, and no SSI over the limit). Not a held-out result: the
+ * rules were written after seeing these five, and the held-out result stays the frozen run in held-out-3-results.json.
+ * Two cases turn on a fact the engine had no field for when the set was written, so they are scored twice, as with the
+ * second set. The two ABLE cases already state the balances in fields the engine had (ableBalance, savings).
+ */
+export const HELD_OUT_3_NEW_FIELDS: NewFields = {
+  "weekly-rent-from-sibling": { fact: "the rent is $25 a week", fields: { every: "week" } },
+  "property-tax-partly-past-with-roommate": { fact: "lives with her sister", profile: { householdSize: 2 } },
+};
+
+export function heldOut3AfterFix(cases: HeldOutCase[], engine: Engine) {
+  return afterFix(cases, engine, HELD_OUT_3_NEW_FIELDS);
 }

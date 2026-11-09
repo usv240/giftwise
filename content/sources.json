@@ -15,6 +15,11 @@
     "publisher": "eCFR",
     "read": "November 2, 2026"
   },
+  "cfr-416-1131": {
+    "title": "20 CFR 416.1131: the one-third reduction rule",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1131",
+    "publisher": "eCFR"
+  },
   "cfr-416-1121": {
     "title": "20 CFR 416.1121: types of unearned income, including gifts",
     "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1121",
@@ -84,6 +89,16 @@
   "poms-si-00835-310": {
     "title": "POMS SI 00835.310: Telling in-kind support apart from other in-kind income",
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835310",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-380": {
+    "title": "POMS SI 00835.380: Rental subsidies",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835380",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-474": {
+    "title": "POMS SI 00835.474: Converting to monthly amounts",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835474",
     "publisher": "Social Security Administration"
   },
   "poms-si-00835-400": {

@@ -15,6 +15,10 @@ export const CoversSchema = z
   .refine((c) => c.from <= c.to, { message: "from must be the same month as to or earlier." })
   .describe("For a housing bill paid ahead or behind: the months it covers. A gift's share for months up to the payment counts when it is paid, and each later month's share in that month (POMS SI 00835.360 D.2).");
 
+export const EverySchema = z
+  .enum(["week", "two_weeks"])
+  .describe("For rent or another housing bill paid to the landlord or company weekly (week) or every two weeks (two_weeks): the amount is one payment, and the month counts the weekly amount times 13, divided by 3, a two-week amount halved first (POMS SI 00835.474 B.3).");
+
 export const GiftSchema = z.object({
   amount: z.number().min(0).max(100000).describe("Gift amount in US dollars."),
   delivery: DeliverySchema,
@@ -42,6 +46,7 @@ export const GiftSchema = z.object({
     .max(100000)
     .optional()
     .describe("For rent below market from a landlord who is her parent or child: the monthly rent she pays, with category rent and amount the market rent less that rent. The subsidy counted is the lesser of the market rent and the presumed maximum value, less this rent (POMS SI 00835.380)."),
+  every: EverySchema.optional(),
 });
 
 export const ProfileSchema = z
@@ -58,7 +63,11 @@ export const ProfileSchema = z
     otherUnearnedMonthly: z.number().min(0).max(100000).default(0).describe("Other unearned income each month, in US dollars, such as a pension. It is counted along with any cash gift."),
     earnedMonthly: z.number().min(0).max(100000).default(0).describe("Wages each month, in US dollars. After the first $65 and any of the $20 exclusion that is left, half of the rest is counted."),
     ableEligible: z.boolean().default(true).describe("False when she cannot have an ABLE account. Then no gift is routed to ABLE."),
-    ableBalance: z.number().min(0).default(0).describe("Her ABLE account balance, in US dollars. The answer does not depend on it, because the first $100,000 in an ABLE account does not count toward savings."),
+    ableBalance: z
+      .number()
+      .min(0)
+      .default(0)
+      .describe("Her ABLE account balance, in US dollars. The first $100,000 does not count toward savings; the part over it does, and with her savings over the limit no SSI is paid that month, though Medicaid continues when the ABLE balance is the reason (POMS SI 01130.740 D.1). An ABLE gift that would take the account past $100,000 says so."),
     ableContributedThisYear: z
       .number()
       .min(0)
@@ -68,7 +77,14 @@ export const ProfileSchema = z
       .number()
       .min(0)
       .default(1240)
-      .describe("Her countable savings at the start of the month the gift arrives, in US dollars. Cash she keeps adds to it, and the answer says when it would pass the limit on the 1st ($2,000, or $3,000 for a couple)."),
+      .describe("Her countable savings at the start of the month the gift arrives, in US dollars. Cash she keeps adds to it, and the answer says when it would pass the limit on the 1st ($2,000, or $3,000 for a couple). Over the limit, no SSI is paid for the month."),
+    householdSize: z
+      .number()
+      .int()
+      .min(1)
+      .max(20)
+      .optional()
+      .describe("The people in her household, herself included (both members of a couple). Housing paid from outside the household is divided equally among them and she is charged her share (POMS SI 00835.350 B.4). Leave it out when no one else lives with her."),
   })
   .partial()
   .describe("The person who receives SSI. Every field is optional; leave it out for one adult who lives on her own with $1,240 in savings.");

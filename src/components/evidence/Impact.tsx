@@ -1,6 +1,7 @@
 import Link from "next/link";
 import heldOut from "../../../content/eval/held-out-results.json";
 import heldOut2 from "../../../content/eval/held-out-2-results.json";
+import heldOut3 from "../../../content/eval/held-out-3-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import { ERROR_RATES } from "@/lib/error-rates";
 import { FAMILY_BASIS, IMPACT, KEPT_LABEL } from "@/lib/impact";
@@ -39,8 +40,9 @@ export function Impact() {
             <span className="jr-what">of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer.</span>
             <span className="jr-base">
               Claude with no rulebook: <span className="tabular">{ssa.summary.claude_matches} of {ssa.summary.claude_answered}</span>. New examples the engine
-              never saw, run on it frozen: <span className="tabular">{heldOut.summary.engine_matches} of {heldOut.summary.cases}</span>, and{" "}
-              <span className="tabular">{heldOut2.summary.engine_matches} of {heldOut2.summary.cases}</span> in a second set written before its run.
+              never saw, run on it frozen: <span className="tabular">{heldOut.summary.engine_matches} of {heldOut.summary.cases}</span>, then{" "}
+              <span className="tabular">{heldOut2.summary.engine_matches} of {heldOut2.summary.cases}</span> and <span className="tabular">{heldOut3.summary.engine_matches} of {heldOut3.summary.cases}</span> in two
+              sets written before their run.
             </span>
           </Link>
         </li>

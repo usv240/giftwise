@@ -2,7 +2,7 @@ import { z } from "zod";
 import { aiAvailable } from "@/lib/ai/claude";
 import { reviewPayload, runReviewers } from "@/lib/ai/reviewers";
 import { today } from "@/lib/api/envelope";
-import { CategorySchema, CoversSchema, DeliverySchema } from "@/lib/api/schemas";
+import { CategorySchema, CoversSchema, DeliverySchema, EverySchema } from "@/lib/api/schemas";
 import { API_VERSION } from "@/lib/api/version";
 import { getHousehold, openNeeds, pageProfile } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
@@ -12,7 +12,7 @@ import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
 import { easyRead } from "@/lib/report/easy";
 import { dbConfigured } from "@/lib/db";
 import { monthlyView, startMonthly } from "@/lib/monthly";
-import { DEFAULT_PROFILE, evaluateGift, fullCheckByYear, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, P, evaluateGift, fullCheckByYear, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
 import { reportCode, verifyPath } from "../report/verify";
 import { findGifts } from "../channel3";
@@ -65,12 +65,32 @@ export const TOOLS = [
         .max(100000)
         .optional()
         .describe("For rent below market from a landlord who is their parent or child: the monthly rent they pay, with category rent and amount the market rent less that rent."),
+      every: EverySchema.optional(),
+      able_balance: z
+        .number()
+        .min(0)
+        .max(10000000)
+        .optional()
+        .describe("Their ABLE account balance now, in dollars, if known. The part over $100,000 counts toward savings, so an ABLE gift that would take the account past it says what that does to the check."),
+      household_size: z
+        .number()
+        .int()
+        .min(1)
+        .max(20)
+        .optional()
+        .describe("The people in their household, themselves included, if others live there. Housing paid from outside is divided among them."),
     }),
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     run: async (i) => {
       const r = evaluateGift(
-        { id: "mcp", date: i.date ?? today(), amount: i.amount, delivery: i.delivery, category: i.category, recurring: i.recurring, covers: i.covers, payerCoOwns: i.payer_co_owns, rentPaid: i.rent_paid },
-        { ...DEFAULT_PROFILE, pronoun: "they", ...(i.savings !== undefined ? { savings: i.savings } : {}) },
+        { id: "mcp", date: i.date ?? today(), amount: i.amount, delivery: i.delivery, category: i.category, recurring: i.recurring, covers: i.covers, payerCoOwns: i.payer_co_owns, rentPaid: i.rent_paid, every: i.every },
+        {
+          ...DEFAULT_PROFILE,
+          pronoun: "they",
+          ...(i.savings !== undefined ? { savings: i.savings } : {}),
+          ...(i.able_balance !== undefined ? { ableBalance: i.able_balance } : {}),
+          ...(i.household_size !== undefined ? { householdSize: i.household_size } : {}),
+        },
       );
       return {
         text: `${r.explanation.plain} Sources: ${r.sourceKeys.map((k) => SRC[k]?.title ?? k).join("; ")}.`,
@@ -80,6 +100,9 @@ export const TOOLS = [
           payment_month: r.paymentMonth,
           best_route: r.bestRoute,
           check_with_best_route: r.checkWithBestRoute,
+          savings_on_next_first: r.resourcesNextFirst,
+          able_balance_on_next_first: r.resourcesAfter.ableBalance,
+          resource_status: r.trace.resources.status,
           rule_ids: r.ruleIds,
           sources: sourcesFor(r.ruleIds).map((k) => ({ title: SRC[k]?.title ?? k, url: SRC[k]?.url ?? null })),
         },
@@ -165,9 +188,17 @@ export const TOOLS = [
       if (!p) return { text: `No gift page named "${i.slug}".`, isError: true };
       const plan = routeGift(i.amount, openNeeds(p.needs), today(), p.profile, `${p.household.name}'s ABLE account`);
       const lines = plan.lines.map((l) => ({ paid_to: l.payeeName, for: l.title, amount: l.amount, rule_ids: l.ruleIds }));
+      const w = pronounWords(p.profile.pronoun);
+      // Why money is handed back when the ABLE account has no room: the yearly limit, or $100,000 in the account (R-ABLE-03).
+      const why =
+        plan.ableFull === "balance"
+          ? `: ${w.poss} ABLE account would pass $100,000, and past that a deposit counts toward ${w.poss} savings`
+          : plan.ableFull === "year"
+            ? `: ${w.poss} ABLE account has reached this year's ${usd(P.ableAnnualLimit)} limit`
+            : "";
       return {
-        text: `${usd(i.amount)} for ${p.household.name}: ${lines.map((l) => `${usd(l.amount)} to ${l.paid_to} (${l.for})`).join(", ")}. ${pronounWords(p.profile.pronoun).Poss} check stays ${usd(plan.checkWithRouting)}. Given as cash, it would be ${usd(plan.checkIfCash)}.${plan.unplaced > 0 ? ` ${usd(plan.unplaced)} has no benefit-safe place right now.` : ""}`,
-        data: { amount: i.amount, lines, check_with_giftwise: plan.checkWithRouting, check_if_cash: plan.checkIfCash, unplaced: plan.unplaced },
+        text: `${usd(i.amount)} for ${p.household.name}: ${lines.length ? lines.map((l) => `${usd(l.amount)} to ${l.paid_to} (${l.for})`).join(", ") : "nothing routed"}. ${w.Poss} check stays ${usd(plan.checkWithRouting)}. Given as cash, it would be ${usd(plan.checkIfCash)}.${plan.unplaced > 0 ? ` ${usd(plan.unplaced)} has no benefit-safe place right now${why}.` : ""}`,
+        data: { amount: i.amount, lines, check_with_giftwise: plan.checkWithRouting, check_if_cash: plan.checkIfCash, unplaced: plan.unplaced, able_full: plan.ableFull ?? null },
       };
     },
   }),

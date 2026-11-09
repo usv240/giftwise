@@ -310,6 +310,23 @@ r = await mcp("nope/never");
 j = await r.json();
 ok("MCP unknown method -> JSON-RPC -32601", j.error?.code === -32601);
 
+// The rules the third held-out set showed, with the facts of SSA's own examples (R-SHEL-06, R-SHEL-07, R-ABLE-03 with
+// R-RES-01). From their own address, so the demo tier's limit is counted apart from the rest of the suite.
+{
+  const own = { "Content-Type": "application/json", "x-forwarded-for": "203.0.113.43" };
+  const weekly = await (await post("/api/v1/check-gift", { gift: { amount: 25, delivery: "vendor", category: "rent", recurring: true, every: "week", date: "2026-04-06" } }, own)).json();
+  ok("check-gift a $25 weekly rent counts $108.33 a month -> $905.67 (POMS SI 00835.474 B.3)", weekly.data?.trace?.ismValue === 108.33 && weekly.data?.check_after === 905.67 && weekly.data?.rule_ids?.includes("R-SHEL-06"), `got ${weekly.data?.trace?.ismValue} ${weekly.data?.check_after}`);
+  const shared = await (await post("/api/v1/plan-month", { gifts: [{ amount: 1200, delivery: "vendor", category: "property_tax", date: "2026-03-15", giver: "sibling", covers: { from: "2025-06", to: "2026-05" } }], profile: { householdSize: 2, savings: 0 } }, own)).json();
+  ok("plan-month divides a $1,200 tax bill between two in the household: $351.33, then $50 and $50 (POMS SI 00835.474 B.2)", JSON.stringify(shared.data?.months?.map((m) => m.ismValue)) === "[351.33,50,50]", `${shared.data?.months?.map((m) => m.ismValue)}`);
+  const paul = await (await post("/api/v1/check-gift", { gift: { amount: 50, delivery: "vendor", category: "equipment", date: "2026-04-10" }, profile: { ableBalance: 101000, savings: 1500 } }, own)).json();
+  ok("check-gift with $101,000 in ABLE and $1,500 saved pays no SSI, ABLE the reason (POMS SI 01130.740 D.1.c)", paul.data?.check_after === 0 && paul.data?.resource_status === "able_suspension" && paul.data?.rule_ids?.includes("R-ABLE-03"), `got ${paul.data?.check_after} ${paul.data?.resource_status}`);
+  const able = await (await post("/api/v1/check-gift", { gift: { amount: 1500, delivery: "able", category: "other", date: "2026-04-10" }, profile: { ableBalance: 99950 } }, own)).json();
+  ok("check-gift an ABLE gift past $100,000 says the check stops and routes it elsewhere", able.data?.check_after === 0 && able.data?.best_route === "item" && able.data?.check_with_best_route === 994 && /Medicaid continues/.test(able.data?.explanation?.plain ?? ""), `got ${able.data?.check_after} ${able.data?.best_route}`);
+}
+r = await mcp("tools/call", { name: "check_gift", arguments: { amount: 1500, delivery: "able", category: "other", date: "2026-04-10", able_balance: 99950 } });
+j = await r.json();
+ok("MCP check_gift takes the ABLE balance: past $100,000 and over the limit, $0 and the item route instead", j.result?.structuredContent?.check_after === 0 && j.result.structuredContent.best_route === "item" && j.result.structuredContent.resource_status === "able_suspension", j.result?.content?.[0]?.text?.slice(0, 100));
+
 // PayPal webhooks: an event without a valid PayPal signature is never accepted (400, or 503 where webhooks are not set up)
 r = await post("/api/paypal/webhook", { id: "WH-TEST", event_type: "PAYMENT.CAPTURE.REFUNDED", resource: { id: "NOPE" } });
 ok("unsigned PayPal webhook is refused", r.status === 400 || r.status === 503, `${r.status}`);

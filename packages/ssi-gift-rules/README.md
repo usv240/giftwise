@@ -48,11 +48,14 @@ Each rule has an id, a plain sentence and its sources in `RULES`:
 | R-SHEL-03 | A home or other shelter given as itself (`delivery: "item"`; a home is category `mortgage`) counts in the month received, up to the monthly cap | POMS SI 00835.400, SI 00835.310, SI 00815.550 |
 | R-SHEL-04 | A co-owner's payment is not a gift: each month it covers counts in that month, past months included (set `payerCoOwns` with `covers`) | POMS SI 00835.360 D.3 |
 | R-SHEL-05 | Rent below market from a parent or child: the lesser of market rent and the cap, less the rent paid (set `rentPaid`; `amount` is market rent less that rent) | POMS SI 00835.380, 89 FR 25507 |
+| R-SHEL-06 | Rent or another housing bill paid weekly counts as the weekly amount times 13, divided by 3, a two-week amount halved first (set `every: "week"` or `"two_weeks"`) | POMS SI 00835.474 B.3 |
+| R-SHEL-07 | Housing paid from outside for the whole household is divided among the people who live there (set `householdSize` on the profile) | POMS SI 00835.350 B.4 and C, SI 00835.380 D.1.d |
 | R-FOOD-01 | Food stopped counting on September 30, 2024 | 89 FR 21199 |
 | R-ITEM-01, R-ITEM-02 | A gifted item for personal or household use is not income; event tickets are | 20 CFR 416.1103(g), POMS SI 01130.430, SI 00830.520 |
 | R-EDU-01 | Gifts used for tuition, books and school costs are not income | POMS SI 00830.455 |
 | R-ABLE-01, R-ABLE-02 | Deposits to an ABLE account are not income; housing withdrawals must be spent that month | POMS SI 01130.740 |
-| R-RES-01 | Countable savings must be $2,000 or less on the 1st ($3,000 for a couple) | POMS SI 01110.003, SI 01110.600 |
+| R-ABLE-03 | The part of an ABLE balance over $100,000 counts toward savings (set `ableBalance` on the profile); over the limit because of it, SSI cash stops and Medicaid continues | POMS SI 01130.740 D.1 |
+| R-RES-01 | Countable savings must be $2,000 or less on the 1st ($3,000 for a couple); over it, the month's check is $0 | POMS SI 01110.003, SI 01110.600 |
 | R-RMA-01 | Income in one month sets the check two months later | POMS SI 02005.001 |
 
 Set `householdProvidesAllMeals: false` on the profile when the person lives in another's household but buys their own food. Amounts follow the check's year: $994 a month for an individual in 2026 and $1,029 from January 2027 (91 FR 67380), so November and December income set the January and February checks at the new rate, as SSA does (POMS SI 02005.001 E.4.c). State supplements, deeming from a spouse or parent, earned income beyond the standard exclusions and trusts are not modeled.

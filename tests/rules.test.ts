@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PROFILE, RULES, computeMonth, evaluateGift, markInfrequency, planMonths, rentalSubsidy, type Gift, type Profile } from "@/lib/rules";
+import sources from "../content/sources.json";
+import { DEFAULT_PROFILE, RULES, computeMonth, evaluateGift, markInfrequency, planMonths, rentalSubsidy, resourceTest, type Gift, type Profile } from "@/lib/rules";
 
 const base: Profile = { ...DEFAULT_PROFILE, savings: 1240 };
 const g = (over: Partial<Gift>): Gift => ({ id: "t", date: "2026-04-10", amount: 1000, delivery: "cash", category: "other", ...over });
@@ -309,6 +310,128 @@ describe("rule table", () => {
       expect(r.plain.length).toBeGreaterThan(10);
       expect(r.sourceKeys.length).toBeGreaterThan(0);
     }
+  });
+  it("every source a rule cites is in content/sources.json, with its address", () => {
+    const known = sources as Record<string, { url: string }>;
+    for (const r of Object.values(RULES)) for (const k of r.sourceKeys) expect(known[k]?.url, `${r.id}: ${k}`).toMatch(/^https:\/\//);
+  });
+});
+
+describe("R-SHEL-06: housing bills paid by the week (POMS SI 00835.474 B.3)", () => {
+  const profile = { ...base, savings: 0 };
+  // Bishop lives in a rooming house with a weekly rent of $25, and a sibling pays it: $25 times 13, divided by 3.
+  const rent = (date: string, over: Partial<Gift> = {}) => g({ id: date, date, amount: 25, delivery: "vendor", category: "rent", giver: "sibling", recurring: true, every: "week", ...over });
+  it("SSA's example: a $25 weekly rent is $108.33 a month, whether the month has four Mondays or five", () => {
+    const april = planMonths(["2026-04-06", "2026-04-13", "2026-04-20", "2026-04-27"].map((d) => rent(d)), profile).months;
+    expect(april.map((m) => [m.month, m.ismValue])).toEqual([["2026-04", 108.33]]);
+    const june = planMonths(["2026-06-01", "2026-06-08", "2026-06-15", "2026-06-22", "2026-06-29"].map((d) => rent(d)), profile).months;
+    expect(june.map((m) => [m.month, m.ismValue])).toEqual([["2026-06", 108.33]]);
+    // The same four payments with no frequency count as paid, $100.
+    expect(planMonths(["2026-04-06", "2026-04-13", "2026-04-20", "2026-04-27"].map((d) => rent(d, { every: undefined })), profile).months[0].ismValue).toBe(100);
+  });
+  it("one weekly payment entered once counts the converted month, and is not one-off income", () => {
+    const r = evaluateGift(rent("2026-04-06", { recurring: undefined }), profile);
+    expect(r.trace.ismValue).toBe(108.33);
+    expect(r.trace.infrequentExcluded).toBe(0);
+    expect(r.ruleIds).toEqual(["R-SHEL-01", "R-GIE-01", "R-SHEL-06"]);
+    // $994 less $108.33 after the $20 general exclusion.
+    expect(r.checkAfter).toBe(905.67);
+  });
+  it("a two-week rent is halved, then converted as a weekly one: $50 every two weeks is $108.33", () => {
+    expect(evaluateGift(rent("2026-04-06", { amount: 50, every: "two_weeks" }), profile).trace.ismValue).toBe(108.33);
+  });
+  it("the converted month is capped at the presumed maximum value, and cash given weekly counts as received", () => {
+    expect(evaluateGift(rent("2026-04-06", { amount: 100 }), profile).trace.ismValue).toBe(351.33);
+    expect(evaluateGift(rent("2026-04-06", { delivery: "cash", category: "other" }), profile).trace.cashIncome).toBe(25);
+  });
+});
+
+describe("R-SHEL-07: housing help shared by the household (POMS SI 00835.350 B.4 and C, SI 00835.474 B.2, SI 00835.380 D.1.d)", () => {
+  const profile = { ...base, savings: 0 };
+  it("SSA's example: Jennifer and her roommate share a $1,200 property tax bill paid in March: March capped, then $50 a month", () => {
+    const tax = g({ date: "2026-03-15", amount: 1200, delivery: "vendor", category: "property_tax", giver: "sibling", covers: { from: "2025-06", to: "2026-05" } });
+    const plan = planMonths([tax], { ...profile, householdSize: 2 });
+    // March: nine past months and March, $1,000, divided by two, $500, capped at the presumed maximum value.
+    expect(plan.months.map((m) => [m.month, m.ismValue])).toEqual([["2026-03", 351.33], ["2026-04", 50], ["2026-05", 50]]);
+    expect(plan.gifts[0].ruleIds).toEqual(["R-SHEL-01", "R-GIE-01", "R-SHEL-02", "R-SHEL-07"]);
+    // Alone, the same bill counts $100 a month after March.
+    expect(planMonths([tax], profile).months.map((m) => m.ismValue)).toEqual([351.33, 100, 100]);
+  });
+  it("SSA's couple example: a son pays $1,300 of property tax for the next 12 months; three in the household, $72.22 to the couple", () => {
+    const tax = g({ date: "2026-03-20", amount: 1300, delivery: "vendor", category: "property_tax", giver: "son", covers: { from: "2026-04", to: "2027-03" } });
+    const april = planMonths([tax], { ...profile, couple: true, householdSize: 3 }).months.find((m) => m.month === "2026-04")!;
+    // $108.33 a month, divided by three, $36.11 each, times two for the couple.
+    expect(april.ismValue).toBe(72.22);
+  });
+  it("SSA's cousins example: a sibling pays $400 of a $1,300 tax bill for two household members, $16.66 each a month", () => {
+    const tax = g({ date: "2026-06-05", amount: 400, delivery: "vendor", category: "property_tax", giver: "sibling", covers: { from: "2026-06", to: "2027-05" } });
+    const july = planMonths([tax], { ...profile, householdSize: 2 }).months.find((m) => m.month === "2026-07")!;
+    // $400 divided by 12, then by two; SSA rounds the cent down.
+    expect(july.ismValue).toBeCloseTo(16.66, 1);
+  });
+  it("a rental subsidy is divided among the household, and neither a home given as itself nor the one-third reduction is", () => {
+    const subsidy = g({ date: "2026-10-01", amount: 130, delivery: "vendor", category: "rent", giver: "child (landlord)", recurring: true, rentPaid: 280 });
+    expect(computeMonth("2026-10", [subsidy], { ...profile, householdSize: 2 }).ismValue).toBe(35.67);
+    const home = g({ date: "2026-06-15", amount: 40000, delivery: "item", category: "mortgage", giver: "parents" });
+    expect(computeMonth("2026-06", [home], { ...profile, householdSize: 3 }).ismValue).toBe(351.33);
+    expect(evaluateGift(home, { ...profile, householdSize: 3 }).ruleIds).not.toContain("R-SHEL-07");
+    const vtr = evaluateGift(g({ delivery: "vendor", category: "rent", amount: 500, recurring: true }), { ...profile, livesInAnothersHousehold: true, householdSize: 4 });
+    expect(vtr.ruleIds).toEqual(["R-SHEL-VTR"]);
+    expect(vtr.checkAfter).toBe(662.67);
+  });
+  it("a household size of one, or two for a couple, changes nothing", () => {
+    const rent = g({ delivery: "vendor", category: "rent", amount: 300, recurring: true });
+    expect(evaluateGift(rent, { ...profile, householdSize: 1 }).trace).toEqual(evaluateGift(rent, profile).trace);
+    expect(evaluateGift(rent, { ...profile, couple: true, householdSize: 2 }).trace).toEqual(evaluateGift(rent, { ...profile, couple: true }).trace);
+  });
+});
+
+describe("R-RES-01 and R-ABLE-03: the resource test, with an ABLE balance over $100,000 (POMS SI 01110.003, SI 01130.740 D.1)", () => {
+  const june = (p: Partial<Profile>) => computeMonth("2026-06", [], { ...DEFAULT_PROFILE, ableEligible: true, ...p });
+  it("SSA's example: Paul's ABLE account holds $101,000 and his checking $1,500; $2,500 counts, his SSI is suspended and Medicaid continues", () => {
+    const m = june({ ableBalance: 101_000, savings: 1_500 });
+    expect(m.resources).toMatchObject({ ableExcess: 1_000, other: 1_500, countable: 2_500, limit: 2_000, over: true, status: "able_suspension" });
+    expect(m.check).toBe(0);
+    expect(m.incomeCheck).toBe(994);
+  });
+  it("SSA's example: Christine's ABLE account holds $101,000 and her checking $3,000; her checking alone is over, so she is not eligible", () => {
+    const m = june({ ableBalance: 101_000, savings: 3_000 });
+    expect(m.resources).toMatchObject({ countable: 4_000, over: true, status: "excess" });
+    expect(m.check).toBe(0);
+  });
+  it("$100,000 in the account and $2,000 in savings is within the limit; a couple's limit is $3,000", () => {
+    expect(june({ ableBalance: 100_000, savings: 2_000 }).check).toBe(994);
+    expect(june({ ableBalance: 100_500, savings: 1_500 }).resources).toMatchObject({ countable: 2_000, over: false, status: "under" });
+    expect(june({ couple: true, savings: 2_500 }).check).toBe(1491);
+    expect(june({ couple: true, savings: 3_000.01 }).check).toBe(0);
+  });
+  it("an ABLE gift that takes the account past $100,000 counts the part over toward savings, and says so", () => {
+    const profile = { ...base, ableBalance: 99_950 };
+    const bill = evaluateGift(g({ date: "2026-11-10", amount: 138, delivery: "able", category: "utility", recurring: true }), profile);
+    expect(bill.resourcesAfter).toMatchObject({ ableBalance: 100_088, ableExcess: 88, countable: 1_328, over: false });
+    expect(bill.checkAfter).toBe(bill.checkBaseline);
+    expect(bill.ruleIds).toContain("R-ABLE-03");
+    expect(bill.explanation.plain).toContain("This gift takes it to $100,088, so $88 counts toward her savings, $1,328 in all on December 1, 2026. That is within the $2,000 limit");
+    const large = evaluateGift(g({ date: "2026-11-10", amount: 1_500, delivery: "able", category: "other" }), profile);
+    expect(large.resourcesAfter).toMatchObject({ ableExcess: 1_450, countable: 2_690, over: true, status: "able_suspension" });
+    expect(large.checkAfter).toBe(0);
+    expect(large.ruleIds).toEqual(expect.arrayContaining(["R-ABLE-01", "R-ABLE-03", "R-RES-01"]));
+    expect(large.alternatives.find((a) => a.delivery === "able")).toEqual({ delivery: "able", check: 0, possible: true, reason: "able_over_resource_limit" });
+    // Routed elsewhere: the item itself keeps the check.
+    expect([large.bestRoute, large.checkWithBestRoute]).toEqual(["item", 1029]);
+    expect(large.explanation.plain).toMatch(/over the \$2,000 limit because of the ABLE account, so SSI cash stops while it stays over, and Medicaid continues: her January 2027 check would be \$0\. Giving the item itself keeps her January 2027 check at \$1,029\./);
+  });
+  it("savings already over the limit: no SSI whatever the gift, and every answer says why", () => {
+    const r = evaluateGift(g({ delivery: "vendor", category: "equipment", amount: 420 }), { ...base, savings: 2_400 });
+    expect([r.checkBaseline, r.checkAfter]).toEqual([0, 0]);
+    expect(r.ruleIds).toContain("R-RES-01");
+    expect(r.explanation.plain).toMatch(/Her countable resources on May 1, 2026 are \$2,400\. That is over the \$2,000 limit, so no SSI is paid while it stays over\.$/);
+  });
+  it("cash she may keep is a warning on the 1st, as before: the check follows her income", () => {
+    const r = evaluateGift(g({}), base);
+    expect(r.checkAfter).toBe(74);
+    expect(r.trace.resources.over).toBe(false);
+    expect(resourceTest(base, "2026-05", 0, 1000)).toMatchObject({ countable: 2_240, over: true });
   });
 });
 

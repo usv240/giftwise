@@ -1,10 +1,10 @@
 {
-  "ran_at": "2026-11-09T09:48:45.683Z",
-  "ms": 695901,
+  "ran_at": "2026-11-09T12:44:34.310Z",
+  "ms": 957485,
   "seed": 20261104,
   "gifts": 100000,
   "dollars": 600819375.43,
-  "lines": 332149,
+  "lines": 330359,
   "results": [
     {
       "id": "to-the-cent",
@@ -33,6 +33,12 @@
     {
       "id": "able-limit",
       "promise": "ABLE deposits stay within the $20,000 yearly limit",
+      "kept": 100000,
+      "broken": 0
+    },
+    {
+      "id": "able-balance",
+      "promise": "ABLE deposits never take the account past $100,000, where they would count toward savings",
       "kept": 100000,
       "broken": 0
     },
