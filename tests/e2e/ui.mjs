@@ -20,6 +20,10 @@ const skip = (n) => console.log(`SKIP  ${n}  | ${SKIP_WHY}`);
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+// Each run reaches the app from an address of its own, so the daily limit on new gift pages for each client is counted
+// apart from earlier runs. Only requests to the app carry it; PayPal's own requests are left as they are.
+const RUN_FROM = `192.0.2.${1 + (Math.floor(Date.now() / 1000) % 254)}`;
+await ctx.route((url) => url.origin === new URL(B).origin, (route) => route.continue({ headers: { ...route.request().headers(), "x-forwarded-for": RUN_FROM } }));
 const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message.slice(0, 140)));
@@ -117,6 +121,14 @@ await page.getByRole("radio", { name: "Pay the shop" }).check();
 await page.getByText("The same person gives this every month").click();
 const v = await page.locator(".result-v").allTextContents();
 ok(`Try describe: monthly rent paid by family shows the lower check and the ABLE route ($${FULL.toLocaleString("en-US")})`, v.includes(`$${FULL.toLocaleString("en-US")}`), JSON.stringify(v));
+// A home given as itself (POMS SI 00835.400 F): counted at the presumed maximum value, the same answer the API gives for today.
+const homeToday = await priced({ amount: 40000, delivery: "item", category: "mortgage" });
+await page.getByLabel("Amount in dollars").fill("40000");
+await page.locator("select").selectOption("mortgage");
+await page.getByRole("radio", { name: "Give the item" }).check();
+await page.getByText("The same person gives this every month").click();
+const homeV = await page.locator(".result-v").allTextContents();
+ok(`Try describe: a home given as itself lowers her check to ${usdOf(homeToday.check_after)}, with no other route offered`, homeV.length === 1 && homeV[0] === usdOf(homeToday.check_after) && homeToday.check_after < FULL && /A home given outright/.test((await page.locator(".result-plain").textContent()) ?? ""), JSON.stringify(homeV));
 
 // 5. Try: month tab (CSV)
 await page.getByRole("tab", { name: "A month of gifts" }).click();

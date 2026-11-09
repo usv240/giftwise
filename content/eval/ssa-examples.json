@@ -1464,7 +1464,7 @@
     {
       "cite": "POMS SI 00830.520 C.3, SI 00815.550 C.2, SI 00835.310 E.3, SI 00835.400 F (Example 2), 20 CFR 416.1103(j) (Example 2)",
       "what": "A gift of the house she lives in",
-      "why": "A gift of real property is a resource question, separate from the gifts Giftwise routes."
+      "why": "Giftwise now follows this rule: a home given as itself counts as in-kind support in the month it is given, at no more than the presumed maximum value (R-SHEL-03). Three of these examples are scored in the second held-out set (content/eval/held-out-2.json)."
     },
     {
       "cite": "POMS SI 00830.522 C (4 examples)",
@@ -1479,12 +1479,12 @@
     {
       "cite": "POMS SI 00835.360 D.3",
       "what": "A co-owner paying mortgage arrears",
-      "why": "That payment is not a gift."
+      "why": "Giftwise now follows this rule: a co-owner's payment is not a gift, so it counts in each month it covers (R-SHEL-04). The example is scored in the second held-out set (content/eval/held-out-2.json)."
     },
     {
       "cite": "POMS SI 00835.380",
       "what": "Rent below market value from a parent or child",
-      "why": "A rental subsidy is a separate calculation from a gift."
+      "why": "Giftwise now follows this rule: the subsidy counted is the lesser of the market rent and the presumed maximum value, less the rent paid (R-SHEL-05). The example is scored in the second held-out set (content/eval/held-out-2.json)."
     },
     {
       "cite": "POMS SI 00835.474 (2 examples)",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PROFILE, RULES, computeMonth, evaluateGift, markInfrequency, planMonths, type Gift, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, RULES, computeMonth, evaluateGift, markInfrequency, planMonths, rentalSubsidy, type Gift, type Profile } from "@/lib/rules";
 
 const base: Profile = { ...DEFAULT_PROFILE, savings: 1240 };
 const g = (over: Partial<Gift>): Gift => ({ id: "t", date: "2026-04-10", amount: 1000, delivery: "cash", category: "other", ...over });
@@ -218,6 +218,88 @@ describe("R-SHEL-02: housing bills paid ahead (POMS SI 00835.360B, D.2)", () => 
     const [m] = planMonths([g({ date: "2026-05-10", amount: 300, delivery: "vendor", category: "rent", recurring: true })], profile).months;
     expect(m.month).toBe("2026-05");
     expect(m.ismValue).toBe(300);
+  });
+});
+
+describe("R-SHEL-03: housing given as itself (POMS SI 00835.400 B.2.c and F, SI 00835.310 B, SI 00815.550 C.2)", () => {
+  const profile = { ...base, savings: 0 };
+  const home = (over: Partial<Gift> = {}) => g({ date: "2026-06-15", amount: 40000, delivery: "item", category: "mortgage", giver: "parents", ...over });
+  it("parents deed her home to her: in-kind support at the presumed maximum value in June, none in July (SI 00835.400 F, Example 2)", () => {
+    const plan = planMonths([home()], profile);
+    expect(plan.months.map((m) => [m.month, m.ismValue])).toEqual([["2026-06", 351.33]]);
+    expect(computeMonth("2026-07", [home()], profile).ismValue).toBe(0);
+    const r = evaluateGift(home(), profile);
+    expect(r.treatment.kind).toBe("ism_shelter");
+    expect(r.ruleIds).toEqual(["R-SHEL-03", "R-GIE-01"]);
+    expect(r.sourceKeys).toEqual(expect.arrayContaining(["poms-si-00835-400", "poms-si-00815-550"]));
+    // 994 less the presumed maximum value after the $20 general exclusion, in the August check.
+    expect(r.checkAfter).toBe(662.67);
+    expect(r.paymentMonth).toBe("2026-08");
+  });
+  it("her son gives her the home she lives in: the gift's value is capped at the presumed maximum value (SI 00815.550 C.2)", () => {
+    const [mar] = planMonths([home({ date: "2026-03-10", giver: "son" })], profile).months;
+    expect(mar.month).toBe("2026-03");
+    expect(mar.ismValue).toBe(351.33);
+  });
+  it("a home given as itself has no other route: it is not money to pay a shop or an ABLE account", () => {
+    const r = evaluateGift(home(), profile);
+    expect(r.alternatives.filter((a) => a.possible).map((a) => a.delivery)).toEqual(["item"]);
+    expect(r.bestRoute).toBe("item");
+    expect(r.explanation.plain).toMatch(/^A home given outright counts as housing support in the month it is given, valued at no more than \$351\.33/);
+  });
+  it("other housing given as itself counts too, and the item route stays closed for a housing bill paid by someone else", () => {
+    expect(evaluateGift(g({ delivery: "item", category: "rent", amount: 300, recurring: true }), profile).checkAfter).toBe(714);
+    expect(evaluateGift(g({ delivery: "item", category: "utility", amount: 90, recurring: true }), profile).ruleIds).toContain("R-SHEL-03");
+    const bill = evaluateGift(g({ delivery: "vendor", category: "rent", amount: 300, recurring: true }), profile);
+    expect(bill.alternatives.find((a) => a.delivery === "item")).toEqual({ delivery: "item", check: 0, possible: false, reason: "shelter_is_not_an_item" });
+  });
+});
+
+describe("R-SHEL-04: housing bills paid by a co-owner (POMS SI 00835.360 D.3, SI 00835.310 B)", () => {
+  const profile = { ...base, savings: 0 };
+  // Warren's sibling co-owns the house and pays six months of arrears at $200 plus February and March, $1,600, on February 28.
+  const arrears = (over: Partial<Gift> = {}) =>
+    g({ date: "2026-02-28", amount: 1600, delivery: "vendor", category: "mortgage", giver: "sibling (co-owner)", covers: { from: "2025-08", to: "2026-03" }, payerCoOwns: true, ...over });
+  it("each month from August through March counts $200, six past months, the current month and the next", () => {
+    const plan = planMonths([arrears()], profile);
+    expect(plan.months.map((m) => m.month)).toEqual(["2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03"]);
+    expect(plan.months.every((m) => m.ismValue === 200)).toBe(true);
+    // Received in eight months in a row, so none of it is one-off income.
+    expect(plan.months.every((m) => m.infrequentExcluded === 0)).toBe(true);
+    const r = evaluateGift(arrears(), profile);
+    expect(r.ruleIds).toEqual(["R-SHEL-01", "R-GIE-01", "R-SHEL-04"]);
+    expect(r.checkAfter).toBe(814);
+  });
+  it("the same payment as a gift from someone who does not own the home counts the past months when it is paid (SI 00835.360 B.1, D.2)", () => {
+    const plan = planMonths([arrears({ payerCoOwns: undefined, giver: "sibling" })], profile);
+    expect(plan.months.map((m) => [m.month, m.ismValue])).toEqual([["2026-02", 351.33], ["2026-03", 200]]);
+    expect(evaluateGift(arrears({ payerCoOwns: undefined }), profile).ruleIds).toContain("R-SHEL-02");
+  });
+});
+
+describe("R-SHEL-05: rent below market from a parent or child (POMS SI 00835.380 A.2, D; 89 FR 25507)", () => {
+  const profile = { ...base, savings: 0 };
+  // She pays $280 required rent; her child, the landlord, states a current market rental value of $410.
+  const rent = (over: Partial<Gift> = {}) => g({ date: "2026-10-01", amount: 130, delivery: "vendor", category: "rent", giver: "child (landlord)", recurring: true, rentPaid: 280, ...over });
+  it("SSA's own figures: the presumed maximum value ($334.33 in 2024) is below the market rent, so the subsidy is $334.33 less $280, $54.33", () => {
+    expect(rentalSubsidy(410 - 280, 280, 334.33)).toBe(54.33);
+  });
+  it("at 2026 amounts the subsidy is $351.33 less $280, $71.33, counted in October", () => {
+    const [oct] = planMonths([rent()], profile).months;
+    expect(oct.ismValue).toBe(71.33);
+    const r = evaluateGift(rent(), profile);
+    expect(r.ruleIds).toEqual(["R-SHEL-05", "R-GIE-01"]);
+    expect(r.checkAfter).toBe(942.67);
+  });
+  it("a market rent below the presumed maximum value counts the market rent less the rent paid", () => {
+    expect(rentalSubsidy(100, 200, 351.33)).toBe(100);
+  });
+  it("rent at or above the presumed maximum value is a business arrangement: nothing is counted", () => {
+    expect(rentalSubsidy(100, 360, 351.33)).toBe(0);
+    expect(evaluateGift(rent({ amount: 100, rentPaid: 360 }), profile).checkAfter).toBe(994);
+  });
+  it("in another's household that provides all meals the one-third reduction applies instead (SI 00835.380 B)", () => {
+    expect(evaluateGift(rent(), { ...profile, livesInAnothersHousehold: true }).ruleIds).toEqual(["R-SHEL-VTR"]);
   });
 });
 

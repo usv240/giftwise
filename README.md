@@ -13,7 +13,7 @@ docker compose up -d          # Postgres 17
 cp .env.example .env.local    # PayPal sandbox keys, payee accounts, ANTHROPIC_API_KEY, DATABASE_URL (TESTING.md names each)
 npm run db:push               # create the tables; Maya's sample page is seeded the first time /g/maya opens
 npm run dev -- -p 3100        # http://localhost:3100
-npm test                      # a fresh clone with no .env.local: 300 pass and 6 skip (6 need a database); when .env.local names a reachable database: 306 of 306, no keys needed
+npm test                      # a fresh clone with no .env.local: 320 pass and 6 skip (6 need a database); when .env.local names a reachable database: 326 of 326, no keys needed
 ```
 
 `npm test` needs no keys: tests that need Postgres skip with the reason in their names; no test calls Claude or PayPal. [TESTING.md](TESTING.md) explains every variable and suite; `npm run checks:local` runs the same 25 outside checks as the nightly Render Workflow ([`render.yaml`](render.yaml)).
@@ -27,7 +27,7 @@ npm test                      # a fresh clone with no .env.local: 300 pass and 6
 | help from family was counted against the person in all 14 real SSI court cases; routed through Giftwise, the same help keeps this in 4 of the 14 as the opinions state the facts, and keeps money in all 10 with stated amounts if the person can open an ABLE account; two families, **$38,103.32** over the 41 and 37 months their cases cover: the engine's counterfactual, not an observed outcome ([`/evidence/impact#kept`](https://giftwise-405i.onrender.com/evidence/impact#kept)) | of Social Security's own worked examples match SSA's answer; Claude with no rulebook, 32 of 40 ([`/evidence/ssa-examples`](https://giftwise-405i.onrender.com/evidence/ssa-examples)) | gifts that would lower the check were let through, over every case whose right answer is known ([`/evidence/rules#errors`](https://giftwise-405i.onrender.com/evidence/rules#errors)) |
 
 - **4 of 5 examples the engine never saw**, from SSA's manual, run once on the engine frozen at commit `3f3ea60`; the one that differs is a gift certificate SSA does not count. The first run matched 1 of 5; two expected answers were then corrected to SSA's text, each with its reason in `content/eval/held-out.json`.
-- **1 of 5 in a second set written before its run** (`content/eval/held-out-2.json`, git blob `715607f`, engine frozen at `c5e94eb`); the others name three rules to add ([docs/results.md](docs/results.md)).
+- **1 of 5 in a second set written before its run** (`content/eval/held-out-2.json`, git blob `715607f`, engine frozen at `c5e94eb`); the rules it showed are now in the engine ([docs/results.md](docs/results.md)).
 - **14 of 14 real SSI cases from federal courts** reach the outcome SSA and the court did.
 - **59 of 59 labeled bills** routed so the check stays whole, 52 clear and 7 contested; Claude with no rulebook, 56 of 59; each reviewer alone, 59 and 58 of 59.
 - **100,000 random gifts, every promise kept**: every cent placed, her check whole, ABLE within its limit.
@@ -40,8 +40,8 @@ Case by case: [docs/results.md](docs/results.md), [`/evidence/rules`](https://gi
 
 | | Open | Then run |
 |---|---|---|
-| What it uses and how | [`src/lib/paypal/gift-order.ts`](src/lib/paypal/gift-order.ts), one order with a payee per purchase unit; [`src/lib/paypal/capture.ts`](src/lib/paypal/capture.ts), captured once under one `PayPal-Request-Id` | `npm run e2e:api`, 99 of 99; `npm run e2e:paypal`, 14 of 14 (sandbox keys), each with a redacted transcript of every order and capture ([`/evidence/operations#transcripts`](https://giftwise-405i.onrender.com/evidence/operations#transcripts)) |
-| A complete product | [`/g/maya`](https://giftwise-405i.onrender.com/g/maya) to [the month's report](https://giftwise-405i.onrender.com/g/maya/report?month=2026-10); the [organizer's page](https://giftwise-405i.onrender.com/manage/maya-sample-organizer) | `npm run e2e:ui`, 65 of 65 (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers); `npm run e2e:a11y`, 140 of 140 page views |
+| What it uses and how | [`src/lib/paypal/gift-order.ts`](src/lib/paypal/gift-order.ts), one order with a payee per purchase unit; [`src/lib/paypal/capture.ts`](src/lib/paypal/capture.ts), captured once under one `PayPal-Request-Id` | `npm run e2e:api`, 108 of 108; `npm run e2e:paypal`, 14 of 14 (sandbox keys), each with a redacted transcript of every order and capture ([`/evidence/operations#transcripts`](https://giftwise-405i.onrender.com/evidence/operations#transcripts)) |
+| A complete product | [`/g/maya`](https://giftwise-405i.onrender.com/g/maya) to [the month's report](https://giftwise-405i.onrender.com/g/maya/report?month=2026-10); the [organizer's page](https://giftwise-405i.onrender.com/manage/maya-sample-organizer) | `npm run e2e:ui`, 66 of 66 (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers); `npm run e2e:a11y`, 140 of 140 page views |
 | Who it helps and the evidence | [`src/lib/impact.ts`](src/lib/impact.ts) and [`src/lib/research.ts`](src/lib/research.ts); [`/evidence/impact`](https://giftwise-405i.onrender.com/evidence/impact) | `tests/docs-numbers.test.ts`; `tests/research.test.ts` |
 | What is new | [`src/lib/review/referee.ts`](src/lib/review/referee.ts), [`src/lib/report/verify.ts`](src/lib/report/verify.ts); [`/evidence/impact#compare`](https://giftwise-405i.onrender.com/evidence/impact#compare) | `tests/referee.test.ts`; `tests/verify.test.ts` |
 

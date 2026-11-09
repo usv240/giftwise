@@ -1,10 +1,19 @@
 import { z } from "zod";
 
-export const DeliverySchema = z.enum(["cash", "vendor", "item", "able"]).describe("How the gift reaches her: cash to her, paid to a vendor, the item itself, or her ABLE account.");
+export const DeliverySchema = z
+  .enum(["cash", "vendor", "item", "able"])
+  .describe("How the gift reaches her: cash to her, paid to a vendor, the item itself, or her ABLE account. A home given outright is item, with category mortgage.");
 
 export const CategorySchema = z
   .enum(["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "event", "other"])
   .describe("What the money is for. Rent, mortgage, property tax and utilities are housing (shelter). event means tickets to a game, show or other event; a birthday or holiday gift of money is other.");
+
+const MonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+
+export const CoversSchema = z
+  .object({ from: MonthSchema.describe("First month covered, YYYY-MM."), to: MonthSchema.describe("Last month covered, YYYY-MM.") })
+  .refine((c) => c.from <= c.to, { message: "from must be the same month as to or earlier." })
+  .describe("For a housing bill paid ahead or behind: the months it covers. A gift's share for months up to the payment counts when it is paid, and each later month's share in that month (POMS SI 00835.360 D.2).");
 
 export const GiftSchema = z.object({
   amount: z.number().min(0).max(100000).describe("Gift amount in US dollars."),
@@ -22,6 +31,17 @@ export const GiftSchema = z.object({
     .optional()
     .describe("Who gives it, for example a first name. In a list of gifts, two gifts from the same giver in one quarter (or the months either side) are not one-off, so neither gets the $60 exclusion."),
   label: z.string().max(120).optional().describe("A short name for the gift, such as Wheelchair repair. It comes back with the answer and does not change the math."),
+  covers: CoversSchema.optional(),
+  payerCoOwns: z
+    .boolean()
+    .optional()
+    .describe("True when the person paying a housing bill co-owns the home. The payment is not a gift, so with covers each month's share counts in that month, past months included (POMS SI 00835.360 D.3)."),
+  rentPaid: z
+    .number()
+    .min(0)
+    .max(100000)
+    .optional()
+    .describe("For rent below market from a landlord who is her parent or child: the monthly rent she pays, with category rent and amount the market rent less that rent. The subsidy counted is the lesser of the market rent and the presumed maximum value, less this rent (POMS SI 00835.380)."),
 });
 
 export const ProfileSchema = z

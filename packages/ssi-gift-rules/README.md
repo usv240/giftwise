@@ -45,6 +45,9 @@ Each rule has an id, a plain sentence and its sources in `RULES`:
 | R-VEND-01 | Paying a business directly for something other than shelter is not income | 20 CFR 416.1103(g), POMS SI 00815.400 |
 | R-SHEL-01, R-SHEL-VTR | Shelter paid by someone else is in-kind support, up to the monthly cap, or the one-third reduction when the person lives in another's household that also provides all meals | 20 CFR 416.1130, 416.1131, POMS SI 00835.020 to .901 |
 | R-SHEL-02 | A prepaid housing bill counts in the months it covers (set `covers` on the gift) | POMS SI 00835.360 |
+| R-SHEL-03 | A home or other shelter given as itself (`delivery: "item"`; a home is category `mortgage`) counts in the month received, up to the monthly cap | POMS SI 00835.400, SI 00835.310, SI 00815.550 |
+| R-SHEL-04 | A co-owner's payment is not a gift: each month it covers counts in that month, past months included (set `payerCoOwns` with `covers`) | POMS SI 00835.360 D.3 |
+| R-SHEL-05 | Rent below market from a parent or child: the lesser of market rent and the cap, less the rent paid (set `rentPaid`; `amount` is market rent less that rent) | POMS SI 00835.380, 89 FR 25507 |
 | R-FOOD-01 | Food stopped counting on September 30, 2024 | 89 FR 21199 |
 | R-ITEM-01, R-ITEM-02 | A gifted item for personal or household use is not income; event tickets are | 20 CFR 416.1103(g), POMS SI 01130.430, SI 00830.520 |
 | R-EDU-01 | Gifts used for tuition, books and school costs are not income | POMS SI 00830.455 |

@@ -21,6 +21,21 @@ for (const [label, gift, expect] of [
   const j = await r.json();
   ok(`check-gift ${label}`, r.status === 200 && j.data?.check_after === expect, `got ${j.data?.check_after}`);
 }
+// check-gift: the three housing rules (R-SHEL-03, R-SHEL-04, R-SHEL-05), with the facts of SSA's own examples. They
+// come from their own documentation address, so the demo tier's 20 a minute is counted apart from the rest of the suite.
+{
+  const own = { "Content-Type": "application/json", "x-forwarded-for": "203.0.113.41" };
+  const home = await (await post("/api/v1/check-gift", { gift: { amount: 40000, delivery: "item", category: "mortgage", date: "2026-06-15" } }, own)).json();
+  ok("check-gift a home given as itself counts at the presumed maximum value -> $662.67 (POMS SI 00835.400 F)", home.data?.check_after === 662.67 && home.data?.rule_ids?.includes("R-SHEL-03") && home.data?.best_route === "item", `got ${home.data?.check_after} ${home.data?.rule_ids}`);
+  const coOwner = await (await post("/api/v1/check-gift", { gift: { amount: 1600, delivery: "vendor", category: "mortgage", date: "2026-02-28", covers: { from: "2025-08", to: "2026-03" }, payerCoOwns: true } }, own)).json();
+  ok("check-gift a co-owner's $1,600 for eight months counts $200 in February -> $814 (POMS SI 00835.360 D.3)", coOwner.data?.trace?.ismValue === 200 && coOwner.data?.check_after === 814 && coOwner.data?.rule_ids?.includes("R-SHEL-04"), `got ${coOwner.data?.trace?.ismValue} ${coOwner.data?.check_after}`);
+  const subsidy = await (await post("/api/v1/check-gift", { gift: { amount: 130, delivery: "vendor", category: "rent", recurring: true, rentPaid: 280, date: "2026-10-01" } }, own)).json();
+  ok("check-gift rent $130 below market from a child, $280 paid, counts $71.33 (POMS SI 00835.380 D)", subsidy.data?.trace?.ismValue === 71.33 && subsidy.data?.rule_ids?.includes("R-SHEL-05"), `got ${subsidy.data?.trace?.ismValue}`);
+  const plan = await (await post("/api/v1/plan-month", { gifts: [{ amount: 1600, delivery: "vendor", category: "mortgage", date: "2026-02-28", covers: { from: "2025-08", to: "2026-03" }, payerCoOwns: true }] }, own)).json();
+  ok("plan-month values a co-owner's payment in each of the eight months it covers", plan.data?.months?.length === 8 && plan.data.months.every((m) => m.ismValue === 200), `${plan.data?.months?.map((m) => m.ismValue)}`);
+  const backwards = await post("/api/v1/check-gift", { gift: { amount: 100, delivery: "vendor", category: "rent", covers: { from: "2026-05", to: "2026-03" } } }, own);
+  ok("check-gift covers that end before they start -> 400", backwards.status === 400);
+}
 const env = await (await post("/api/v1/check-gift", { gift: { amount: 50, delivery: "cash" } })).json();
 ok("check-gift envelope has meta.request_id, rules_version, citations with urls", Boolean(env.meta?.request_id && env.meta?.rules_version && env.data?.citations?.every((c) => c.url)));
 ok("check-gift default date (today) works", env.data?.income_month?.length === 7);
@@ -90,8 +105,11 @@ r = await fetch(B + "/openapi.json");
 j = await r.json();
 ok("openapi lists review-bill with its request schema", Boolean(j.paths?.["/api/v1/review-bill"]?.post?.requestBody));
 
-// Gift pages from a list of needs: the engine picks each route, and the page uses the chosen pronouns
-r = await post("/api/v1/gift-pages", { name: "Jordan", pronoun: "they", organizer: "E2E", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] });
+// Gift pages from a list of needs: the engine picks each route, and the page uses the chosen pronouns. Each run makes
+// its pages and its key from an address of its own, so the daily limits on new pages and keys for each client are
+// counted apart from earlier runs.
+const runFrom = { "Content-Type": "application/json", "x-forwarded-for": `203.0.113.${1 + (Math.floor(Date.now() / 1000) % 254)}` };
+r = await post("/api/v1/gift-pages", { name: "Jordan", pronoun: "they", organizer: "E2E", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] }, runFrom);
 j = await r.json();
 ok(`gift-pages: the lift is paid straight to the shop, rent goes to the ABLE account, check stays $${FULL}`, r.status === 200 && j.data.needs[0].route === "vendor" && j.data.needs[1].route === "able" && j.data.needs.every((n) => n.check_after === FULL), `${r.status} ${JSON.stringify(j.data?.needs?.map((n) => n.route))}`);
 if (j.data?.url) {
@@ -99,6 +117,11 @@ if (j.data?.url) {
   const text = ((await r.text()).match(/<body[\s\S]*<\/body>/)?.[0] ?? "").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ");
   ok("the new page reads Help Jordan and uses their, never her or she", r.status === 200 && text.includes("Help Jordan") && /\btheir\b/.test(text) && !/\b(her|she)\b/i.test(text));
 }
+// A page whose one need is toward the home her parents are giving her: plan_gift (below) sends it to the ABLE account.
+r = await post("/api/v1/gift-pages", { name: "Martha", pronoun: "she", organizer: "E2E", needs: [{ title: "Closing costs on the home her parents give her", amount: 1500, category: "mortgage" }] }, runFrom);
+j = await r.json();
+const homeSlug = j.data?.slug ?? null;
+ok("gift-pages: a need toward a home goes to the ABLE account", r.status === 200 && j.data?.needs?.[0]?.route === "able" && j.data.needs[0].check_after === FULL, `${r.status} ${JSON.stringify(j.data?.needs?.map((n) => n.route))}`);
 r = await post("/api/v1/gift-pages", { name: "<b>x</b>", pronoun: "she", needs: [{ title: "Chair", amount: 50, category: "equipment" }] });
 ok("gift-pages rejects a name that is not letters", r.status === 400, `${r.status}`);
 
@@ -152,7 +175,7 @@ j = await r.json();
 ok("ledger verifies end to end", r.status === 200 && j.data?.ok === true, `${j.data?.count} entries`);
 
 // Developer keys: create, use, usage, rotate, revoke
-r = await post("/api/keys", { name: "E2E", email: `e2e-${Date.now()}@example.com`, purpose: "tests", accept: true });
+r = await post("/api/keys", { name: "E2E", email: `e2e-${Date.now()}@example.com`, purpose: "tests", accept: true }, runFrom);
 j = await r.json();
 const cookie = (r.headers.get("set-cookie") ?? "").split(";")[0];
 const key = j.data?.key ?? "";
@@ -256,6 +279,17 @@ ok(`MCP start_monthly_gift returns the giver's page, nothing charged, check stay
 r = await mcp("tools/call", { name: "plan_gift", arguments: { slug: "maya", amount: 500 } });
 j = await r.json();
 ok(`MCP plan_gift splits $500 so her check stays $${FULL} (cash would be $${FULL - 420})`, j.result?.structuredContent?.check_with_giftwise === FULL && j.result?.structuredContent?.check_if_cash === FULL - 420, j.result?.content?.[0]?.text?.slice(0, 80));
+r = await mcp("tools/call", { name: "check_gift", arguments: { amount: 40000, delivery: "item", category: "mortgage", date: "2026-03-10" } });
+j = await r.json();
+ok("MCP check_gift counts a home given as itself at the presumed maximum value -> $662.67 (POMS SI 00815.550 C.2)", j.result?.structuredContent?.check_after === 662.67 && j.result.structuredContent.rule_ids?.includes("R-SHEL-03"), j.result?.content?.[0]?.text?.slice(0, 100));
+r = await mcp("tools/call", { name: "check_gift", arguments: { amount: 130, delivery: "vendor", category: "rent", recurring: true, rent_paid: 280, date: "2026-10-01" } });
+j = await r.json();
+ok("MCP check_gift values rent below market from a child as $351.33 less the $280 paid -> $942.67", j.result?.structuredContent?.check_after === 942.67 && j.result.structuredContent.rule_ids?.includes("R-SHEL-05"), j.result?.content?.[0]?.text?.slice(0, 100));
+if (homeSlug) {
+  r = await mcp("tools/call", { name: "plan_gift", arguments: { slug: homeSlug, amount: 1500 } });
+  j = await r.json();
+  ok(`MCP plan_gift puts $1,500 toward her home through the ABLE account, check stays $${FULL}`, j.result?.structuredContent?.check_with_giftwise === FULL && j.result.structuredContent.check_if_cash < FULL && j.result.structuredContent.lines?.every((l) => /ABLE/.test(l.paid_to)), JSON.stringify(j.result?.structuredContent?.lines ?? j.error ?? j).slice(0, 120));
+} else ok("MCP plan_gift on the home page (the page was not created)", false);
 r = await mcp("tools/call", { name: "get_ssa_report", arguments: { slug: "maya", month: "2026-10" } });
 j = await r.json();
 ok("MCP get_ssa_report: October needs no income report, due November 10", j.result?.structuredContent?.status === "nothing_counts" && j.result?.structuredContent?.due?.date === "2026-11-10" && /Nothing here counts as income/.test(j.result?.content?.[0]?.text ?? ""), j.result?.content?.[0]?.text?.slice(0, 80));
@@ -279,7 +313,8 @@ ok("org payouts to an unknown page -> 422", r.status === 422, `${r.status}`);
 r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }], preview: true });
 j = await r.json();
 ok(`org payouts preview routes a $10 grant and keeps the check at $${FULL}`, r.status === 200 && j.data.preview === true && j.data.items.length >= 1 && j.data.households[0].checkWithGrant === FULL, JSON.stringify(j.data?.items?.map((i) => i.payeeName)));
-r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }] });
+// Sent from the run's own address (runFrom, above), so the three sandbox batches a day each visitor may send are counted apart.
+r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }] }, runFrom);
 j = await r.json();
 const payoutBatch = j.data?.batch_id;
 ok("org payouts sends one PayPal Payouts batch", r.status === 200 && /^[A-Z0-9]{8,30}$/.test(payoutBatch ?? ""), `${r.status} ${payoutBatch ?? j.error?.message}`);

@@ -88,27 +88,12 @@ export function classify(gift: Gift, profile: Profile): Treatment {
   if (category === "event" && (delivery === "item" || delivery === "vendor")) {
     return { kind: "unearned_in_kind", ruleIds: ["R-ITEM-02", "R-GIE-01", "R-RMA-01"], infrequentEligible: !gift.recurring, ambiguous: false };
   }
+  // Housing that reaches her in kind, paid to the landlord or lender or given as itself, is in-kind support either way.
+  if ((delivery === "item" || delivery === "vendor") && isShelter(category)) return shelterTreatment(gift, profile);
   if (delivery === "item") {
-    if (isShelter(category)) {
-      return { kind: "not_possible", ruleIds: ["R-SHEL-01"], infrequentEligible: false, ambiguous: false, note: "shelter_is_not_an_item" };
-    }
     return { kind: "excluded", ruleIds: ["R-ITEM-01"], infrequentEligible: false, ambiguous: false };
   }
   if (delivery === "vendor") {
-    if (isShelter(category)) {
-      const base = vtrHousehold(profile) ? ["R-SHEL-VTR"] : ["R-SHEL-01", "R-GIE-01"];
-      return {
-        kind: "ism_shelter",
-        ruleIds: gift.covers ? [...base, "R-SHEL-02"] : base,
-        // A prepaid bill that covers later months is received in consecutive months, so it is not infrequent (SI 00810.410A.1).
-        infrequentEligible: !gift.recurring && !coversLaterMonths(gift),
-        ambiguous: true,
-        ambiguityReason:
-          category === "utility"
-            ? "Utilities paid by someone else count as housing support. Two reviewers check whether this bill is a utility."
-            : "Housing paid by someone else counts as in-kind support.",
-      };
-    }
     if (category === "food") return { kind: "excluded", ruleIds: ["R-FOOD-01", "R-VEND-01"], infrequentEligible: false, ambiguous: false };
     if (category === "education") return { kind: "excluded", ruleIds: ["R-VEND-01", "R-EDU-01"], infrequentEligible: false, ambiguous: false };
     return { kind: "excluded", ruleIds: ["R-VEND-01"], infrequentEligible: false, ambiguous: false };
@@ -125,6 +110,55 @@ export function classify(gift: Gift, profile: Profile): Treatment {
   };
 }
 
+/**
+ * Housing paid to the landlord or lender (vendor) or given as itself (item), under the rule that values it:
+ *   R-SHEL-01  housing costs paid by someone else, up to the presumed maximum value;
+ *   R-SHEL-03  a home or other shelter given as itself, counted in the month received (POMS SI 00835.400 B.2.c,
+ *              SI 00835.310 B, SI 00815.550 C.2);
+ *   R-SHEL-05  rent below market from a parent or child, the rental subsidy (POMS SI 00835.380 D);
+ *   R-SHEL-VTR in place of all three when she lives in another's household that also provides all meals.
+ * With `covers`, the months a bill puts value in follow R-SHEL-02, or R-SHEL-04 when the payer co-owns the home.
+ */
+function shelterTreatment(gift: Gift, profile: Profile): Treatment {
+  const asItself = gift.delivery === "item";
+  // The rental subsidy is developed only where the one-third reduction does not apply (SI 00835.380 B).
+  const subsidy = isRentalSubsidy(gift) && !vtrHousehold(profile);
+  const rule = subsidy ? "R-SHEL-05" : asItself ? "R-SHEL-03" : "R-SHEL-01";
+  const base = vtrHousehold(profile) ? (asItself ? ["R-SHEL-03", "R-SHEL-VTR"] : ["R-SHEL-VTR"]) : [rule, "R-GIE-01"];
+  const timing = gift.covers && gift.delivery === "vendor" ? [coOwnerCovers(gift) ? "R-SHEL-04" : "R-SHEL-02"] : [];
+  const reason = subsidy
+    ? "Rent below market from a parent or child counts as in-kind support. SSA asks the landlord for the rent and the market rent."
+    : coOwnerCovers(gift)
+      ? "A co-owner's payment counts as in-kind support in each month it covers."
+      : asItself && gift.category === "mortgage"
+        ? "A home counts this way when it is lived in. A home given outright and not lived in counts at its full value instead."
+        : asItself
+          ? "Housing given as itself counts as in-kind support."
+          : gift.category === "utility"
+            ? "Utilities paid by someone else count as housing support. Two reviewers check whether this bill is a utility."
+            : "Housing paid by someone else counts as in-kind support.";
+  return {
+    kind: "ism_shelter",
+    ruleIds: [...base, ...timing],
+    // A bill that puts value in more than one month is received in consecutive months, so it is not infrequent (SI 00810.410A.1).
+    infrequentEligible: !gift.recurring && !coversLaterMonths(gift) && !(coOwnerCovers(gift) && monthsBetween(gift.covers!.from, gift.covers!.to) > 1),
+    ambiguous: true,
+    ambiguityReason: reason,
+  };
+}
+
+/** Rent below market from a landlord who is her parent or child, entered as the market rent less the rent she pays. */
+export const isRentalSubsidy = (g: Gift) => g.category === "rent" && typeof g.rentPaid === "number" && (g.delivery === "vendor" || g.delivery === "item");
+
+/**
+ * The rental subsidy in a month: the lesser of the market rent and the presumed maximum value, less the rent she pays,
+ * and none once her rent reaches either (POMS SI 00835.380 A.2 and D.1; 89 FR 25507). `difference` is the market rent
+ * less her rent, the gift as entered.
+ */
+export function rentalSubsidy(difference: number, rentPaid: number, cap: number): number {
+  return round2(Math.max(0, Math.min(difference + rentPaid, cap) - rentPaid));
+}
+
 const monthsBetween = (from: string, to: string) => {
   const [fy, fm] = from.split("-").map(Number);
   const [ty, tm] = to.split("-").map(Number);
@@ -134,16 +168,33 @@ const monthsBetween = (from: string, to: string) => {
 /** True when a housing bill covers months after the month it was paid. */
 export const coversLaterMonths = (g: Gift) => Boolean(g.covers && g.covers.to > monthOf(g.date));
 
+/** True when a co-owner of the home pays a housing bill that covers stated months (POMS SI 00835.360 D.3). */
+export const coOwnerCovers = (g: Gift) => Boolean(g.payerCoOwns && g.covers && g.delivery === "vendor" && isShelter(g.category));
+
+/**
+ * The months other than the payment month a gift can put value in: a bill's later months (R-SHEL-02), or every month
+ * a co-owner's payment covers, earlier ones included (R-SHEL-04).
+ */
+export function otherMonths(g: Gift): string[] {
+  if (!g.covers || !(coOwnerCovers(g) || coversLaterMonths(g))) return [];
+  const paid = monthOf(g.date);
+  const out: string[] = [];
+  for (let m = coOwnerCovers(g) ? g.covers.from : addMonths(paid, 1); m <= g.covers.to; m = addMonths(m, 1)) if (m !== paid) out.push(m);
+  return out;
+}
+
 /**
  * The part of a gift that counts in a month. A housing bill paid for past, current and future months counts its
  * share for every month up to the payment month in the payment month, and each later month's share in that month
- * (POMS SI 00835.360B and D.2). Everything else counts in full in the month it is given.
+ * (POMS SI 00835.360B and D.2). A co-owner's payment is not a gift, so each month's share counts in that month, past
+ * months included (SI 00835.360 D.3, SI 00835.310 B). Everything else counts in full in the month it is given.
  */
 export function amountInMonth(g: Gift, month: string): number {
   const paid = monthOf(g.date);
   if (!g.covers || g.delivery !== "vendor" || !isShelter(g.category)) return paid === month ? g.amount : 0;
   const { from, to } = g.covers;
   const share = g.amount / monthsBetween(from, to);
+  if (coOwnerCovers(g)) return month >= from && month <= to ? share : 0;
   if (month === paid) return monthsBetween(from, paid < to ? paid : to) * share * (paid >= from ? 1 : 0);
   return month > paid && month >= from && month <= to ? share : 0;
 }
@@ -158,15 +209,20 @@ export function amountInMonth(g: Gift, month: string): number {
  */
 export function computeMonth(month: string, gifts: Gift[], profile: Profile, quarterAllowanceUsed = 0): MonthTrace {
   const couple = profile.couple;
+  const payMonth = addMonths(month, P.rmaLagMonths);
+  const cap = pmv(couple, payMonth);
   let cashIncome = 0;
   let inKind = 0;
   let shelterPaid = 0;
   const items: { date: string; amount: number; shelter: boolean; infrequent: boolean }[] = [];
 
   for (const g of gifts) {
-    const amount = amountInMonth(g, month);
-    if (amount <= 0) continue;
+    const inMonth = amountInMonth(g, month);
+    if (inMonth <= 0) continue;
     const t = classify(g, profile);
+    // A rental subsidy is valued against the presumed maximum value for this month's check (R-SHEL-05).
+    const amount = t.ruleIds.includes("R-SHEL-05") ? rentalSubsidy(inMonth, g.rentPaid!, cap) : inMonth;
+    if (amount <= 0) continue;
     if (t.kind === "unearned_cash") cashIncome += amount;
     else if (t.kind === "unearned_in_kind") inKind += amount;
     else if (t.kind === "ism_shelter") shelterPaid += amount;
@@ -175,8 +231,6 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
   }
 
   const vtrApplied = vtrHousehold(profile) && shelterPaid > 0;
-  const payMonth = addMonths(month, P.rmaLagMonths);
-  const cap = pmv(couple, payMonth);
   const ismValue = shelterPaid > 0 && !vtrApplied ? Math.min(shelterPaid, cap) : 0;
 
   // No exclusion applies to the one-third reduction (SI 00835.200A.6), so housing help under it takes none of the allowance.
@@ -226,6 +280,9 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
 
 const ROUTE_ORDER: Delivery[] = ["vendor", "item", "able", "cash"];
 
+/** A home given outright, entered as an item in the mortgage category: the home itself is the gift (R-SHEL-03). */
+export const isHomeGiven = (g: Gift) => g.delivery === "item" && g.category === "mortgage";
+
 function routesFor(gift: Gift, profile: Profile) {
   return ROUTE_ORDER.map((delivery) => {
     const alt: Gift = { ...gift, delivery };
@@ -233,7 +290,16 @@ function routesFor(gift: Gift, profile: Profile) {
     if (t.kind === "not_possible") {
       return { delivery, check: 0, possible: false, reason: t.note };
     }
-    if (delivery === "item" && !["equipment", "personal", "clothing", "medical", "education", "other", "phone", "internet", "transport", "event"].includes(gift.category)) {
+    // A home given as itself has no other way to arrive: it is not money that could be paid to a shop or an ABLE account.
+    if (isHomeGiven(gift) && delivery !== "item") {
+      return { delivery, check: 0, possible: false, reason: "a_home_is_given_as_itself" };
+    }
+    // Housing given as itself is a route only for the gift that arrived that way; a housing bill is not an item to give.
+    if (delivery === "item" && isShelter(gift.category) && gift.delivery !== "item") {
+      return { delivery, check: 0, possible: false, reason: "shelter_is_not_an_item" };
+    }
+    const asGiven = delivery === "item" && gift.delivery === "item" && isShelter(gift.category);
+    if (delivery === "item" && !asGiven && !["equipment", "personal", "clothing", "medical", "education", "other", "phone", "internet", "transport", "event"].includes(gift.category)) {
       return { delivery, check: 0, possible: false, reason: "no_item_for_category" };
     }
     if (delivery === "vendor" && gift.category === "other") {
@@ -287,12 +353,7 @@ export function evaluateGift(gift: Gift, profile: Profile = DEFAULT_PROFILE): Gi
 
 /** Plan a whole month (or several) of gifts, applying the quarterly exclusion across them in date order. */
 export function planMonths(gifts: Gift[], profile: Profile = DEFAULT_PROFILE) {
-  const covered = gifts.flatMap((g) => {
-    if (!coversLaterMonths(g)) return [];
-    const out: string[] = [];
-    for (let m = addMonths(monthOf(g.date), 1); m <= g.covers!.to; m = addMonths(m, 1)) out.push(m);
-    return out;
-  });
+  const covered = gifts.flatMap(otherMonths);
   const months = [...new Set([...gifts.map((g) => monthOf(g.date)), ...covered])].sort();
   const withInfrequency = markInfrequency(gifts);
   const usedByQuarter = new Map<string, number>();
@@ -347,10 +408,8 @@ function explain(
   let plain: string;
 
   if (t.kind === "not_possible") {
-    plain =
-      t.note === "not_able_eligible"
-        ? "An ABLE account is for people whose disability began before age 46. Another route will work better here."
-        : `Housing is paid as a bill, not given as an item. Try paying the bill through ${w.poss} ABLE account.`;
+    // The one gift the engine cannot place is an ABLE deposit for someone who cannot have an account.
+    plain = "An ABLE account is for people whose disability began before age 46. Another route will work better here.";
   } else if (t.kind === "unearned_cash") {
     const excl = round2(trace.infrequentExcluded + trace.generalExcludedFromUnearned);
     plain = `Cash counts as income. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
@@ -361,9 +420,23 @@ function explain(
     plain = `Tickets ${w.subj} receives count as income at their value, even when bought straight from the box office. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
     if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${w.poss} ${pay} check at ${usd(bestCheck)}.`;
   } else if (t.kind === "ism_shelter") {
-    plain = trace.vtrApplied
-      ? `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple, trace.paymentMonth))}, to ${usd(trace.check)}.`
-      : `Help with ${label} counts as housing support, up to ${usd(pmv(profile.couple, trace.paymentMonth))} a month. ${usd(counted)} would be counted, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
+    const cap = usd(pmv(profile.couple, trace.paymentMonth));
+    const result = `${usd(counted)} would be counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
+    if (trace.vtrApplied) {
+      plain = `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple, trace.paymentMonth))}, to ${usd(trace.check)}.`;
+    } else if (t.ruleIds.includes("R-SHEL-05")) {
+      const rent = gift.rentPaid ?? 0;
+      plain =
+        rent >= pmv(profile.couple, trace.paymentMonth)
+          ? `Rent of ${usd(rent)} a month to a parent or child is at or above ${cap}, so no rental subsidy is counted. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`
+          : `Rent below market from a parent or child counts as a rental subsidy: the lesser of the market rent and ${cap}, less the ${usd(rent)} rent paid. ${result}`;
+    } else if (t.ruleIds.includes("R-SHEL-04")) {
+      plain = `A co-owner's payment is not a gift, so each month it covers counts in that month, up to ${cap} a month. ${result}`;
+    } else if (isHomeGiven(gift)) {
+      plain = `A home given outright counts as housing support in the month it is given, valued at no more than ${cap}, and not in the months after. ${result}`;
+    } else {
+      plain = `Help with ${label} counts as housing support, up to ${cap} a month. ${usd(counted)} would be counted, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
+    }
     if (bestCheck > trace.check) plain += ` ${routePhrase(best, w)} keeps ${w.poss} ${pay} check at ${usd(bestCheck)}.`;
   } else if (t.ruleIds.includes("R-FOOD-01")) {
     plain = `Food paid for by others has not been counted since September 30, 2024. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`;

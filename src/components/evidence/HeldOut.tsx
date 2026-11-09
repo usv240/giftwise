@@ -2,9 +2,13 @@ import data from "../../../content/eval/held-out.json";
 import r from "../../../content/eval/held-out-results.json";
 import main from "../../../content/eval/ssa-examples-results.json";
 import second from "../../../content/eval/held-out-2-results.json";
+import secondSet from "../../../content/eval/held-out-2.json";
+import { HELD_OUT_2_NEW_FIELDS, heldOut2AfterFix, type HeldOutCase } from "@/lib/held-out";
+import * as rules from "@/lib/rules";
 
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" });
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: Number.isInteger(n) ? 0 : 2 });
+const WORDS = ["no", "one", "two", "three", "four", "five"];
 const MEASURE: Record<string, string> = { after_infrequent: "income after the one-off exclusion", ism_value: "in-kind support", ssi_amount: "SSI amount" };
 
 /**
@@ -13,6 +17,9 @@ const MEASURE: Record<string, string> = { after_infrequent: "income after the on
  */
 export function HeldOut() {
   const s = r.summary;
+  // The current engine on the second set, after the rules it showed were added: labelled as such, never as held out.
+  const after = heldOut2AfterFix(secondSet.cases as unknown as HeldOutCase[], rules);
+  const titleOf = (id: string) => secondSet.cases.find((c) => c.id === id)?.title.toLowerCase() ?? id;
   return (
     <section id="held-out" className="page-section" aria-labelledby="held-out-h">
       <h2 id="held-out-h">Examples the engine never saw</h2>
@@ -67,8 +74,21 @@ export function HeldOut() {
       </h3>
       <p className="page-prose">
         A second set of SSA examples, each with SSA&rsquo;s answer, was written and fixed first (content/eval/held-out-2.json, git blob <code>{second.set.git_blob.slice(0, 10)}</code>), then run once on the same frozen
-        engine, {date(second.ran_at)}. <strong className="tabular">{second.summary.engine_matches} of {second.summary.cases}</strong> match. The others show three rules to add next: a co-owner&rsquo;s payment counts
-        in each month it covers, a home given as itself counts at the presumed maximum value, and rent below market from family counts as that value less the rent she pays.
+        engine, {date(second.ran_at)}. <strong className="tabular">{second.summary.engine_matches} of {second.summary.cases}</strong> match. The others showed three housing rules, now in the engine, each citing
+        SSA&rsquo;s section: a home given as itself counts at the presumed maximum value in the month it is given (<span className="rule-id">R-SHEL-03</span>), a co-owner&rsquo;s payment counts in each month it covers (<span className="rule-id">R-SHEL-04</span>), and rent below
+        market from a parent or child counts as the lesser of the market rent and that value, less the rent paid (<span className="rule-id">R-SHEL-05</span>).
+      </p>
+      <p className="page-prose" id="held-out-2-after">
+        <strong>After the fix, not a held-out result:</strong> the three rules were written after seeing these five, so this line shows only that the current engine now follows them. On the same five as written,{" "}
+        <strong className="tabular">
+          {after.asWritten.matches} of {after.asWritten.cases}
+        </strong>{" "}
+        match. The other {WORDS[after.asWritten.misses.length]} ({after.asWritten.misses.map(titleOf).join("; ")}) turn on a fact the engine had no field for when the set was written; with that fact from each
+        case&rsquo;s own situation in the new field ({after.newFields.map((id) => `“${HELD_OUT_2_NEW_FIELDS[id].fact}”`).join(" and ")}),{" "}
+        <strong className="tabular">
+          {after.withFields.matches} of {after.withFields.cases}
+        </strong>{" "}
+        match. The frozen run&rsquo;s record is unchanged.
       </p>
       <details className="dsc">
         <summary>

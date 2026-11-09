@@ -55,9 +55,22 @@ export interface Gift {
   recurring?: boolean;
   /**
    * For a housing bill paid ahead or behind: the months it covers, YYYY-MM to YYYY-MM. The part for months up to the
-   * payment month counts in the payment month; each later month's share counts in that month (R-SHEL-02).
+   * payment month counts in the payment month; each later month's share counts in that month (R-SHEL-02). When the
+   * payer co-owns the home, each month's share counts in that month, past months included (R-SHEL-04).
    */
   covers?: { from: string; to: string };
+  /**
+   * The person paying co-owns the home, so the payment is not a gift (POMS SI 00835.360 D.3). With `covers`, each
+   * month's share counts in its own month, past months included, instead of the past months counting when it is paid.
+   */
+  payerCoOwns?: boolean;
+  /**
+   * Rent below market from a landlord who is her parent or child (POMS SI 00835.380): the monthly rent she pays. The
+   * gift's amount is the market rent less that rent. The subsidy counted is the lesser of the market rent and the
+   * presumed maximum value, less the rent she pays, and none once her rent reaches either (R-SHEL-05). It is valued
+   * for a household of one; SSA divides it among the household's members.
+   */
+  rentPaid?: number;
   label?: string;
 }
 

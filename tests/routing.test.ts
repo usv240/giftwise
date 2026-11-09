@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { routeGift, type OpenNeed } from "@/lib/routing";
+import { routeForDecision } from "@/lib/review/referee";
 import { DEFAULT_PROFILE } from "@/lib/rules";
 
 const needs: OpenNeed[] = [
@@ -32,6 +33,23 @@ describe("routeGift", () => {
     const r = routeGift(800, risky, "2026-11-10");
     expect(r.lines.every((l) => l.route === "able")).toBe(true);
     expect(r.checkWithRouting).toBe(1029);
+  });
+
+  it("never passes on a home given as itself: it counts against the check (R-SHEL-03), so the money goes to ABLE", () => {
+    const home: OpenNeed[] = [{ id: 7, title: "Her home, from her parents", category: "mortgage", route: "item", payeeName: "Her parents", payeeAccount: "item", amount: 1500, funded: 0, recurring: false }];
+    const r = routeGift(1500, home, "2026-06-15");
+    expect(r.lines.map((l) => l.route)).toEqual(["able"]);
+    expect(r.checkWithRouting).toBe(r.baseline);
+    expect(r.baseline).toBe(994);
+  });
+
+  it("the bill route for a home given as itself is the ABLE account, under either reading", () => {
+    const gift = { id: "b", date: "2026-06-15", amount: 40000, delivery: "item" as const, category: "mortgage" as const };
+    for (const decision of ["shelter", "unsure"] as const) {
+      const out = routeForDecision(gift, decision);
+      expect(out.route, decision).toBe("able");
+      expect(out.check, decision).toBe(994);
+    }
   });
 
   it("leaves money unplaced when ABLE is not possible and no safe need is open", () => {

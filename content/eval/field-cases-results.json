@@ -1,5 +1,5 @@
 {
-  "ran_at": "2026-11-08T05:36:08.799Z",
+  "ran_at": "2026-11-09T08:41:12.201Z",
   "rules_version": "2026.1",
   "tolerance_usd": 1,
   "rates": "Engine amounts are 2026: federal benefit rate $994, presumed maximum value $351.33, one-third reduction $331.33. Dollar figures are what the same help would mean to a person on SSI in 2026.",
@@ -1359,5 +1359,5 @@
       "overpayment": null
     }
   ],
-  "ms": 213
+  "ms": 826
 }

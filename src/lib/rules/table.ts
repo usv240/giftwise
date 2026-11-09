@@ -43,6 +43,24 @@ export const RULES: Record<string, RuleRow> = {
     plain: "When someone pays a housing bill that covers later months, the share for each later month counts in that month; the share for months up to the payment counts when it is paid.",
     sourceKeys: ["poms-si-00835-360"],
   },
+  "R-SHEL-03": {
+    id: "R-SHEL-03",
+    name: "Housing given as itself",
+    plain: "A home, or other shelter, given to the person as itself counts as in-kind support in the month it is received, up to the monthly cap. A home given outright that the person lives in counts only in that month.",
+    sourceKeys: ["poms-si-00835-400", "poms-si-00835-310", "poms-si-00815-550", "poms-si-00835-300", "poms-si-00835-901"],
+  },
+  "R-SHEL-04": {
+    id: "R-SHEL-04",
+    name: "Housing bills paid by a co-owner",
+    plain: "When a co-owner of the home pays its bills, the payment is not a gift: the share for each month it covers counts in that month, past months included, each up to the monthly cap.",
+    sourceKeys: ["poms-si-00835-360", "poms-si-00835-310"],
+  },
+  "R-SHEL-05": {
+    id: "R-SHEL-05",
+    name: "Rent below market from a parent or child",
+    plain: "When the landlord is the person's parent or child and charges less than market rent, the subsidy counted each month is the lesser of the market rent and the monthly cap, less the rent paid. Rent at or above the cap is a business arrangement, and nothing is counted.",
+    sourceKeys: ["poms-si-00835-380", "fr-89-25507-rental-subsidy", "poms-si-00835-300"],
+  },
   "R-SHEL-VTR": {
     id: "R-SHEL-VTR",
     name: "Living in another person's household",

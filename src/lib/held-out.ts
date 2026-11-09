@@ -58,3 +58,28 @@ export function scoreHeldOut(cases: HeldOutCase[], engine: Engine) {
     };
   });
 }
+
+/**
+ * The second set (content/eval/held-out-2.json) after the three housing rules it showed were added: R-SHEL-03 (a home
+ * given as itself), R-SHEL-04 (a co-owner's payment) and R-SHEL-05 (rent below market from a parent or child). This is
+ * not a held-out result, because the rules were written after seeing these five; the held-out result stays the frozen
+ * run in held-out-2-results.json. Two cases turn on a fact the engine had no field for when the set was written, so
+ * they are scored twice: as written, and with that fact, quoted from the case's own situation, in the new field.
+ */
+export const HELD_OUT_2_NEW_FIELDS: Record<string, { fact: string; fields: Partial<Gift> }> = {
+  "co-owner-mortgage": { fact: "a house he owns jointly with his sibling", fields: { payerCoOwns: true } },
+  "rent-below-market-from-child": { fact: "paying the required rent of $280 a month", fields: { rentPaid: 280 } },
+};
+
+export function heldOut2AfterFix(cases: HeldOutCase[], engine: Engine) {
+  const asWritten = scoreHeldOut(cases, engine);
+  const withFields = scoreHeldOut(
+    cases.map((c) => {
+      const extra = HELD_OUT_2_NEW_FIELDS[c.id];
+      return extra ? { ...c, gifts: c.gifts.map((g) => ({ ...g, ...extra.fields })) } : c;
+    }),
+    engine,
+  );
+  const tally = (s: ReturnType<typeof scoreHeldOut>) => ({ matches: s.filter((c) => c.match).length, cases: s.length, misses: s.filter((c) => !c.match).map((c) => c.id) });
+  return { asWritten: tally(asWritten), withFields: tally(withFields), newFields: Object.keys(HELD_OUT_2_NEW_FIELDS), cases: withFields };
+}

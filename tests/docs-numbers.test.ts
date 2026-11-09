@@ -9,6 +9,9 @@ import held2 from "../content/eval/held-out-2-results.json";
 import { ASKED_SENTENCE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, paypalShareSentence, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
 import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
+import held2Set from "../content/eval/held-out-2.json";
+import { heldOut2AfterFix, type HeldOutCase } from "@/lib/held-out";
+import * as rules from "@/lib/rules";
 
 /**
  * Every number the README, its docs/ pages and TESTING.md state about tests, checks, tools and dollars has one source: test counts in
@@ -217,6 +220,12 @@ describe("one source for every dollar figure", () => {
     expect(readme).toContain(`frozen at \`${held2.engine.commit}\``);
     expect(resultsDoc).toContain(`It matches ${held2.summary.engine_matches} of ${held2.summary.cases}`);
     expect(resultsDoc).toContain(`(\`${held2.set.git_blob.slice(0, 7)}\`)`);
+    // The current engine on the second set after the fix, labelled as not a held-out result, from src/lib/held-out.ts.
+    const after = heldOut2AfterFix(held2Set.cases as unknown as HeldOutCase[], rules);
+    expect(resultsDoc).toContain("**After the fix, not a held-out result.**");
+    expect(resultsDoc).toContain(`On the same ${WORDS[after.asWritten.cases]} as written, the current engine matches ${after.asWritten.matches} of ${after.asWritten.cases}.`);
+    expect(resultsDoc).toContain(`The other ${WORDS[after.asWritten.misses.length]} turn on a fact the engine had no field for`);
+    expect(resultsDoc).toContain(`in the new field, ${after.withFields.matches} of ${after.withFields.cases}`);
   });
 
   it("docs/real-world.md answers why not pay the shop yourself with the engine's figures", () => {

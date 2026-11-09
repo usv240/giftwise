@@ -2,7 +2,7 @@ import { z } from "zod";
 import { aiAvailable } from "@/lib/ai/claude";
 import { reviewPayload, runReviewers } from "@/lib/ai/reviewers";
 import { today } from "@/lib/api/envelope";
-import { CategorySchema, DeliverySchema } from "@/lib/api/schemas";
+import { CategorySchema, CoversSchema, DeliverySchema } from "@/lib/api/schemas";
 import { API_VERSION } from "@/lib/api/version";
 import { getHousehold, openNeeds, withAbleSoFar } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
@@ -57,10 +57,21 @@ export const TOOLS = [
       date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Date the gift arrives, YYYY-MM-DD. Defaults to today."),
       recurring: z.boolean().optional().describe("True when the same person gives this every month."),
       savings: z.number().min(0).max(1000000).optional().describe("Their countable savings now, in dollars, if known."),
+      covers: CoversSchema.optional(),
+      payer_co_owns: z.boolean().optional().describe("True when the person paying a housing bill co-owns the home: the payment is not a gift, so each month it covers counts in that month."),
+      rent_paid: z
+        .number()
+        .min(0)
+        .max(100000)
+        .optional()
+        .describe("For rent below market from a landlord who is their parent or child: the monthly rent they pay, with category rent and amount the market rent less that rent."),
     }),
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     run: async (i) => {
-      const r = evaluateGift({ id: "mcp", date: i.date ?? today(), amount: i.amount, delivery: i.delivery, category: i.category, recurring: i.recurring }, { ...DEFAULT_PROFILE, pronoun: "they", ...(i.savings !== undefined ? { savings: i.savings } : {}) });
+      const r = evaluateGift(
+        { id: "mcp", date: i.date ?? today(), amount: i.amount, delivery: i.delivery, category: i.category, recurring: i.recurring, covers: i.covers, payerCoOwns: i.payer_co_owns, rentPaid: i.rent_paid },
+        { ...DEFAULT_PROFILE, pronoun: "they", ...(i.savings !== undefined ? { savings: i.savings } : {}) },
+      );
       return {
         text: `${r.explanation.plain} Sources: ${r.sourceKeys.map((k) => SRC[k]?.title ?? k).join("; ")}.`,
         data: {

@@ -22,7 +22,19 @@ async function handle(req: Request) {
   }
   const { gift, profile } = parsed.data;
   const r = evaluateGift(
-    { id: "api", date: gift.date ?? today(), amount: gift.amount, delivery: gift.delivery, category: gift.category, recurring: gift.recurring, giver: gift.giver, label: gift.label },
+    {
+      id: "api",
+      date: gift.date ?? today(),
+      amount: gift.amount,
+      delivery: gift.delivery,
+      category: gift.category,
+      recurring: gift.recurring,
+      giver: gift.giver,
+      label: gift.label,
+      covers: gift.covers,
+      payerCoOwns: gift.payerCoOwns,
+      rentPaid: gift.rentPaid,
+    },
     { ...DEFAULT_PROFILE, ...profile },
   );
   return ok(
