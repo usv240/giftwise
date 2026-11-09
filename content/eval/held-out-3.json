@@ -1,0 +1,130 @@
+{
+  "about": "A third held-out check, written before it was run: five worked examples from Social Security's operating manual (POMS), from sections used in neither content/eval/held-out.json nor content/eval/held-out-2.json, and never scored in content/eval/ssa-examples.json or used to change the rules engine. Each case quotes SSA's page in part (passage_quotes, word for word from the URL) and restates its facts in plain words (situation). As in the other sets, dates are moved to 2026 so 2026 amounts apply. Where SSA's example holds a fact the engine has no input for, the case names it in not_held, and SSA's answer stays as SSA gives it. The set is run once, on the engine frozen at the commit named in held-out-3-results.json, and the result is published as it comes out.",
+  "fetched": "2026-11-09",
+  "encoding_rule": "Help is entered the way Giftwise takes it: a payment someone makes to a business or a landlord is delivery vendor, cash given to the person is delivery cash, and rent or a property tax bill is a housing category. A weekly rent paid by someone else is entered as one payment on each Monday of the month scored, April 2026 (April 6, 13, 20 and 27), because the engine takes payments as they are made. A property tax bill paid for a tax period that is partly past is entered with the months it covers. A balance or a recurring payment is entered in the profile (savings, ableBalance, otherUnearnedMonthly, earnedMonthly) and holds for every month. Bingo winnings are entered as cash in the category other. The presumed maximum value in 2026 is one third of $994 plus $20, $351.33 (POMS SI 00835.300), and SSA's answers are restated at 2026 rates only where SSA says the presumed maximum value caps them. These choices were made before the run and are not changed after it.",
+  "registered": "Written and fixed on 2026-11-09, before any case was run. held-out-3-results.json will record this file's git blob hash and SHA-256, so the exact file that was run can be found in the repository's history. Run it with npm run eval:held-out -- --set content/eval/held-out-3.json once the file is committed.",
+  "cases": [
+    {
+      "id": "weekly-rent-from-sibling",
+      "title": "A sibling pays her weekly rooming-house rent",
+      "cite": "POMS SI 00835.474",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835474",
+      "part": "B.3, Example: Converting a Weekly Rent to a Monthly Rent",
+      "passage_quotes": [
+        "Bishop, an eligible individual, lives in a rooming house with a weekly rent of $25.",
+        "Bishop's sibling pays the rent so the CR must determine the converted monthly CMV of the rent payment.",
+        "The CR multiplies $25 by 13 and divides by 3 and determines that the monthly charge for rent is $108.33."
+      ],
+      "situation": "Bishop receives SSI and lives in a rooming house where the rent is $25 a week. Bishop's sibling pays the rent to the rooming house each week. In April 2026 the sibling pays on April 6, 13, 20 and 27.",
+      "profile": { "livesInAnothersHousehold": false },
+      "gifts": [
+        { "id": "g1", "date": "2026-04-06", "amount": 25, "delivery": "vendor", "category": "rent", "giver": "sibling", "recurring": true },
+        { "id": "g2", "date": "2026-04-13", "amount": 25, "delivery": "vendor", "category": "rent", "giver": "sibling", "recurring": true },
+        { "id": "g3", "date": "2026-04-20", "amount": 25, "delivery": "vendor", "category": "rent", "giver": "sibling", "recurring": true },
+        { "id": "g4", "date": "2026-04-27", "amount": 25, "delivery": "vendor", "category": "rent", "giver": "sibling", "recurring": true }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [{ "month": "2026-04", "measure": "ism_value", "value": 108.33 }]
+      },
+      "ssa_answer": "In-kind support of $108.33 a month: the weekly rent times 13, divided by 3, which is under the presumed maximum value.",
+      "not_held": []
+    },
+    {
+      "id": "property-tax-partly-past-with-roommate",
+      "title": "A sibling with no ownership interest pays a property tax bill nine months into its period",
+      "cite": "POMS SI 00835.474",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835474",
+      "part": "B.2, Example: Real Property Taxes, Outside ISM",
+      "passage_quotes": [
+        "Jennifer, an SSI recipient, lives with their sister in a home Jennifer owns.",
+        "paid the property taxes in March 1995. The tax period was June 1994 through May 1995, and the taxes amounted to $1200.",
+        "The payment of the taxes by their sibling is considered a “gift” because they did not have ownership interest in the property.",
+        "The CMV of the ISM to be charged in March is $500 (i.e., 9 months X $100 plus $100 for March, divided by 2 because Jennifer has one roommate). The ISM is capped at the PMV for March.",
+        "Jennifer's ISM for April and May is $50 per month ($100 divided between Jennifer and their roommate)."
+      ],
+      "situation": "Jennifer receives SSI and lives with her sister in a home Jennifer owns. In March 2026 her sibling, who has no ownership interest in the home, pays the $1,200 property tax bill for the tax period June 2025 through May 2026. (SSA's example is in 1995; it is moved a whole number of years so 2026 amounts apply.)",
+      "profile": { "livesInAnothersHousehold": false },
+      "gifts": [
+        { "id": "g1", "date": "2026-03-15", "amount": 1200, "delivery": "vendor", "category": "property_tax", "giver": "sibling", "covers": { "from": "2025-06", "to": "2026-05" } }
+      ],
+      "expected": {
+        "counts": true,
+        "values": [
+          { "month": "2026-03", "measure": "ism_value", "value": 351.33 },
+          { "month": "2026-04", "measure": "ism_value", "value": 50 },
+          { "month": "2026-05", "measure": "ism_value", "value": 50 }
+        ]
+      },
+      "ssa_answer": "In March, the nine past months and March are charged together, $1,000 divided between Jennifer and her roommate, $500, capped at the presumed maximum value ($351.33 in 2026). In April and May, $100 a month divided between them, $50 a month.",
+      "not_held": ["Jennifer has one roommate, and SSA divides the help between the two of them. The engine values help for a household of one."]
+    },
+    {
+      "id": "able-over-limit-suspends",
+      "title": "An ABLE account over $100,000 puts her over the resource limit",
+      "cite": "POMS SI 01130.740",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740",
+      "part": "D.1.c, Example: Excess resources, recipient is suspended but retains eligibility for Medicaid",
+      "passage_quotes": [
+        "Paul is the designated beneficiary of an ABLE account with a balance of $101,000 on the first of the month.",
+        "Paul's only other countable resource is a checking account with a balance of $1,500.",
+        "suspend Paul’s SSI eligibility and stop their cash benefits, but retain their eligibility for Medicaid in their State."
+      ],
+      "situation": "Paul receives SSI. On the first of June 2026 his ABLE account holds $101,000 and his checking account $1,500, his only other countable resource. Nobody gives him anything that month.",
+      "profile": { "ableEligible": true, "ableBalance": 101000, "savings": 1500 },
+      "gifts": [],
+      "expected": {
+        "counts": false,
+        "values": [{ "month": "2026-06", "measure": "ssi_amount", "value": 0 }]
+      },
+      "ssa_answer": "The $1,000 over $100,000 in the ABLE account counts as a resource, so his countable resources are $2,500, over the $2,000 limit. His SSI is suspended and his cash benefit stops; he keeps Medicaid.",
+      "not_held": ["Medicaid continues during the suspension; the engine has no measure for Medicaid."]
+    },
+    {
+      "id": "able-over-limit-other-resources",
+      "title": "An ABLE account over $100,000, and other savings over the limit on their own",
+      "cite": "POMS SI 01130.740",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740",
+      "part": "D.1.b, Example: Combination of resources, recipient loses SSI eligibility",
+      "passage_quotes": [
+        "Christine is the designated beneficiary of an ABLE account with a first of the month balance of $101,000.",
+        "Christine's only other countable resource is a checking account with a balance of $3,000.",
+        "the suspension rule does not apply, and Christine is not eligible for SSI because of excess resources."
+      ],
+      "situation": "Christine receives SSI. On the first of June 2026 her ABLE account holds $101,000 and her checking account $3,000, her only other countable resource. Nobody gives her anything that month.",
+      "profile": { "ableEligible": true, "ableBalance": 101000, "savings": 3000 },
+      "gifts": [],
+      "expected": {
+        "counts": false,
+        "values": [{ "month": "2026-06", "measure": "ssi_amount", "value": 0 }]
+      },
+      "ssa_answer": "Her countable resources are $4,000, and her checking account alone is over the $2,000 limit, so she is not eligible for SSI that month and no SSI is paid.",
+      "not_held": ["Medicaid stops with the suspension; the engine has no measure for Medicaid."]
+    },
+    {
+      "id": "couple-gift-and-bingo",
+      "title": "A couple: a birthday gift and Bingo winnings in one month, beside a wage and a monthly benefit",
+      "cite": "POMS SI 00810.410",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500810410",
+      "part": "L.2, Infrequent/Irregular income, monthly and quarterly income",
+      "passage_quotes": [
+        "One member of an eligible couple receives a one-time wage payment of $85 for a single day of work in September.",
+        "an unexpected birthday gift of $30 in cash from the couple's daughter and $15 in winnings playing Bingo.",
+        "The other member of the couple receives a title II check of $150 each month.",
+        "The $45 of unearned income in September from these sources may be excluded."
+      ],
+      "situation": "An eligible couple receives SSI. In September 2026 one member works one day for $85, gets a $30 cash birthday gift from the couple's daughter on September 12, and wins $15 at Bingo on September 19. The other member receives a $150 Social Security (title II) check every month. Nothing else is given in July, August or September.",
+      "profile": { "couple": true, "otherUnearnedMonthly": 150, "earnedMonthly": 85 },
+      "gifts": [
+        { "id": "g1", "date": "2026-09-12", "amount": 30, "delivery": "cash", "category": "other", "giver": "daughter" },
+        { "id": "g2", "date": "2026-09-19", "amount": 15, "delivery": "cash", "category": "other", "giver": "Bingo winnings" }
+      ],
+      "expected": {
+        "counts": false,
+        "values": [{ "month": "2026-09", "measure": "after_infrequent", "value": 0 }]
+      },
+      "ssa_answer": "The $30 gift and the $15 Bingo winnings are infrequent and irregular, and all $45 is excluded in September. The title II check is not excluded, because it comes every month; the first $30 of the wage is excluded as infrequent earned income, and the rest gets the other earned income exclusions.",
+      "not_held": ["The $85 wage is paid once, in September only; the engine takes earned income as a monthly amount, so it is entered as $85 a month. The measure scored is the gifts and winnings after the infrequent or irregular exclusion, which the wage does not change."]
+    }
+  ]
+}
