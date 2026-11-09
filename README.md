@@ -41,7 +41,7 @@ npm test                      # a fresh clone with no .env.local: 436 pass and 7
 
 `npm test` needs no keys: tests that need Postgres skip with the reason in their names; no test calls Claude or PayPal. [TESTING.md](TESTING.md) explains every variable and suite; `npm run checks:local` runs the same 25 outside checks as the nightly Render Workflow ([`render.yaml`](render.yaml)).
 
-[![CI](https://github.com/usv240/giftwise/actions/workflows/ci.yml/badge.svg)](https://github.com/usv240/giftwise/actions/workflows/ci.yml) on every push: audit, types, lint, unit tests, 20,000 fresh random gifts, the `ssi-gift-rules` package and a keyless production build checked with axe.
+[![CI](https://github.com/usv240/giftwise/actions/workflows/ci.yml/badge.svg)](https://github.com/usv240/giftwise/actions/workflows/ci.yml) on every push: audit, types, lint, unit tests, 20,000 fresh random gifts, the `ssi-gift-rules` package and a keyless production build checked with axe. [![PayPal-checkout](https://github.com/usv240/giftwise/actions/workflows/e2e-paypal.yml/badge.svg)](https://github.com/usv240/giftwise/actions/workflows/e2e-paypal.yml) on demand, in the sandbox.
 
 ## Where to look
 
