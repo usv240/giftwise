@@ -3,8 +3,8 @@
 import type { AgBaseWidgetDefinition, AgDefaultRegistry, AgDefaultWidgetDefinition, AgWidgetDataFormat, AgWidgetFieldReference, AgWidgetParams } from "ag-studio";
 import { useEffect, useRef, useState } from "react";
 import type { RoutesDef } from "./RoutesWidget";
-import { CATEGORY_CODE, ROUTE_CODE } from "@/lib/dashboard/labels";
-import { DEFAULT_PROFILE, checkMonthName, fbr, planMonths, usd, type Category, type Delivery, type Gift } from "@/lib/rules";
+import { checkFigures, giftsFromRows, type CheckFigures } from "@/lib/dashboard/check";
+import { usd } from "@/lib/rules";
 
 /** The Giftwise check widget: runs the rules engine on whatever gifts the dashboard's filters leave in view. */
 export interface CheckDef {
@@ -23,16 +23,9 @@ export type GiftwiseRegistry = Omit<AgDefaultRegistry, "widgets"> & {
   widgets: readonly (AgBaseWidgetDefinition<"giftwiseCheck", CheckDef> | AgBaseWidgetDefinition<"giftwiseRoutes", RoutesDef> | AgDefaultWidgetDefinition)[];
 };
 
-type Result = { lowestRouted: number; lowestCash: number; lowestCashMonth: string; kept: number; months: number; whole: boolean; years: string[] };
-
-const toDate = (v: unknown) => {
-  const d = v instanceof Date ? v : new Date(typeof v === "number" ? v : String(v));
-  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
-};
-
 export default function CheckWidget(params: AgWidgetParams<CheckDef>) {
   const { dataMapping, widgetApi } = params;
-  const [r, setR] = useState<Result | null>(null);
+  const [r, setR] = useState<CheckFigures | null>(null);
   // The rows behind the current figures, and the display state last set. Setting a display state makes Studio pass new
   // params, so the widget only changes either one when the data really changed; otherwise the refresh would loop.
   const shown = useRef<{ rows: string; state: string } | null>(null);
@@ -55,31 +48,12 @@ export default function CheckWidget(params: AgWidgetParams<CheckDef>) {
       if (!live) return;
       const rows = JSON.stringify(res.results.rows);
       if (shown.current?.rows === rows) return;
-      const gifts: Gift[] = [];
-      res.results.rows.forEach((row, i) => {
-        const d = toDate(row[date.key]);
-        const delivery = ROUTE_CODE[String(row[route.key])] as Delivery | undefined;
-        const category = CATEGORY_CODE[String(row[whatFor.key])] as Category | undefined;
-        const value = Number(row[amount.key]);
-        if (d && delivery && category && value > 0) gifts.push({ id: `w${i}`, date: d, amount: value, delivery, category, giver: String(row[giver.key] ?? "") });
-      });
-      if (gifts.length === 0) {
+      const figures = checkFigures(giftsFromRows(res.results.rows, { date: date.key, giver: giver.key, route: route.key, whatFor: whatFor.key, amount: amount.key }));
+      if (!figures) {
         setState("noData", rows);
         return;
       }
-      const routed = planMonths(gifts, DEFAULT_PROFILE).months;
-      const cash = planMonths(gifts.map((g) => ({ ...g, delivery: "cash" as const })), DEFAULT_PROFILE).months;
-      const worst = cash.reduce((a, b) => (b.check < a.check ? b : a));
-      setR({
-        lowestRouted: Math.min(...routed.map((m) => m.check)),
-        lowestCash: worst.check,
-        lowestCashMonth: checkMonthName(worst.paymentMonth),
-        kept: routed.reduce((s, m, i) => s + (m.check - cash[i].check), 0),
-        months: routed.length,
-        // Each check against its own year's full amount: $994 for a 2026 check, $1,029 for a 2027 one.
-        whole: routed.every((m) => m.check >= fbr(false, m.paymentMonth)),
-        years: [...new Set(routed.map((m) => m.paymentMonth.slice(0, 4)))],
-      });
+      setR(figures);
       setState("displayed", rows);
     });
     return () => {
@@ -89,16 +63,21 @@ export default function CheckWidget(params: AgWidgetParams<CheckDef>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
-  if (!r) return null;
-  const whole = r.whole;
+  // The shell is always rendered. AG Studio's React wrapper waits for a custom widget's first DOM node before it attaches
+  // the widget to the page, and gives up after one second; a widget that renders nothing until its data arrives is never
+  // attached when the data engine takes longer than that, and the card stays empty for good.
   return (
-    <div className="gw-check">
-      <p className="gw-check-v tabular">{usd(r.lowestRouted)}</p>
-      <p className="gw-check-note">{whole ? `Every month, ${r.months} ${r.months === 1 ? "month" : "months"} in view: the full ${r.years.join(" and ")} check.` : `Lowest month in view.`}</p>
-      <p className="gw-check-cash">
-        As cash, her {r.lowestCashMonth} check would have dropped to <strong className="tabular">{usd(r.lowestCash)}</strong>. Giftwise kept <strong className="tabular">{usd(r.kept)}</strong> in her
-        checks.
-      </p>
+    <div className="gw-shell" aria-busy={r ? undefined : true}>
+      {r && (
+        <div className="gw-check">
+          <p className="gw-check-v tabular">{usd(r.lowestRouted)}</p>
+          <p className="gw-check-note">{r.whole ? `Every month, ${r.months} ${r.months === 1 ? "month" : "months"} in view: the full ${r.years.join(" and ")} check.` : `Lowest month in view.`}</p>
+          <p className="gw-check-cash">
+            As cash, her {r.lowestCashMonth} check would have dropped to <strong className="tabular">{usd(r.lowestCash)}</strong>. Giftwise kept <strong className="tabular">{usd(r.kept)}</strong> in her
+            checks.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

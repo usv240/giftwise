@@ -13,7 +13,7 @@ docker compose up -d          # Postgres 17
 cp .env.example .env.local    # PayPal sandbox keys, payee accounts, ANTHROPIC_API_KEY, DATABASE_URL (TESTING.md names each)
 npm run db:push               # create the tables; Maya's sample page is seeded the first time /g/maya opens
 npm run dev -- -p 3100        # http://localhost:3100
-npm test                      # a fresh clone with no .env.local: 274 pass and 6 skip (6 need a database); when .env.local names a reachable database: 280 of 280, no keys needed
+npm test                      # a fresh clone with no .env.local: 278 pass and 6 skip (6 need a database); when .env.local names a reachable database: 278 of 284, no keys needed
 ```
 
 `npm test` runs in a bare checkout: the six tests that need Postgres skip with the reason in their names and run once `.env.local` names a database; no test calls Claude or PayPal. [TESTING.md](TESTING.md) explains every variable and suite; `npm run checks:local` runs the same 25 outside checks as the nightly Render Workflow ([`render.yaml`](render.yaml)).

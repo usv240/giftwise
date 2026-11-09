@@ -101,6 +101,11 @@
   background: var(--surface-2);
 }
 
+/* The shell each Giftwise widget renders at once, before its figures arrive; Studio attaches a widget only once it has a DOM node. */
+.gw-shell {
+  height: 100%;
+}
+
 /* The Giftwise check widget */
 .gw-check {
   height: 100%;

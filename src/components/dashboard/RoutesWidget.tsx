@@ -67,7 +67,15 @@ export default function RoutesWidget(params: AgWidgetParams<RoutesDef>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
-  if (!rows) return null;
+  // Always a DOM node: AG Studio attaches a custom widget only once it has rendered one, and stops waiting after a second.
+  return (
+    <div className="gw-shell" aria-busy={rows ? undefined : true}>
+      {rows && <RoutesBody rows={rows} />}
+    </div>
+  );
+}
+
+function RoutesBody({ rows }: { rows: Row[] }) {
   const total = rows.reduce((s, r) => s + r.amount, 0);
   const pct = (n: number) => {
     const p = (n / total) * 100;
