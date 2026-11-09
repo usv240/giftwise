@@ -1,0 +1,164 @@
+{
+  "ran_at": "2026-11-09T11:54:16.951Z",
+  "engine": {
+    "commit": "7e24ed8",
+    "git_tree_src_lib_rules": "ba66d3a3c12055bf9d7aec4a86b9216aec1b356f",
+    "files_sha256": "952fa7dbe35dfb55",
+    "rules_version": "2026.1"
+  },
+  "source": "content/eval/held-out-3.json",
+  "set": {
+    "git_blob": "b9a5eceaedab7c607900c67abec04486cf04accf",
+    "sha256": "b170c797d8917208b0baa986b678d9f69b347f987a1d0f16c099a83736b095a2"
+  },
+  "summary": {
+    "cases": 5,
+    "engine_matches": 1,
+    "counts_matches": 5,
+    "misses": [
+      "weekly-rent-from-sibling",
+      "property-tax-partly-past-with-roommate",
+      "able-over-limit-suspends",
+      "able-over-limit-other-resources"
+    ],
+    "not_scored": 0
+  },
+  "cases": [
+    {
+      "id": "weekly-rent-from-sibling",
+      "title": "A sibling pays her weekly rooming-house rent",
+      "cite": "POMS SI 00835.474",
+      "part": "B.3, Example: Converting a Weekly Rent to a Monthly Rent",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835474",
+      "ssa_answer": "In-kind support of $108.33 a month: the weekly rent times 13, divided by 3, which is under the presumed maximum value.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ism_value",
+          "value": 108.33,
+          "got": 100,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01"
+      ],
+      "match": false
+    },
+    {
+      "id": "property-tax-partly-past-with-roommate",
+      "title": "A sibling with no ownership interest pays a property tax bill nine months into its period",
+      "cite": "POMS SI 00835.474",
+      "part": "B.2, Example: Real Property Taxes, Outside ISM",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835474",
+      "ssa_answer": "In March, the nine past months and March are charged together, $1,000 divided between Jennifer and her roommate, $500, capped at the presumed maximum value ($351.33 in 2026). In April and May, $100 a month divided between them, $50 a month.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-03",
+          "measure": "ism_value",
+          "value": 351.33,
+          "got": 351.33,
+          "match": true
+        },
+        {
+          "month": "2026-04",
+          "measure": "ism_value",
+          "value": 50,
+          "got": 100,
+          "match": false
+        },
+        {
+          "month": "2026-05",
+          "measure": "ism_value",
+          "value": 50,
+          "got": 100,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01",
+        "R-SHEL-02"
+      ],
+      "match": false
+    },
+    {
+      "id": "able-over-limit-suspends",
+      "title": "An ABLE account over $100,000 puts her over the resource limit",
+      "cite": "POMS SI 01130.740",
+      "part": "D.1.c, Example: Excess resources, recipient is suspended but retains eligibility for Medicaid",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740",
+      "ssa_answer": "The $1,000 over $100,000 in the ABLE account counts as a resource, so his countable resources are $2,500, over the $2,000 limit. His SSI is suspended and his cash benefit stops; he keeps Medicaid.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-06",
+          "measure": "ssi_amount",
+          "value": 0,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "able-over-limit-other-resources",
+      "title": "An ABLE account over $100,000, and other savings over the limit on their own",
+      "cite": "POMS SI 01130.740",
+      "part": "D.1.b, Example: Combination of resources, recipient loses SSI eligibility",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0501130740",
+      "ssa_answer": "Her countable resources are $4,000, and her checking account alone is over the $2,000 limit, so she is not eligible for SSI that month and no SSI is paid.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-06",
+          "measure": "ssi_amount",
+          "value": 0,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "couple-gift-and-bingo",
+      "title": "A couple: a birthday gift and Bingo winnings in one month, beside a wage and a monthly benefit",
+      "cite": "POMS SI 00810.410",
+      "part": "L.2, Infrequent/Irregular income, monthly and quarterly income",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500810410",
+      "ssa_answer": "The $30 gift and the $15 Bingo winnings are infrequent and irregular, and all $45 is excluded in September. The title II check is not excluded, because it comes every month; the first $30 of the wage is excluded as infrequent earned income, and the rest gets the other earned income exclusions.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-09",
+          "measure": "after_infrequent",
+          "value": 0,
+          "got": 0,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-CASH-01",
+        "R-INFREQ-01",
+        "R-GIE-01",
+        "R-RMA-01"
+      ],
+      "match": true
+    }
+  ]
+}
