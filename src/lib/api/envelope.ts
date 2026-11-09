@@ -1,6 +1,7 @@
 import { newRequestId, requestId } from "@/lib/log";
 import { RULES_VERSION } from "@/lib/rules";
 import { redactDeep, redactSecrets } from "@/lib/scrub";
+import { API_VERSION } from "./version";
 
 export type ApiErrorCode = "invalid_request" | "rate_limited" | "unauthorized" | "not_found" | "upstream_unavailable" | "internal";
 
@@ -13,7 +14,7 @@ export function ok<T>(data: T, started: number, extra: Record<string, unknown> =
   return Response.json({
     // No credential-shaped text leaves in a response, whatever an upstream service or a model put in it.
     data: redactDeep(data),
-    meta: { request_id: id(), version: "2026-11-01", rules_version: RULES_VERSION, latency_ms: Date.now() - started, ...extra },
+    meta: { request_id: id(), version: API_VERSION, rules_version: RULES_VERSION, latency_ms: Date.now() - started, ...extra },
     error: null,
   });
 }
@@ -24,7 +25,7 @@ export function fail(code: ApiErrorCode, message: string, status: number, detail
   return Response.json(
     {
       data: null,
-      meta: { request_id, version: "2026-11-01" },
+      meta: { request_id, version: API_VERSION },
       error: { code, message: `${redactSecrets(message.trim())} Request id: ${request_id}`, docs: `${DOCS}-${code}`, details: redactDeep(details) },
     },
     { status },

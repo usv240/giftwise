@@ -16,7 +16,7 @@ Use this login in the PayPal window that opens when you press a PayPal button on
 
 - It is a PayPal sandbox personal account. It works only in the sandbox checkout window, and its balance is practice money.
 - PayPal names this buyer John Doe, so a paid need reads "Paid by John".
-- Please keep the password as it is so the next person can use it too. The login stays active through the end of judging.
+- Please keep the password as it is so the next person can use it too. The login stays active.
 
 ## Make a payment (about 3 minutes)
 
@@ -168,9 +168,11 @@ Every push to GitHub runs [CI](.github/workflows/ci.yml): the dependency audit, 
 
 Start the app on port 3100 first. Run `npm run test:clean` and reset the sample page before the API and card-approved suites, because they expect her needs to be open and the daily limits for new keys and pages to be clear; the PayPal checkout suite resets it on its own. The browser suites drive Chrome; if Chrome is not at `C:/Program Files/Google/Chrome/Application/chrome.exe`, set `CHROME_PATH`.
 
+The PayPal checkout and API suites write a redacted transcript as they run, `content/eval/e2e-transcripts.json`: each step with its PayPal order and capture ids, payee count, statuses and timings, and no address, key or token. It is shown on `/evidence/operations#transcripts`. The GitHub Actions workflow [PayPal checkout (sandbox)](.github/workflows/e2e-paypal.yml) runs `npm run e2e:paypal` on request, once the sandbox app's keys and the buyer login are set as repository secrets; without them it says so and stops.
+
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 269 passed with a database and keys; with nothing set, 263 pass and 6 skip (6 need a database) |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 280 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 274 pass and 6 skip (6 need a database) |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
@@ -179,9 +181,9 @@ Start the app on port 3100 first. Run `npm run test:clean` and reset the sample 
 | API end to end | `npm run e2e:api` | 99 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
 | The Postman collection, with Newman | `npm run test:postman` | 20 assertions over 16 requests |
-| Browser end to end (with no AI key, the three steps where Claude reads a document are skipped) | `npm run e2e:ui` | 61 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 136 page views pass |
-| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 68 passed |
+| Browser end to end (with no AI key, the three steps where Claude reads a document are skipped) | `npm run e2e:ui` | 59 passed |
+| Accessibility and layout | `npm run e2e:a11y` | All 140 page views pass |
+| Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 72 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |
 | Card-approved gift to five payees | `npm run e2e:routed` | Five captures, a repeat capture that changes nothing, and COMPLETED at PayPal |

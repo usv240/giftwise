@@ -1,6 +1,7 @@
 // Every page and public endpoint of a running Giftwise answers, with the content it should carry. Needs only a database:
 // with no PayPal, Claude, Channel3 or Elastic keys, each one should fall back and say so, not fail. CI runs this on a
 // fresh build against an empty Postgres. Usage: BASE_URL=http://localhost:3100 npm run e2e:smoke
+import { readFileSync } from "node:fs";
 const B = process.env.BASE_URL ?? "http://localhost:3100";
 let failed = 0;
 let total = 0;
@@ -137,6 +138,59 @@ check("/agents and /g/maya name the same checks for $300 in cash", Boolean(cashL
           .filter((s) => FULL.test(s) && !/\b20(2[6-9])\b/.test(s));
     check(`page ${path} names the year of every full check it states`, bad.length === 0, bad.slice(0, 2).join(" | ").slice(0, 200));
   }
+}
+
+// The organizer's page is complete in the HTML itself: the needs are there before any client script runs.
+{
+  const html = await (await fetch(`${B}/manage/maya-sample-organizer`)).text();
+  check("the organizer's page renders its needs on the server, not a loading line", html.includes("Wheelchair repair") && !html.includes("Loading the page"), `${html.length} bytes`);
+}
+
+// The recorded sandbox receipt is seeded with the sample page, so it opens on any deployment without paying.
+{
+  const recorded = JSON.parse(readFileSync("content/sample-receipt.json", "utf8"));
+  const r = await fetch(`${B}/r/${recorded.order_id}`);
+  const html = await r.text();
+  check("the recorded sample receipt opens, labelled as recorded, with every line", r.status === 200 && html.includes("rc-total") && html.includes("data-recorded") && recorded.lines.every((l) => html.includes(l.capture_id)), `${r.status}`);
+}
+
+// Every script the gift page asks the browser for is served: a build whose client chunks are missing (a stale server
+// after a deploy) answers 200 for the page and 404 for the chunk, and the PayPal buttons never appear.
+{
+  const html = await (await fetch(`${B}/g/maya`)).text();
+  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((m) => m[1]).filter((s) => s.startsWith("/"));
+  const statuses = await Promise.all(scripts.map(async (s) => [s, (await fetch(B + s)).status]));
+  const missing = statuses.filter(([, st]) => st !== 200);
+  check("every client script the gift page names is served", scripts.length > 0 && missing.length === 0, missing.length ? missing.map(([s, st]) => `${st} ${s}`).join(", ") : `${scripts.length} scripts`);
+}
+
+// In a real browser, the PayPal button on Maya's page becomes visible; with no PayPal client id on the server, the
+// page says so instead. A page that keeps "Loading PayPal" with neither is the failure this catches.
+{
+  const paypalLive = health.checks?.find((c) => c.id === "paypal")?.mode === "live";
+  let outcome = "";
+  try {
+    const { chromium } = await import("playwright-core");
+    const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const pageErrors = [];
+    page.on("pageerror", (e) => pageErrors.push(e.message.slice(0, 120)));
+    await page.goto(`${B}/g/maya`, { waitUntil: "domcontentloaded" });
+    // Wake the buttons the way a person does (they load at the first sign of one), then wait for either outcome.
+    await page.mouse.move(200, 300);
+    outcome = await page
+      .waitForFunction(() => (document.querySelector("paypal-button:not([hidden])") ? "button" : document.querySelector(".pp-note") ? "unavailable" : null), null, { timeout: 30000 })
+      .then((h) => h.jsonValue())
+      .catch(() => `neither (${pageErrors[0] ?? "no page error"})`);
+    await browser.close();
+  } catch (e) {
+    outcome = `no browser: ${e.message.slice(0, 80)}`;
+  }
+  check(
+    paypalLive ? "the PayPal button on Maya's page becomes visible in a browser" : "Maya's page says PayPal is not connected, with no client id on this server",
+    paypalLive ? outcome === "button" : outcome === "unavailable" || outcome === "button",
+    outcome,
+  );
 }
 
 console.log(`\n${total - failed} passed, ${failed} failed`);

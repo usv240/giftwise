@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { RULES_VERSION } from "../rules";
 import { ENDPOINTS, ERRORS } from "./endpoints";
+import { API_VERSION } from "./version";
 import { AnalyzeFundraiserRequest, CheckGiftRequest, GiftPageRequest, KeyRequest, PlanMonthRequest, ReviewBillRequest, AskRulesRequest } from "./schemas";
 
 const json = (s: z.ZodType) => {
@@ -60,7 +61,7 @@ export function openapi(server: string) {
     openapi: "3.1.0",
     info: {
       title: "Giftwise API",
-      version: "2026-11-01",
+      version: API_VERSION,
       description: `Benefit-safe giving checks for people who receive SSI. Rules version ${RULES_VERSION}. Every answer cites the regulation or SSA's operating manual. Sandbox only: no real money and no real personal data.`,
     },
     servers: [{ url: server }],

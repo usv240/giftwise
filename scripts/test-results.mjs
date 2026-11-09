@@ -78,8 +78,8 @@ function writeDocs(suite) {
   if (suite.bare) {
     const text = readFileSync("README.md", "utf8");
     const out = text.replace(
-      /nothing set: \d+ pass and \d+ skip \(\d+ need a database\); a database and keys: \d[\d,]* of \d[\d,]*/,
-      `nothing set: ${suite.bare.passed} pass and ${suite.bare.skipped} skip (${suite.bare.needs.database} need a database); a database and keys: ${n(suite.passed)} of ${n(suite.total)}`,
+      /a fresh clone with no \.env\.local: \d+ pass and \d+ skip \(\d+ need a database\); when \.env\.local names a reachable database: \d[\d,]* of \d[\d,]*, no keys needed/,
+      `a fresh clone with no .env.local: ${suite.bare.passed} pass and ${suite.bare.skipped} skip (${suite.bare.needs.database} need a database); when .env.local names a reachable database: ${n(suite.passed)} of ${n(suite.total)}, no keys needed`,
     );
     if (out !== text) writeFileSync("README.md", out);
   }

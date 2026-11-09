@@ -2,12 +2,20 @@
 // If SANDBOX_BUYER_EMAIL and SANDBOX_BUYER_PASSWORD are set, it also logs in as the sandbox buyer,
 // approves, and checks the capture on the page, at PayPal, and on the public receipt (full flow).
 import { chromium } from "playwright-core";
+import { transcript } from "./transcript.mjs";
 
 const B = process.env.BASE_URL ?? "http://localhost:3100";
 const OUT = process.argv[2] ?? ".taste-skill";
 const email = process.env.SANDBOX_BUYER_EMAIL, pass = process.env.SANDBOX_BUYER_PASSWORD;
 let pass_ = 0, fail = 0;
-const ok = (n, c, x = "") => { if (c) pass_++; else fail++; console.log(`${c ? "PASS" : "FAIL"}  ${n}${x ? "  | " + x : ""}`); };
+// Each PayPal step is written to content/eval/e2e-transcripts.json with its order and capture ids, redacted.
+const T = transcript("paypal", B);
+const ok = (n, c, x = "") => { if (c) pass_++; else fail++; console.log(`${c ? "PASS" : "FAIL"}  ${n}${x ? "  | " + x : ""}`); T.step(n, { ok: c }); };
+/** PayPal's view of an order: its status and every capture id, for the transcript. */
+async function captured(id) {
+  const j = await (await fetch(`${B}/api/paypal/orders/${id}`)).json();
+  return { paypal_status: j.data?.status ?? j.error?.code, capture_ids: (j.data?.units ?? []).flatMap((u) => u.captures.map((c) => c.id)), payees: j.data?.units?.length };
+}
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -63,6 +71,7 @@ await card.locator("paypal-button").click();
 const orderJson = await (await orderReq).json();
 const orderId = orderJson.data?.id;
 ok("need button creates an order", Boolean(orderId), `${cardTitle}: ${orderId}`);
+T.step("the need order, as created", { order_id: orderId, payees: 1, status: orderJson.data?.status, amount: orderJson.data?.amount });
 const popup = await popupP;
 ok("PayPal checkout opens for that order", await opensFor(popup, orderId));
 
@@ -73,6 +82,7 @@ if (popup && email && pass) {
   ok("card shows it paid, with the buyer's name", /Paid by \S+/.test(line ?? ""), line);
   await page.screenshot({ path: `${OUT}/pp-need-paid.png` });
   ok("PayPal says the need order is COMPLETED", (await checkAtPayPal(orderId)) === "COMPLETED");
+  T.step("PayPal's record of the need order", { order_id: orderId, ...(await captured(orderId)) });
   const rc = await page.request.get(`${B}/r/${orderId}`);
   ok("public receipt for the need order", rc.status() === 200 && (await rc.text()).includes("rc-total"));
 } else if (popup) {
@@ -93,6 +103,7 @@ const giftJson = await (await giftReq).json();
 const giftId = giftJson.data?.id;
 const units = giftJson.data?.plan?.lines?.length ?? 0;
 ok("Give any amount creates one routed order", Boolean(giftId) && units > 1, `${giftId}, ${units} payees`);
+T.step("the routed order, as created", { order_id: giftId, payees: units, status: giftJson.data?.status, amount: giftJson.data?.plan?.amount });
 const giftPopup = await giftPopupP;
 ok("PayPal checkout opens for the routed order", await opensFor(giftPopup, giftId));
 
@@ -108,6 +119,7 @@ if (giftPopup && email && pass) {
   ok("needs the gift covered show as paid without a reload", refreshed);
   await page.screenshot({ path: `${OUT}/pp-routed-paid.png` });
   ok("PayPal says the routed order is COMPLETED", (await checkAtPayPal(giftId)) === "COMPLETED");
+  T.step("PayPal's record of the routed order", { order_id: giftId, ...(await captured(giftId)) });
   await page.goto(`${B}/r/${giftId}`, { waitUntil: "networkidle" });
   const rows = await page.locator(".rc-line").count();
   ok("public receipt lists every payee", rows === units, `${rows} of ${units}`);
@@ -117,5 +129,6 @@ if (giftPopup && email && pass) {
 }
 
 await fetch(`${B}/api/demo/reset`, { method: "POST" });
+T.save(pass_, fail);
 console.log(`\n${pass_} passed, ${fail} failed`);
 await browser.close();

@@ -38,7 +38,7 @@ describe("the claims-to-evidence index", () => {
     expect(impact[37]).toContain("IMPACT");
     expect(impact[75]).toContain("FAMILY_SENTENCE");
     expect(impact[79]).toContain("FAMILY_BASIS");
-    expect(at("tests/e2e/api.mjs").split("\n")[246]).toContain("nine tools");
+    expect(at("tests/e2e/api.mjs").split("\n")[251]).toContain("nine tools");
     expect(at("content/eval/held-out-results.json").split("\n")[3]).toContain("commit");
     expect(at("scripts/run-field-cases.ts")).toContain("overpaymentCheck");
     expect((at("src/lib/mcp/tools.ts").match(/^\s*name: "/gm) ?? []).length).toBe(9);

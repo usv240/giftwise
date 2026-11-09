@@ -49,6 +49,12 @@ const PAID_TO: Record<string, Delivery> = { person: "cash", cash: "cash", her: "
 
 const NUMBER_HINT = "Type the amount as a number, like 1000";
 
+/** Today in US Pacific time, YYYY-MM-DD: the same day the gift page and the home page's Gift Checker price a gift. */
+const todayPacific = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+const noSubscribeToday = () => () => {};
+/** The day of the build (next.config.ts): the static page paints with it, then the browser's own today takes over. */
+const BUILD_DAY = process.env.NEXT_PUBLIC_BUILD_DAY || "2026-11-08";
+
 type MoneyKey = "otherUnearnedMonthly" | "earnedMonthly" | "savings";
 const MONEY_FIELDS: { key: MoneyKey; label: string }[] = [
   { key: "otherUnearnedMonthly", label: "Other monthly income, not from work" },
@@ -140,7 +146,10 @@ function DescribeTab() {
   const [category, setCategory] = useState<Category>("other");
   const [delivery, setDelivery] = useState<Delivery>("cash");
   const [recurring, setRecurring] = useState(false);
-  const [date, setDate] = useState("2026-04-10");
+  // The gift arrives today unless the visitor picks a date, so the check it names is the one the gift page names.
+  const today = useSyncExternalStore(noSubscribeToday, todayPacific, () => BUILD_DAY);
+  const [picked, setDate] = useState<string | null>(null);
+  const date = picked ?? today;
   const dollars = parseDollars(amount);
   const valid = form.valid;
   const result = useMemo(
@@ -168,7 +177,7 @@ function DescribeTab() {
           </div>
           <label className="try-field">
             <span>Date it arrives</span>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value || "2026-04-10")} />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value || null)} />
           </label>
         </div>
         <label className="try-field">

@@ -3,6 +3,7 @@ import Link from "next/link";
 import sources from "../../../../content/sources.json";
 import { notFound } from "next/navigation";
 import { Info } from "@/components/Info";
+import { AbleHandoff } from "@/components/gift/AbleHandoff";
 import { GiveAny } from "@/components/gift/GiveAny";
 import { DEFAULT_GIFT, suggestedAmounts } from "@/components/gift/amount";
 import { routeGift } from "@/lib/routing";
@@ -16,6 +17,7 @@ import { dbConfigured } from "@/lib/db";
 import { cache } from "react";
 import { cashExample, getHousehold, openNeeds, withAbleSoFar } from "@/lib/households";
 import { pageOrigin } from "@/lib/origin";
+import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
 import QRCode from "qrcode";
 import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import { asLang, checkMonthIn, giftText, monthIn, sampleIn } from "@/lib/i18n/gift";
@@ -212,6 +214,11 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
                 {t.latestReceipt}
               </Link>
             )}
+            {household.isSample && (
+              <Link className="text-link gift-latest gift-sample-receipt" href={`/r/${RECORDED_RECEIPT.order_id}${es}`}>
+                {t.sampleReceipt}
+              </Link>
+            )}
             {lang === "es" && (
               <Link className="text-link gift-latest" href={`/g/${slug}/report/easy?lang=es`}>
                 {t.easyLink(household.name)}
@@ -258,6 +265,9 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
         </details>
       </aside>
       <div className="gift-real" lang="en">
+        <div lang={lang}>
+          <AbleHandoff name={household.name} poss={w.poss} lang={lang} />
+        </div>
         {lang === "es" && (
           <p className="gift-real-note muted" lang="es">
             {t.realWorldNote}

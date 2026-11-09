@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import results from "../../../../content/eval/field-cases-results.json";
-import { FieldCaseList } from "@/components/judges/FieldCases";
+import { FieldCaseList } from "@/components/evidence/FieldCases";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../evidence.css";

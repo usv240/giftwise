@@ -4,16 +4,17 @@ import billResults from "../../../../content/eval-results.json";
 import invResults from "../../../../content/eval/invariants-results.json";
 import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
-import { ErrorRates } from "@/components/judges/ErrorRates";
-import { EvalIntro, EvalResults } from "@/components/judges/EvalResults";
-import { FieldCases } from "@/components/judges/FieldCases";
-import { Invariants, InvariantsIntro } from "@/components/judges/Invariants";
-import { NeverDecides } from "@/components/judges/NeverDecides";
-import { Lineage } from "@/components/judges/Lineage";
-import { RefereeExample } from "@/components/judges/RefereeExample";
-import { Results } from "@/components/judges/Results";
-import { RulesWatch } from "@/components/judges/RulesWatch";
-import { SsaExamples } from "@/components/judges/SsaExamples";
+import { ErrorRates } from "@/components/evidence/ErrorRates";
+import { EvalIntro, EvalResults } from "@/components/evidence/EvalResults";
+import { FieldCases } from "@/components/evidence/FieldCases";
+import { Invariants, InvariantsIntro } from "@/components/evidence/Invariants";
+import { NeverDecides } from "@/components/evidence/NeverDecides";
+import { Lineage } from "@/components/evidence/Lineage";
+import { Adversarial } from "@/components/evidence/Adversarial";
+import { RefereeExample } from "@/components/evidence/RefereeExample";
+import { Results } from "@/components/evidence/Results";
+import { RulesWatch } from "@/components/evidence/RulesWatch";
+import { SsaExamples } from "@/components/evidence/SsaExamples";
 import { reviewedWatch } from "@/lib/rules-watch";
 import "../../pages.css";
 import "../../developers/dev.css";
@@ -72,6 +73,7 @@ export default function RulesCheckedPage() {
       </nav>
 
       <RefereeExample />
+      <Adversarial />
 
       <Lineage />
 

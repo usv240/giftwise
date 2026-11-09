@@ -34,7 +34,7 @@ services:
           type: workflow
           name: giftwise-checks
           property: slug
-      - key: RENDER_API_KEY # lets "Run the checks now" on /judges start the workflow
+      - key: RENDER_API_KEY # lets "Run the checks now" on /evidence/operations start the workflow
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
@@ -83,7 +83,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "24"
-      - key: APP_URL # checked from outside, through the public address, the way a judge sees it
+      - key: APP_URL # checked from outside, through the public address, the way a visitor reaches it
         value: https://giftwise-405i.onrender.com
       - key: CHECKS_SECRET
         fromService:

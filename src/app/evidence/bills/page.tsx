@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import results from "../../../../content/eval-results.json";
-import { BillList } from "@/components/judges/EvalResults";
+import { BillList } from "@/components/evidence/EvalResults";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../evidence.css";

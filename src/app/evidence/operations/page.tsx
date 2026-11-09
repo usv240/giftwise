@@ -3,10 +3,16 @@ import Link from "next/link";
 import results from "../../../../content/test-results.json";
 import loadLaptop from "../../../../content/public/load-test.json";
 import loadHosted from "../../../../content/public/load-test-hosted.json";
+import transcripts from "../../../../content/eval/e2e-transcripts.json";
+
+type TranscriptStep = { step: string; at_ms: number; ok?: boolean; order_id?: string; batch_id?: string; capture_ids?: string[]; payees?: number; status?: string; paypal_status?: string; amount?: number | string; note?: string };
+type Transcript = { ran_at: string; against: string; passed: number; failed: number; total_ms: number; steps: TranscriptStep[] };
+/** The recorded transcripts, the checkout suite first. */
+const TRANSCRIPTS = Object.entries((transcripts as { suites: Record<string, Transcript> }).suites).sort(([a], [b]) => (a === "paypal" ? -1 : b === "paypal" ? 1 : a.localeCompare(b)));
 import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
-import { CaseRunner } from "@/components/judges/CaseRunner";
-import { NightlyChecks } from "@/components/judges/NightlyChecks";
+import { CaseRunner } from "@/components/evidence/CaseRunner";
+import { NightlyChecks } from "@/components/evidence/NightlyChecks";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../evidence.css";
@@ -118,6 +124,65 @@ export default function OperationsPage() {
             </div>
           </details>
         </div>
+      </section>
+
+      <section id="transcripts" className="page-section" aria-labelledby="transcripts-h" data-check-year="">
+        <div className="title-row">
+          <h2 id="transcripts-h">The PayPal suites, step by step</h2>
+          <Info id="evidence.tests" label="" />
+        </div>
+        <p className="page-prose jp-intro">
+          The two suites that move sandbox money write a redacted transcript as they run, in content/eval/e2e-transcripts.json: each step with its PayPal order and capture ids, how many payees, the
+          statuses PayPal reported and the timings. No address, key or token is kept. A GitHub Actions workflow (PayPal checkout, sandbox) runs the checkout suite on request when the sandbox secrets
+          are set on the repository. A check named in a step is at its year&rsquo;s rate: the full amount is $994 in 2026 and $1,029 from January 2027.
+        </p>
+        {TRANSCRIPTS.length === 0 ? (
+          <p className="page-prose muted">No transcript recorded yet.</p>
+        ) : (
+          <div className="jx-more">
+            {TRANSCRIPTS.map(([id, t]) => (
+              <details key={id} className="jx-disc">
+                <summary>
+                  {id === "paypal" ? "Real PayPal checkout, logged in as the sandbox buyer" : "API end to end"}: {t.passed} of {t.passed + t.failed}, {day(t.ran_at)}, {t.steps.length} steps in{" "}
+                  {(t.total_ms / 1000).toFixed(1)} s
+                </summary>
+                <div className="jx-body">
+                  <p className="jp-test-what">Run against {t.against}. Steps that name a PayPal order or capture are shown with their ids; the rest are the suite&rsquo;s own checks.</p>
+                  <div className="doc-table-wrap" tabIndex={0} role="region" aria-label={`${id} transcript`}>
+                    <table className="doc-table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Step</th>
+                          <th scope="col">PayPal</th>
+                          <th scope="col" className="num">
+                            At
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {t.steps.map((s, i) => (
+                          <tr key={i}>
+                            <td>
+                              {s.ok === false ? "Failed: " : ""}
+                              {s.step}
+                              {s.note && <span className="ev-basis">{s.note}</span>}
+                            </td>
+                            <td className="tabular">
+                              {[s.order_id && `order ${s.order_id}`, s.batch_id && `batch ${s.batch_id}`, s.payees !== undefined && `${s.payees} ${s.payees === 1 ? "payee" : "payees"}`, (s.paypal_status ?? s.status) && String(s.paypal_status ?? s.status), s.capture_ids?.length ? `captures ${s.capture_ids.join(", ")}` : null]
+                                .filter(Boolean)
+                                .join("; ")}
+                            </td>
+                            <td className="tabular num">{(s.at_ms / 1000).toFixed(1)} s</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
+            ))}
+          </div>
+        )}
       </section>
 
       <section id="load" className="page-section" aria-labelledby="load-h">

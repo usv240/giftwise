@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import results from "../../../../content/eval/ssa-examples-results.json";
-import { HeldOut } from "@/components/judges/HeldOut";
-import { SsaExampleList } from "@/components/judges/SsaExamples";
+import { HeldOut } from "@/components/evidence/HeldOut";
+import { SsaExampleList } from "@/components/evidence/SsaExamples";
 import { P, usd } from "@/lib/rules";
 import "../../pages.css";
 import "../../developers/dev.css";

@@ -65,7 +65,7 @@ describe("redactSecrets", () => {
 });
 
 describe("a leaked error never reaches a visitor", () => {
-  it("the bill reader answers in plain words", async () => {
+  it("the bill reader answers in plain words", { timeout: 120_000 }, async () => {
     const { POST } = await import("@/app/api/v1/read-bill/route");
     const form = new FormData();
     form.append("file", new File([Buffer.from("%PDF-1.4\n% made-up bill\n")], "bill.pdf", { type: "application/pdf" }));

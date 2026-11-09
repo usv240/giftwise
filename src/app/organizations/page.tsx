@@ -4,7 +4,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
-import { ADOPTION_ROUTES } from "@/components/judges/Adoption";
+import { ADOPTION_ROUTES } from "@/components/evidence/Adoption";
 import { OrgPayouts, type OrgHousehold } from "@/components/org/OrgPayouts";
 import { db, dbConfigured, schema } from "@/lib/db";
 import { ensureSample, openNeeds } from "@/lib/households";

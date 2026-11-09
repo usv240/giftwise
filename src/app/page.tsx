@@ -111,14 +111,13 @@ export default function Home() {
             <li>
               <Link className="hero-impact-link" href="/evidence/impact#kept">
                 <span className="hero-impact-fig tabular" data-kept="">
-                  {usd(Math.round(IMPACT.familyTotal))}
+                  {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month
                 </span>
                 <span className="hero-impact-what">
-                  kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families in real court cases, over the {IMPACT.familyCases.map((c) => c.months).join(" and ")} months their
-                  cases cover, routed through Giftwise at 2026 rates
+                  kept in {IMPACT.routedCases} of {IMPACT.scoredCases} real court cases, with the same help routed through Giftwise at 2026 rates
                 </span>
                 <span className="hero-impact-base tabular">
-                  {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month in {IMPACT.routedCases} of {IMPACT.scoredCases} cases
+                  {usd(Math.round(IMPACT.familyTotal))} kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families over the {IMPACT.familyCases.map((c) => c.months).join(" and ")} months their cases cover
                 </span>
               </Link>
             </li>

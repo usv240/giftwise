@@ -3,6 +3,7 @@ import { aiAvailable } from "@/lib/ai/claude";
 import { reviewPayload, runReviewers } from "@/lib/ai/reviewers";
 import { today } from "@/lib/api/envelope";
 import { CategorySchema, DeliverySchema } from "@/lib/api/schemas";
+import { API_VERSION } from "@/lib/api/version";
 import { getHousehold, openNeeds, withAbleSoFar } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
 import { routeGift } from "@/lib/routing";
@@ -265,6 +266,6 @@ export const TOOLS = [
   }),
 ];
 
-export const SERVER_INFO = { name: "giftwise", title: "Giftwise", version: "2026.11.4" };
+export const SERVER_INFO = { name: "giftwise", title: "Giftwise", version: API_VERSION };
 export const INSTRUCTIONS =
   "Giftwise helps people give to someone who receives SSI without lowering their monthly check. Call check_gift before suggesting cash. To give to a person with a Giftwise page, read it with get_gift_page, show the split with plan_gift, and start_gift_checkout returns a PayPal link the giver approves themselves; start_monthly_gift sets up the same gift every month, approved by the giver each month. For the person receiving SSI, get_ssa_report writes the month's report to Social Security from the gifts, in Easy Read or Spanish with reader \"person\". Sandbox only.";

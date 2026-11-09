@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import sources from "../../../../content/sources.json";
 import { Info } from "@/components/Info";
+import { AbleHandoff } from "@/components/gift/AbleHandoff";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { dbConfigured } from "@/lib/db";
 import { loadReceipt } from "@/lib/receipt";
-import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
+import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import { asLang, checkMonthIn, monthIn, payeeIn, payeeInline, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "../../pages.css";
@@ -79,7 +81,13 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
           )}
           <p className="rc-order tabular">{t.orderLine(orderId)}</p>
           {/* The sample page was reset after this gift: it stays on record here and at PayPal, outside the page's current round. */}
-          {earlierRound && <p className="rc-earlier muted">{t.earlierRound}</p>}
+          {orderId === RECORDED_RECEIPT.order_id ? (
+            <p className="rc-earlier muted" data-recorded="">
+              {t.recorded(new Date(RECORDED_RECEIPT.captured_at).toLocaleDateString(lang === "es" ? "es-US" : "en-US", { dateStyle: "long", timeZone: "America/Los_Angeles" }))}
+            </p>
+          ) : (
+            earlierRound && <p className="rc-earlier muted">{t.earlierRound}</p>
+          )}
         </div>
         <dl className="rc-facts">
           <div>
@@ -119,12 +127,15 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
           ))}
         </ul>
         {lines.some(({ row }) => row.route === "able") && (
-          <p className="rc-handoff muted">
-            {t.ableHandoff(hers)}{" "}
-            <a className="text-link" href={SRC_UGIFT.url} target="_blank" rel="noreferrer">
-              {t.ableHandoffSource}
-            </a>
-          </p>
+          <>
+            <p className="rc-handoff muted">
+              {t.ableHandoff(hers)}{" "}
+              <a className="text-link" href={SRC_UGIFT.url} target="_blank" rel="noreferrer">
+                {t.ableHandoffSource}
+              </a>
+            </p>
+            <AbleHandoff name={name} poss={pronounWords(profile.pronoun).poss} lang={lang} headingId="rc-able-real-h" />
+          </>
         )}
       </section>
 

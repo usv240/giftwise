@@ -4,6 +4,7 @@ import results from "../content/test-results.json";
 import { API, MCP_TOOLS, PATH } from "../workflows/src/checks";
 import { CASES } from "@/lib/cases/list";
 import held from "../content/eval/held-out-results.json";
+import heldOutSet from "../content/eval/held-out.json";
 import { ASKED_SENTENCE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
 import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
@@ -131,10 +132,12 @@ describe("one source for every dollar figure", () => {
     expect(dollars).toContain(FAMILY_BASIS);
     expect(dollars).toContain(sampleYearSentence());
     expect(IMPACT.familyTotal).toBe(38103.32);
-    // The result strip above leads with the same total and months.
+    // The result strip above leads with the per-month range, then the two-family total over the same months.
     const strip = readme.slice(readme.indexOf("## Results"), readme.indexOf("## Where to look"));
-    expect(strip).toContain(`| **${cents(IMPACT.familyTotal)}** |`);
-    expect(strip).toContain(`over the ${IMPACT.familyCases.map((c) => c.months).join(" and ")} months`);
+    const whole = (x: number) => `$${Math.round(x).toLocaleString("en-US")}`;
+    expect(strip).toContain(`| **${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month** |`);
+    expect(strip).toContain(`kept in ${IMPACT.routedCases} of ${IMPACT.scoredCases} real SSI court cases`);
+    expect(strip).toContain(`**${cents(IMPACT.familyTotal)}** over the ${IMPACT.familyCases.map((c) => c.months).join(" and ")} months`);
     expect(resultsDoc).toContain(`${cents(IMPACT.familyTotal)} in all`);
   });
 
@@ -166,6 +169,12 @@ describe("one source for every dollar figure", () => {
     expect(readme).toContain(`commit \`${held.engine.commit}\``);
     expect(resultsDoc).toContain(`It matches ${held.summary.engine_matches} of ${held.summary.cases}.`);
     expect(resultsDoc).toContain(`frozen at commit \`${held.engine.commit}\``);
+    // Both documents carry the first run's result and say that two expected answers were corrected afterwards, with the reasons in the set.
+    const firstRun = `${held.first_run.engine_matches} of ${held.first_run.cases}`;
+    expect(readme).toContain(`The first run matched ${firstRun}; two expected answers were then corrected`);
+    expect(readme).toContain("content/eval/held-out.json");
+    expect(resultsDoc).toContain(`corrected after the first run (${firstRun})`);
+    expect(heldOutSet.corrections).toHaveLength(2);
   });
 
   it("docs/real-world.md answers why not pay the shop yourself with the engine's figures", () => {

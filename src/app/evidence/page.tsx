@@ -9,20 +9,29 @@ import invResults from "../../../content/eval/invariants-results.json";
 import loadHosted from "../../../content/public/load-test-hosted.json";
 import { Info } from "@/components/Info";
 import { OpenOnHash } from "@/components/OpenOnHash";
-import { Impact } from "@/components/judges/Impact";
+import { Impact } from "@/components/evidence/Impact";
 import { TourStart } from "@/components/tour/Tour";
 import { SandboxLogin } from "@/components/SandboxLogin";
 import { WhatIsNew } from "@/components/WhatIsNew";
-import { WhatIsFirst } from "@/components/judges/WhatIsFirst";
+import { WhatIsFirst } from "@/components/evidence/WhatIsFirst";
 import { CASES } from "@/lib/cases/list";
 import { ERROR_RATES } from "@/lib/error-rates";
 import heldOut from "../../../content/eval/held-out-results.json";
-import { ASKED_SENTENCE, FAMILY_SENTENCE, KEPT_SENTENCE, sampleYearSentence } from "@/lib/impact";
+import { ASKED_SENTENCE, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, sampleYearSentence } from "@/lib/impact";
+import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
 import "../pages.css";
 import "../developers/dev.css";
 import "./evidence.css";
 
-export const metadata: Metadata = { title: "Evidence", description: "Three numbers, a five-minute path through the product, and every result in five groups, each with where it comes from." };
+export const metadata: Metadata = { title: "Evidence", description: "One result line, a five-minute path through the product, and every result in five groups, each with where it comes from." };
+
+const whole = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+
+/**
+ * The result line the page opens with: the three numbers in one sentence, each computed from the files in content/
+ * (src/lib/error-rates.ts, content/eval/ssa-examples-results.json, src/lib/impact.ts).
+ */
+const RESULT_LINE = `${ERROR_RATES.lowered.errors} of ${ERROR_RATES.lowered.of} gifts that would lower the check were let through; ${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} of Social Security's own worked examples match SSA's answer; in ${IMPACT.routedCases} of ${IMPACT.scoredCases} real court cases, the same help routed through Giftwise would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month.`;
 
 /** The five-minute path: six steps, under a minute and a half each, in the order the story runs. */
 const PATH = [
@@ -35,6 +44,7 @@ const PATH = [
 ];
 
 const A11Y = results.suites.find((s) => s.id === "a11y")!;
+const SAMPLE_RECEIPT = `/r/${RECORDED_RECEIPT.order_id}`;
 
 /**
  * Every result and every place to look, under five headings, each row a link to the page that shows it in full. Each
@@ -49,6 +59,7 @@ const INDEX = [
       { id: "held-out", href: "/evidence/ssa-examples#held-out", label: "Examples the engine never saw", what: `${heldOut.summary.engine_matches} of ${heldOut.summary.cases} worked examples from SSA's own pages, run on the engine frozen at ${heldOut.engine.commit}.` },
       { id: "field-cases", href: "/evidence/court-cases", label: "Real cases from federal courts", what: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did.` },
       { id: "evaluation", href: "/evidence/rules#evaluation", label: "The two reviewers, measured", what: `${billResults.summary.referee.check_kept_whole} of ${billResults.summary.referee.all_cases} labeled bills keep her check whole, with each reviewer alone shown beside the referee.` },
+      { id: "referee", href: "/evidence/rules#referee", label: "The referee, under pressure", what: "A wrong quote, a quote from the wrong rulebook, a right answer with a made-up citation, and two reviewers who disagree: what the code does with each, and the check whole every time." },
       { id: "errors", href: "/evidence/rules#errors", label: "The two errors that cost money", what: `${ERROR_RATES.lowered.errors} of ${ERROR_RATES.lowered.of} let through that would lower the check; ${ERROR_RATES.held.errors} of ${ERROR_RATES.held.of} fine gifts sent another way, each with the check whole.` },
       { id: "invariants", href: "/evidence/rules#invariants", label: `${invResults.gifts.toLocaleString("en-US")} random gifts`, what: `Every one keeps all ${invResults.results.length} promises: every cent placed, her check exactly as with no gift, ABLE within its yearly limit.` },
       { id: "rules-watch", href: "/evidence/rules#rules-watch", label: "The rules watch the Federal Register", what: "Asked live for every change to SSI's income rules and amounts since 2022; the 2027 amounts are in use." },
@@ -59,12 +70,15 @@ const INDEX = [
     title: "Does the money go only where the rules say?",
     href: "/stack#paypal-apis-all",
     rows: [
+      { id: "receipt", href: SAMPLE_RECEIPT, label: "A receipt you can read without paying", what: "A recorded sandbox gift, seeded with the sample page: every payee and capture id, the rule behind each line, and Check with PayPal now asks PayPal for the order live." },
       { id: "verify", href: "/g/maya/report?month=2026-11#rp-verify-h", label: "A report anyone can check", what: "After a gift on Maya's page, November's report carries a QR code: Giftwise rebuilds it, asks PayPal for each payment live and checks the audit ledger." },
       { id: "bill-live", href: "/try/presets/electric-bill#read-live", label: "Claude reads a bill, live", what: "Press Read this bill live: Claude reads the sample bill now, within the daily AI budget, and the rules engine routes it." },
       { id: "paypal-apis", href: "/stack#paypal-apis-all", label: "Every PayPal API it calls", what: "One order paying several payees, capture once with PayPal-Request-Id, approval links for agents, Payouts, Transaction Search and signed webhooks, each with its file." },
+      { id: "transcripts", href: "/evidence/operations#transcripts", label: "The PayPal suites, step by step", what: "The checkout and API suites write a redacted transcript: each step with its PayPal order and capture ids, payee count, statuses and timings." },
       { id: "failure-cases", href: "/evidence/operations#failure-cases", label: `${CASES.length} failure cases, run live`, what: "A declined card, a double click, a browser changing the amount, refunds and more, against the PayPal sandbox." },
       { id: "monthly", href: "/g/maya", label: "Give every month", what: "After a gift, press Give this every month: the same amount is routed again each month, with what changed and why." },
       { id: "organizations", href: "/organizations", label: "A fund pays many families", what: "One PayPal Payouts batch, each item paid straight to a shop or ABLE account, confirmed in PayPal's Transaction Search." },
+      { id: "able-real", href: "/g/maya#able-real-h", label: "The ABLE share, for real", what: "PayPal settles the shops; the ABLE share goes through the plan's own gift page, by Ugift code or gifting link. The gift page and every receipt with an ABLE line show the hand-off step by step." },
     ],
   },
   {
@@ -72,7 +86,7 @@ const INDEX = [
     href: "/evidence/impact",
     rows: [
       { id: "stake", href: "/evidence/impact#stake", label: "The problem, measured by Social Security", what: "454,843 checks lowered for shelter help in December 2024, by $247 a month on average; in-kind support 8.59 percent of SSI improper payments; no tools to find living arrangement errors; the $2,000 limit and ABLE's reach, each from its source with the date." },
-      { id: "kept", href: "/evidence/impact#kept", label: "What routing would have kept", what: `${FAMILY_SENTENCE} ${KEPT_SENTENCE}` },
+      { id: "kept", href: "/evidence/impact#kept", label: "What routing would have kept", what: `${KEPT_SENTENCE} ${FAMILY_SENTENCE}` },
       { id: "why", href: "/evidence/impact#why", label: "Why not pay the shop yourself?", what: sampleYearSentence() },
       { id: "asked", href: "/evidence/impact#asked", label: "What SSA asked back", what: ASKED_SENTENCE },
       { id: "reach", href: "/evidence/impact#reach", label: "Who each route reaches", what: `Items, care and school for all ${facts.audience.ssi_jan2025_total.value} people on SSI; rent and utilities through ABLE, where the disability began before ${facts.values.able_onset_age.value}.` },
@@ -120,45 +134,70 @@ export default function EvidencePage() {
           <h1 className="page-title">Evidence</h1>
           <Info id="page.evidence" />
         </div>
-        <p className="lede">
-          PayPal is where the rules are enforced: money reaches only a payee the rules picked, in one order, captured once, and anyone can check a month&rsquo;s report against PayPal.
-          Below: three numbers, the five-minute path, and every result in five groups, each with where it comes from.
-        </p>
-        <p className="jp-tour">
-          <TourStart /> <span className="muted">Eight stops in this tab, about five minutes. Escape ends it.</span>
-        </p>
+        <p className="lede ev-result">{RESULT_LINE}</p>
       </header>
 
-      <Impact />
-
-      <section id="path" className="page-section" aria-labelledby="path-h">
+      {/* Ninety seconds: the path as six links, one action, and everything else one press away. */}
+      <section id="path" className="page-section ev-90" aria-labelledby="path-h">
         <h2 id="path-h">The five-minute path</h2>
-        <ol className="jp-path">
-          {PATH.map((p, i) => (
-            <li key={p.label} className="jp-step" data-ui>
-              <span className="jp-n tabular" aria-hidden="true">
-                {i + 1}
-              </span>
-              <div>
-                <p className="jp-head">
-                  <Link className="jp-link" href={p.href}>
-                    {p.label}
-                  </Link>
-                  <span className="jp-time tabular muted">{p.time}</span>
-                </p>
-                <p>{p.look}</p>
-              </div>
+        <ol className="ev-path" aria-label="The six steps, in order">
+          {PATH.map((p) => (
+            <li key={p.label}>
+              <Link className="ev-path-link" href={p.href}>
+                {p.label} <span className="ev-path-time tabular muted">{p.time}</span>
+              </Link>
             </li>
           ))}
         </ol>
-        <div className="jp-login" data-ui>
-          <div>
-            <p className="jp-login-k">Sandbox buyer login, for step 2</p>
-            <p className="muted">A PayPal sandbox test account. It works only in PayPal&rsquo;s sandbox checkout window, and no real money moves.</p>
-          </div>
-          <SandboxLogin />
+        <div className="ev-act">
+          <Link href="/g/maya" className="btn btn-primary">
+            Open Maya&rsquo;s page and give in the sandbox
+          </Link>
+          <Link className="text-link" href={SAMPLE_RECEIPT}>
+            Or read a sample receipt without paying
+          </Link>
+        </div>
+        <div className="jx-more">
+          <details className="jx-disc" id="path-detail">
+            <summary>What to look for at each step, the sandbox buyer login, and the guided tour</summary>
+            <div className="jx-body">
+              <p className="jp-tour">
+                <TourStart /> <span className="muted">Eight stops in this tab, about five minutes. Escape ends it.</span>
+              </p>
+              <ol className="jp-path">
+                {PATH.map((p, i) => (
+                  <li key={p.label} className="jp-step" data-ui>
+                    <span className="jp-n tabular" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <div>
+                      <p className="jp-head">
+                        <Link className="jp-link" href={p.href}>
+                          {p.label}
+                        </Link>
+                        <span className="jp-time tabular muted">{p.time}</span>
+                      </p>
+                      <p>{p.look}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="jp-login" data-ui>
+                <div>
+                  <p className="jp-login-k">Sandbox buyer login, for step 2</p>
+                  <p className="muted">It works only in PayPal&rsquo;s sandbox checkout window, and no real money moves.</p>
+                </div>
+                <SandboxLogin />
+              </div>
+            </div>
+          </details>
         </div>
       </section>
+
+      <Impact />
+      <p className="page-prose jp-intro ev-paypal">
+        PayPal is where the rules are enforced: money reaches only a payee the rules picked, in one order, captured once, and anyone can check a month&rsquo;s report against PayPal.
+      </p>
 
       <WhatIsNew headingId="new-h" className="page-section" />
 
@@ -188,7 +227,6 @@ export default function EvidencePage() {
           ))}
         </div>
       </section>
-
     </div>
   );
 }

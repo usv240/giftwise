@@ -148,6 +148,34 @@ async function timed(fn: () => Promise<string>): Promise<{ ok: boolean; detail: 
   }
 }
 
+/** The Status page's last full round of checks, kept for a minute so the page answers at once. */
+export type StatusRound = { checks: Check[]; at: string };
+const STATUS_FRESH_MS = 60_000;
+const statusStore = globalThis as { __giftwiseStatus?: StatusRound | null; __giftwiseStatusRunning?: Promise<StatusRound> | null };
+
+/**
+ * The checks the Status page shows, with the time they ran. A round probes every live service (PayPal's token, the
+ * database, PayPal's MCP server, the Federal Register, Claude's key check), which takes several seconds, so one round
+ * serves every visitor for a minute; `fresh` runs a new one now (the page's "Check again"). While a round is running,
+ * callers that arrive share it rather than starting another. An older round is shown while a new one runs, so the page
+ * never waits on the probes once the first round is in.
+ */
+export function statusChecks({ fresh = false }: { fresh?: boolean } = {}): Promise<StatusRound> {
+  const last = statusStore.__giftwiseStatus;
+  if (last && !fresh && Date.now() - new Date(last.at).getTime() < STATUS_FRESH_MS) return Promise.resolve(last);
+  statusStore.__giftwiseStatusRunning ??= runChecks({ probeMcp: true })
+    .then((checks) => {
+      statusStore.__giftwiseStatus = { checks, at: new Date().toISOString() };
+      return statusStore.__giftwiseStatus;
+    })
+    .finally(() => {
+      statusStore.__giftwiseStatusRunning = null;
+    });
+  // A stale round answers now and the new one lands for the next visitor; a fresh request, or the first, waits for it.
+  if (last && !fresh) return Promise.resolve(last);
+  return statusStore.__giftwiseStatusRunning;
+}
+
 /**
  * Live checks for every integration, with the fallback each one uses when it is not reachable.
  * probeMcp: check PayPal's MCP server again when the last check is over ten minutes old (the Status page). Render's

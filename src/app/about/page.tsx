@@ -5,7 +5,7 @@ import videoCredits from "../../../public/media/credits.json";
 import { Info } from "@/components/Info";
 import Image from "next/image";
 import { RealWorld } from "@/components/RealWorld";
-import { PayPalShare, PayYourself, Reach } from "@/components/judges/WhyGiftwise";
+import { PayPalShare, PayYourself, Reach } from "@/components/evidence/WhyGiftwise";
 import { sampleYearSplit } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 import "../pages.css";

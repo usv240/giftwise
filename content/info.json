@@ -409,7 +409,7 @@
   },
   "page.evidence": {
     "title": "About this page",
-    "what": "Three numbers, a five-minute path through the product, and every result in five groups: whether it gets the rules right, whether the money goes only where the rules say, what it changes, how it runs, and how it is built.",
+    "what": "One result line, the five-minute path as six links with one action, then the three numbers and every result in five groups: whether it gets the rules right, whether the money goes only where the rules say, what it changes, how it runs, and how it is built. What to look for at each step, the sandbox buyer login and the guided tour are one press away under the path.",
     "why": "So you can check every claim yourself in a few minutes.",
     "technical": "The failure-case runner is POST /api/cases/run. It creates small PayPal sandbox orders and runs the same capture and order code the gift page uses."
   },
@@ -752,7 +752,7 @@
     "title": "What is first here",
     "what": "Four things none of the compared products does, each read from that product’s own pages, with the comparison rows they rest on.",
     "why": "A claim of novelty should name the nearest existing thing and the one step it does not do, so it can be checked.",
-    "technical": "src/components/judges/WhatIsFirst.tsx; the rows are src/components/judges/Compare.tsx, with each source and its date in content/sources.json."
+    "technical": "src/components/evidence/WhatIsFirst.tsx; the rows are src/components/evidence/Compare.tsx, with each source and its date in content/sources.json."
   },
   "evidence.lineage": {
     "title": "Where the two-reviewer design comes from",
@@ -764,7 +764,7 @@
     "title": "How it compares",
     "what": "Other ways people help someone on SSI with money, each described from its own published pages, and the one step Giftwise adds beside it.",
     "why": "Each of these does its own job well. The comparison shows the moment Giftwise is built for: when a gift is given.",
-    "technical": "src/components/judges/Compare.tsx; each source and the date it was read are in content/sources.json."
+    "technical": "src/components/evidence/Compare.tsx; each source and the date it was read are in content/sources.json."
   },
   "evidence.stake": {
     "title": "The problem, measured by Social Security",

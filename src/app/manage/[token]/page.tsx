@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import QRCode from "qrcode";
 import { Info } from "@/components/Info";
 import { ShareGift } from "@/components/gift/ShareGift";
@@ -196,12 +195,17 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
   );
 }
 
+/**
+ * The organizer's page renders on the server before it is sent: the needs, the gifts received and the sharing tools
+ * are in the HTML, complete without client JavaScript, and the forms hydrate on top. The page is one person's private
+ * link, so there is nothing static to serve first; a blocking render is the shorter path.
+ */
+export const instant = false;
+
 export default function Page({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<Search> }) {
   return (
     <div className="page frame manage">
-      <Suspense fallback={<p className="page-loading">Loading the page…</p>}>
-        <Manage params={params} searchParams={searchParams} />
-      </Suspense>
+      <Manage params={params} searchParams={searchParams} />
     </div>
   );
 }

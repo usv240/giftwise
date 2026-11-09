@@ -2,7 +2,7 @@ import Link from "next/link";
 import heldOut from "../../../content/eval/held-out-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import { ERROR_RATES } from "@/lib/error-rates";
-import { FAMILY_BASIS, IMPACT, KEPT_SENTENCE } from "@/lib/impact";
+import { FAMILY_BASIS, IMPACT } from "@/lib/impact";
 
 const whole = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
@@ -20,13 +20,15 @@ export function Impact() {
       <ul className="jr ji-list ji-three">
         <li className="jr-item">
           <Link className="jr-link" href="/evidence/impact#kept">
-            <span className="jr-fig tabular">{whole(IMPACT.familyTotal)}</span>
+            <span className="jr-fig tabular">
+              {whole(IMPACT.keptMin)} to {whole(IMPACT.keptMax)} a month
+            </span>
             <span className="jr-what">
-              kept by <span className="tabular">{IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length}</span> families in real SSI court cases, over the{" "}
-              <span className="tabular">{IMPACT.familyCases.map((c) => c.months).join(" and ")}</span> months their cases cover, with the same help routed through Giftwise at 2026 rates.
+              kept in <span className="tabular">{IMPACT.routedCases}</span> of <span className="tabular">{IMPACT.scoredCases}</span> real SSI court cases, with the same help routed through Giftwise at 2026 rates.
             </span>
             <span className="jr-base">
-              {FAMILY_BASIS} {KEPT_SENTENCE}
+              <span className="tabular">{whole(IMPACT.familyTotal)}</span> kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families over the{" "}
+              <span className="tabular">{IMPACT.familyCases.map((c) => c.months).join(" and ")}</span> months their cases cover. {FAMILY_BASIS}
             </span>
           </Link>
         </li>

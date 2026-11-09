@@ -98,10 +98,13 @@ await page.evaluate(() => localStorage.removeItem("gw-prefs"));
 
 // 4. Try: describe tab
 await page.goto(B + "/try", { waitUntil: "networkidle" });
+// Try prices a gift given today, like the gift page: the check two months on, at that year's rate (FULL, above), less the
+// one-off cash gift after the $20 general exclusion and the $60 infrequent or irregular income exclusion.
+const afterCash = (gift) => `$${(FULL - (gift - 80)).toLocaleString("en-US")}`;
 await page.getByLabel("Amount in dollars").fill("300");
-ok("Try describe: $300 cash -> $774", (await page.locator(".result-v").first().textContent()) === "$774");
+ok(`Try describe: $300 cash today -> ${afterCash(300)}`, (await page.locator(".result-v").first().textContent()) === afterCash(300), await page.locator(".result-v").first().textContent());
 await page.getByLabel("Amount in dollars").fill("1,000");
-ok("Try describe: \"1,000\" is read as $1,000 and shown back", (await page.locator(".result-v").first().textContent()) === "$74" && (await page.locator("#try-amount-note").textContent()) === "Checking $1,000", await page.locator("#try-amount-note").textContent());
+ok(`Try describe: "1,000" is read as $1,000 and shown back (${afterCash(1000)})`, (await page.locator(".result-v").first().textContent()) === afterCash(1000) && (await page.locator("#try-amount-note").textContent()) === "Checking $1,000", await page.locator("#try-amount-note").textContent());
 await page.getByLabel("Amount in dollars").fill("abc");
 ok("Try describe: text with no number asks for a number and shows no result", (await page.locator(".result-v").count()) === 0 && /like 1000/.test((await page.locator("#try-amount-note").textContent()) ?? ""));
 await page.getByLabel("Amount in dollars").fill("300");
@@ -109,7 +112,7 @@ await page.locator("select").selectOption("rent");
 await page.getByRole("radio", { name: "Pay the shop" }).check();
 await page.getByText("The same person gives this every month").click();
 const v = await page.locator(".result-v").allTextContents();
-ok("Try describe: monthly rent paid by family shows the lower check and the ABLE route", v.includes("$994"), JSON.stringify(v));
+ok(`Try describe: monthly rent paid by family shows the lower check and the ABLE route ($${FULL.toLocaleString("en-US")})`, v.includes(`$${FULL.toLocaleString("en-US")}`), JSON.stringify(v));
 
 // 5. Try: month tab (CSV)
 await page.getByRole("tab", { name: "A month of gifts" }).click();
@@ -177,12 +180,13 @@ ok("For agents page shows the assistant calling Giftwise tools, starting a check
 
 // 7e. Maya's year in AG Studio: the Giftwise widget runs the rules engine, and reruns when a giver filter is pressed
 await page.goto(B + "/dashboard", { waitUntil: "load" });
-await page.locator(".gw-check").waitFor({ timeout: 90000 });
-const allYear = (await page.locator(".gw-check").innerText()).replace(/\s+/g, " ");
+// The widget renders once AG Studio hands it the rows; when it does not appear, the two checks below fail and the suite goes on.
+const widgetShown = await page.locator(".gw-check").waitFor({ timeout: 90000 }).then(() => true).catch(() => false);
+const allYear = widgetShown ? (await page.locator(".gw-check").innerText()).replace(/\s+/g, " ") : "";
 ok("dashboard widget: $994 every month with Giftwise, far lower as cash", /\$994 Every month, \d+ months/.test(allYear) && /dropped to \$0/.test(allYear), allYear.slice(0, 90));
 await page.locator(".fd-studio button").filter({ hasText: /^Dan$/ }).first().click();
 await page.waitForFunction(() => /5 months in view/.test(document.querySelector(".gw-check")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});
-const danOnly = (await page.locator(".gw-check").innerText()).replace(/\s+/g, " ");
+const danOnly = (await page.locator(".gw-check").count()) ? (await page.locator(".gw-check").innerText()).replace(/\s+/g, " ") : "";
 ok("filtering to one giver reruns the rules engine on just those gifts", /5 months in view/.test(danOnly) && danOnly !== allYear, danOnly.slice(0, 90));
 await page.getByRole("button", { name: "Edit the dashboard" }).click();
 ok("edit mode opens the AG Studio assistant with Giftwise prompt starters", await page.getByRole("button", { name: "What if it were cash?" }).isVisible({ timeout: 15000 }).catch(() => false));
@@ -236,6 +240,8 @@ ok(
 
 // 8d. The guided tour from /evidence: eight stops across six pages, each with its element ringed, and Finish closes it.
 await page.goto(B + "/evidence", { waitUntil: "networkidle" });
+// The tour starts inside the path's disclosure ("What to look for at each step"), one press below the ninety-second version.
+await page.locator("#path-detail > summary").click();
 await page.getByRole("button", { name: "Take the guided tour" }).click();
 const stops = [];
 for (let i = 0; i < 8; i++) {

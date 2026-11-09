@@ -1,0 +1,104 @@
+# The real PayPal checkout, on request: build the app, start it against a fresh Postgres, and run the PayPal checkout
+# suite (tests/e2e/paypal-button.mjs) as the sandbox buyer, which approves both PayPal buttons and checks every capture at
+# PayPal and on the public receipt. It needs the sandbox app's keys and the buyer login as repository secrets; when they
+# are not set, the job says so and stops without failing. The redacted transcript it writes is kept as an artifact.
+#
+# Secrets: PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_VENDOR_EMAIL, PAYPAL_ABLE_EMAIL, SANDBOX_BUYER_EMAIL,
+# SANDBOX_BUYER_PASSWORD. Optional: PAYPAL_VENDOR_EMAIL_RIVERSIDE, PAYPAL_VENDOR_EMAIL_EASTGATE, PAYPAL_VENDOR_EMAIL_NORTHSIDE.
+name: PayPal checkout (sandbox)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-paypal
+  cancel-in-progress: false
+
+jobs:
+  paypal:
+    name: Both PayPal buttons, approved by the sandbox buyer
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: giftwise
+          POSTGRES_PASSWORD: giftwise
+          POSTGRES_DB: giftwise
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U giftwise"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgres://giftwise:giftwise@localhost:5432/giftwise
+      PORT: "3100"
+      BASE_URL: http://localhost:3100
+      CHROME_PATH: /usr/bin/google-chrome
+      PAYPAL_ENV: sandbox
+    steps:
+      - name: Are the sandbox secrets set?
+        id: secrets
+        env:
+          HAVE: ${{ secrets.PAYPAL_CLIENT_ID != '' && secrets.PAYPAL_CLIENT_SECRET != '' && secrets.SANDBOX_BUYER_EMAIL != '' && secrets.SANDBOX_BUYER_PASSWORD != '' && secrets.PAYPAL_VENDOR_EMAIL != '' && secrets.PAYPAL_ABLE_EMAIL != '' }}
+        run: |
+          echo "have=$HAVE" >> "$GITHUB_OUTPUT"
+          if [ "$HAVE" != "true" ]; then
+            echo "The PayPal sandbox secrets are not set on this repository, so the checkout suite did not run." >> "$GITHUB_STEP_SUMMARY"
+            echo "Add PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_VENDOR_EMAIL, PAYPAL_ABLE_EMAIL, SANDBOX_BUYER_EMAIL and SANDBOX_BUYER_PASSWORD under Settings > Secrets, then run this workflow again." >> "$GITHUB_STEP_SUMMARY"
+            echo "Sandbox secrets not set; skipping."
+          fi
+      - uses: actions/checkout@v5
+        if: steps.secrets.outputs.have == 'true'
+      - uses: actions/setup-node@v5
+        if: steps.secrets.outputs.have == 'true'
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        if: steps.secrets.outputs.have == 'true'
+      - name: Build with the sandbox app's public client id
+        if: steps.secrets.outputs.have == 'true'
+        env:
+          NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+        run: npm run build
+      - name: Create the tables in the empty database
+        if: steps.secrets.outputs.have == 'true'
+        run: npx drizzle-kit push --force
+      - name: Start the app with the sandbox keys
+        if: steps.secrets.outputs.have == 'true'
+        env:
+          PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+          PAYPAL_CLIENT_SECRET: ${{ secrets.PAYPAL_CLIENT_SECRET }}
+          NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+          PAYPAL_VENDOR_EMAIL: ${{ secrets.PAYPAL_VENDOR_EMAIL }}
+          PAYPAL_ABLE_EMAIL: ${{ secrets.PAYPAL_ABLE_EMAIL }}
+          PAYPAL_VENDOR_EMAIL_RIVERSIDE: ${{ secrets.PAYPAL_VENDOR_EMAIL_RIVERSIDE }}
+          PAYPAL_VENDOR_EMAIL_EASTGATE: ${{ secrets.PAYPAL_VENDOR_EMAIL_EASTGATE }}
+          PAYPAL_VENDOR_EMAIL_NORTHSIDE: ${{ secrets.PAYPAL_VENDOR_EMAIL_NORTHSIDE }}
+        run: |
+          npm start > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf "$BASE_URL/api/health" -o /dev/null && exit 0; sleep 1; done
+          echo "The app did not start"; cat server.log; exit 1
+      - name: Both PayPal buttons, approved by the sandbox buyer, every capture checked
+        if: steps.secrets.outputs.have == 'true'
+        env:
+          SANDBOX_BUYER_EMAIL: ${{ secrets.SANDBOX_BUYER_EMAIL }}
+          SANDBOX_BUYER_PASSWORD: ${{ secrets.SANDBOX_BUYER_PASSWORD }}
+        run: npm run e2e:paypal
+      - name: Keep the redacted transcript
+        if: steps.secrets.outputs.have == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-transcripts
+          path: content/eval/e2e-transcripts.json
+          if-no-files-found: ignore
+      - name: Server log
+        if: steps.secrets.outputs.have == 'true' && failure()
+        run: cat server.log

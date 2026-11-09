@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db, schema } from "./db";
 import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Profile, type Pronoun } from "./rules";
 import { SAMPLE_MANAGE_TOKEN, hashToken, newToken, resetSampleManage, routeNeed } from "./manage";
+import { sampleNeedPositions, seedRecordedReceipt } from "./sample-receipt";
 
 export type NeedRow = typeof schema.needs.$inferSelect;
 export type PaymentRow = typeof schema.payments.$inferSelect;
@@ -42,7 +43,10 @@ export async function ensureSample() {
     const [h] = await d.update(schema.households).set({ manageTokenHash: hashToken(SAMPLE_MANAGE_TOKEN) }).where(eq(schema.households.id, existing.id)).returning();
     return h;
   }
-  if (existing) return existing;
+  if (existing) {
+    await seedRecordedReceipt(existing.id, await sampleNeedPositions(existing.id), payeeEmail);
+    return existing;
+  }
   const [h] = await d
     .insert(schema.households)
     .values({ slug: SAMPLE.slug, name: SAMPLE.name, caregiverName: SAMPLE.caregiverName, note: SAMPLE.note, profile: SAMPLE.profile, isSample: true, manageTokenHash: hashToken(SAMPLE_MANAGE_TOKEN) })
@@ -52,6 +56,8 @@ export async function ensureSample() {
   if (h) {
     await d.insert(schema.needs).values(SAMPLE.needs.map((n, i) => ({ ...n, householdId: household.id, sortOrder: i })));
   }
+  // The recorded sandbox receipt (content/sample-receipt.json) travels with the sample, as an earlier round.
+  await seedRecordedReceipt(household.id, await sampleNeedPositions(household.id), payeeEmail);
   return household;
 }
 

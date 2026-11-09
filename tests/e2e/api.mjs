@@ -1,10 +1,13 @@
 // End-to-end API checks against the running dev server. Prints PASS/FAIL lines only.
+import { transcript } from "./transcript.mjs";
 const B = process.env.BASE_URL ?? "http://localhost:3100";
 let pass = 0, fail = 0;
 // A gift given today counts in the check paid two months later, at that year's rate: $994 in 2026, $1,029 from January 2027 (91 FR 67380).
 const PAY = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 2, 1));
 const FULL = PAY.getUTCFullYear() >= 2027 ? 1029 : 994;
-const ok = (name, cond, extra = "") => { if (cond) pass++; else fail++; console.log(`${cond ? "PASS" : "FAIL"}  ${name}${extra ? "  | " + extra : ""}`); };
+// The steps that touch PayPal are written to content/eval/e2e-transcripts.json with their order, capture and batch ids, redacted.
+const T = transcript("api", B);
+const ok = (name, cond, extra = "") => { if (cond) pass++; else fail++; console.log(`${cond ? "PASS" : "FAIL"}  ${name}${extra ? "  | " + extra : ""}`); T.step(name, { ok: cond }); };
 const post = (p, body, headers = { "Content-Type": "application/json" }) => fetch(B + p, { method: "POST", headers, body: typeof body === "string" ? body : JSON.stringify(body) });
 
 // check-gift: hero numbers
@@ -103,6 +106,7 @@ ok("gift-pages rejects a name that is not letters", r.status === 400, `${r.statu
 r = await post("/api/paypal/orders", { needId: 4 });
 j = await r.json();
 ok("paypal order for need 4 created (sandbox)", r.status === 200 && /^[A-Z0-9]+$/.test(j.data?.id ?? ""), j.data?.id ?? j.error?.message);
+T.step("the need order, as created (never approved: the API suite moves no money)", { order_id: j.data?.id, payees: 1, status: j.data?.status });
 r = await post("/api/paypal/orders", { needId: 9999 });
 ok("paypal order for unknown need -> 404", r.status === 404);
 r = await post("/api/paypal/orders", { needId: "1; drop table" });
@@ -129,6 +133,7 @@ if (j.data?.id) {
   r = await fetch(`${B}/api/paypal/orders/${j.data.id}`);
   const live = await r.json();
   ok("live order check returns each payee unit from PayPal", r.status === 200 && live.data?.units?.length === 5 && ["CREATED", "PAYER_ACTION_REQUIRED"].includes(live.data?.status), `${live.data?.status}`);
+  T.step("the routed $1,500 order, read back from PayPal", { order_id: j.data.id, payees: live.data?.units?.length, paypal_status: live.data?.status, amount: 1500 });
   r = await fetch(`${B}/r/${j.data.id}`);
   ok("receipt page renders for a started order", r.status === 200);
 }
@@ -278,6 +283,7 @@ r = await post("/api/org/payouts", { grants: [{ slug: "maya", amount: 10 }] });
 j = await r.json();
 const payoutBatch = j.data?.batch_id;
 ok("org payouts sends one PayPal Payouts batch", r.status === 200 && /^[A-Z0-9]{8,30}$/.test(payoutBatch ?? ""), `${r.status} ${payoutBatch ?? j.error?.message}`);
+T.step("the fund's $10 grant as one PayPal Payouts batch", { batch_id: payoutBatch, payees: j.data?.items?.length, status: j.data?.batch_status ?? j.data?.status, amount: 10 });
 if (payoutBatch) {
   let b = null;
   for (let i = 0; i < 20; i++) {
@@ -346,4 +352,5 @@ r = await fetch(`${B}/g/maya/opengraph-image`);
 ok("the gift page has its own share image", r.status === 200 && (r.headers.get("content-type") ?? "").startsWith("image/png"), `${r.status} ${r.headers.get("content-type")}`);
 
 await post("/api/demo/reset", {});
+T.save(pass, fail);
 console.log(`\n${pass} passed, ${fail} failed`);

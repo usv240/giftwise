@@ -6,7 +6,7 @@ import { Info } from "@/components/Info";
 import { MAX_UNITS } from "@/lib/routing";
 
 /**
- * What is first here, each tied to the comparison rows it rests on (src/components/judges/Compare.tsx, every row from
+ * What is first here, each tied to the comparison rows it rests on (src/components/evidence/Compare.tsx, every row from
  * that product's own pages). Stated as what the compared products do and the one step they do not; nothing wider.
  */
 export function WhatIsFirst({

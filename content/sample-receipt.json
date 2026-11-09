@@ -1,0 +1,46 @@
+{
+  "about": "One captured PayPal sandbox order from a real run of npm run e2e:paypal on the sample page, recorded here so a receipt can be read on any deployment without paying. It is seeded with the sample household as an earlier round (archived), so it never counts toward Maya's open needs or her report. Check with PayPal now on its receipt asks PayPal's sandbox for this order live. Written by scripts/record-sample-receipt.ts; no email address or key is kept.",
+  "recorded_at": "2026-11-09T01:08:26.022Z",
+  "source": "npm run e2e:paypal, Give any amount, routed across the open needs and the ABLE account",
+  "order_id": "62186861DT1367502",
+  "captured_at": "2026-11-09T01:02:05.977Z",
+  "payer_first_name": "John",
+  "lines": [
+    {
+      "reference_id": "need-2",
+      "need_index": 1,
+      "payee_name": "Eastgate College Bookstore",
+      "payee_account": "vendor:eastgate",
+      "route": "vendor",
+      "amount": "649.00",
+      "capture_id": "6V484671DN533594R"
+    },
+    {
+      "reference_id": "need-3",
+      "need_index": 2,
+      "payee_name": "Maya's ABLE account",
+      "payee_account": "able",
+      "route": "able",
+      "amount": "138.00",
+      "capture_id": "0U81621036183911G"
+    },
+    {
+      "reference_id": "need-4",
+      "need_index": 3,
+      "payee_name": "Northside Physical Therapy",
+      "payee_account": "vendor:northside",
+      "route": "vendor",
+      "amount": "90.00",
+      "capture_id": "4K776927XY580431Y"
+    },
+    {
+      "reference_id": "able-savings",
+      "need_index": null,
+      "payee_name": "Maya's ABLE account",
+      "payee_account": "able",
+      "route": "able",
+      "amount": "623.00",
+      "capture_id": "8U746024AT5455016"
+    }
+  ]
+}

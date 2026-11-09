@@ -3,7 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
-import { MODE_LABEL, liveSummary, optionalOffSentence, runChecks } from "@/lib/health";
+import { MODE_LABEL, liveSummary, optionalOffSentence, statusChecks } from "@/lib/health";
 import { CheckedAt } from "./CheckedAt";
 import "../pages.css";
 import "./status.css";
@@ -13,10 +13,13 @@ export const metadata: Metadata = { title: "Status", description: "Every service
 /** The Info entry that explains each service, when it is not stack.<id>. */
 const INFO: Record<string, string> = { database: "render", webhooks: "paypal", payees: "paypal", checks: "render", "paypal-mcp": "paypal_apis" };
 
-async function Rows() {
+type Search = { check?: string };
+
+async function Rows({ searchParams }: { searchParams: Promise<Search> }) {
   await connection();
-  const checks = await runChecks({ probeMcp: true });
-  const at = new Date().toISOString();
+  const q = await searchParams;
+  // One round of probes serves every visitor for a minute; "Check again" runs a new round now.
+  const { checks, at } = await statusChecks({ fresh: q.check === "now" });
   // Optional services that are off are named, not counted: they are a choice, and nothing depends on them.
   const s = liveSummary(checks);
   const off = optionalOffSentence(s.optionalOff);
@@ -27,8 +30,9 @@ async function Rows() {
           {s.live} of {s.of} services live, checked at <CheckedAt iso={at} />.
         </span>{" "}
         {off && <span className="muted">{off} </span>}
-        <a className="text-link" href="/status">
-          Check again
+        <span className="muted">Each round of checks is kept for a minute. </span>
+        <a className="text-link" href="/status?check=now">
+          Check again now
         </a>
       </p>
       <ul className="status-list">
@@ -51,7 +55,7 @@ async function Rows() {
   );
 }
 
-export default function StatusPage() {
+export default function StatusPage({ searchParams }: { searchParams: Promise<Search> }) {
   return (
     <div className="page frame">
       <header className="page-head">
@@ -59,7 +63,7 @@ export default function StatusPage() {
           <h1 className="page-title">Status</h1>
           <Info id="page.status" />
         </div>
-        <p className="lede">Every service Giftwise uses, checked live when you open this page. When a service is not reachable, Giftwise switches to its fallback so nothing breaks.</p>
+        <p className="lede">Every service Giftwise uses, checked live. The latest round of checks is shown at once and runs again after a minute. When a service is not reachable, Giftwise switches to its fallback so nothing breaks.</p>
         <p className="page-prose">
           For requests, errors, payments and a live event stream, see{" "}
           <Link className="text-link" href="/ops">
@@ -69,7 +73,7 @@ export default function StatusPage() {
         </p>
       </header>
       <Suspense fallback={<p className="page-loading">Checking every service…</p>}>
-        <Rows />
+        <Rows searchParams={searchParams} />
       </Suspense>
     </div>
   );
