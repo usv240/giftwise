@@ -4,8 +4,11 @@ import Papa from "papaparse";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Info } from "../Info";
 import { ResultCard } from "../ResultCard";
+import { AiBudget } from "./AiBudget";
 import { MakeGiftPage } from "./MakeGiftPage";
-import { ReviewPanel, type ReviewData } from "./ReviewPanel";
+import { ReviewPanel, replayedSource, type ReviewData, type ReviewInput } from "./ReviewPanel";
+import type { SampleRead } from "@/lib/ai/sample-bill";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import { usePrefs } from "../prefs";
 import { modelName } from "@/lib/ai/model-name";
 import { parseDollars, parseOptionalDollars } from "@/lib/parseDollars";
@@ -318,8 +321,16 @@ function MonthTab() {
   );
 }
 
+/** How a run was answered, from the response's meta: the model, and whether Claude's recorded answer was replayed. */
+type RunMeta = { model?: string; replayed?: boolean; recorded_at?: string; review_replayed?: boolean };
+/** The sample electric bill, and how the two reviewers are asked about it (the API docs' example, src/lib/ai/replay-set.ts). */
+const SAMPLE_BILL_PNG = "/samples/northside-electric-bill.png";
+const SAMPLE_REVIEW = { date: "2026-04-10", ...(ENDPOINTS.find((e) => e.id === "review-bill")!.example as Omit<ReviewInput, "date">) } as ReviewInput;
+type SampleRun = { read: SampleRead; review: ReviewData | null; reviewMeta: RunMeta; reviewNote?: string };
+
 function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
-  const [state, setState] = useState<{ status: "idle" | "working" | "done" | "unavailable" | "error"; message?: string; data?: unknown; model?: string }>({ status: "idle" });
+  const [state, setState] = useState<{ status: "idle" | "working" | "done" | "unavailable" | "error"; message?: string; data?: unknown; meta?: RunMeta; sample?: SampleRun }>({ status: "idle" });
+  const [runs, setRuns] = useState(0);
   const [url, setUrl] = useState("");
   // "Start a gift page" on the home page asks who it is for and passes it as ?name=, so the page it makes starts with that name.
   // This tab only renders in the browser (the open tab comes from the address), so reading the address here is safe.
@@ -335,10 +346,30 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
       const json = await res.json();
       if (res.status === 503) setState({ status: "unavailable", message: json.error?.message });
       else if (!res.ok) setState({ status: "error", message: json.error?.message ?? "Something went wrong. Please try again." });
-      else setState({ status: "done", data: json.data, model: json.meta?.model });
+      else setState({ status: "done", data: json.data, meta: json.meta });
     } catch {
       setState({ status: "error", message: "Could not reach Giftwise. Check your connection and try again." });
     }
+    setRuns((n) => n + 1);
+  }
+  // The sample bill end to end: Claude reads it (the live step on its example page), and the two reviewers answer on it.
+  // Live within the day's budget; otherwise Claude's recorded answers, replayed through the same code.
+  async function runSample() {
+    setState({ status: "working" });
+    try {
+      const [read, review] = await Promise.all([
+        fetch("/api/live/sample-bill", { method: "POST" }).then((r) => r.json()),
+        fetch("/api/v1/review-bill", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(SAMPLE_REVIEW) }).then(async (r) => ({ ok: r.ok, json: await r.json() })),
+      ]);
+      if (!read.data) throw new Error();
+      setState({
+        status: "done",
+        sample: { read: read.data as SampleRead, review: review.ok ? (review.json.data as ReviewData) : null, reviewMeta: review.json.meta ?? {}, reviewNote: review.ok ? undefined : review.json.error?.message },
+      });
+    } catch {
+      setState({ status: "error", message: "Could not reach Giftwise. Check your connection and try again." });
+    }
+    setRuns((n) => n + 1);
   }
   return (
     <div className="try-split">
@@ -360,7 +391,18 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
               }}
             />
           </label>
-        ) : (
+        ) : null}
+        {kind === "bill" && (
+          <div className="try-sample">
+            <button type="button" className="btn btn-quiet" onClick={runSample} disabled={state.status === "working"}>
+              Use the sample electric bill
+            </button>
+            <a className="text-link" href={SAMPLE_BILL_PNG} target="_blank" rel="noreferrer">
+              See the bill
+            </a>
+          </div>
+        )}
+        {kind === "bill" ? null : (
           <form
             className="try-row"
             onSubmit={(e) => {
@@ -394,6 +436,7 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
             </div>
           </form>
         )}
+        <AiBudget refresh={runs} />
         <p className="muted try-privacy">What you upload is used only to show your result and is deleted within 7 days.</p>
       </div>
       <div className="ai-state" aria-live="polite">
@@ -403,8 +446,9 @@ function AiTab({ kind }: { kind: "bill" | "fundraiser" }) {
           <p className="result-attention">{state.message ?? "The live AI service is not connected on this server yet. The ready-made examples show the full result."}</p>
         )}
         {state.status === "error" && <p className="result-attention">{state.message}</p>}
-        {state.status === "done" && kind === "bill" && <BillResult data={state.data as BillData} model={state.model} />}
-        {state.status === "done" && kind === "fundraiser" && <FundraiserResult data={state.data as FundraiserData} url={url} forName={forName} />}
+        {state.status === "done" && state.sample && <SampleBillResult run={state.sample} />}
+        {state.status === "done" && !state.sample && kind === "bill" && <BillResult data={state.data as BillData} meta={state.meta ?? {}} />}
+        {state.status === "done" && kind === "fundraiser" && <FundraiserResult data={state.data as FundraiserData} url={url} forName={forName} meta={state.meta ?? {}} />}
       </div>
     </div>
   );
@@ -426,8 +470,61 @@ type BillData = {
   review?: ReviewData | null;
 };
 
+const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" });
+/** The line under "What Claude read": live, or Claude's recorded reading replayed through the same reader. */
+function ReadMode({ meta }: { meta: RunMeta }) {
+  if (!meta.replayed) return null;
+  return <p className="read-mode muted">Replayed: {modelName(meta.model)}&rsquo;s recorded reading{meta.recorded_at ? ` of ${when(meta.recorded_at)}` : ""}, run just now through the same reader and rules engine.</p>;
+}
+
+/** The sample bill: what Claude read, the engine's answer for paying it, and the two reviewers with the referee's verdict. */
+function SampleBillResult({ run }: { run: SampleRun }) {
+  const r = run.read;
+  const input = SAMPLE_REVIEW;
+  return (
+    <div className="ai-result">
+      <div className="read-card" data-ui>
+        <p className="result-k">What Claude read</p>
+        <ReadMode meta={{ model: r.model, replayed: r.mode !== "live", recorded_at: r.mode !== "live" ? r.read_at : undefined }} />
+        <dl className="read-fields">
+          <div>
+            <dt>From</dt>
+            <dd>{r.bill.vendor_name}</dd>
+          </div>
+          <div>
+            <dt>Amount</dt>
+            <dd className="tabular">{usd(r.bill.amount_due)}</dd>
+          </div>
+          <div>
+            <dt>Due</dt>
+            <dd>{r.bill.due_date ?? "Not shown"}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{r.bill.is_shelter_cost ? "Housing cost (utility, rent or similar)" : CATEGORIES.find((c) => c.value === r.bill.vendor_category)?.label}</dd>
+          </div>
+        </dl>
+        <p className="read-plain">{r.bill.explanation.plain}</p>
+        <p className="read-plain">
+          Paid to the company, her {r.check.month} check would be <span className="tabular">{usd(r.check.paid_to_company)}</span>; through her ABLE account it stays{" "}
+          <span className="tabular">{usd(r.check.through_able)}</span>.
+        </p>
+      </div>
+      {run.review ? (
+        <ReviewPanel input={input} ran={{ data: run.review, source: run.reviewMeta.replayed ? replayedSource(run.reviewMeta) : `Run live just now with ${modelName(run.reviewMeta.model)}.` }} />
+      ) : (
+        <>
+          {run.reviewNote && <p className="result-attention">{run.reviewNote}</p>}
+          <ReviewPanel input={input} />
+        </>
+      )}
+    </div>
+  );
+}
+
 /** What Claude read, side by side with the engine's answer for paying that bill, and the two reviewers when the bill is near housing. */
-function BillResult({ data, model }: { data: BillData; model?: string }) {
+function BillResult({ data, meta }: { data: BillData; meta: RunMeta }) {
+  const model = meta.model;
   const { prefs } = usePrefs();
   const b = data.bill;
   // The reading the route rests on: the referee's when the reviewers ran (the worse one when it was unsure), else Claude's.
@@ -442,6 +539,7 @@ function BillResult({ data, model }: { data: BillData; model?: string }) {
     <div className="ai-result">
       <div className="read-card" data-ui>
         <p className="result-k">What Claude read</p>
+        <ReadMode meta={meta} />
         <dl className="read-fields">
           <div>
             <dt>From</dt>
@@ -465,7 +563,7 @@ function BillResult({ data, model }: { data: BillData; model?: string }) {
       </div>
       <ResultCard result={result} title={`If someone pays ${b.vendor_name}`} />
       {data.review ? (
-        <ReviewPanel input={input} ran={{ data: data.review, source: `${asked}Run live just now with ${modelName(model)}.` }} />
+        <ReviewPanel input={input} ran={{ data: data.review, source: meta.review_replayed ? `${asked}${replayedSource(meta)}` : `${asked}Run live just now with ${modelName(model)}.` }} />
       ) : data.route?.decided_by === "both_readings" ? (
         <>
           {data.route.note && <p className="result-attention">{data.route.note}</p>}
@@ -487,12 +585,13 @@ type FundraiserData = {
 
 const ROUTE_WORDS: Record<string, string> = { vendor: "Pay the shop", item: "Give the item", able: "To her ABLE account", cash: "Cash" };
 
-function FundraiserResult({ data, url, forName }: { data: FundraiserData; url: string; forName: string }) {
+function FundraiserResult({ data, url, forName, meta }: { data: FundraiserData; url: string; forName: string; meta: RunMeta }) {
   const { prefs } = usePrefs();
   return (
     <div className="ai-result">
       <div className="read-card" data-ui>
         <p className="result-k">{data.page.title}</p>
+        <ReadMode meta={meta} />
         <p className="read-summary">{data.summary}</p>
         <ul className="month-gifts">
           {data.plan.map((p) => (

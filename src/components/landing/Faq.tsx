@@ -26,7 +26,7 @@ const faqs = (bills: number, kept: number) => [
   },
   {
     q: "Does Giftwise hold the money?",
-    a: "No. Donors pay the shop or the ABLE account directly through PayPal. Giftwise never holds funds, so nothing sits in her savings.",
+    a: "No. Donors pay the shop directly through PayPal, and the ABLE share through the ABLE plan's own gift page. Giftwise never holds funds, so nothing sits in her savings.",
   },
   {
     q: "How do I know an answer is right?",

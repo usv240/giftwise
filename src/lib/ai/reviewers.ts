@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { asData, structured } from "./claude";
+import { asData, structured, type StructuredOpts } from "./claude";
 import { AUTHORITY, passagesFor, referee, routeForDecision, type AuthorityId, type Review } from "@/lib/review/referee";
 import { DEFAULT_PROFILE, type Gift, type Profile } from "@/lib/rules";
 
@@ -31,12 +31,12 @@ The question: when someone other than the SSI recipient pays this bill directly 
 Answer "unclear" if your passages do not settle it. Never compute benefit amounts: Giftwise's rules engine does that.`;
 }
 
-/** One reviewer, one authority. */
-export async function review(authority: AuthorityId, c: ReviewCase): Promise<Review & { model: string }> {
+/** The request one reviewer answers: its rulebook passages, the bill as data, the question. Its key finds a recorded answer. */
+export function reviewRequest(authority: AuthorityId, c: ReviewCase): StructuredOpts<ReturnType<typeof schemaFor>> {
   const passages = passagesFor(authority)
     .map((p) => `[${p.id}] ${p.cite}${p.section_heading ? `, ${p.section_heading}` : ""}\n${p.text}`)
     .join("\n\n");
-  const { data, model } = await structured({
+  return {
     schema: schemaFor(authority),
     system: systemFor(authority),
     effort: "medium",
@@ -46,17 +46,25 @@ export async function review(authority: AuthorityId, c: ReviewCase): Promise<Rev
       asData("bill", `${c.description}\nAmount: $${c.gift.amount.toFixed(2)}${c.gift.recurring ? ", paid every month" : ""}`),
       { type: "text", text: "Is this bill a shelter cost under your passages? Quote the passage that decides it." },
     ],
-  });
-  return { authority, ...data, model };
+  };
 }
 
-/** Both reviewers in parallel, then the referee, then the rules engine. */
-export async function runReviewers(c: ReviewCase, profile: Profile = DEFAULT_PROFILE) {
+/** One reviewer, one authority. */
+export async function review(authority: AuthorityId, c: ReviewCase, how: { replayOnly?: boolean } = {}): Promise<Review & { model: string; replayed: boolean; recordedAt?: string }> {
+  const { data, model, replayed, recordedAt } = await structured(reviewRequest(authority, c), how);
+  return { authority, ...data, model, replayed, recordedAt };
+}
+
+/**
+ * Both reviewers in parallel, then the referee, then the rules engine. `replayed` when both answers are Claude's recorded
+ * ones; the quote check and the referee run on them exactly as on live answers.
+ */
+export async function runReviewers(c: ReviewCase, profile: Profile = DEFAULT_PROFILE, how: { replayOnly?: boolean } = {}) {
   const started = Date.now();
-  const [regs, poms] = await Promise.all([review("regs", c), review("poms", c)]);
+  const [regs, poms] = await Promise.all([review("regs", c, how), review("poms", c, how)]);
   const ref = referee([regs, poms]);
   const route = routeForDecision(c.gift, ref.decision, profile);
-  return { reviews: [regs, poms], ...ref, outcome: route, model: regs.model, ms: Date.now() - started };
+  return { reviews: [regs, poms], ...ref, outcome: route, model: regs.model, ms: Date.now() - started, replayed: regs.replayed && poms.replayed, recordedAt: regs.recordedAt ?? poms.recordedAt };
 }
 
 /** The public shape of a run: the API response, and the recorded examples. */

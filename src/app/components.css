@@ -601,3 +601,36 @@
   display: inline-flex;
   align-items: center;
 }
+
+/* Beside each live AI step: today's budget, and whether the next run is live or replayed. A dot carries the state,
+   the words say it; the line keeps its height while it loads so nothing below moves. */
+.ai-budget {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  min-height: 1.5em;
+  font-size: var(--step-small);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 68ch;
+}
+.ai-budget::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  transform: translateY(-1px);
+}
+.ai-budget[data-tone="live"]::before {
+  background: var(--positive);
+}
+.ai-budget[data-tone="replayed"]::before {
+  background: var(--accent);
+}
+.ai-budget[data-tone="checking"]::before {
+  background: var(--surface-2);
+}
+

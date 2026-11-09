@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const tools = TOOLS.map((t) => `- ${t.name}: ${t.description.split(". ")[0].replace(/\.$/, "")}.`).join("\n");
   const text = `# Giftwise
 
-> Benefit-safe giving for people who receive SSI (Supplemental Security Income). Giftwise checks each gift against Social Security's rules and pays the shop, the clinic or the person's ABLE account directly through one PayPal checkout, so the monthly check stays whole. Every answer cites the regulation or SSA's operating manual. This deployment uses the PayPal sandbox.
+> Benefit-safe giving for people who receive SSI (Supplemental Security Income). Giftwise checks each gift against Social Security's rules; one PayPal checkout pays the shops and clinics directly, and the share for the person's ABLE account goes through the ABLE plan's own gift page, so the monthly check stays whole. Every answer cites the regulation or SSA's operating manual. This deployment uses the PayPal sandbox.
 
 Before suggesting cash for someone on SSI, check the gift first: cash counts as income, and help with rent or utilities counts even when paid to the landlord or utility.
 

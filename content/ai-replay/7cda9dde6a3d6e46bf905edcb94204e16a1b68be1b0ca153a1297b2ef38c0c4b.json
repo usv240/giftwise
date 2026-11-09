@@ -1,0 +1,16 @@
+{
+  "what": "The Regulations reviewer on \"Northside Electric Co-op, residential electric service, monthly bill\"",
+  "source": "src/app/developers/docs/recorded.json (review-bill)",
+  "recorded_at": "2026-11-05",
+  "model": "claude-opus-5-5",
+  "stop_reason": "end_turn",
+  "usage": null,
+  "parsed_output": {
+    "answer": "shelter",
+    "passage_id": "cfr-416-1130-shelter",
+    "quote": "Shelter includes room, rent, mortgage payments, real property taxes, heating fuel, gas, electricity, water, sewerage, and garbage collection services.",
+    "reason_plain": "Yes, this is a shelter cost. Electricity is listed by name as shelter, so someone else paying it counts as in-kind support.",
+    "reason_technical": "20 CFR 416.1130(b)(1) lists \"electricity\" in its definition of shelter. It also counts as in-kind support and maintenance any shelter \"that you receive because someone else pays for it.\" A residential electric bill paid directly to the co-op is not income itself under 416.1103(g). However, the shelter received because of that payment is in-kind income for shelter.",
+    "confidence": 0.95
+  }
+}

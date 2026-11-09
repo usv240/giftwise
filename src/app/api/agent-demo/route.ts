@@ -1,7 +1,8 @@
 import { runAgentDemo } from "@/lib/agent/demo";
 import { log } from "@/lib/log";
 import { hit } from "@/lib/rate-limit";
-import { AiUnavailableError, aiAvailable } from "@/lib/ai/claude";
+import { AI_DAILY_CAP_USD, AiUnavailableError, aiAvailable } from "@/lib/ai/claude";
+import { aiSpentToday } from "@/lib/ai/budget";
 import { fail, ok } from "@/lib/api/envelope";
 import { guard } from "@/lib/api/keys";
 import { audit } from "@/lib/audit";
@@ -12,6 +13,8 @@ import { api } from "@/lib/api/handler";
 async function handle(req: Request) {
   const started = Date.now();
   if (!aiAvailable()) return fail("upstream_unavailable", "The assistant needs the AI service, which is not connected on this server. The recorded run shows the full result.", 503);
+  // The assistant is the site's largest AI step, so it runs only while the day's spend is under the budget /agents shows.
+  if ((await aiSpentToday().catch(() => 0)) >= AI_DAILY_CAP_USD) return fail("upstream_unavailable", "Today's AI budget is spent, so the recorded run shows the full result. It resets at midnight Pacific time.", 503);
   if (!(await hit("agent-demo", 60, 1)).allowed) return fail("rate_limited", "The assistant ran a moment ago. Please wait a minute and run it again, or read the recorded run.", 429);
   try {
     const run = await runAgentDemo(publicOrigin(req));

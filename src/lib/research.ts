@@ -22,6 +22,8 @@ export type Figure = {
   code: string[];
   source: string;
   sourceLabel: string;
+  /** Where in the source the figure is: a table, a printed page, a Federal Register page or a section. */
+  locator: string;
 };
 
 const fbr = facts.values.fbr_individual.value;
@@ -50,6 +52,7 @@ export const SCALE: Figure[] = [
     code: ["src/lib/rules/engine.ts", "src/lib/impact.ts"],
     source: "ssa-asr-2024-sect02",
     sourceLabel: "SSI Annual Statistical Report 2024, Tables 8 and 12",
+    locator: "Tables 8 and 12",
   },
   {
     id: "afr-ism-share",
@@ -59,6 +62,7 @@ export const SCALE: Figure[] = [
     code: ["src/lib/report/ssa.ts", "src/lib/report/verify.ts"],
     source: "ssa-afr-2025-payment-integrity",
     sourceLabel: "SSA FY 2025 Agency Financial Report, payment integrity",
+    locator: "p. 184 (causes of SSI improper payments, FY 2020 to 2024) and p. 186 (the 8.59 percent, and self-reporting)",
   },
   {
     id: "oig-no-tools",
@@ -68,6 +72,7 @@ export const SCALE: Figure[] = [
     code: ["src/lib/review/referee.ts", "src/lib/audit.ts", "src/lib/error-rates.ts"],
     source: "ssa-oig-152601",
     sourceLabel: "SSA Inspector General, July 2026",
+    locator: "p. 11",
   },
   {
     id: "oig-9-percent",
@@ -77,6 +82,7 @@ export const SCALE: Figure[] = [
     code: ["src/lib/rules/engine.ts", "src/lib/routing.ts"],
     source: "ssa-oig-062405",
     sourceLabel: "SSA Inspector General, February 2025",
+    locator: "p. 3 (the 9 percent) and p. 2 (the 51 percent)",
   },
   {
     id: "fr-rental-132",
@@ -86,6 +92,7 @@ export const SCALE: Figure[] = [
     code: ["src/lib/impact.ts", "src/lib/rules/engine.ts"],
     source: "fr-89-25507-rental-subsidy",
     sourceLabel: "89 FR 25507, April 2024",
+    locator: "89 FR 25512, Anticipated Transfers to Our Program",
   },
   {
     id: "fr-food-1-6b",
@@ -95,6 +102,7 @@ export const SCALE: Figure[] = [
     code: ["src/lib/rules/table.ts", "src/lib/rules-watch.ts"],
     source: "fr-89-21199",
     sourceLabel: "89 FR 21199, March 2024",
+    locator: "89 FR 21206 (the $1.6 billion) and 89 FR 21200 (payment errors)",
   },
   {
     id: "em-recovery-10",
@@ -104,6 +112,7 @@ export const SCALE: Figure[] = [
     code: ["scripts/run-field-cases.ts", "src/lib/impact.ts"],
     source: "ssa-em-25029-rev",
     sourceLabel: "SSA EM-25029 REV, August 2025",
+    locator: "Section C, Instructions for new overpayments",
   },
 ];
 
@@ -117,6 +126,7 @@ export const LIMIT: Figure[] = [
     code: ["src/lib/rules/engine.ts", "scripts/run-field-cases.ts"],
     source: "ssa-asr-2024-sect11",
     sourceLabel: "SSI Annual Statistical Report 2024, Tables 76 and 77",
+    locator: "Tables 76 and 77",
   },
   {
     id: "oact-savings-penalty",
@@ -126,6 +136,7 @@ export const LIMIT: Figure[] = [
     code: ["src/lib/rules/params.ts", "content/facts.json"],
     source: "ssa-oact-cassidy-2026",
     sourceLabel: "SSA Chief Actuary, August 2026",
+    locator: "p. 1",
   },
   {
     id: "able-reach",
@@ -135,16 +146,18 @@ export const LIMIT: Figure[] = [
     code: ["src/lib/rules/engine.ts", "src/lib/households.ts"],
     source: "iss-able-2q-2026",
     sourceLabel: "ISS Market Intelligence, August 2026; POMS SI 01130.740",
+    locator: "June 2026 Quarterly 529 & ABLE Market Sizing Data, last item",
   },
 ];
 
 /** Published evidence that doing the steps beats explaining them, each as what it measured in its own program. */
-export const UPTAKE: { id: string; who: string; found: string; source: string }[] = [
-  { id: "finkelstein-notowidigdo-2019", who: "Finkelstein and Notowidigdo, 2019", found: "In a randomized trial of about 30,000 older people likely eligible for SNAP, 6 percent of the control group enrolled within nine months, 11 percent of those sent information, and 18 percent of those sent information and offered help with the application.", source: "finkelstein-notowidigdo-2019" },
-  { id: "bendtsen-2026-takeup", who: "Bendtsen, 2026", found: "Across 51 field experiments with 187 effect sizes, help that reduces what applicants must do raised take-up by 8.3 percentage points on average; information that reduces what they must learn, by 3.4 points.", source: "bendtsen-2026-takeup" },
-  { id: "wright-2017-medicaid", who: "Wright, Garcia-Alexander, Weller and Baicker, 2017", found: "Low-cost mailings in Oregon raised Medicaid enrollment among lottery selectees from 27 percent to about 41 percent, and among people presumed eligible by about 3 points, at about $2.50 a person.", source: "wright-2017-medicaid" },
-  { id: "fannin-2024-wic", who: "Fannin, Heflin and Lopoo, 2024", found: "Waiving in-person certification raised WIC caseloads by about 11 percent, with no detectable effect in counties that kept paper document steps or offered only curbside rather than fully remote certification.", source: "fannin-2024-wic" },
-  { id: "manoli-turner-2014", who: "Manoli and Turner, 2014 (working paper)", found: "An IRS reminder with a simplified form led nearly 80 percent of apparently eligible childless filers to claim the EITC that year; the effect fell to about 22 percent a year later, so a one-time nudge fades.", source: "manoli-turner-2014" },
+/** `locator`: where the figures are in each paper (the abstract, a printed page, or the article's pages where the results sit in its body). */
+export const UPTAKE: { id: string; who: string; found: string; source: string; locator: string }[] = [
+  { id: "finkelstein-notowidigdo-2019", who: "Finkelstein and Notowidigdo, 2019", found: "In a randomized trial of about 30,000 older people likely eligible for SNAP, 6 percent of the control group enrolled within nine months, 11 percent of those sent information, and 18 percent of those sent information and offered help with the application.", source: "finkelstein-notowidigdo-2019", locator: "p. 1509" },
+  { id: "bendtsen-2026-takeup", who: "Bendtsen, 2026", found: "Across 51 field experiments with 187 effect sizes, help that reduces what applicants must do raised take-up by 8.3 percentage points on average; information that reduces what they must learn, by 3.4 points.", source: "bendtsen-2026-takeup", locator: "abstract" },
+  { id: "wright-2017-medicaid", who: "Wright, Garcia-Alexander, Weller and Baicker, 2017", found: "Low-cost mailings in Oregon raised Medicaid enrollment among lottery selectees from 27 percent to about 41 percent, and among people presumed eligible by about 3 points, at about $2.50 a person.", source: "wright-2017-medicaid", locator: "pp. 838 to 845, results" },
+  { id: "fannin-2024-wic", who: "Fannin, Heflin and Lopoo, 2024", found: "Waiving in-person certification raised WIC caseloads by about 11 percent, with no detectable effect in counties that kept paper document steps or offered only curbside rather than fully remote certification.", source: "fannin-2024-wic", locator: "abstract" },
+  { id: "manoli-turner-2014", who: "Manoli and Turner, 2014 (working paper)", found: "An IRS reminder with a simplified form led nearly 80 percent of apparently eligible childless filers to claim the EITC that year; the effect fell to about 22 percent a year later, so a one-time nudge fades.", source: "manoli-turner-2014", locator: "abstract" },
 ];
 
 /** The law, the code and the test on one line: the rules that make the vendor-pay and ABLE routes non-countable, and the housing cap. */

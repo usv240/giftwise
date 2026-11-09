@@ -37,7 +37,8 @@ export function Results() {
           </span>
           <span className="jr-what">real SSI cases from federal courts reach the outcome SSA and the court did.</span>
           <span className="jr-base">
-            Routed through Giftwise, the same help would have kept two families <span className="tabular">{usd(Math.round(IMPACT.familyTotal))}</span> over the months their opinions cover, and{" "}
+            Help from family was counted against the person in all <span className="tabular">{IMPACT.countedCases}</span>. Routed through Giftwise, the same help would have kept two families{" "}
+            <span className="tabular">{usd(Math.round(IMPACT.familyTotal))}</span> over the months their opinions cover, and{" "}
             <span className="tabular">
               {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))}
             </span>{" "}

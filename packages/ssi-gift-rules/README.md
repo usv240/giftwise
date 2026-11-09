@@ -4,14 +4,18 @@ How the US Supplemental Security Income (SSI) program counts a gift, as code. Gi
 
 It is the rules engine inside [Giftwise](https://github.com/usv240/giftwise), built from the same source files, with no dependencies.
 
+It is built from source in this repo and is not on the npm registry. Build it, then import its `dist` folder:
+
 ```bash
-npm install ssi-gift-rules
+cd packages/ssi-gift-rules
+npm run build      # compiles src/lib/rules into dist/; npm test checks the build against SSA's examples
 ```
 
 ## Use it
 
 ```js
-import { evaluateGift, planMonths, DEFAULT_PROFILE } from "ssi-gift-rules";
+// From the repo root. In another project, `npm install <path to this repo>/packages/ssi-gift-rules` lets you import "ssi-gift-rules".
+import { evaluateGift, planMonths, DEFAULT_PROFILE } from "./packages/ssi-gift-rules/dist/index.js";
 
 const cash = evaluateGift({ amount: 1000, delivery: "cash", date: "2026-04-10" });
 cash.checkAfter;          // 74      (the June check, two months after April)

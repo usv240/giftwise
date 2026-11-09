@@ -3,8 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-/** "First step, already open": the gift page's first question at true size. The name carries over to the page it makes. */
-export function CtaDialog() {
+/**
+ * "First step, already open": the gift page's first question at true size. The name carries over to the page it makes.
+ * `heading` is the card's own title; /start passes null because its page title already says it.
+ */
+export function CtaDialog({ heading = "Start a gift page" }: { heading?: string | null }) {
   const router = useRouter();
   const [name, setName] = useState("Maya");
   return (
@@ -16,7 +19,7 @@ export function CtaDialog() {
         router.push(`/try?name=${encodeURIComponent(name.trim() || "Maya")}#fundraiser`);
       }}
     >
-      <h3 className="cta-dialog-title">Start a gift page</h3>
+      {heading && <h3 className="cta-dialog-title">{heading}</h3>}
       <label className="cta-field">
         <span>Who is it for? Their first name</span>
         <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" maxLength={40} />

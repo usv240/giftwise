@@ -20,7 +20,7 @@ const TOOLS: Tool[] = [
   {
     id: "paypal",
     name: "PayPal",
-    job: "Moves the money: the donor pays the shop, the clinic or her ABLE account directly, never her and never Giftwise.",
+    job: "Moves the money: the donor pays the shop or the clinic directly, never her and never Giftwise; the ABLE share goes through her ABLE plan's own gift page.",
     how: "Orders v2 with a payee on each purchase unit, so one checkout pays several recipients. PayPal JavaScript SDK v6 buttons, server-side capture with PayPal-Request-Id idempotency, approval links that capture on return, Payouts batches for funds reconciled with Transaction Search and the Balances API, signature-verified webhooks, and sandbox negative testing for the failure cases.",
     files: ["src/lib/paypal/orders.ts", "src/lib/paypal/capture.ts", "src/lib/paypal/payouts.ts", "src/lib/paypal/reporting.ts", "src/app/api/paypal/webhook/route.ts", "src/components/gift/PayPalPay.tsx"],
   },

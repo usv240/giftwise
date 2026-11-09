@@ -8,7 +8,7 @@ import { ViewMenu } from "./ViewMenu";
 /** What a person does here: give, organize a page, report to Social Security, and check the evidence. The rest is in the footer. */
 const LINKS = [
   { href: "/g/maya", label: "Give", match: /^\/(g\/[^/]+(\/calendar)?|r\/.+|m\/.+)$/ },
-  { href: "/manage/maya-sample-organizer", label: "Organize", match: /^\/(manage\/.+|try(\/.*)?|organizations)$/ },
+  { href: "/manage/maya-sample-organizer", label: "Organize", match: /^\/(manage\/.+|try(\/.*)?|start|organizations)$/ },
   { href: "/g/maya/report", label: "Report", match: /^\/(g\/[^/]+\/report(\/.*)?|v\/.+)$/ },
   { href: "/evidence", label: "Evidence", match: /^\/evidence(\/.*)?$/ },
 ];
@@ -85,7 +85,7 @@ function HeaderBar({ path }: { path: string | null }) {
       </nav>
       <div className="header-actions">
         <ViewMenu lang={lang} />
-        <Link href="/try#fundraiser" className="btn btn-primary header-cta">
+        <Link href="/start" className="btn btn-primary header-cta">
           {w.cta}
         </Link>
         <button ref={button} type="button" className="btn btn-quiet menu-btn" aria-expanded={menu} aria-controls="mobile-menu" onClick={() => setMenu((m) => !m)}>
@@ -100,7 +100,7 @@ function HeaderBar({ path }: { path: string | null }) {
                 {l.label}
               </Link>
             ))}
-            <Link href="/try#fundraiser" className="btn btn-primary mobile-cta" onClick={() => setMenu(false)}>
+            <Link href="/start" className="btn btn-primary mobile-cta" onClick={() => setMenu(false)}>
               {w.cta}
             </Link>
           </nav>

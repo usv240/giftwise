@@ -1,0 +1,16 @@
+{
+  "what": "The Manual reviewer on \"Northside Electric Co-op, residential electric service, monthly bill\"",
+  "source": "src/app/developers/docs/recorded.json (review-bill)",
+  "recorded_at": "2026-11-05",
+  "model": "claude-opus-5-5",
+  "stop_reason": "end_turn",
+  "usage": null,
+  "parsed_output": {
+    "answer": "shelter",
+    "passage_id": "poms-si-00835-020-shelter",
+    "quote": "In household LA's, shelter costs (also known as “items of shelter” ) are mortgage payments, property insurance (if required by a mortgageholder), rent, gas, electricity, heating fuel, water, sewer, garbage collection service, and real property taxes.",
+    "reason_plain": "Yes, this is a shelter cost. Electricity is on the manual's list of shelter costs, so someone else paying the bill directly counts as in-kind support.",
+    "reason_technical": "SI 00835.020B.36 explicitly lists \"electricity\" among shelter costs. SI 00835.465C and SI 00835.020B.17 add that a non-household member paying a vendor directly for a household shelter item creates outside ISM. The bill is for residential electric service, not a business, so SI 00835.471 does not apply.",
+    "confidence": 0.95
+  }
+}

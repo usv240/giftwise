@@ -10,6 +10,7 @@ type Transcript = { ran_at: string; against: string; passed: number; failed: num
 /** The recorded transcripts, the checkout suite first. */
 const TRANSCRIPTS = Object.entries((transcripts as { suites: Record<string, Transcript> }).suites).sort(([a], [b]) => (a === "paypal" ? -1 : b === "paypal" ? 1 : a.localeCompare(b)));
 import { Info } from "@/components/Info";
+import { VAULT_FINDING } from "@/lib/monthly";
 import { OpenOnHash } from "@/components/OpenOnHash";
 import { CaseRunner } from "@/components/evidence/CaseRunner";
 import { NightlyChecks } from "@/components/evidence/NightlyChecks";
@@ -262,6 +263,9 @@ export default function OperationsPage() {
             Operations page
           </Link>
           , and the Render Workflows fan-out for anything that runs in the background: one task per unit of work, in parallel, with retries.
+        </p>
+        <p id="monthly-approval" className="page-prose jp-intro">
+          Monthly gifts: the giver approves each month in PayPal. {VAULT_FINDING.sentence}
         </p>
       </section>
     </div>

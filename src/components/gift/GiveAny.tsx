@@ -177,6 +177,7 @@ export function GiveAny({
             <>
               <div className="give-check">
                 <p className="give-k">{t.checkSetBy(w, checkMonth, giftMonth)}</p>
+                {prefs.mode !== "technical" && <p className="give-lag">{t.lagNote(giftMonth, checkMonth)}</p>}
                 <p className="give-verdict tabular">{plan.checkWithRouting === plan.baseline ? t.checkStays(usd(plan.checkWithRouting), checkMonthKey.slice(0, 4)) : t.checkIs(usd(plan.checkWithRouting))}</p>
               </div>
               <div className="give-compare">

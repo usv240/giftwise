@@ -11,7 +11,6 @@ const cents = (n: number) => n.toLocaleString("en-US", { style: "currency", curr
 const CASES = data.cases as unknown as Dataset[];
 const ROWS = results.cases as unknown as Result[];
 const S = results.summary;
-const D = S.dollars;
 /** Court captions name the person; the docket number and court find the opinion without repeating the name. */
 const docket = (c: Dataset) => `${c.source.court.replace(/^U\.S\. /, "")}, ${c.source.citation.replace(/^.*?,\s*(No\.)/, "$1")}`;
 const byId = new Map(CASES.map((c) => [c.id, c]));
@@ -69,7 +68,7 @@ export function FieldCaseList() {
         <h2 id="scored-h">All {scored.length} scored cases</h2>
 <div className="jx-sheet">
         <p className="sx-vs">
-          {KEPT_SENTENCE} {KEPT_BASIS} If each person qualified for an ABLE account, {D.if_each_person_is_able_eligible.cases_where_routing_keeps_money} of the cases would keep money.
+          {KEPT_SENTENCE} {KEPT_BASIS}
         </p>
         <p className="sx-vs">
           In {IMPACT.askedBackCases} of the cases the opinion states what SSA asked to be paid back:{" "}

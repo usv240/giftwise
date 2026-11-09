@@ -60,7 +60,7 @@ ok("preset CSV download has header + 6 rows", r.status === 200 && csv.trim().spl
 r = await fetch(`${B}/api/presets/nope`);
 ok("unknown preset -> 404", r.status === 404);
 
-// AI routes: live when ANTHROPIC_API_KEY is set on the server, friendly 503 otherwise
+// AI routes: live with ANTHROPIC_API_KEY; with no key the samples replay Claude's recorded answers (content/ai-replay), else a friendly 503.
 const fd = new FormData();
 fd.append("file", new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: "image/jpeg" }), "x.jpg");
 r = await fetch(B + "/api/v1/read-bill", { method: "POST", body: fd });
@@ -71,21 +71,21 @@ bill.append("file", new Blob([await (await import("node:fs/promises")).readFile(
 r = await fetch(B + "/api/v1/read-bill", { method: "POST", body: bill });
 j = await r.json();
 if (r.status === 503) ok("read-bill live (skipped: AI not configured)", true);
-else ok("read-bill live reads the electric bill as a $138 utility and routes to ABLE", r.status === 200 && j.data.bill.vendor_category === "utility" && j.data.bill.amount_due === 138 && j.data.check.best_route === "able", `${j.data?.bill?.vendor_category} ${j.data?.bill?.amount_due}`);
+else ok(`read-bill ${j.meta?.replayed ? "replayed" : "live"} reads the electric bill as a $138 utility and routes to ABLE`, r.status === 200 && j.data.bill.vendor_category === "utility" && j.data.bill.amount_due === 138 && j.data.check.best_route === "able", `${j.data?.bill?.vendor_category} ${j.data?.bill?.amount_due}`);
 r = await post("/api/v1/analyze-fundraiser", { url: "/samples/fundraiser.html" });
 j = await r.json();
 if (r.status === 503) ok("analyze-fundraiser live (skipped: AI not configured)", true);
-else ok(`analyze-fundraiser live plans every use so her check stays $${FULL}`, r.status === 200 && j.data.plan.length >= 2 && j.data.plan.every((p) => p.check_with_route === FULL), `${j.data?.plan?.length} uses`);
+else ok(`analyze-fundraiser ${j.meta?.replayed ? "replayed" : "live"} plans every use so her check stays $${FULL}`, r.status === 200 && j.data.plan.length >= 2 && j.data.plan.every((p) => p.check_with_route === FULL), `${j.data?.plan?.length} uses`);
 r = await post("/api/v1/analyze-fundraiser", { url: "ftp://x" });
 ok("analyze-fundraiser rejects non-http url", r.status === 400, `${r.status}`);
 
 // Two reviewers, two rulebooks: each quote must be found word for word, and the engine picks the route
 r = await post("/api/v1/review-bill", { amount: 10 });
 ok("review-bill without a description -> 400", r.status === 400, `${r.status}`);
-r = await post("/api/v1/review-bill", { description: "Northside Electric Co-op, residential electric service", amount: 138, category: "utility", date: "2026-04-10", recurring: true });
+r = await post("/api/v1/review-bill", { description: "Northside Electric Co-op, residential electric service, monthly bill", amount: 138, category: "utility", date: "2026-04-10", recurring: true });
 j = await r.json();
 if (r.status === 503) ok("review-bill live (skipped: AI not configured)", true);
-else ok("review-bill live: both reviewers quote their own rulebook, agree it is housing, and the engine routes to ABLE at $994", r.status === 200 && j.data.reviews.length === 2 && j.data.reviews.every((v) => v.quote_checked) && new Set(j.data.reviews.map((v) => v.authority)).size === 2 && j.data.referee.decision === "shelter" && j.data.outcome.route === "able" && j.data.outcome.check_after === 994, `${j.data?.referee?.decision} ${j.data?.outcome?.route} ${j.data?.outcome?.check_after}`);
+else ok(`review-bill ${j.meta?.replayed ? "replayed" : "live"}: both reviewers quote their own rulebook, agree it is housing, and the engine routes to ABLE at $994`, r.status === 200 && j.data.reviews.length === 2 && j.data.reviews.every((v) => v.quote_checked) && new Set(j.data.reviews.map((v) => v.authority)).size === 2 && j.data.referee.decision === "shelter" && j.data.outcome.route === "able" && j.data.outcome.check_after === 994, `${j.data?.referee?.decision} ${j.data?.outcome?.route} ${j.data?.outcome?.check_after}`);
 r = await fetch(B + "/openapi.json");
 j = await r.json();
 ok("openapi lists review-bill with its request schema", Boolean(j.paths?.["/api/v1/review-bill"]?.post?.requestBody));

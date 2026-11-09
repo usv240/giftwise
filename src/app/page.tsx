@@ -12,10 +12,11 @@ import { OpenOnHash } from "@/components/OpenOnHash";
 import { CtaDialog } from "@/components/landing/CtaDialog";
 import { Faq } from "@/components/landing/Faq";
 import { HowNav } from "@/components/landing/HowNav";
+import { RefereeMoment } from "@/components/landing/RefereeMoment";
 import { LoopVideo } from "@/components/landing/LoopVideo";
 import { ShowcaseBoard } from "@/components/landing/ShowcaseBoard";
 import { WhatIsNew } from "@/components/WhatIsNew";
-import { IMPACT, housingReach, payItYourself } from "@/lib/impact";
+import { IMPACT, KEPT_LABEL, housingReach, payItYourself } from "@/lib/impact";
 import { checkMonthName, usd } from "@/lib/rules";
 import "./landing.css";
 
@@ -104,37 +105,11 @@ export default function Home() {
             her full check
           </h1>
           <p className="hero-sub">
-            For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules, and PayPal pays only the shops, clinics and ABLE account the
-            rules picked, in one order, captured once. Claude reads the bills; the rules do the math.
+            For someone on SSI, a cash gift can lower the monthly check. Giftwise checks every gift against Social Security&rsquo;s rules. PayPal pays the shops and clinics the rules picked, in
+            one order captured once, and the ABLE share goes through the plan&rsquo;s own gift page. Claude reads the bills; the rules do the math.
           </p>
-          <ul className="hero-impact" aria-label="What routing keeps, measured by the rules engine">
-            <li>
-              <Link className="hero-impact-link" href="/evidence/impact#kept">
-                <span className="hero-impact-fig tabular" data-kept="">
-                  {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month
-                </span>
-                <span className="hero-impact-what">
-                  kept in {IMPACT.routedCases} of {IMPACT.scoredCases} real court cases, with the same help routed through Giftwise at 2026 rates
-                </span>
-                <span className="hero-impact-base tabular">
-                  {usd(Math.round(IMPACT.familyTotal))} kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families over the {IMPACT.familyCases.map((c) => c.months).join(" and ")} months their cases cover
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link className="hero-impact-link" href="/evidence/impact#why">
-                <span className="hero-impact-fig tabular" data-kept="">
-                  {cents(YEAR.totalLowered)}
-                </span>
-                <span className="hero-impact-what">kept in Maya&rsquo;s sample year by one shared page, against {YEAR.givers} givers each paying on their own</span>
-                <span className="hero-impact-base tabular">
-                  {YEAR.monthsLowered} monthly checks whole that would have dropped
-                </span>
-              </Link>
-            </li>
-          </ul>
           <div className="hero-actions">
-            <Link href="/try#fundraiser" className="btn btn-primary">
+            <Link href="/start" className="btn btn-primary">
               Start a gift page
             </Link>
             <Link href="/evidence" className="text-link">
@@ -156,13 +131,15 @@ export default function Home() {
               <Link className="text-link" href="/g/maya/report?month=2026-10#rp-verify-h">
                 Verify a report
               </Link>
-              <Link className="text-link" href="/evidence/rules#referee">
-                See the referee
-              </Link>
             </p>
           </div>
         </div>
       </section>
+
+      {/* One referee moment, right under the Gift Checker: the two reviewers' quotes and the verdict, replayed through the real code. */}
+      <div className="frame grid-12 home-ref">
+        <RefereeMoment />
+      </div>
 
       {/* What is new, in the first two screens: the report anyone can check, the referee, and the agent that asks first. */}
       <div className="frame grid-12 home-new">
@@ -215,6 +192,37 @@ export default function Home() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* What routing keeps, in dollars: below How it works, so the Gift Checker leads the first screen. */}
+      <section className="frame home-kept" aria-labelledby="kept-title">
+        <h2 id="kept-title" className="section-title">
+          What routing keeps
+        </h2>
+        <ul className="hero-impact home-kept-list" aria-label="What routing keeps, measured by the rules engine">
+          <li>
+            <Link className="hero-impact-link" href="/evidence/impact#kept">
+              <span className="hero-impact-fig tabular" data-kept="">
+                {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month
+              </span>
+              <span className="hero-impact-what">{KEPT_LABEL.charAt(0).toUpperCase() + KEPT_LABEL.slice(1)}</span>
+              <span className="hero-impact-base tabular">
+                {usd(Math.round(IMPACT.familyTotal))} kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families over the {IMPACT.familyCases.map((c) => c.months).join(" and ")} months their cases cover
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link className="hero-impact-link" href="/evidence/impact#why">
+              <span className="hero-impact-fig tabular" data-kept="">
+                {cents(YEAR.totalLowered)}
+              </span>
+              <span className="hero-impact-what">kept in Maya&rsquo;s sample year by one shared page, against {YEAR.givers} givers each paying on their own</span>
+              <span className="hero-impact-base tabular">
+                {YEAR.monthsLowered} monthly checks whole that would have dropped
+              </span>
+            </Link>
+          </li>
+        </ul>
       </section>
 
       {/* Showcase: rows as a board */}

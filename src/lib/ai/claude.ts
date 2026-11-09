@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 import { db, dbConfigured, schema } from "../db";
@@ -151,45 +151,86 @@ export function aiError(e: unknown): unknown {
 }
 
 /**
- * Local test runs only. When AI_CACHE_DIR is set, a request identical to one already made (same model, prompt, images
- * and settings) returns the answer Claude gave the first time, read from disk, instead of paying for the same answer
- * again. Any change to the request is a new key, so a changed prompt always calls Claude. The hosted site and CI never
- * set AI_CACHE_DIR, so they always call Claude live.
+ * Recorded answers, replayed through the real code. Two places hold them:
+ * - content/ai-replay, committed: Claude's recorded answers for the samples a visitor can run (the electric bill read,
+ *   the two reviewers on it, the sample fundraiser), written by scripts/build-ai-replay.ts from the recordings in
+ *   content/reviews and src/app/developers/docs/recorded.json. With no key, or once the day's AI budget is spent, a
+ *   request identical to a recorded one is answered from here, so the reader, the two reviewers, the quote check, the
+ *   referee and the rules engine all run as they do live, and the answer says "replayed". Any other request needs the
+ *   key, as before.
+ * - AI_CACHE_DIR, for local test runs with a key: a request identical to one already made returns the answer Claude gave
+ *   the first time, and a new one is called live and written there. The hosted site and CI never set it.
+ * The key is the SHA-256 of the exact request (model, prompt, schema, settings and content), so a changed prompt or
+ * schema never meets an old answer. A file in the request is named by the SHA-256 of the bytes the visitor sent
+ * (`fileSha256`), so the key is the same on every machine whatever its image library does when it re-encodes.
  */
-export async function replayable<T>(params: unknown, call: () => Promise<T>): Promise<T> {
-  return (await replayableWithSource(params, call)).value;
+export const REPLAY_DIR = path.join(process.cwd(), "content", "ai-replay");
+export const requestKey = (params: unknown) => createHash("sha256").update(JSON.stringify(params)).digest("hex");
+
+/** A recorded answer on disk: what structured() needs, plus when it was recorded, what it answers and where it came from. */
+export type Replay = { parsed_output: unknown; usage: Usage; model: string; stop_reason: string; recorded_at?: string; what?: string; source?: string };
+
+async function readJson<T>(file: string): Promise<T | null> {
+  try {
+    return JSON.parse(await readFile(file, "utf8")) as T;
+  } catch {
+    return null;
+  }
 }
 
-/** replayable, and whether the answer came from disk. */
+let replayCount: number | null = null;
+/** How many recorded answers the committed set holds (read once per process); 0 on a checkout without the directory. */
+export async function replayCountOnDisk(): Promise<number> {
+  if (replayCount !== null) return replayCount;
+  try {
+    replayCount = (await readdir(REPLAY_DIR)).filter((f) => f.endsWith(".json")).length;
+  } catch {
+    replayCount = 0;
+  }
+  return replayCount;
+}
+/** True when this server can answer the samples from recordings while it has no key. */
+export async function replayAvailable(): Promise<boolean> {
+  return (await replayCountOnDisk()) > 0;
+}
+/** Tests reset the counted directory. */
+export function resetReplayCount() {
+  replayCount = null;
+}
+
+/** With a key: AI_CACHE_DIR replay and record, else live. Returns the answer and whether it came from disk. */
 export async function replayableWithSource<T>(params: unknown, call: () => Promise<T>): Promise<{ value: T; replayed: boolean }> {
   const dir = process.env.AI_CACHE_DIR;
   if (!dir) return { value: await call(), replayed: false };
-  const file = path.join(dir, `${createHash("sha256").update(JSON.stringify(params)).digest("hex")}.json`);
-  try {
-    return { value: JSON.parse(await readFile(file, "utf8")) as T, replayed: true };
-  } catch {
-    /* not stored yet */
-  }
+  const file = path.join(dir, `${requestKey(params)}.json`);
+  const hit = await readJson<T>(file);
+  if (hit) return { value: hit, replayed: true };
   const value = await call();
   await mkdir(dir, { recursive: true });
   await writeFile(file, JSON.stringify(value));
   return { value, replayed: false };
 }
 
-/**
- * Structured output with server-side fallbacks. Thinking is adaptive (Opus 5.5 cannot disable it);
- * effort is set explicitly because the Opus 5.5 default is medium.
- */
-export async function structured<S extends z.ZodType>(opts: {
+/** replayableWithSource, value only. */
+export async function replayable<T>(params: unknown, call: () => Promise<T>): Promise<T> {
+  return (await replayableWithSource(params, call)).value;
+}
+
+export type StructuredOpts<S extends z.ZodType> = {
   schema: S;
   system: string;
   content: Anthropic.Beta.Messages.BetaContentBlockParam[];
   effort?: "low" | "medium" | "high";
   maxTokens?: number;
-}): Promise<{ data: z.infer<S>; usage: unknown; model: string }> {
-  const c = claude();
-  if (!c) throw new AiUnavailableError();
-  const params = {
+  /** The SHA-256 of the file as the visitor sent it, when the request carries one; it names the file in the replay key. */
+  fileSha256?: string;
+  /** What the replay key reads in place of `content`, when the request names something by this host's own address. */
+  keyContent?: Anthropic.Beta.Messages.BetaContentBlockParam[];
+};
+
+/** The exact request a structured call sends. */
+export function structuredParams<S extends z.ZodType>(opts: StructuredOpts<S>) {
+  return {
     model: MODEL,
     max_tokens: opts.maxTokens ?? 16000,
     betas: [FALLBACK_BETA],
@@ -198,19 +239,103 @@ export async function structured<S extends z.ZodType>(opts: {
     output_config: { effort: opts.effort ?? "medium", format: betaZodOutputFormat(opts.schema) },
     messages: [{ role: "user" as const, content: opts.content }],
   };
+}
+
+/**
+ * The replay key of a structured call: the request, with each image or PDF named by the SHA-256 of the file the visitor
+ * sent instead of the bytes this machine re-encoded, and `keyContent` in place of this host's own address. Everything
+ * else is the request exactly as sent. scripts/build-ai-replay.ts and the tests use it too.
+ */
+export function replayKey<S extends z.ZodType>(opts: StructuredOpts<S>): string {
+  const params = structuredParams({ ...opts, content: opts.keyContent ?? opts.content });
+  if (!opts.fileSha256) return requestKey(params);
+  const named = params.messages[0].content.map((b) =>
+    (b.type === "image" || b.type === "document") && b.source.type === "base64" ? { ...b, source: { ...b.source, data: `sha256:${opts.fileSha256}` } } : b,
+  );
+  return requestKey({ ...params, messages: [{ role: "user", content: named }] });
+}
+
+/** How the next sample run is answered on this server. */
+export type AiMode = "live" | "replay" | "off";
+/** "live" with a usable key, "replay" with no key (or a paused account) and recordings on disk, "off" otherwise. */
+export async function aiMode(): Promise<AiMode> {
+  if (aiAvailable()) return "live";
+  return (await replayAvailable()) ? "replay" : "off";
+}
+
+/** Today's AI spend from the ai_usage table, asked at most every 30 seconds, and only by a call that could replay. */
+let spendCheck: { at: number; spent: number } | null = null;
+async function overBudget(): Promise<boolean> {
+  if (!dbConfigured()) return false;
+  if (!spendCheck || Date.now() - spendCheck.at > 30_000) {
+    const { aiSpentToday } = await import("./budget");
+    spendCheck = { at: Date.now(), spent: await aiSpentToday().catch(() => 0) };
+  }
+  return spendCheck.spent >= AI_DAILY_CAP_USD;
+}
+/** Tests clear the cached spend. */
+export function resetSpendCheck() {
+  spendCheck = null;
+}
+
+/** A recorded answer, checked against the schema the request asks for; a recording that no longer fits it is not used. */
+function fits<S extends z.ZodType>(r: Replay | null, schema: S): Replay | null {
+  if (!r || r.stop_reason === "refusal") return r;
+  const ok = schema.safeParse(r.parsed_output);
+  if (ok.success) return { ...r, parsed_output: ok.data };
+  log.warn("recorded answer does not fit its schema; not used");
+  return null;
+}
+
+/**
+ * Structured output with server-side fallbacks. Thinking is adaptive (Opus 5.5 cannot disable it);
+ * effort is set explicitly because the Opus 5.5 default is medium.
+ * Live with a key while the day's AI spend is under the budget. A request with a recorded answer (the samples) is
+ * replayed instead when there is no key, when the budget is spent, or when `replayOnly` is set (a page that shows a
+ * recorded run through the real code); any other request with no key is unavailable, as before.
+ */
+export async function structured<S extends z.ZodType>(
+  opts: StructuredOpts<S>,
+  how: { replayOnly?: boolean } = {},
+): Promise<{ data: z.infer<S>; usage: unknown; model: string; replayed: boolean; recordedAt?: string }> {
+  const c = how.replayOnly ? null : claude();
+  const params = structuredParams(opts);
+  const key = replayKey(opts);
   const t = Date.now();
-  const { value: res, replayed } = await replayableWithSource(params, async () => {
+  const dir = process.env.AI_CACHE_DIR ? path.resolve(process.env.AI_CACHE_DIR) : null;
+  // A local test run's own cache always answers an identical request; the committed set answers only with no key or
+  // once the day's budget is spent, so the hosted site with a key calls live.
+  const cached = dir ? fits(await readJson<Replay>(path.join(dir, `${key}.json`)), opts.schema) : null;
+  const committed = cached ? null : fits(await readJson<Replay>(path.join(REPLAY_DIR, `${key}.json`)), opts.schema);
+  let res: Replay;
+  let replayed: boolean;
+  if (cached) {
+    res = cached;
+    replayed = true;
+  } else if (committed && (!c || (await overBudget()))) {
+    res = committed;
+    replayed = true;
+  } else if (c) {
     const r = await c.beta.messages.parse(params).catch((e: unknown) => {
       log.warn("ai call failed", { model: MODEL, err: e, ms: Date.now() - t });
       throw aiError(e);
     });
-    return { parsed_output: r.parsed_output, usage: r.usage, model: r.model, stop_reason: r.stop_reason };
-  });
-  await recordAiUsage({ model: res.model ?? MODEL, usage: res.usage as Usage, ms: Date.now() - t, replayed });
+    res = { parsed_output: r.parsed_output, usage: r.usage, model: r.model, stop_reason: r.stop_reason ?? "end_turn", recorded_at: new Date().toISOString() };
+    replayed = false;
+    // Local test runs keep each live answer under the same key, so the next identical request replays it.
+    if (dir) {
+      await mkdir(dir, { recursive: true });
+      await writeFile(path.join(dir, `${key}.json`), JSON.stringify(res));
+    }
+  } else {
+    throw new AiUnavailableError();
+  }
+  // A page that shows a recorded run (replayOnly) makes no call, so it writes no usage row.
+  if (!how.replayOnly) await recordAiUsage({ model: res.model ?? MODEL, usage: res.usage, ms: Date.now() - t, replayed });
   if (res.stop_reason === "refusal" || !res.parsed_output) {
     throw new AiRefusedError("The AI could not complete this request.");
   }
-  return { data: res.parsed_output as z.infer<S>, usage: res.usage, model: res.model };
+  return { data: res.parsed_output as z.infer<S>, usage: res.usage, model: res.model, replayed, recordedAt: replayed ? res.recorded_at : undefined };
 }
 
 /** Untrusted text (uploads, web pages) is always passed as data, never as instructions. */

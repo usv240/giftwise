@@ -7,7 +7,7 @@ import { Suspense } from "react";
 /** Every page the header leaves out, so each one stays a link away. */
 const NAV = [
   { href: "/try", label: "Try it" },
-  { href: "/try#fundraiser", label: "Make a gift page" },
+  { href: "/start", label: "Make a gift page" },
   { href: "/learn", label: "The rules, explained" },
   { href: "/agents", label: "For AI agents" },
   { href: "/organizations", label: "For organizations" },

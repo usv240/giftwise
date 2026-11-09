@@ -6,7 +6,7 @@ import { Info } from "@/components/Info";
 import Image from "next/image";
 import { RealWorld } from "@/components/RealWorld";
 import { PayPalShare, PayYourself, Reach } from "@/components/evidence/WhyGiftwise";
-import { sampleYearSplit } from "@/lib/impact";
+import { paypalShareSentence, sampleYearSplit } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 import "../pages.css";
 import "./about.css";
@@ -94,6 +94,7 @@ export default function AboutPage() {
             </li>
           ))}
         </ul>
+        <p className="about-year-share">{paypalShareSentence()}</p>
         <p className="muted about-year-src">Each gift runs through the rules engine; the gifts are the ones on the dashboard and in her reports.</p>
         <PayPalShare />
       </section>
@@ -121,7 +122,7 @@ export default function AboutPage() {
         <h2 id="data-h">Your data</h2>
         <ul className="about-list">
           <li>Bills and pages you try are used only to show your result. Images are re-encoded to remove location data before they are read.</li>
-          <li>Giftwise never holds money. Donors pay the shop or the ABLE account directly through PayPal.</li>
+          <li>Giftwise never holds money. Donors pay the shop directly through PayPal, and the ABLE share through the ABLE plan&rsquo;s own gift page.</li>
           <li>Every payment step is written down in order and can&rsquo;t be changed later (an append-only ledger with a hash chain).</li>
         </ul>
       </section>

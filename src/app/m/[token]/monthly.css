@@ -132,3 +132,13 @@
     min-height: 44px;
   }
 }
+
+/* The sandbox finding behind the monthly approval, in the Technical view only. */
+.mo-tech {
+  display: none;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+:root[data-mode="technical"] .mo-tech {
+  display: block;
+}

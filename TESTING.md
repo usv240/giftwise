@@ -90,7 +90,8 @@ The runner can be started again 20 seconds after the last run.
 ## Claude reads a bill, live
 
 1. Open `/try/presets/electric-bill` and press **Read this bill live**. Claude reads the sample electric bill now (one call, about 5 seconds, counted against the site's daily AI budget, `AI_DAILY_CAP_USD`), and the rules engine prices what it read: her June 2026 check paid to the company, and through her ABLE account.
-2. The line above the result says whether it was live. With no `ANTHROPIC_API_KEY`, or once the day's AI spend reaches the budget, the recorded run from `content/reviews/electric-bill-read.json` is shown with its date and the reason. `npx tsx --env-file=.env.local scripts/record-bill-read.ts` records a new one.
+2. The line under the button says whether the next run is live and how much of today's AI budget is left (`GET /api/live/ai-budget`, from the `ai_usage` table). With no `ANTHROPIC_API_KEY`, or once the day's AI spend reaches the budget, the same reader runs on Claude's recorded answer to this exact request (`content/ai-replay`), labelled **Replayed** with the date it was recorded and the reason; a checkout without that recording shows the saved run from `content/reviews/electric-bill-read.json`. `npx tsx --env-file=.env.local scripts/record-bill-read.ts` records a new reading (one Claude call), and `npx tsx scripts/build-ai-replay.ts` rebuilds the replay set with no call.
+3. With no key, **Use the sample electric bill** on `/try` (A bill or quote) runs the reader and both reviewers on their recorded answers: the two quotes, checked by code, the referee's verdict and the route, each labelled Replayed. Any other upload needs the key.
 
 ## Maya's benefit calendar, in Bryntum
 
@@ -172,7 +173,7 @@ The PayPal checkout and API suites write a redacted transcript as they run, `con
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 278 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 278 pass and 6 skip (6 need a database) |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 306 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 300 pass and 6 skip (6 need a database) |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
@@ -181,7 +182,7 @@ The PayPal checkout and API suites write a redacted transcript as they run, `con
 | API end to end | `npm run e2e:api` | 99 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
 | The Postman collection, with Newman | `npm run test:postman` | 20 assertions over 16 requests |
-| Browser end to end (with no AI key, the three steps where Claude reads a document are skipped) | `npm run e2e:ui` | 59 passed |
+| Browser end to end (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers) | `npm run e2e:ui` | 65 passed |
 | Accessibility and layout | `npm run e2e:a11y` | All 140 page views pass |
 | Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 72 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |

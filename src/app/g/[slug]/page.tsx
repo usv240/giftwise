@@ -152,13 +152,6 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
             {t.ableRealSource}
           </a>
         </p>
-        {household.isSample && lang === "en" && (
-          <p className="gift-sample">
-            <Link className="text-link gift-organizer" href="/manage/maya-sample-organizer">
-              See the organizer&rsquo;s view of this page
-            </Link>
-          </p>
-        )}
         {household.status === "closed" && (
           <p className="gift-closed" role="status">
             {t.closed(household.name)}
@@ -252,15 +245,26 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
             </Link>
           </p>
         </details>
-        {/* For anyone testing the page: kept one press away, out of the giver's reading path. */}
+        {/* The demo's own controls, one press away and marked Sandbox, apart from the giver's path: the buyer login and
+            test card, the sample organizer's private link, and the reset. */}
         <details className="gift-cash gift-sandbox">
-          <summary>{t.sandboxTitle}</summary>
+          <summary>
+            <span className="sbx-tag">Sandbox</span>
+            <span className="sbx-what">{t.sandboxHolds(household.isSample)}</span>
+          </summary>
           <div className="title-row">
             <p>{t.sandboxText}</p>
             <Info id="gift.sandbox" label="" topic={t.sandboxTitle} lang={lang} />
           </div>
           <SandboxLogin compact lang={lang} />
           <p>{t.sandboxCard}</p>
+          {household.isSample && (
+            <p>
+              <Link className="text-link gift-organizer" href="/manage/maya-sample-organizer">
+                {t.organizerView}
+              </Link>
+            </p>
+          )}
           {household.isSample && <ResetSample slug={slug} lang={lang} />}
         </details>
       </aside>

@@ -74,26 +74,44 @@ function writeDocs(suite) {
       .join("\n");
     if (out !== text) writeFileSync(file, out);
   }
-  // The README's "Run it yourself" line states both unit counts; it is rewritten from the same record.
-  if (suite.bare) {
+  // The README's "Where to look" table names suites as "`command`, N of M"; each is rewritten from the record.
+  {
     const text = readFileSync("README.md", "utf8");
-    const out = text.replace(
-      /a fresh clone with no \.env\.local: \d+ pass and \d+ skip \(\d+ need a database\); when \.env\.local names a reachable database: \d[\d,]* of \d[\d,]*, no keys needed/,
-      `a fresh clone with no .env.local: ${suite.bare.passed} pass and ${suite.bare.skipped} skip (${suite.bare.needs.database} need a database); when .env.local names a reachable database: ${n(suite.passed)} of ${n(suite.total)}, no keys needed`,
-    );
+    const esc = suite.command.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const out = text.replace(new RegExp(`(\`${esc}\`, )\\d[\\d,]* of \\d[\\d,]*`, "g"), `$1${n(suite.passed)} of ${n(suite.total)}`);
+    if (out !== text) writeFileSync("README.md", out);
+  }
+  // The README's "Run it yourself" line states both unit counts, each from its own recorded run.
+  if (suite.bare && suite.with_database) {
+    const text = readFileSync("README.md", "utf8");
+    const out = text.replace(/a fresh clone with no \.env\.local: .*$/m, `a fresh clone with no .env.local: ${suite.bare.passed} pass and ${suite.bare.skipped} skip (${suite.bare.needs.database} need a database); ${withDatabaseLine(suite)}`);
     if (out !== text) writeFileSync("README.md", out);
   }
 }
 
 /**
- * The unit suite run as a fresh checkout runs it: GIFTWISE_TEST_BARE=1 makes tests/helpers/needs.ts ignore .env.local
- * and every key, so every test that needs a database or a key skips with its need in its name. Returns the passed and
- * skipped counts and how many skipped tests need each thing.
+ * The second half of the README's unit line, from the run with .env.local: every test when the database answered, and
+ * otherwise what skipped and why, so the line never claims a database run that did not happen.
  */
-function runBare() {
-  const dir = mkdtempSync(path.join(tmpdir(), "giftwise-bare-"));
+export function withDatabaseLine(suite) {
+  const w = suite.with_database;
+  if (w.skipped === 0) return `when .env.local names a reachable database: ${n(w.passed)} of ${n(suite.total)}, no keys needed`;
+  return `with .env.local: ${n(w.passed)} of ${n(suite.total)}, ${w.skipped} skipped because the database did not answer`;
+}
+
+/**
+ * One unit run, with its counts: passed, failed, skipped, and how many skipped tests need each thing. `bare` runs it as
+ * a fresh checkout does: GIFTWISE_TEST_BARE=1 makes tests/helpers/needs.ts ignore .env.local and every key, so every test
+ * that needs a database or a key skips with its need in its name. Without it, the run reads .env.local as a developer's
+ * does (only DATABASE_URL is used; no test calls Claude or PayPal), and the AI key is left blank either way.
+ */
+function runVitest(bare) {
+  const dir = mkdtempSync(path.join(tmpdir(), bare ? "giftwise-bare-" : "giftwise-unit-"));
   const out = path.join(dir, "vitest.json");
-  spawnSync(["npx", "vitest", "run", "--reporter=json", `--outputFile="${out}"`].join(" "), { stdio: "inherit", shell: true, env: { ...process.env, GIFTWISE_TEST_BARE: "1" } });
+  const env = { ...process.env, ANTHROPIC_API_KEY: "" };
+  if (bare) env.GIFTWISE_TEST_BARE = "1";
+  else delete env.GIFTWISE_TEST_BARE;
+  spawnSync(["npx", "vitest", "run", "--reporter=json", `--outputFile="${out}"`].join(" "), { stdio: "inherit", shell: true, env });
   const r = JSON.parse(readFileSync(out, "utf8"));
   rmSync(dir, { recursive: true, force: true });
   const needs = { database: 0, claude: 0, paypal: 0 };
@@ -106,8 +124,9 @@ function runBare() {
       for (const k of Object.keys(TAG)) if (t.fullName.includes(TAG[k])) needs[k]++;
     }
   }
-  return { passed: r.numPassedTests, failed: r.numFailedTests, skipped, needs };
+  return { passed: r.numPassedTests, failed: r.numFailedTests, skipped, total: r.numTotalTests, needs };
 }
+const runBare = () => runVitest(true);
 
 /** One run of a suite: its passed and total counts. */
 function runOnce(id) {
@@ -139,28 +158,25 @@ let short = false;
 for (const id of ids) {
   const suite = doc.suites.find((s) => s.id === id);
   if (!suite || !RUN[id]) throw new Error(`No runnable suite "${id}". Try --list.`);
-  const record = ({ passed, total, requests, bare }) => {
-    Object.assign(suite, { passed, total, ...(requests ? { requests } : {}), ...(bare ? { bare } : {}), ranAt: new Date().toISOString().slice(0, 10) });
+  const record = ({ passed, total, requests, bare, with_database }) => {
+    Object.assign(suite, { passed, total, ...(requests ? { requests } : {}), ...(bare ? { bare } : {}), ...(with_database ? { with_database } : {}), ranAt: new Date().toISOString().slice(0, 10) });
     writeFileSync(FILE, JSON.stringify(doc, null, 2) + "\n");
     writeDocs(suite);
   };
   let r;
   if (id === "unit") {
-    // The unit suite includes the test that holds the README and the tables to this file, so a changed count first
-    // shows up as that test failing. The bare run goes first: record it, rewrite the documents, and run it again when
-    // the stale numbers were the only failures; then the full run the same way.
-    let bare = runBare();
-    record({ passed: suite.passed, total: suite.total, bare });
-    if (bare.failed) {
+    // The unit suite includes the test that holds the README and the tables to this file, so a changed count first shows
+    // up as that test failing. Run it as a fresh clone does (bare), then with .env.local, recording each as it ran and
+    // rewriting the documents after each; repeat, at most three times, until neither run fails on stale numbers.
+    let bare;
+    for (let i = 0; i < 3; i++) {
       bare = runBare();
       record({ passed: suite.passed, total: suite.total, bare });
+      const w = runVitest(false);
+      r = { passed: w.passed, total: w.total, bare, with_database: { passed: w.passed, failed: w.failed, skipped: w.skipped, needs: w.needs } };
+      record(r);
+      if (!bare.failed && !w.failed) break;
     }
-    r = runOnce(id);
-    if (r.passed !== r.total) {
-      record({ passed: r.total, total: r.total, bare });
-      r = runOnce(id);
-    }
-    r = { ...r, bare };
   } else {
     r = runOnce(id);
   }

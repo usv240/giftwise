@@ -1,15 +1,19 @@
 import sources from "../../../content/sources.json";
 
-const SRC = sources as Record<string, { title: string; url: string; date?: string }>;
+const SRC = sources as Record<string, { title: string; url: string; date?: string; read?: string }>;
 
 /**
- * The other ways people help someone on SSI with money, each from its own published pages (the date each was read is
- * in content/sources.json): what it does, and the one step it does not do that Giftwise does. Each of these does its
- * own job well; Giftwise is built for the moment a gift is given, and works alongside them.
+ * The other ways people help someone on SSI with money, each from its own published pages: what it does, and the one
+ * step it does not do that Giftwise does. Every row shows each source's address and the day it was read (`read` in
+ * content/sources.json, the day the page was read for this record); tests/compare.test.ts holds every row to both. Each
+ * of these does its own job well; Giftwise is built for the moment a gift is given, and works alongside them.
  */
-type Option = { slug: string; name: string; well: string; adds: string; src?: [string, string][] };
+type Option = { slug: string; name: string; well: string; adds: string; src: [string, string][] };
 
-const OPTIONS: Option[] = [
+/** An address as a reader can see it: host and path, without the scheme or a trailing slash. */
+export const shownUrl = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+
+export const OPTIONS: Option[] = [
   {
     slug: "true-link",
     name: "Prepaid cards for people on benefits (True Link)",
@@ -79,12 +83,13 @@ const OPTIONS: Option[] = [
     name: "Fundraising sites",
     well: "Raise money from many people for one cause, with a goal and updates.",
     adds: "Each stated use is paid straight to its shop or to the ABLE account, so the money raised does not arrive as cash. A fundraiser link can become a gift page.",
+    src: [["sna-crowdfunding", "Special Needs Alliance"]],
   },
   {
     slug: "giftly",
     name: "Giftly, and PayPal.me or a bank transfer",
     well: "Giftly sends money with a spending suggestion; the recipient redeems it to a bank account, PayPal or a prepaid card and chooses where to spend it. PayPal.me and a transfer send money to someone you know, quickly.",
-    adds: "Money that arrives as cash is unearned income for SSI. Giftwise never lets the gift become cash to the person: the same PayPal checkout pays the shop, the clinic and the ABLE account instead, up to 10 recipients in one order.",
+    adds: "Money that arrives as cash is unearned income for SSI. Giftwise never lets the gift become cash to the person: the same PayPal checkout pays the shop and the clinic instead, up to 10 recipients in one order, and the ABLE share goes through the plan's own gift page.",
     src: [["giftly-how", "Giftly"]],
   },
   {
@@ -106,6 +111,10 @@ const OPTIONS: Option[] = [
     name: "Paying the shop yourself",
     well: "For one repair from one giver, it keeps the check whole, and it is what Giftwise does.",
     adds: "Rent and utility bills, which count even when paid straight to the landlord, go through ABLE instead, and many givers share one list, one ABLE limit and one monthly report.",
+    src: [
+      ["poms-si-00815-400", "POMS SI 00815.400"],
+      ["cfr-416-1130", "20 CFR 416.1130"],
+    ],
   },
 ];
 
@@ -123,19 +132,16 @@ export function Compare() {
             <span className="cmp-k">The step Giftwise adds. </span>
             {o.adds}
           </p>
-          {o.src && (
-            <p className="cmp-src muted">
-              {o.src.map(([id, label], i) => (
-                <span key={id}>
-                  {i > 0 ? "; " : "Sources: "}
-                  <a className="text-link" href={SRC[id].url} target="_blank" rel="noreferrer">
-                    {label}
-                  </a>
-                  {SRC[id].date ? ` (${SRC[id].date})` : ""}
-                </span>
-              ))}
-            </p>
-          )}
+          <ul className="cmp-src muted" aria-label={`Sources for ${o.name}`}>
+            {o.src.map(([id, label]) => (
+              <li key={id}>
+                <a className="text-link" href={SRC[id].url} target="_blank" rel="noreferrer">
+                  {label}
+                </a>{" "}
+                <span className="cmp-url">{shownUrl(SRC[id].url)}</span>, read {SRC[id].read}
+              </li>
+            ))}
+          </ul>
         </li>
       ))}
     </ul>

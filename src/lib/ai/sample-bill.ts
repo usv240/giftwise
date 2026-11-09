@@ -1,26 +1,28 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { sql } from "drizzle-orm";
-import sharp from "sharp";
 import recorded from "../../../content/reviews/electric-bill-read.json";
-import { db, dbConfigured } from "../db";
-import { rowsOf } from "../rate-limit";
 import { DEFAULT_PROFILE, checkMonthName, evaluateGift, type Category } from "../rules";
-import { AI_DAILY_CAP_USD, aiAvailable } from "./claude";
+import { aiSpentToday } from "./budget";
+import { AI_DAILY_CAP_USD, AiUnavailableError, aiAvailable } from "./claude";
 import { readBill, type Bill } from "./tasks";
+import { prepareFile, type PreparedFile } from "./upload";
+
+export { aiSpentToday };
 
 /**
  * The one live AI step on the visitor's path: Claude reads the sample electric bill (public/samples) now, and the rules
- * engine prices it. It runs only while the day's AI spend is under the site's daily budget (AI_DAILY_CAP_USD, the
- * figure /ops shows), and otherwise shows the recorded reading in content/reviews/electric-bill-read.json, labelled.
+ * engine prices it. It runs live while the day's AI spend is under the site's daily budget (AI_DAILY_CAP_USD, the
+ * figure /ops shows). With no key, or once the budget is spent, the same request is answered from Claude's recorded
+ * answer to it (content/ai-replay), so the real reader and rules engine run and the result says "replayed"; on a
+ * checkout without the recording, the saved reading in content/reviews/electric-bill-read.json is shown, labelled.
  */
 export const SAMPLE_BILL = "northside-electric-bill.png";
 /** The preset's gift date, so the live reading prices the same check the example on the page does. */
 const GIFT_DATE = "2026-04-10";
 
 export type SampleRead = {
-  mode: "live" | "recorded";
-  /** Why the recording is shown: no AI key on this server, the day's budget spent, or the live call failed. */
+  mode: "live" | "replayed" | "recorded";
+  /** Why it is not live: no AI key on this server, the day's budget spent, or the live call failed. */
   reason: "no_key" | "budget" | "error" | null;
   read_at: string;
   model: string;
@@ -29,13 +31,6 @@ export type SampleRead = {
   check: { month: string; paid_to_company: number; through_able: number; full: number; rule_ids: string[] };
   budget: { spent_today: number; cap: number };
 };
-
-/** What the site's AI calls cost today, in US Pacific time, from the ai_usage table /ops reads. */
-export async function aiSpentToday(): Promise<number> {
-  if (!dbConfigured()) return 0;
-  const r = await db().execute(sql`select coalesce(sum(cost_usd), 0) as cost from ai_usage where created_at >= (date_trunc('day', now() at time zone 'America/Los_Angeles') at time zone 'America/Los_Angeles')`);
-  return Number(rowsOf<{ cost: string }>(r)[0]?.cost ?? 0);
-}
 
 /** The engine's answer for a reading: the check paid to the company, and through her ABLE account. */
 export function priceReading(bill: Pick<Bill, "vendor_category" | "amount_due" | "vendor_name">) {
@@ -61,24 +56,42 @@ export function recordedRead(reason: SampleRead["reason"], spent: number): Sampl
   return { mode: "recorded", reason, read_at: recorded.recorded_at, model: recorded.model, ms: recorded.ms, bill: pick(bill), check: priceReading(bill), budget: { spent_today: spent, cap: AI_DAILY_CAP_USD } };
 }
 
-/** Claude reads the sample bill now: one structured call, the same one /api/v1/read-bill makes. */
-export async function readSampleBillLive(): Promise<{ bill: Bill; model: string; ms: number }> {
-  const buf = await readFile(path.join(process.cwd(), "public", "samples", SAMPLE_BILL));
-  const out = await sharp(buf).resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+/** Claude reads the sample bill: one structured call, the same one /api/v1/read-bill makes for this file. */
+export async function readSampleBillLive(how: { replayOnly?: boolean } = {}): Promise<{ bill: Bill; model: string; ms: number; replayed: boolean; recordedAt?: string }> {
+  const file = await sampleBillFile();
   const t = Date.now();
-  const { data, model } = await readBill({ base64: out.toString("base64"), mediaType: "image/jpeg" });
-  return { bill: data, model, ms: Date.now() - t };
+  const { data, model, replayed, recordedAt } = await readBill(file, how);
+  return { bill: data, model, ms: Date.now() - t, replayed, recordedAt };
 }
 
-/** Live when the key is set and today's spend is under the budget; the recording otherwise, saying why. */
+/** The sample bill as an upload of it is sent (src/lib/ai/upload.ts). */
+export async function sampleBillFile(): Promise<PreparedFile> {
+  return prepareFile(await readFile(path.join(process.cwd(), "public", "samples", SAMPLE_BILL)), "image/png");
+}
+
+/**
+ * Live when the key is set and today's spend is under the budget. With no key, or the budget spent, the reader runs on
+ * Claude's recorded answer to this exact request ("replayed"); the saved reading is shown when there is no recording,
+ * and when a live call fails. Each says why it is not live.
+ */
 export async function sampleBillRead(): Promise<SampleRead> {
   const spent = await aiSpentToday().catch(() => 0);
-  if (!aiAvailable()) return recordedRead("no_key", spent);
-  if (spent >= AI_DAILY_CAP_USD) return recordedRead("budget", spent);
+  const live = aiAvailable();
+  const why: SampleRead["reason"] = !live ? "no_key" : spent >= AI_DAILY_CAP_USD ? "budget" : null;
   try {
-    const { bill, model, ms } = await readSampleBillLive();
-    return { mode: "live", reason: null, read_at: new Date().toISOString(), model, ms, bill: pick(bill), check: priceReading(bill), budget: { spent_today: spent, cap: AI_DAILY_CAP_USD } };
-  } catch {
+    const { bill, model, ms, replayed, recordedAt } = await readSampleBillLive({ replayOnly: why !== null });
+    return {
+      mode: replayed ? "replayed" : "live",
+      reason: replayed ? why : null,
+      read_at: recordedAt ?? new Date().toISOString(),
+      model,
+      ms: replayed ? null : ms,
+      bill: pick(bill),
+      check: priceReading(bill),
+      budget: { spent_today: spent, cap: AI_DAILY_CAP_USD },
+    };
+  } catch (e) {
+    if (why && e instanceof AiUnavailableError) return recordedRead(why, spent);
     return recordedRead("error", spent);
   }
 }

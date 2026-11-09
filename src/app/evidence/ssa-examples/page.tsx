@@ -6,6 +6,7 @@ import { SsaExampleList } from "@/components/evidence/SsaExamples";
 import { P, usd } from "@/lib/rules";
 import "../../pages.css";
 import "../../developers/dev.css";
+import "../../learn/disclosure.css";
 import "../evidence.css";
 
 const S = results.summary;

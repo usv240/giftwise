@@ -6,6 +6,7 @@ import { usePrefs } from "../prefs";
 import { referee, routeForDecision, type Review } from "@/lib/review/referee";
 import { DEFAULT_PROFILE, P, addMonths, checkMonthName, evaluateGift, usd, type Category, type Gift } from "@/lib/rules";
 import { modelName } from "@/lib/ai/model-name";
+import { AiBudget } from "./AiBudget";
 
 export type ReviewInput = { description: string; amount: number; category: Category; date: string; recurring?: boolean };
 export type ReviewOut = {
@@ -37,6 +38,10 @@ const ROUTE = { vendor: "pay the company directly", able: "send it to her ABLE a
 // A test answer we wrote: the Manual reviewer claims a rule that is not in the manual.
 const MADE_UP_QUOTE = "Electric bills paid by a family member are never counted as income.";
 
+/** The line under a replayed run: whose answers, when they were recorded, and that the checks ran on them just now. */
+export const replayedSource = (meta: { model?: string; recorded_at?: string }) =>
+  `Replayed: ${modelName(meta.model)}'s recorded answers${meta.recorded_at ? ` of ${new Date(meta.recorded_at).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" })}` : ""}, run just now through the same quote check, referee and rules engine.`;
+
 const toReview = (r: ReviewOut): Review => ({ authority: r.authority, answer: r.answer, passage_id: r.passage_id, quote: r.quote, reason_plain: r.reason.plain, reason_technical: r.reason.technical, confidence: r.confidence });
 
 /**
@@ -50,6 +55,7 @@ export function ReviewPanel({ input, recorded, ran }: { input: ReviewInput; reco
   const [status, setStatus] = useState<"idle" | "running" | "error">("idle");
   const [note, setNote] = useState("");
   const [test, setTest] = useState(false);
+  const [runs, setRuns] = useState(0);
   const gift: Gift = { id: "review", date: input.date, amount: input.amount, delivery: "vendor", category: input.category, recurring: input.recurring };
 
   async function run() {
@@ -61,12 +67,13 @@ export function ReviewPanel({ input, recorded, ran }: { input: ReviewInput; reco
       const j = await r.json();
       if (!r.ok) throw new Error(j.error?.message ?? "The reviewers could not run. Please try again.");
       setData(j.data);
-      setSource(`Run live just now with ${modelName(j.meta?.model)}, in ${Math.round((j.meta?.latency_ms ?? 0) / 1000)} seconds.`);
+      setSource(j.meta?.replayed ? replayedSource(j.meta) : `Run live just now with ${modelName(j.meta?.model)}, in ${Math.round((j.meta?.latency_ms ?? 0) / 1000)} seconds.`);
       setStatus("idle");
     } catch (e) {
       setNote((e as Error).message);
       setStatus("error");
     }
+    setRuns((n) => n + 1);
   }
 
   // The "wrong answer" test runs the same referee code in the browser, on the same reviews with one quote replaced.
@@ -161,6 +168,7 @@ export function ReviewPanel({ input, recorded, ran }: { input: ReviewInput; reco
             {test ? "Back to the real answers" : "What if a reviewer gets it wrong?"}
           </button>
         )}
+        <AiBudget refresh={runs} />
         {status === "running" && <p className="muted">Both reviewers read their rulebooks at the same time. This takes about 20 seconds.</p>}
         {status === "error" && <p className="result-attention">{note}</p>}
         {source && status !== "running" && <p className="muted rv-source">{source}</p>}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { asData, structured } from "./claude";
+import { asData, structured, type StructuredOpts } from "./claude";
 
 const CATEGORIES = ["medical", "equipment", "phone", "internet", "education", "utility", "rent", "mortgage", "property_tax", "food", "clothing", "transport", "personal", "event", "other"] as const;
 
@@ -24,17 +24,23 @@ const BILL_SYSTEM = `You read bills, invoices and quotes for Giftwise, a tool th
 Extract only what is visible. If a value is not shown, use null. Choose the category from what the bill is for, not from the vendor's name alone.
 Write explanation.plain in warm, plain words: what the bill is, who sent it, the total and when it is due. Never say how to pay it or whether paying it directly is safe, never give legal advice and never compute benefit amounts: Giftwise's rules engine chooses the route (rent and utilities paid straight to the company can count against SSI, so the engine sends those to her ABLE account).`;
 
-export async function readBill(file: { base64: string; mediaType: string }) {
+/** The request that reads a bill: the document as data, the fields to fill. Its replay key names the file by `fileSha256`. */
+export function billRequest(file: { base64: string; mediaType: string; fileSha256?: string }): StructuredOpts<typeof BillSchema> {
   const block =
     file.mediaType === "application/pdf"
       ? ({ type: "document", source: { type: "base64", media_type: "application/pdf", data: file.base64 } } as const)
       : ({ type: "image", source: { type: "base64", media_type: file.mediaType as "image/png" | "image/jpeg" | "image/webp" | "image/gif", data: file.base64 } } as const);
-  return structured({
+  return {
     schema: BillSchema,
     system: BILL_SYSTEM,
     effort: "medium",
     content: [block, { type: "text", text: "Read this document and fill in the fields." }],
-  });
+    fileSha256: file.fileSha256,
+  };
+}
+
+export async function readBill(file: { base64: string; mediaType: string; fileSha256?: string }, how: { replayOnly?: boolean } = {}) {
+  return structured(billRequest(file), how);
 }
 
 export const FundraiserSchema = z.object({
@@ -57,11 +63,21 @@ export const FundraiserSchema = z.object({
 });
 export type Fundraiser = z.infer<typeof FundraiserSchema>;
 
-export async function readFundraiser(pageText: string, url: string) {
-  return structured({
+/**
+ * The request that reads a fundraiser page. For a page this site ships, `keyUrl` is its path: the replay key reads the
+ * page under that name, so the sample's recorded answer is found on every host while Claude is still sent the full address.
+ */
+export function fundraiserRequest(pageText: string, url: string, keyUrl?: string): StructuredOpts<typeof FundraiserSchema> {
+  const ask = { type: "text" as const, text: "Extract the fundraiser details." };
+  return {
     schema: FundraiserSchema,
     system: `You read public fundraising pages for Giftwise. Extract the goal, the amount raised and each stated use of the money, so Giftwise can plan benefit-safe ways to deliver the help. Use only facts on the page. Keep explanation.plain under 40 words and positive.`,
     effort: "medium",
-    content: [asData("fundraiser_page", `URL: ${url}\n\n${pageText}`), { type: "text", text: "Extract the fundraiser details." }],
-  });
+    content: [asData("fundraiser_page", `URL: ${url}\n\n${pageText}`), ask],
+    ...(keyUrl ? { keyContent: [asData("fundraiser_page", `URL: ${keyUrl}\n\n${pageText}`), ask] } : {}),
+  };
+}
+
+export async function readFundraiser(pageText: string, url: string, how: { replayOnly?: boolean; keyUrl?: string } = {}) {
+  return structured(fundraiserRequest(pageText, url, how.keyUrl), how);
 }

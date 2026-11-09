@@ -5,7 +5,8 @@ import { API, MCP_TOOLS, PATH } from "../workflows/src/checks";
 import { CASES } from "@/lib/cases/list";
 import held from "../content/eval/held-out-results.json";
 import heldOutSet from "../content/eval/held-out.json";
-import { ASKED_SENTENCE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
+import held2 from "../content/eval/held-out-2-results.json";
+import { ASKED_SENTENCE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, paypalShareSentence, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
 import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
 
@@ -73,7 +74,8 @@ describe("one source for every test number", () => {
   });
 
   it("the README states the unit counts a reader sees with nothing set and with everything set", () => {
-    const unit = suite("unit") as { command: string; passed: number; total: number; bare?: { passed: number; skipped: number; failed: number; needs: { database: number; claude: number; paypal: number } } };
+    type Run = { passed: number; skipped: number; failed: number; needs: { database: number; claude: number; paypal: number } };
+    const unit = suite("unit") as { command: string; passed: number; total: number; bare?: Run; with_database?: Run };
     expect(unit.bare, "scripts/test-results.mjs unit records the bare run").toBeDefined();
     const bare = unit.bare!;
     // Every test is counted once; a failure here would show in the full count, which must be whole.
@@ -82,9 +84,28 @@ describe("one source for every test number", () => {
     const line = `${bare.passed} pass and ${bare.skipped} skip`;
     expect(readme).toContain(line);
     expect(readme).toContain(`${bare.needs.database} need a database`);
-    expect(readme).toContain(`${n(unit.passed)} of ${n(unit.total)}`);
+    // The with-database count is the run that read .env.local, as it ran: whole only when the database answered.
+    const w = unit.with_database!;
+    expect(w, "scripts/test-results.mjs unit records the run with .env.local").toBeDefined();
+    expect([w.passed, w.passed + w.skipped + w.failed]).toEqual([unit.passed, unit.total]);
+    expect(readme).toContain(
+      w.skipped === 0
+        ? `when .env.local names a reachable database: ${n(unit.passed)} of ${n(unit.total)}, no keys needed`
+        : `with .env.local: ${n(w.passed)} of ${n(unit.total)}, ${w.skipped} skipped because the database did not answer`,
+    );
     expect(rows(tests, unit.command)[0]).toContain(line);
     expect(rows(testing, unit.command)[0]).toContain(line);
+  });
+
+  it("the browser suite's count and its one skip reason read the same in the README, docs/tests.md, TESTING.md and the suite", () => {
+    const ui = suite("ui");
+    const why = /const SKIP_WHY = "([^"]+)"/.exec(readFileSync("tests/e2e/ui.mjs", "utf8"))?.[1];
+    expect(why).toBeTruthy();
+    const sentence = `Claude's four document steps run live with a key and on its recorded answers without one, and skip only when ${why}`;
+    expect(readme).toContain(`\`npm run e2e:ui\`, ${ui.passed} of ${ui.total} (${sentence})`);
+    expect(rows(tests, ui.command)[0]).toContain(sentence);
+    expect(rows(testing, ui.command)[0]).toContain(sentence);
+    for (const doc of [readme, tests, testing]) expect(doc).not.toMatch(/AG Studio widget steps|three steps where Claude reads/);
   });
 
   it("the design line counts the page views the accessibility suite checks", () => {
@@ -97,6 +118,17 @@ describe("one source for every test number", () => {
     expect(inside).toContain(`${ev.screens_1440x900} screens at 1440 by 900`);
     expect(inside).toContain(`${n(ev.words_with_sections_open)} words`);
     expect(inside).toContain(`${was.screens_1440x900} screens and ${n(was.words_with_sections_open)} words`);
+  });
+
+  it("the two long evidence pages open short, measured before and after", () => {
+    const m = measured as typeof measured & { previous?: { pages: typeof measured.pages } };
+    expect(m.previous, "scripts/measure-pages.mjs keeps the run it replaced").toBeDefined();
+    for (const path of ["/evidence/impact", "/evidence/rules"]) {
+      const now = m.pages.find((p) => p.path === path)! as (typeof m.pages)[number] & { words_shown: number };
+      const then = m.previous!.pages.find((p) => p.path === path)! as typeof now;
+      expect(now.screens_1440x900, path).toBeLessThan(then.screens_1440x900);
+      expect(inside).toContain(`\`${path}\` opens at ${now.screens_1440x900} screens and ${n(now.words_shown)} words shown, against ${then.screens_1440x900} and ${n(then.words_shown)} before`);
+    }
   });
 
   it("README and TESTING.md count the outside checks the workflow runs", () => {
@@ -136,7 +168,11 @@ describe("one source for every dollar figure", () => {
     const strip = readme.slice(readme.indexOf("## Results"), readme.indexOf("## Where to look"));
     const whole = (x: number) => `$${Math.round(x).toLocaleString("en-US")}`;
     expect(strip).toContain(`| **${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month** |`);
-    expect(strip).toContain(`kept in ${IMPACT.routedCases} of ${IMPACT.scoredCases} real SSI court cases`);
+    // What the cases mean leads (family help counted against the person in every one), then how many routing keeps money in.
+    expect(IMPACT.countedCases).toBe(IMPACT.scoredCases);
+    expect(strip).toContain(`help from family was counted against the person in all ${IMPACT.countedCases} real SSI court cases; routed through Giftwise, the same help keeps this in ${IMPACT.routedCases} of the ${IMPACT.scoredCases}`);
+    expect(strip).toContain(`keeps money in all ${IMPACT.keptIfAbleCases} with stated amounts if the person can open an ABLE account`);
+    expect(IMPACT.keptIfAbleCases).toBe(IMPACT.computedCases);
     expect(strip).toContain(`**${cents(IMPACT.familyTotal)}** over the ${IMPACT.familyCases.map((c) => c.months).join(" and ")} months`);
     expect(resultsDoc).toContain(`${cents(IMPACT.familyTotal)} in all`);
   });
@@ -175,6 +211,12 @@ describe("one source for every dollar figure", () => {
     expect(readme).toContain("content/eval/held-out.json");
     expect(resultsDoc).toContain(`corrected after the first run (${firstRun})`);
     expect(heldOutSet.corrections).toHaveLength(2);
+    // The second set, written before its run: its result and the blob that ran, in both documents.
+    expect(readme).toContain(`**${held2.summary.engine_matches} of ${held2.summary.cases} in a second set written before its run**`);
+    expect(readme).toContain(`git blob \`${held2.set.git_blob.slice(0, 7)}\``);
+    expect(readme).toContain(`frozen at \`${held2.engine.commit}\``);
+    expect(resultsDoc).toContain(`It matches ${held2.summary.engine_matches} of ${held2.summary.cases}`);
+    expect(resultsDoc).toContain(`(\`${held2.set.git_blob.slice(0, 7)}\`)`);
   });
 
   it("docs/real-world.md answers why not pay the shop yourself with the engine's figures", () => {
@@ -185,6 +227,15 @@ describe("one source for every dollar figure", () => {
     expect(realWorld).toContain(`${y.housingGifts} of the ${y.gifts} gifts (${usd(y.housingAmount)})`);
     expect(realWorld).toContain(`${y.cashGifts} gifts (${usd(y.cashAmount)})`);
     expect(realWorld).toContain(`${y.reportMonthsAlone} months with income or housing help to tell Social Security about, against ${y.reportMonthsGiftwise}`);
+  });
+
+  it("the README and /about state PayPal's share of the sample year as the engine splits it", () => {
+    const y = sampleYearSplit();
+    const pct = Math.round((y.paypal.amount / y.total) * 100);
+    expect(paypalShareSentence()).toBe(`PayPal carries ${pct} percent of the sample year's dollars today: ${usd(y.paypal.amount)} of ${usd(y.total)}, everything paid to shops and clinics.`);
+    expect(readme).toContain(paypalShareSentence());
+    expect(readFileSync("src/app/about/page.tsx", "utf8")).toContain("{paypalShareSentence()}");
+    expect(realWorld).toContain(`${usd(y.paypal.amount)} (${y.paypal.gifts} gifts)`);
   });
 
   it("docs/real-world.md splits the sample year the way the rules engine does", () => {

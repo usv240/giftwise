@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePrefs } from "../prefs";
+import { AiBudget } from "../try/AiBudget";
 import { modelName } from "@/lib/ai/model-name";
 import { addMonths, checkMonthName, fbr, usd } from "@/lib/rules";
 
@@ -134,6 +135,7 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
   const [live, setLive] = useState(false);
   const [status, setStatus] = useState<"idle" | "running" | "error">("idle");
   const [note, setNote] = useState("");
+  const [runs, setRuns] = useState(0);
 
   async function go() {
     setStatus("running");
@@ -149,6 +151,7 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
       setNote((e as Error).message);
       setStatus("error");
     }
+    setRuns((n) => n + 1);
   }
 
   const calls = run.steps.filter((s) => s.kind === "call").length;
@@ -220,6 +223,7 @@ export function AgentDemo({ recorded }: { recorded: AgentRun }) {
         <button type="button" className="btn btn-primary" onClick={go} disabled={status === "running"}>
           {status === "running" ? "The assistant is working…" : "Run it live"}
         </button>
+        <AiBudget refresh={runs} recorded />
         {status === "running" && <p className="muted">It reads Maya&rsquo;s page, plans the gift and starts a sandbox checkout. About 30 seconds.</p>}
         {status === "error" && <p className="result-attention">{note}</p>}
       </div>

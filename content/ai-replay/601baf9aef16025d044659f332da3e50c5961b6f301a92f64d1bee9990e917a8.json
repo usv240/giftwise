@@ -1,0 +1,39 @@
+{
+  "what": "Claude reads the sample fundraiser page (public/samples/fundraiser.html)",
+  "source": "src/app/developers/docs/recorded.json (analyze-fundraiser)",
+  "recorded_at": "2026-11-05",
+  "model": "claude-opus-5-5",
+  "stop_reason": "end_turn",
+  "usage": null,
+  "parsed_output": {
+    "title": "Help Maya get an accessible van (sample fundraiser)",
+    "goal_amount": 6000,
+    "raised_amount": 6000,
+    "beneficiary_description": "Maya, 29, lives on her own and uses a power wheelchair. She is starting community college this spring, and the bus route does not reach campus. Organized by her mom, Rosa.",
+    "uses": [
+      {
+        "description": "Wheelchair ramp and lock-down conversion of a used minivan, done by Lakeside Mobility Conversions",
+        "amount": 5200,
+        "category": "equipment",
+        "likely_vendor": "Van conversion shop (Lakeside Mobility Conversions)"
+      },
+      {
+        "description": "First months of insurance on the van",
+        "amount": 500,
+        "category": "transport",
+        "likely_vendor": "Auto insurance company"
+      },
+      {
+        "description": "Gas for her first semester of classes",
+        "amount": 300,
+        "category": "transport",
+        "likely_vendor": "Gas station"
+      }
+    ],
+    "mentions_benefits": true,
+    "explanation": {
+      "plain": "Maya's fundraiser is fully funded at $6,000! The money covers a wheelchair-accessible van conversion, insurance and gas so she can get to community college. Giftwise can help deliver it in a benefit-safe way.",
+      "technical": "Goal $6,000; raised $6,000 from 48 donors. Stated uses: $5,200 ramp and lock-down conversion of a used minivan by Lakeside Mobility Conversions (equipment); $500 initial van insurance (transport); $300 gas for first semester (transport). Uses sum to $6,000. The page states Maya receives SSI, so mentions_benefits is true. Paying vendors directly (conversion shop, insurer) may help, since SSI generally counts cash and some in-kind support as income; benefit rules should be confirmed for her specific situation."
+    }
+  }
+}

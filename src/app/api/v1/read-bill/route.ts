@@ -1,10 +1,10 @@
 import { guard } from "@/lib/api/keys";
 import { log } from "@/lib/log";
-import sharp from "sharp";
 import { fail, ok, today } from "@/lib/api/envelope";
-import { AiRefusedError, AiUnavailableError, aiAvailable } from "@/lib/ai/claude";
+import { AiRefusedError, AiUnavailableError, aiAvailable, replayAvailable } from "@/lib/ai/claude";
 import { readBill } from "@/lib/ai/tasks";
 import { routeReadBill } from "@/lib/ai/bill-review";
+import { prepareFile, type PreparedFile } from "@/lib/ai/upload";
 import { DEFAULT_PROFILE, evaluateGift } from "@/lib/rules";
 import { api } from "@/lib/api/handler";
 
@@ -16,7 +16,8 @@ const MAX_BYTES = 10 * 1024 * 1024;
  */
 async function handle(req: Request) {
   const started = Date.now();
-  if (!aiAvailable()) {
+  // With no key, the sample bill is still read, from Claude's recorded answer to it (content/ai-replay); any other upload is unavailable.
+  if (!aiAvailable() && !(await replayAvailable())) {
     return fail(
       "upstream_unavailable",
       "Live bill reading needs the AI service, which is not connected on this server yet. Open the Wheelchair repair or Electric bill example to see the full result.",
@@ -33,37 +34,27 @@ async function handle(req: Request) {
   if (!(file instanceof File)) return fail("invalid_request", "Attach a photo or PDF in the field named file.", 400);
   if (file.size > MAX_BYTES) return fail("invalid_request", "That file is larger than 10 MB. Try a smaller photo.", 413);
 
-  const buf = Buffer.from(await file.arrayBuffer());
-  let base64: string;
-  let mediaType: string;
-  if (file.type === "application/pdf") {
-    base64 = buf.toString("base64");
-    mediaType = "application/pdf";
-  } else if (file.type.startsWith("image/")) {
-    // Re-encode: strips EXIF location data and any embedded payloads, and keeps the image a sensible size.
-    try {
-      const out = await sharp(buf).rotate().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
-      base64 = out.toString("base64");
-      mediaType = "image/jpeg";
-    } catch {
-      return fail("invalid_request", "That image could not be opened. Try taking the photo again, or upload a PDF.", 422);
-    }
-  } else {
-    return fail("invalid_request", "Use a photo (JPEG, PNG, WebP) or a PDF.", 415);
+  if (file.type !== "application/pdf" && !file.type.startsWith("image/")) return fail("invalid_request", "Use a photo (JPEG, PNG, WebP) or a PDF.", 415);
+  // An image is re-encoded (src/lib/ai/upload.ts): EXIF location data and any embedded payloads are stripped.
+  let prepared: PreparedFile;
+  try {
+    prepared = await prepareFile(Buffer.from(await file.arrayBuffer()), file.type);
+  } catch {
+    return fail("invalid_request", "That image could not be opened. Try taking the photo again, or upload a PDF.", 422);
   }
 
   try {
-    const { data: bill, model } = await readBill({ base64, mediaType });
+    const { data: bill, model, replayed, recordedAt } = await readBill(prepared);
     // `check`: the rules engine on the one reading, paid to the vendor. `route`: the way Giftwise pays it, after the reviewers when they ran.
     const result = evaluateGift(
       { id: "bill", date: bill.due_date ?? today(), amount: bill.amount_due, delivery: "vendor", category: bill.vendor_category, label: bill.vendor_name },
       DEFAULT_PROFILE,
     );
-    const { route, review } = await routeReadBill(bill, today(), DEFAULT_PROFILE);
+    const { route, review, reviewReplayed } = await routeReadBill(bill, today(), DEFAULT_PROFILE);
     return ok(
       { bill, check: { check_after: result.checkAfter, best_route: result.bestRoute, check_with_best_route: result.checkWithBestRoute, rule_ids: result.ruleIds, ambiguous: result.ambiguous, explanation: result.explanation }, route, review },
       started,
-      { model },
+      { model, replayed, ...(recordedAt ? { recorded_at: recordedAt } : {}), review_replayed: reviewReplayed },
     );
   } catch (e) {
     if (e instanceof AiUnavailableError) return fail("upstream_unavailable", `${e.message} Open the Wheelchair repair or Electric bill example to see the full result.`, 503);

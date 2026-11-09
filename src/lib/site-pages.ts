@@ -24,6 +24,7 @@ export const PUBLIC_PAGES = [
   "/organizations",
   "/developers",
   "/developers/docs",
+  "/start",
   "/try",
   ...PRESETS.map((p) => `/try/presets/${p.id}`),
   "/status",

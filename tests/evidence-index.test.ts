@@ -36,8 +36,8 @@ describe("the claims-to-evidence index", () => {
     expect(audit[62]).toContain("verifyLedger");
     const impact = at("src/lib/impact.ts").split("\n");
     expect(impact[37]).toContain("IMPACT");
-    expect(impact[75]).toContain("FAMILY_SENTENCE");
-    expect(impact[79]).toContain("FAMILY_BASIS");
+    expect(impact[83]).toContain("FAMILY_SENTENCE");
+    expect(impact[87]).toContain("FAMILY_BASIS");
     expect(at("tests/e2e/api.mjs").split("\n")[251]).toContain("nine tools");
     expect(at("content/eval/held-out-results.json").split("\n")[3]).toContain("commit");
     expect(at("scripts/run-field-cases.ts")).toContain("overpaymentCheck");

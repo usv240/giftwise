@@ -291,6 +291,31 @@
 .gift-sandbox-title {
   font-weight: 500;
 }
+/* The Sandbox ribbon: the demo's controls sit on their own tinted band, with a label that names them as test tools,
+   so nothing in it reads as part of giving. */
+.gift-cash.gift-sandbox {
+  background: color-mix(in srgb, var(--mark) 9%, var(--surface));
+}
+.gift-sandbox summary {
+  gap: 10px;
+}
+.sbx-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--mark);
+  color: var(--mark-ink);
+}
+.sbx-what {
+  font-weight: 500;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sbx-tag {
+  flex: none;
+}
 .gift-sandbox p + p,
 .gift-sandbox .title-row + p {
   margin-top: 4px;
@@ -446,6 +471,13 @@
 .give-k {
   font-size: 0.875rem;
   color: var(--muted);
+}
+/* Plain view: why the check named is two months after the gift. */
+.give-lag {
+  margin: 2px 0 6px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  max-width: 52ch;
 }
 .give-lines {
   list-style: none;

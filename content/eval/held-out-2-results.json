@@ -1,0 +1,180 @@
+{
+  "ran_at": "2026-11-09T05:18:04.474Z",
+  "engine": {
+    "commit": "c5e94eb",
+    "git_tree_src_lib_rules": "b672b12cf48e02214127bb139a879dc68023ce04",
+    "files_sha256": "0b74e16f3761c0d4",
+    "rules_version": "2026.1"
+  },
+  "source": "content/eval/held-out-2.json",
+  "set": {
+    "git_blob": "715607f77ec9ee62bcd7058284a75653f0cdb3d8",
+    "sha256": "9b9dac079ec0329106f47b1af206abc697cd6e6b6cc426269bf32e23fc97ab3d"
+  },
+  "summary": {
+    "cases": 5,
+    "engine_matches": 1,
+    "counts_matches": 3,
+    "misses": [
+      "co-owner-mortgage",
+      "house-deeded-by-parents",
+      "home-from-son",
+      "rent-below-market-from-child"
+    ],
+    "not_scored": 0
+  },
+  "cases": [
+    {
+      "id": "co-owner-mortgage",
+      "title": "A co-owner sibling pays eight months of the mortgage at once",
+      "cite": "POMS SI 00835.360",
+      "part": "D.3, TPVP by co-owner not a gift",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835360",
+      "ssa_answer": "In-kind support valued at $200 a month, subject to the presumed maximum value, in each month from August through March: six past months, the current month and the next.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2025-08",
+          "measure": "ism_value",
+          "value": 200,
+          "got": 0,
+          "match": false
+        },
+        {
+          "month": "2026-02",
+          "measure": "ism_value",
+          "value": 200,
+          "got": 351.33,
+          "match": false
+        },
+        {
+          "month": "2026-03",
+          "measure": "ism_value",
+          "value": 200,
+          "got": 200,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01",
+        "R-SHEL-02"
+      ],
+      "match": false
+    },
+    {
+      "id": "house-deeded-by-parents",
+      "title": "Parents deed the home she lives in to her as a gift",
+      "cite": "POMS SI 00835.400",
+      "part": "F, Example 2: Eligible Individual Receives Gift of a House",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835400",
+      "ssa_answer": "In-kind support in the month the house is given, capped at the presumed maximum value ($351.33 in 2026), and none the month after.",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-06",
+          "measure": "ism_value",
+          "value": 351.33,
+          "got": 0,
+          "match": false
+        },
+        {
+          "month": "2026-07",
+          "measure": "ism_value",
+          "value": 0,
+          "got": 0,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01"
+      ],
+      "match": false
+    },
+    {
+      "id": "mobile-home-bought-outright",
+      "title": "A sibling buys her mobile home outright, in her name only",
+      "cite": "POMS SI 00835.310",
+      "part": "E.3, ISM from outright gift of a home",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835310",
+      "ssa_answer": "In-kind support in April, charged at the presumed maximum value ($351.33 in 2026), and none from May.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ism_value",
+          "value": 351.33,
+          "got": 351.33,
+          "match": true
+        },
+        {
+          "month": "2026-05",
+          "measure": "ism_value",
+          "value": 0,
+          "got": 0,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01"
+      ],
+      "match": true
+    },
+    {
+      "id": "home-from-son",
+      "title": "Her son gives her the home she lives in",
+      "cite": "POMS SI 00815.550",
+      "part": "C.2, Receipt of shelter",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815550",
+      "ssa_answer": "Income in the month the home is given, its value capped at the presumed maximum value ($351.33 in 2026).",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-03",
+          "measure": "ism_value",
+          "value": 351.33,
+          "got": 0,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01"
+      ],
+      "match": false
+    },
+    {
+      "id": "rent-below-market-from-child",
+      "title": "Her child, the landlord, charges less than market rent",
+      "cite": "POMS SI 00835.380",
+      "part": "D.2.d, Example",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835380",
+      "ssa_answer": "A rental subsidy counted as in-kind support: because the presumed maximum value is less than the market rent, the subsidy is the presumed maximum value less the rent she pays. SSA's 2024 figures give $334.33 less $280, $54.33; at 2026 amounts, $351.33 less $280 is $71.33.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-10",
+          "measure": "ism_value",
+          "value": 71.33,
+          "got": 130,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01"
+      ],
+      "match": false
+    }
+  ]
+}

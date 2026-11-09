@@ -3,22 +3,24 @@
 import { useState } from "react";
 import type { SampleRead } from "@/lib/ai/sample-bill";
 import { usd } from "@/lib/rules";
+import { AiBudget } from "./AiBudget";
 
 const WHY: Record<NonNullable<SampleRead["reason"]>, string> = {
-  no_key: "The AI service is not connected on this server, so this is the recorded run.",
-  budget: "Today's AI budget is spent, so this is the recorded run. It resets at midnight Pacific time.",
-  error: "The live call did not finish, so this is the recorded run.",
+  no_key: "There is no AI key on this server.",
+  budget: "Today's AI budget is spent; it resets at midnight Pacific time.",
+  error: "The live call did not finish, so this is the saved run.",
 };
 const when = (iso: string) => new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Los_Angeles" });
 
 /**
  * The one live AI step on the main path: press, and Claude reads the sample bill now; the rules engine prices what it
- * read. Counted against the site's daily AI budget; the recorded run is shown, and labelled, when that is spent or no
- * key is set.
+ * read. Counted against the site's daily AI budget, shown beside the button. With no key, or the budget spent, the same
+ * reader runs on Claude's recorded answer and says "Replayed".
  */
 export function LiveBillRead({ cap }: { cap: number }) {
   const [state, setState] = useState<"idle" | "reading" | "done" | "failed">("idle");
   const [r, setR] = useState<SampleRead | null>(null);
+  const [runs, setRuns] = useState(0);
 
   const read = async () => {
     setState("reading");
@@ -31,6 +33,7 @@ export function LiveBillRead({ cap }: { cap: number }) {
     } catch {
       setState("failed");
     }
+    setRuns((n) => n + 1);
   };
 
   return (
@@ -42,17 +45,22 @@ export function LiveBillRead({ cap }: { cap: number }) {
         <span className="live-read-tag">Live AI</span>
       </div>
       <p className="muted">
-        Claude reads the sample bill now, and the rules engine prices what it read. Each press is one Claude call, counted against the site&rsquo;s daily AI budget of {usd(cap)}.
+        Claude reads the sample bill now, and the rules engine prices what it read. Each live press is one Claude call, counted against the site&rsquo;s daily AI budget of {usd(cap)}.
       </p>
-      <button type="button" className="btn btn-primary live-read-btn" onClick={read} disabled={state === "reading"} aria-describedby="read-live-status">
+      <button type="button" className="btn btn-primary live-read-btn" onClick={read} disabled={state === "reading"} aria-describedby="read-live-budget read-live-status">
         {state === "reading" ? "Claude is reading the bill…" : r ? "Read it again" : "Read this bill live"}
       </button>
+      <AiBudget id="read-live-budget" refresh={runs} />
       <div id="read-live-status" aria-live="polite" className="live-read-out">
         {state === "failed" && <p data-tone="attention">The reading could not start. Please try again.</p>}
         {r && state !== "reading" && (
           <>
             <p className="live-read-mode" data-mode={r.mode}>
-              {r.mode === "live" ? `Live, read ${when(r.read_at)} in ${((r.ms ?? 0) / 1000).toFixed(1)} s` : `Recorded run, ${when(r.read_at)}`}
+              {r.mode === "live"
+                ? `Live, read ${when(r.read_at)} in ${((r.ms ?? 0) / 1000).toFixed(1)} s`
+                : r.mode === "replayed"
+                  ? `Replayed: Claude's recorded answer of ${when(r.read_at)}, run just now through the same reader and rules engine`
+                  : `Saved run, ${when(r.read_at)}`}
               {r.reason ? `. ${WHY[r.reason]}` : ""}
             </p>
             <dl className="live-read-facts">

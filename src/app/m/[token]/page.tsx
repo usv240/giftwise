@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { Info } from "@/components/Info";
 import { PayMonth, PlanNext } from "@/components/gift/MonthlyActions";
 import { today } from "@/lib/api/envelope";
-import { monthlyView } from "@/lib/monthly";
+import { VAULT_FINDING, monthlyView } from "@/lib/monthly";
 import { P, addMonths, checkMonthName, monthName, pronounWords, usd } from "@/lib/rules";
 import "../../pages.css";
 import "./monthly.css";
@@ -105,6 +105,7 @@ async function Monthly({ params }: { params: Promise<{ token: string }> }) {
           A gift that goes straight to each shop has to be approved by you, in PayPal, each time. PayPal can save a payment method for a platform&rsquo;s own account, but not to pay other accounts on
           your behalf, so an automatic charge would mean Giftwise holding your money first. One approval a month keeps it going straight to the people {name} needs to pay.
         </p>
+        <p className="page-prose mo-tech">{VAULT_FINDING.sentence} (src/lib/monthly.ts)</p>
       </section>
 
       <p className="mo-back">

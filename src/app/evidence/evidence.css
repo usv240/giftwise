@@ -1876,3 +1876,118 @@
     justify-content: space-between;
   }
 }
+
+/* Long evidence pages open short: one result line, then each section closed under its own heading with one line of
+   what it holds (components/evidence/Fold.tsx). A tone step marks each section; no rules, no shadows at rest. */
+.ev-result {
+  max-width: 62ch;
+}
+.ev-fold-note {
+  margin-top: 0.75rem;
+  font-size: var(--step-small);
+  max-width: 72ch;
+}
+.ev-folds {
+  display: grid;
+  gap: 8px;
+  margin-top: clamp(1.25rem, 1rem + 1vw, 2rem);
+}
+.ev-fold {
+  background: var(--surface);
+  border-radius: 14px;
+  scroll-margin-top: 88px;
+}
+.ev-fold-sum {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 2px;
+  min-height: 44px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  transition: background-color var(--dur-press) var(--ease-out);
+}
+.ev-fold-sum::-webkit-details-marker {
+  display: none;
+}
+.ev-fold-h {
+  grid-column: 1;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+.ev-fold-what {
+  grid-column: 1;
+  font-size: var(--step-small);
+  color: var(--muted);
+  line-height: 1.4;
+}
+/* The same plus that folds into a minus as the other disclosures. */
+.ev-fold-sum::after {
+  content: "";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 12px;
+  height: 12px;
+  color: var(--muted);
+  background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 12px 1.5px, 1.5px 12px;
+  transition: background-size 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.ev-fold[open] > .ev-fold-sum::after {
+  background-size: 12px 1.5px, 1.5px 0;
+  transform: rotate(180deg);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ev-fold-sum:hover {
+    background: var(--surface-2);
+  }
+}
+.ev-fold-sum:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.ev-fold[open] > .ev-fold-sum {
+  border-radius: 14px 14px 0 0;
+}
+.ev-fold-body {
+  padding: 6px 18px 22px;
+  display: grid;
+  gap: 14px;
+}
+.ev-fold-body > * {
+  margin-top: 0;
+  min-width: 0;
+}
+/* A section component's own outer spacing is the page's; inside a fold the fold sets it. */
+.ev-fold-body > .page-section,
+.ev-fold-body > section {
+  margin-top: 0;
+  padding-top: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-fold-sum::after {
+    transition: none;
+  }
+}
+/* A section component whose own heading repeats its fold's title: inside the fold, the fold's heading is the one. */
+.ev-fold-body #je-h,
+.ev-fold-body #lineage-h {
+  display: none;
+}
+/* The second held-out set: its own heading inside the held-out section, with more space above than below. */
+#held-out-2 {
+  margin-top: clamp(1.75rem, 1.25rem + 1.5vw, 2.5rem);
+  margin-bottom: 0.5rem;
+  font-size: 1.1875rem;
+  font-weight: 500;
+  scroll-margin-top: 88px;
+}
+

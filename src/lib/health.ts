@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { apiKeyState, cachedKeyCheck, keyAccepted } from "./ai/claude";
+import { apiKeyState, cachedKeyCheck, keyAccepted, replayAvailable } from "./ai/claude";
 import { log } from "./log";
 import { latestRun } from "./checks";
 import { db, dbConfigured } from "./db";
@@ -72,8 +72,8 @@ async function probePayPalMcp(): Promise<McpProbe> {
 export type Mode = "live" | "fallback" | "not_connected" | "off" | "checking";
 /** The word on each service's badge, on /status and /ops. */
 export const MODE_LABEL: Record<Mode, string> = { live: "Live", fallback: "Fallback", not_connected: "Not connected", off: "Optional, off", checking: "Checking" };
-/** checkedAt: when a cached check ran (the PayPal MCP server). optional: the product works the same without it. */
-export type Check = { id: string; name: string; mode: Mode; detail: string; ms?: number; checkedAt?: string; optional?: boolean };
+/** checkedAt: when a cached check ran (the PayPal MCP server). optional: the product works the same without it. replay: with no key, the samples replay Claude's recorded answers. */
+export type Check = { id: string; name: string; mode: Mode; detail: string; ms?: number; checkedAt?: string; optional?: boolean; replay?: boolean };
 
 /** "just now", "4 minutes ago", "2 hours ago". */
 export function ago(at: number, now = Date.now()) {
@@ -96,9 +96,11 @@ export function mcpCheck(probe: McpProbe | null, configured: boolean, now = Date
  * Claude's line: what the API said about this server's key (a free models lookup), or why no key is in use. A key with
  * a space or a second line in it is never sent, and the line says so.
  */
-export function claudeCheck(key: { ok: boolean; detail: string } | null, state = apiKeyState()): Check {
+export function claudeCheck(key: { ok: boolean; detail: string } | null, state = apiKeyState(), replay = false): Check {
   const base = { id: "claude", name: "Claude Opus 5.5" };
   if (state === "malformed") return { ...base, mode: "not_connected", detail: "The API key on this server has more than one line or a space, so it is not used; enter it again as one line. Ready-made examples show saved results" };
+  if (state === "missing" && replay)
+    return { ...base, mode: "fallback", replay: true, detail: "No API key: the sample bill, the sample fundraiser and the two reviewers on the examples replay Claude's recorded answers through the same code" };
   if (state === "missing") return { ...base, mode: "fallback", detail: "Ready-made examples show saved results" };
   if (!key) return { ...base, mode: "checking", detail: "The key check is running now; this line shows the API's answer once it is in" };
   return { ...base, mode: key.ok ? "live" : "fallback", detail: key.ok || /ready-made/i.test(key.detail) ? key.detail : `${key.detail} Ready-made examples show saved results` };
@@ -204,7 +206,7 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
   return [
     { id: "paypal", name: "PayPal sandbox", mode: pp?.ok ? "live" : "not_connected", detail: pp ? pp.detail : "Credentials not set", ms: pp?.ms },
     payees(),
-    claudeCheck(key),
+    claudeCheck(key, apiKeyState(), await replayAvailable()),
     {
       id: "webhooks",
       name: "PayPal webhooks",

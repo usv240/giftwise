@@ -10,9 +10,13 @@ let pass = 0, fail = 0;
 const PAY = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 2, 1));
 const FULL = PAY.getUTCFullYear() >= 2027 ? 1029 : 994;
 const ok = (n, c, x = "") => { if (c) pass++; else fail++; console.log(`${c ? "PASS" : "FAIL"}  ${n}${x ? "  | " + x : ""}`); };
-// The two steps where Claude reads a document need the AI key; on a server without one they are skipped, not failed.
-const AI = (await (await fetch(`${B}/api/health`)).json().catch(() => ({}))).checks?.find((c) => c.id === "claude")?.mode === "live";
-const skip = (n) => console.log(`SKIP  ${n}  | no AI key on this server`);
+// The four steps where Claude reads a document run live with an AI key, and on Claude's recorded answers without one
+// (content/ai-replay); only a server with neither skips them, with this one reason.
+const SKIP_WHY = "the server has no AI key and no recorded answers";
+const claudeCheck = (await (await fetch(`${B}/api/health`)).json().catch(() => ({}))).checks?.find((c) => c.id === "claude");
+const LIVE = claudeCheck?.mode === "live";
+const AI = LIVE || Boolean(claudeCheck?.replay);
+const skip = (n) => console.log(`SKIP  ${n}  | ${SKIP_WHY}`);
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe" });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
@@ -124,13 +128,13 @@ ok("Try month: template downloads", dl.suggestedFilename().endsWith(".csv"), dl.
 await page.locator("textarea").fill("date,giver,amount,description,paid_to,category,recurring\n2026-13-40,Bad,abc,x,moon,other,no\n");
 ok("Try month: bad CSV rows explained", (await page.locator(".try-problems li").count()) >= 1);
 
-// 6. Try: bill tab upload through the UI (live Claude)
+// 6. Try: bill tab upload through the UI (live Claude; with no key, the sample bill on Claude's recorded answer)
 if (AI) {
   await page.getByRole("tab", { name: "A bill or quote" }).click();
-  await page.locator('input[type="file"]').setInputFiles("public/samples/riverside-mobility-quote.png");
+  await page.locator('input[type="file"]').setInputFiles(LIVE ? "public/samples/riverside-mobility-quote.png" : "public/samples/northside-electric-bill.png");
   await page.waitForSelector(".read-card, .ai-json, .result-attention", { timeout: 120000 });
   const billOut = await page.locator(".ai-state").textContent();
-  ok("Try bill: upload is read through the UI", /Riverside Mobility/.test(billOut ?? ""), (billOut ?? "").slice(0, 80));
+  ok("Try bill: upload is read through the UI", (LIVE ? /Riverside Mobility/ : /Northside Electric[\s\S]*Replayed|Replayed[\s\S]*Northside Electric/).test(billOut ?? ""), (billOut ?? "").slice(0, 80));
   ok("Try bill result shows a readable card, not raw JSON", (await page.locator(".ai-json").count()) === 0 && (await page.locator(".read-card").count()) === 1);
 } else {
   skip("Try bill: upload is read through the UI");

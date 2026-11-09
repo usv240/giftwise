@@ -1,7 +1,7 @@
 import field from "../../content/eval/field-cases-results.json";
 import sample from "../../content/sample-year.json";
 import { SAMPLE } from "./households";
-import { DEFAULT_PROFILE, P, SHELTER_CATEGORIES, evaluateGift, planMonths, type Category, type Delivery, type Profile } from "./rules";
+import { DEFAULT_PROFILE, P, SHELTER_CATEGORIES, evaluateGift, planMonths, usd, type Category, type Delivery, type Profile } from "./rules";
 import { MAX_UNITS } from "./routing";
 
 /**
@@ -39,6 +39,11 @@ export const IMPACT = {
   /** Federal court cases scored, and those whose facts allow a benefit-safe route. */
   scoredCases: field.summary.scored,
   routedCases: routed.cases_where_routing_keeps_money,
+  /** Scored cases where SSA counted help from family or friends against the person: every one of them. */
+  countedCases: field.cases.filter((c) => c.determination.counts).length,
+  /** Cases whose opinions state the amounts the check needs, and of those, the ones routing keeps money in if the person can open an ABLE account. */
+  computedCases: field.summary.dollars.cases_computed,
+  keptIfAbleCases: field.summary.dollars.if_each_person_is_able_eligible.cases_where_routing_keeps_money,
   /** What routing the same help keeps a month in those cases, at 2026 rates, in all. */
   keptMonthly: routed.kept_per_month_2026,
   /** The engine's counterfactual on those cases: the least and most it keeps a month, at 2026 rates, and the years their facts come from. */
@@ -62,11 +67,14 @@ const whole = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 const dollarsCents = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 /**
- * The court-case claim in one sentence, the same wherever it is shown: the engine's counterfactual on real cases, not an
- * observed outcome. "In 4 of 14 real court cases, the same help routed through Giftwise would have kept $331 to $663 a
- * month at 2026 rates."
+ * The court-case claim, the same wherever it is shown: what the cases mean first (help from family was counted against
+ * the person in every one), then the engine's counterfactual on them, not an observed outcome. Of the 10 other cases, 6
+ * were help with housing or everyday living costs, which routing keeps whole only through ABLE, and 4 do not state the amounts the check needs.
  */
-export const KEPT_SENTENCE = `In ${IMPACT.routedCases} of ${IMPACT.scoredCases} real court cases, the same help routed through Giftwise would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month at 2026 rates.`;
+export const COURT_MEANING = `Social Security counted help from family or friends against the person in all ${IMPACT.countedCases} real SSI court cases scored.`;
+export const KEPT_SENTENCE = `${COURT_MEANING} Routed through Giftwise, the same help would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month at 2026 rates in ${IMPACT.routedCases} of the ${IMPACT.scoredCases} as the opinions state the facts, and money in all ${IMPACT.keptIfAbleCases} whose amounts are stated if the person could open an ABLE account.`;
+/** The same claim as a short label under the per-month figure. */
+export const KEPT_LABEL = `family help counted against the person in all ${IMPACT.countedCases} real court cases; routed through Giftwise, the same help keeps this in ${IMPACT.routedCases} of them at 2026 rates`;
 const COUNT_WORD = ["no", "one", "two", "three", "four", "five", "six"];
 /**
  * The lead court-case claim, per family: "In the two real court cases whose opinions state how long the help lasted,
@@ -183,4 +191,14 @@ export function sampleYearSplit() {
     cash: part("cash"),
     checkWhole: gifts.filter((x) => x.r.checkAfter === x.r.checkBaseline).length,
   };
+}
+
+/**
+ * The part of a real year PayPal carries today, from the same split: everything paid to shops and clinics. The ABLE share
+ * goes through the plan's own gift page, and the rest is a jacket given as itself. The README and /about state it.
+ */
+export function paypalShareSentence() {
+  const y = sampleYearSplit();
+  const pct = Math.round((y.paypal.amount / y.total) * 100);
+  return `PayPal carries ${pct} percent of the sample year's dollars today: ${usd(y.paypal.amount)} of ${usd(y.total)}, everything paid to shops and clinics.`;
 }

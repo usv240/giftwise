@@ -338,6 +338,17 @@
 .try-privacy {
   font-size: var(--step-small);
 }
+/* Under the upload: the sample bill, read and reviewed end to end. */
+.try-sample {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+.read-mode {
+  margin: 0;
+  font-size: var(--step-small);
+}
 .ai-state {
   background: var(--surface);
   border-radius: 20px;

@@ -30,6 +30,12 @@ describe("the problem, measured by Social Security", () => {
     expect(SCALE.slice(0, 3).map((f) => f.id)).toEqual(["asr-counted", "afr-ism-share", "oig-no-tools"]);
   });
 
+  it("every row says where in its source the figure is: a table, a page, a Federal Register page, a section or the abstract", () => {
+    const where = /\b(Tables? \d+|pp?\. \d+|\d+ FR \d+|Section [A-Z]|abstract|Market Sizing Data)\b/;
+    for (const f of [...SCALE, ...LIMIT]) expect(f.locator, f.id).toMatch(where);
+    for (const u of UPTAKE) expect(u.locator, u.id).toMatch(where);
+  });
+
   it("the improper-payment figures add up as the report states them", () => {
     expect(Math.round((ISM_IMPROPER.over + ISM_IMPROPER.under) * 100) / 100).toBe(ISM_IMPROPER.total);
     expect(Math.round((ISM_IMPROPER.total / 5) * 100) / 100).toBe(ISM_IMPROPER.yearlyAverage);

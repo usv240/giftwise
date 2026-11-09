@@ -12,7 +12,8 @@
   "cfr-416-1130": {
     "title": "20 CFR 416.1130: in-kind support and maintenance (shelter)",
     "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1130",
-    "publisher": "eCFR"
+    "publisher": "eCFR",
+    "read": "November 2, 2026"
   },
   "cfr-416-1121": {
     "title": "20 CFR 416.1121: types of unearned income, including gifts",
@@ -22,7 +23,8 @@
   "poms-si-00815-400": {
     "title": "POMS SI 00815.400: Bills Paid by Third Party",
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815400",
-    "publisher": "Social Security Administration"
+    "publisher": "Social Security Administration",
+    "read": "November 2, 2026"
   },
   "poms-si-00815-550": {
     "title": "POMS SI 00815.550: Receipt of certain noncash items",
@@ -189,7 +191,8 @@
   "sna-crowdfunding": {
     "title": "Special Needs Alliance: Crowdfunding should be handled with care",
     "url": "https://www.specialneedsalliance.org/blog/crowdfunding-should-be-handled-with-care/",
-    "publisher": "Special Needs Alliance"
+    "publisher": "Special Needs Alliance",
+    "read": "November 2, 2026"
   },
   "berliner-kenworthy-2017": {
     "title": "Berliner and Kenworthy, Producing a worthy illness: personal crowdfunding amidst financial crisis, Social Science and Medicine (2017)",
@@ -299,12 +302,14 @@
   "calable-gifting": {
     "title": "CalABLE: Gifting",
     "url": "https://calable.ca.gov/how-it-works/gifting",
-    "publisher": "CalABLE"
+    "publisher": "CalABLE",
+    "read": "November 3, 2026"
   },
   "able-united-gifting": {
     "title": "ABLE United: Gifting",
     "url": "https://www.ableunited.com/usage/gifting",
-    "publisher": "ABLE United"
+    "publisher": "ABLE United",
+    "read": "November 3, 2026"
   },
   "asan-easy-read": {
     "title": "ASAN: One Idea Per Line, a guide to making Easy Read resources (2021)",
@@ -330,79 +335,93 @@
     "title": "True Link: Prepaid Visa card for people on benefits and their trustees",
     "url": "https://www.truelinkfinancial.com/prepaid-card",
     "publisher": "True Link Financial",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "poms-si-01120-200": {
     "title": "POMS SI 01120.200: Information on trusts, including trusts established prior to 1/1/2000",
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120200",
-    "publisher": "Social Security Administration"
+    "publisher": "Social Security Administration",
+    "read": "November 8, 2026"
   },
   "poms-si-01120-203": {
     "title": "POMS SI 01120.203: Exceptions to counting trusts established on or after January 1, 2000 (special needs and pooled trusts)",
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120203",
-    "publisher": "Social Security Administration"
+    "publisher": "Social Security Administration",
+    "read": "November 8, 2026"
   },
   "arc-texas-pooled-fees": {
     "title": "The Arc of Texas Master Pooled Trust: enrollment and fees",
     "url": "https://www.thearcoftexas.org/trust/enrollment/",
-    "publisher": "The Arc of Texas"
+    "publisher": "The Arc of Texas",
+    "read": "November 8, 2026"
   },
   "db101": {
     "title": "Disability Benefits 101: benefits and work estimators (13 states)",
     "url": "https://www.db101.org/",
-    "publisher": "World Institute on Disability"
+    "publisher": "World Institute on Disability",
+    "read": "November 8, 2026"
   },
   "ssa-wipa": {
     "title": "SSA Ticket to Work: benefits counseling and the path to employment (WIPA)",
     "url": "https://choosework.ssa.gov/library/fact-sheet-benefits-counseling-and-the-path-to-employment",
-    "publisher": "Social Security Administration"
+    "publisher": "Social Security Administration",
+    "read": "November 8, 2026"
   },
   "ssa-wipa-findhelp": {
     "title": "SSA Ticket to Work: Find Help (WIPA benefits counselors near you)",
     "url": "https://choosework.ssa.gov/findhelp",
-    "publisher": "Social Security Administration"
+    "publisher": "Social Security Administration",
+    "read": "November 8, 2026"
   },
   "purple-bank": {
     "title": "Purple: banking for people with disabilities (SSI resource limit alerts, representative payee accounts, an ABLE account in the app)",
     "url": "https://www.withpurple.com/",
     "publisher": "Purple",
-    "date": "2026 pages"
+    "date": "2026 pages",
+    "read": "November 8, 2026"
   },
   "talli-snt": {
     "title": "Talli: Distributing special needs trust funds to beneficiaries",
     "url": "https://www.talli.ai/blog/distributing-special-needs-trust-beneficiaries",
     "publisher": "Talli",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "trusthelm-snt": {
     "title": "TrustHelm: Special needs trust management, a guide for trustees and caregivers",
     "url": "https://trusthelm.ai/guides/trustee-duties/special-needs-trust-management",
     "publisher": "TrustHelm",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "giftly-how": {
     "title": "Giftly: How does Giftly work",
     "url": "https://www.giftly.com/blog/giftly-101/how-does-giftly-work",
     "publisher": "Giftly",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "ablenow-gifting": {
     "title": "ABLEnow: Gifting with Ugift",
     "url": "https://www.ablenow.com/saving-investments/gifting/",
     "publisher": "ABLEnow (Virginia529)",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "ugiftable": {
     "title": "UgiftABLE: give a gift to an ABLE account",
     "url": "https://www.ugiftable.com/",
     "publisher": "Ugift (Ascensus)",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "paable-gift": {
     "title": "PA ABLE: Give a gift",
     "url": "https://paable.gov/gift/",
     "publisher": "PA ABLE (Pennsylvania Treasury)",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "zheng-2023-judge": {
     "title": "Zheng et al., Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena, NeurIPS 2023",
@@ -504,31 +523,36 @@
     "title": "POMS SI 01120.201: Trusts established with the assets of an individual on or after 01/01/00 (I.1.e names administrator-managed prepaid cards such as True Link)",
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0501120201",
     "publisher": "Social Security Administration",
-    "date": "rev. May 23, 2022"
+    "date": "rev. May 23, 2022",
+    "read": "November 8, 2026"
   },
   "guardian-trust-pooled-fees": {
     "title": "Guardian Trust (Florida): Fee schedule, pooled (d)(4)(C) special needs trust administration",
     "url": "https://guardiantrusts.org/wp-content/uploads/2025/02/Pooled-D4C-Fee-Schedule.pdf",
     "publisher": "Guardian Trust",
-    "date": "effective February 1, 2025"
+    "date": "effective February 1, 2025",
+    "read": "November 8, 2026"
   },
   "plan-ma-ri-fees": {
     "title": "PLAN of MA and RI: Comparing PLAN’s trusts (fees, minimums and distribution times)",
     "url": "https://www.planofma-ri.org/special-needs-professionals/comparing-plans-trusts/",
     "publisher": "PLAN of Massachusetts and Rhode Island",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "db101-il-ssi-limits": {
     "title": "DB101 Illinois: Supplemental Security Income, resource and income limits (2026 figures, with the rent and ABLE examples)",
     "url": "https://il.db101.org/il/programs/income_support/ssi2/program2d.htm",
     "publisher": "World Institute on Disability",
-    "date": "2026 edition, read November 8, 2026"
+    "date": "2026 edition, read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "ableforall-gifting": {
     "title": "ABLE for ALL: gifting FAQs (personal gifting page, no fee for bank transfers)",
     "url": "https://ableforall.com/faqs?tag=gifting",
     "publisher": "ABLE for ALL (Oregon)",
-    "date": "read November 8, 2026"
+    "date": "read November 8, 2026",
+    "read": "November 8, 2026"
   },
   "finkelstein-notowidigdo-2019": {
     "title": "Finkelstein and Notowidigdo, Take-Up and Targeting: Experimental Evidence from SNAP, Quarterly Journal of Economics 134(3)",

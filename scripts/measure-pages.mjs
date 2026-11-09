@@ -1,9 +1,10 @@
 // How long the long pages are: words in <main> (shown, and with every closed section opened), screens at 1440 by 900
 // (the page's height over 900 px, as it first loads, with its sections closed) and the HTML's size. Writes
-// content/public/page-measure.json, which the README's docs quote, so a screen count is a measure, never a guess.
+// content/public/page-measure.json, which the README's docs quote, so a screen count is a measure, never a guess. The
+// run it replaces is kept in the same file as `previous`, so every change in length reads as a before and an after.
 //
 //   BASE_URL=http://localhost:3100 node scripts/measure-pages.mjs
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright-core";
 
 const B = process.env.BASE_URL ?? "http://localhost:3100";
@@ -26,5 +27,8 @@ for (const path of PAGES) {
 }
 await browser.close();
 mkdirSync("content/public", { recursive: true });
-writeFileSync("content/public/page-measure.json", JSON.stringify({ measured_at: new Date().toISOString(), base_url: B, viewport: "1440x900", pages }, null, 2) + "\n");
+const FILE = "content/public/page-measure.json";
+const last = existsSync(FILE) ? JSON.parse(readFileSync(FILE, "utf8")) : null;
+const previous = last ? { measured_at: last.measured_at, pages: last.pages } : undefined;
+writeFileSync(FILE, JSON.stringify({ measured_at: new Date().toISOString(), base_url: B, viewport: "1440x900", pages, ...(previous ? { previous } : {}) }, null, 2) + "\n");
 console.log("written to content/public/page-measure.json");

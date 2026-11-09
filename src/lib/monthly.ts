@@ -17,6 +17,14 @@ import { DEFAULT_PROFILE, addMonths, computeMonth, evaluateGift, monthName, mont
  * so an automatic charge would mean Giftwise holding the money. One approval a month keeps it going straight to each payee.
  */
 
+/** The sandbox finding behind "the giver approves each month", stated on /m/[token] and /evidence/operations. */
+export const VAULT_FINDING = {
+  code: "BILLING_AGREEMENT_NOT_FOUND",
+  tested: "November 4, 2026",
+  sentence:
+    "Measured in PayPal's sandbox on November 4, 2026: a charge with a saved PayPal wallet (a vault_id) to another payee returns BILLING_AGREEMENT_NOT_FOUND, because a saved wallet pays only the platform's own account. So each month is a fresh Orders v2 order the giver approves, paying every recipient directly, and Giftwise never holds the money.",
+} as const;
+
 export type NeedRow = typeof schema.needs.$inferSelect;
 export type PaymentRow = typeof schema.payments.$inferSelect;
 export type Change = { kind: "added" | "removed" | "changed"; title: string; payee: string; from: number; to: number; why: string };

@@ -31,7 +31,7 @@ const whole = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
  * The result line the page opens with: the three numbers in one sentence, each computed from the files in content/
  * (src/lib/error-rates.ts, content/eval/ssa-examples-results.json, src/lib/impact.ts).
  */
-const RESULT_LINE = `${ERROR_RATES.lowered.errors} of ${ERROR_RATES.lowered.of} gifts that would lower the check were let through; ${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} of Social Security's own worked examples match SSA's answer; in ${IMPACT.routedCases} of ${IMPACT.scoredCases} real court cases, the same help routed through Giftwise would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month.`;
+const RESULT_LINE = `${ERROR_RATES.lowered.errors} of ${ERROR_RATES.lowered.of} gifts that would lower the check were let through; ${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} of Social Security's own worked examples match SSA's answer; help from family was counted against the person in all ${IMPACT.countedCases} real court cases, and routed through Giftwise the same help would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month in ${IMPACT.routedCases} of them.`;
 
 /** The five-minute path: six steps, under a minute and a half each, in the order the story runs. */
 const PATH = [

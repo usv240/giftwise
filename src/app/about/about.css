@@ -98,6 +98,11 @@
   font-weight: 500;
   text-align: right;
 }
+.about-year-share {
+  margin-top: 1rem;
+  font-weight: 500;
+  max-width: 60ch;
+}
 .about-year-src {
   margin-top: 0.75rem;
   font-size: var(--step-small);
