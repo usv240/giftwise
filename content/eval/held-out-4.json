@@ -1,0 +1,276 @@
+{
+  "about": "A fourth held-out check, larger than the first three and written before it was run: fifteen worked examples from Social Security's operating manual (POMS), from sections used in none of content/eval/held-out.json, held-out-2.json or held-out-3.json, and never scored in content/eval/ssa-examples.json or used to change the rules engine: loans of in-kind support (SI 00835.482), cash from outside the household (SI 00835.450), sharing household costs (SI 00835.160), earmarked sharing (SI 00835.170) and gifts to children with life-threatening conditions (SI 00830.750). Each case quotes SSA's page in part (passage_quotes, word for word from the URL) and restates its facts in plain words (situation). As in the other sets, dates are moved to 2026 so 2026 amounts apply. Where SSA's example holds a fact the engine has no input for, the case names it in not_held, and SSA's answer stays as SSA gives it. The set is run once, on the engine frozen at the commit named in held-out-4-results.json, and the result is published as it comes out.",
+  "fetched": "2026-11-09",
+  "encoding_rule": "Help is entered the way Giftwise takes it: a payment someone makes to a business is delivery vendor, cash given to the person is delivery cash, and an item given as itself is delivery item. Each example is scored in April 2026 (August 2026 for the gift SSA dates in August), with any payment on a date in that month. The people in the person's household, herself included, are entered as householdSize when SSA states them. The profile field livesInAnothersHousehold is entered true only when the person lives in another person's household and pays nothing toward its costs, as the field's own description reads; a person who pays part of the costs is entered false, and what they pay, the household's costs and their pro rata share are named in not_held, because the engine has no input for them. A loan of food or shelter, the giver's tax status and a child's medical condition have no input either, and are named in not_held. Where SSA finds that help from inside the household counts under the normal rules and the person pays nothing toward the household's costs, the one-third reduction applies (POMS SI 00835.200), and the SSI amount is restated at 2026 rates: $994 less one third, $331.33, which is $662.67, less any cash counted after the $20 general exclusion. These choices were made before the run and are not changed after it.",
+  "registered": "Written and fixed on 2026-11-09, before any case was run. held-out-4-results.json will record this file's git blob hash and SHA-256, so the exact file that was run can be found in the repository's history. Run it with npm run eval:held-out -- --set content/eval/held-out-4.json once the file is committed.",
+  "cases": [
+    {
+      "id": "loan-outside-utility-repaid",
+      "title": "Someone outside the household pays a utility bill as a loan she must repay in full",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "B.4, Example: Lender outside the household; G.4.c",
+      "passage_quotes": [
+        "If the outside lender pays $150 toward a utility bill, the loan amount is $150, if the borrower agreed to repay the entire $150.",
+        "If the loan repayment amount equals or exceeds the actual value of the outside ISM provided by the lender, the borrower receives no outside ISM from the lender."
+      ],
+      "situation": "She receives SSI and lives in her own home. Someone outside her household pays $150 toward her utility bill in April 2026, under a bona fide loan agreement: she agreed to repay the whole $150.",
+      "profile": { "livesInAnothersHousehold": false },
+      "gifts": [{ "id": "g1", "date": "2026-04-10", "amount": 150, "delivery": "vendor", "category": "utility", "giver": "lender", "recurring": false }],
+      "expected": { "counts": false, "values": [{ "month": "2026-04", "measure": "ism_value", "value": 0 }] },
+      "ssa_answer": "The loan amount is $150 and she repays all of it, so the repayment equals the value of the help and she receives no outside in-kind support.",
+      "not_held": ["The payment is a bona fide loan she must repay in full; the engine has no input for a loan."]
+    },
+    {
+      "id": "loan-outside-utility-share-of-two",
+      "title": "A utility bill paid as a loan, repaid only for her share of a household of two",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "B.4, Example: Lender outside the household; G.4.a and G.4.c",
+      "passage_quotes": [
+        "However, if the loan stipulates that the eligible individual is only responsible for their pro rata share of the utility bill and there are two persons in the household, the eligible individual's loan agreement is to repay $75 to the lender.",
+        "Determine the actual value of the outside ISM provided to the borrower by the lender as if no loan of ISM existed."
+      ],
+      "situation": "She receives SSI and lives with one other person. Someone outside the household pays $150 toward the household's utility bill in April 2026, under a bona fide loan agreement: she agreed to repay her share, $75.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 2 },
+      "gifts": [{ "id": "g1", "date": "2026-04-10", "amount": 150, "delivery": "vendor", "category": "utility", "giver": "lender", "recurring": false }],
+      "expected": { "counts": false, "values": [{ "month": "2026-04", "measure": "ism_value", "value": 0 }] },
+      "ssa_answer": "As if there were no loan, her share of the $150 bill in a household of two is $75. She repays $75, which equals that value, so she receives no outside in-kind support.",
+      "not_held": ["The payment is a bona fide loan she must repay for her share; the engine has no input for a loan."]
+    },
+    {
+      "id": "outside-electric-household-of-three",
+      "title": "Someone outside pays the electric bill for a household of three",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "G.4.a",
+      "passage_quotes": [
+        "Determine the actual value of the outside ISM provided to the borrower by the lender as if no loan of ISM existed.",
+        "For example, if the lender pays a $300 electric bill and there are three members in the household, $100 is countable as ISM to the eligible individual."
+      ],
+      "situation": "She receives SSI and lives in a household of three. Someone outside the household pays its $300 electric bill in April 2026. SSA's example values the help as if there were no loan, which is how it is scored here.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 3 },
+      "gifts": [{ "id": "g1", "date": "2026-04-10", "amount": 300, "delivery": "vendor", "category": "utility", "giver": "relative", "recurring": false }],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ism_value", "value": 100 }] },
+      "ssa_answer": "$100 is countable as in-kind support: the $300 bill divided among the three members of the household, which is under the presumed maximum value.",
+      "not_held": []
+    },
+    {
+      "id": "loan-conditional-repayment",
+      "title": "Food and shelter from an adult child, to be repaid only if SSI is paid",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "B.3, Example 2: Conditional requirement for repayment",
+      "passage_quotes": [
+        "Jeff has no income or resources and alleges that their adult child provides them with food and shelter as a loan.",
+        "When contacted, the adult child states that Jeff is required to repay them only if Jeff begins to receive their Title XVI benefits.",
+        "a bona fide loan does not exist because Jeff has no obligation to repay the ISM."
+      ],
+      "situation": "Jeff has no income or resources and lives in his adult child's home, which provides all of his food and shelter in April 2026. He pays nothing toward the household's costs. The child says Jeff must repay only if his SSI begins.",
+      "profile": { "livesInAnothersHousehold": true, "householdProvidesAllMeals": true, "otherUnearnedMonthly": 0, "earnedMonthly": 0, "savings": 0 },
+      "gifts": [],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 662.67 }] },
+      "ssa_answer": "There is no bona fide loan, because repayment depends on SSI being paid. The food and shelter are in-kind support under the normal rules; with both from the household and nothing paid toward it, the one-third reduction applies.",
+      "not_held": ["The alleged loan and its condition; the engine has no input for a loan."]
+    },
+    {
+      "id": "loan-no-mutual-agreement",
+      "title": "Food and shelter from a parent she feels bound to repay, though the parent expects nothing",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "B.3, Example 1: No obligation for repayment",
+      "passage_quotes": [
+        "Jane has no income or resources and alleges that their parent provides Jane with food and shelter.",
+        "Jane states that they feel personally responsible to pay back their parent, but the parent does not expect repayment.",
+        "The CS determines that a bona fide loan does not exist because Jane and their parent did not have a mutual agreement that Jane must repay the loan."
+      ],
+      "situation": "Jane has no income or resources and lives in her parent's home, which provides all of her food and shelter in April 2026. She pays nothing toward the household's costs. She feels she should repay her parent; the parent does not expect it.",
+      "profile": { "livesInAnothersHousehold": true, "householdProvidesAllMeals": true, "otherUnearnedMonthly": 0, "earnedMonthly": 0, "savings": 0 },
+      "gifts": [],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 662.67 }] },
+      "ssa_answer": "There is no bona fide loan, because the two never agreed that Jane must repay. The food and shelter are in-kind support under the normal rules; with both from the household and nothing paid toward it, the one-third reduction applies.",
+      "not_held": ["Jane's wish to repay, which SSA finds is not a loan; the engine has no input for a loan."]
+    },
+    {
+      "id": "loan-plan-not-feasible",
+      "title": "Food and shelter from a sibling under a repayment plan she cannot meet",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "B.5, Example 2: Prorata share greater than anticipated income",
+      "passage_quotes": [
+        "They live with a sibling, who provides them with food and shelter with a value (pro rata share) of $825 per month.",
+        "Alex's repayment plan is not feasible because their SSI check amount is not sufficient to pay their pro rata share of current household operating expenses ($825);",
+        "The loan is not a bona fide loan of ISM because the repayment plan is not feasible;"
+      ],
+      "situation": "Alex has no income or resources and lives in a sibling's home, which provides all of Alex's food and shelter, worth $825 a month as Alex's share, in April 2026. Alex pays nothing toward the household's costs. Alex's plan is to repay $20 a month from SSI and with lawn care worth $50 a month.",
+      "profile": { "livesInAnothersHousehold": true, "householdProvidesAllMeals": true, "otherUnearnedMonthly": 0, "earnedMonthly": 0, "savings": 0 },
+      "gifts": [],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 662.67 }] },
+      "ssa_answer": "The repayment plan is not feasible, so the loan is not a bona fide loan of in-kind support, and the food and shelter count under the normal rules; with both from the household and nothing paid toward it, the one-third reduction applies.",
+      "not_held": ["The alleged loan, its $825 monthly value and the repayment plan; the engine has no input for a loan."]
+    },
+    {
+      "id": "loan-ended-contribution-meets-share",
+      "title": "After a loan of food and shelter ends, he pays his full share",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "F.4, Example 1",
+      "passage_quotes": [
+        "William filed for SSI, alleging that they have lived in their sibling's home since 11/07/2009, and that they receive food and shelter from their sibling that is covered by a loan agreement.",
+        "determines that William’s expected contribution (as verified by the householder) equals or exceeds the pro rata share; and",
+        "determines that the individual is in FLA:A with no ISM."
+      ],
+      "situation": "William lives in his sibling's home. A loan of his food and shelter has ended, and from the month after, April 2026 here, he pays at least his pro rata share of the household's costs, as his sibling confirms.",
+      "profile": { "livesInAnothersHousehold": false },
+      "gifts": [],
+      "expected": { "counts": false, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 994 }] },
+      "ssa_answer": "His contribution equals or exceeds his pro rata share, so he is in federal living arrangement A with no in-kind support, and the full SSI amount is paid.",
+      "not_held": ["The amount he pays and the household's costs, which SSA's example does not state."]
+    },
+    {
+      "id": "loan-ended-contribution-short",
+      "title": "After a loan of food and shelter ends, he pays $300 of a $400 share",
+      "cite": "POMS SI 00835.482",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "part": "E.4, Example: Simultaneous development claim with RT diary for re-contact",
+      "passage_quotes": [
+        "Alfred files for SSI on 03/12/2009, alleging that they live in their siblings home and receives both food and shelter covered by a loan agreement.",
+        "The CS establishes that Alfred’s pro rata share is $400 per month and that Alfred contributes $300 per month toward the expenses.",
+        "Based on this information, The SSI Claim System determines that Alfred is in FLA/B and subject to the one-third reduction starting in July 2009 (the month after the month the first SSI payment was received)."
+      ],
+      "situation": "Alfred lives in his sibling's home and receives his food and shelter there. A loan of them has ended, and in April 2026 he pays $300 a month toward his $400 pro rata share of the household's costs.",
+      "profile": { "livesInAnothersHousehold": false },
+      "gifts": [],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 662.67 }] },
+      "ssa_answer": "He pays less than his pro rata share, so he is in federal living arrangement B and subject to the one-third reduction.",
+      "not_held": ["He pays $300 a month toward a $400 pro rata share; the engine takes the living arrangement as yes or no and has no input for a contribution or a share."]
+    },
+    {
+      "id": "cash-for-household-share-met",
+      "title": "A sibling sends cash toward the household's costs, and he pays his full share",
+      "cite": "POMS SI 00835.450",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835450",
+      "part": "G, Example 1: Claimant's Contribution Equals Their Pro Rata Share",
+      "passage_quotes": [
+        "The household operating expenses are $600 per month. John Smith's pro rata share is $300.",
+        "Mabel White's $200 contribution is split equally between the two brothers.",
+        "The $100 dollar contribution from Mabel is counted as cash income. However, since John's contribution equals their pro rata share, John receives no ISM."
+      ],
+      "situation": "John lives with his brother Edward in a house Edward is buying. The household's costs are $600 a month and John's share is $300. Each brother pays $200. Their sister Mabel sends Edward $200 each month for both brothers, so $100 of it is John's. In April 2026 John's own $200 and Mabel's $100 cover his $300 share.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 2 },
+      "gifts": [{ "id": "g1", "date": "2026-04-03", "amount": 100, "delivery": "cash", "category": "other", "giver": "sister", "recurring": true }],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "after_infrequent", "value": 100 }] },
+      "ssa_answer": "Mabel's $100 to John is cash income, not in-kind support, even though it pays household costs. John's contribution equals his pro rata share, so he receives no in-kind support.",
+      "not_held": ["The household's $600 costs and John's $300 share; the engine has no input for them."]
+    },
+    {
+      "id": "cash-for-household-share-short",
+      "title": "A sibling sends cash toward the household's costs, and he pays less than his share",
+      "cite": "POMS SI 00835.450",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835450",
+      "part": "G, Example 2: Claimant's Contribution Does Not Equal Their Pro Rata Share",
+      "passage_quotes": [
+        "The case facts are the same as Example 1 except that the claimant, John Smith, contributes only $100 toward the household operating expenses from their own funds.",
+        "The $100 contribution from Mabel is counted as cash income. However, since John's total contribution is only $200 and their pro rata share is $300, John is also subject to the one-third reduction (VTR)."
+      ],
+      "situation": "As in the case before, except that John pays only $100 of his own money. With Mabel's $100 he pays $200 in April 2026 toward his $300 share of the household's $600 costs.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 2 },
+      "gifts": [{ "id": "g1", "date": "2026-04-03", "amount": 100, "delivery": "cash", "category": "other", "giver": "sister", "recurring": true }],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 582.67 }] },
+      "ssa_answer": "Mabel's $100 is cash income, and because John pays only $200 of his $300 share he is also subject to the one-third reduction: at 2026 rates, $994 less $331.33, less the $100 after the $20 general exclusion, $582.67.",
+      "not_held": ["John pays $200 toward a $300 pro rata share; the engine takes the living arrangement as yes or no and has no input for a contribution or a share."]
+    },
+    {
+      "id": "sharing-short-by-20",
+      "title": "Paying $100 toward a $150 share of an apartment's costs",
+      "cite": "POMS SI 00835.160",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835160",
+      "part": "G, Example 1: Pro rata share exceeds the contribution by $20 or more",
+      "passage_quotes": [
+        "Grayson, an eligible individual, lives in an apartment with Simon and Bob. The lease is in Simon's name.",
+        "Grayson alleges the household operating expenses are $450 per month and Grayson contributes $100 per month.",
+        "Because the alleged pro rata share exceeds the alleged contribution by at least $20, the adjudicator determines Grayson is receiving ISM valued at the VTR (FLA/B applies)."
+      ],
+      "situation": "Grayson lives in an apartment leased by Simon, with Simon and Bob. The household's costs are $450 a month, so Grayson's share is $150, and in April 2026 he pays $100.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 3 },
+      "gifts": [],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 662.67 }] },
+      "ssa_answer": "His share exceeds what he pays by at least $20, so he receives in-kind support valued at the one-third reduction (federal living arrangement B).",
+      "not_held": ["He pays $100 toward a $150 pro rata share; the engine takes the living arrangement as yes or no and has no input for a contribution or a share."]
+    },
+    {
+      "id": "sharing-over-by-20",
+      "title": "Paying $175 toward a $150 share of an apartment's costs",
+      "cite": "POMS SI 00835.160",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835160",
+      "part": "G, Example 2: Contribution exceeds the pro rata share by $20",
+      "passage_quotes": [
+        "Similar to Example 1, except Grayson alleges contributing $175 per month.",
+        "Because the alleged contribution exceeds the pro rata share by at least $20, we determined Grayson to be in a sharing arrangement (FLA/A applies)."
+      ],
+      "situation": "As in the case before, except that Grayson pays $175 a month toward his $150 share in April 2026.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 3 },
+      "gifts": [],
+      "expected": { "counts": false, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 994 }] },
+      "ssa_answer": "He pays more than his share, so he is in a sharing arrangement (federal living arrangement A) with no in-kind support from the household.",
+      "not_held": ["He pays $175 toward a $150 pro rata share; the engine has no input for a contribution or a share."]
+    },
+    {
+      "id": "sharing-within-20",
+      "title": "Paying $125 toward a verified $145 share of an apartment's costs",
+      "cite": "POMS SI 00835.160",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835160",
+      "part": "G, Example 3: Contribution is within $20 of the pro rata share",
+      "passage_quotes": [
+        "Bob states Grayson contributes $125 per month and the household operating expenses total $435 per month.",
+        "Using these verified amounts, the CS determines the pro rata share is $145.",
+        "Because Grayson's contribution of $125 per month is within $20 of the pro rata share, a sharing arrangement is found to exist (FLA/A with no ISM applies)."
+      ],
+      "situation": "As in the cases before, except that Bob confirms the household's costs are $435 a month, so Grayson's share is $145, and Grayson pays $125 in April 2026.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 3 },
+      "gifts": [],
+      "expected": { "counts": false, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 994 }] },
+      "ssa_answer": "What he pays is within $20 of his share, so a sharing arrangement exists: federal living arrangement A with no in-kind support.",
+      "not_held": ["He pays $125 toward a $145 pro rata share; the engine has no input for a contribution or a share."]
+    },
+    {
+      "id": "earmarked-food-short",
+      "title": "Paying $150 a month, half for food and half for shelter, in a nephew's apartment",
+      "cite": "POMS SI 00835.170",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835170",
+      "part": "C.4, Example: Determining if double earmarking applies",
+      "passage_quotes": [
+        "For the past three years, Kathleen has been living with a nephew and the nephew's family in an apartment for which the nephew has rental liability.",
+        "Kathleen submits the requested statement (SSA-8011-F3) that shows the food expenses are $450 per month and shelter expenses are $600 per month.",
+        "Because Kathleen is not paying their earmarked share for food, $90 ($450 ÷ 5), the CR determines that Kathleen is subject to the VTR, as Kathleen is receiving food and shelter throughout the month from the household in which they reside."
+      ],
+      "situation": "Kathleen, who is aged, lives with her nephew and his family, five people in all, in an apartment the nephew rents. In April 2026 she pays $150 a month, $75 for food and $75 for shelter. The household spends $450 a month on food and $600 on shelter, so her shares are $90 and $120.",
+      "profile": { "livesInAnothersHousehold": false, "householdSize": 5 },
+      "gifts": [],
+      "expected": { "counts": true, "values": [{ "month": "2026-04", "measure": "ssi_amount", "value": 662.67 }] },
+      "ssa_answer": "Neither earmarked payment meets its share, so she receives food and shelter throughout the month from the household and is subject to the one-third reduction.",
+      "not_held": ["She pays $75 toward a $90 food share and $75 toward a $120 shelter share; the engine takes the living arrangement as yes or no and has no input for a contribution, a share or earmarking."]
+    },
+    {
+      "id": "child-gift-timeshare-in-kind",
+      "title": "A charity gives a child with a life-threatening condition a timeshare",
+      "cite": "POMS SI 00830.750",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830750",
+      "part": "C.3.a, Example",
+      "passage_quotes": [
+        "In August 2025, a non-profit organization donates ownership of a timeshare to a child's payee (on the child's behalf) with the intention that the payee could take the child on vacation.",
+        "The timeshare meets the definition of an in-kind gift.",
+        "Do not count the value of the timeshare ($15,000) as income to the child in the month the payee received it on the child's behalf (August 2025)."
+      ],
+      "situation": "A child with a life-threatening condition receives SSI. In August 2026 a tax-exempt charity gives the child's payee, on the child's behalf, a timeshare worth $15,000, so the payee can take the child on vacation.",
+      "profile": { "pronoun": "they" },
+      "gifts": [{ "id": "g1", "date": "2026-08-14", "amount": 15000, "delivery": "item", "category": "other", "giver": "non-profit organization", "recurring": false }],
+      "expected": { "counts": false, "values": [{ "month": "2026-08", "measure": "after_infrequent", "value": 0 }] },
+      "ssa_answer": "The timeshare is an in-kind gift from a tax-exempt organization to a child with a life-threatening condition, so its $15,000 value is not counted as income in the month it is received.",
+      "not_held": [
+        "The giver is a section 501(c)(3) tax-exempt organization and the child has a life-threatening condition; the engine has no input for either.",
+        "The child's later sale of the timeshare, which SSA counts as income in the month of the sale, is not a gift and is left out."
+      ]
+    }
+  ]
+}
