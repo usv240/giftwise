@@ -1,0 +1,112 @@
+{
+  "about": "A second held-out check, written before it was run: five worked examples from Social Security's operating manual (POMS) that were never scored in content/eval/ssa-examples.json or content/eval/held-out.json and never used to change the rules engine. Each case quotes SSA's page in part (passage_quotes, word for word from the URL) and restates its facts in plain words (situation). As in the other sets, dates are moved to 2026 so 2026 amounts apply, and where SSA's example gives no amount, an amount is supplied that does not change SSA's answer. The set is run once, on the engine frozen at the commit named in held-out-2-results.json, and the result is published as it comes out.",
+  "fetched": "2026-11-09",
+  "encoding_rule": "Help is entered the way Giftwise takes it: a payment someone makes to a business is delivery vendor, a thing given as itself is delivery item, and a home, a mortgage or rent is a housing category. A home given as itself is entered as an item in the mortgage category, the housing category for an owned home. Where SSA states no value for a home, $40,000 is supplied; SSA's answer (the presumed maximum value) is the same for any value above it. The presumed maximum value in 2026 is one third of $994 plus $20, $351.33 (POMS SI 00835.300). The rental subsidy case keeps SSA's rent and market rent; the help the landlord gives is the difference, entered as a monthly rent payment by the landlord. These choices were made before the run and are not changed after it.",
+  "registered": "Written and fixed on 2026-11-09, before any case was run. held-out-2-results.json records this file's git blob hash, so the exact file that was run can be found in the repository's history.",
+  "cases": [
+    {
+      "id": "co-owner-mortgage",
+      "title": "A co-owner sibling pays eight months of the mortgage at once",
+      "cite": "POMS SI 00835.360",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835360",
+      "part": "D.3, TPVP by co-owner not a gift",
+      "passage_quotes": [
+        "Warren lives alone in a house, which they jointly owns with their sibling.",
+        "the sibling paid the entire amount past due, at $200 per month, plus payment for February and March (a total of $1,600).",
+        "Because the sibling is a co-owner, the TPVP was not a gift."
+      ],
+      "situation": "Warren receives SSI and lives alone in a house he owns jointly with his sibling. The mortgage is six months behind, August 2025 through January 2026. On February 28, 2026 the sibling pays the mortgage company the six past-due months at $200 a month, plus February and March: $1,600 in all.",
+      "gifts": [{ "id": "g1", "date": "2026-02-28", "amount": 1600, "delivery": "vendor", "category": "mortgage", "giver": "sibling (co-owner)", "covers": { "from": "2025-08", "to": "2026-03" } }],
+      "expected": {
+        "counts": true,
+        "values": [
+          { "month": "2025-08", "measure": "ism_value", "value": 200 },
+          { "month": "2026-02", "measure": "ism_value", "value": 200 },
+          { "month": "2026-03", "measure": "ism_value", "value": 200 }
+        ]
+      },
+      "ssa_answer": "In-kind support valued at $200 a month, subject to the presumed maximum value, in each month from August through March: six past months, the current month and the next."
+    },
+    {
+      "id": "house-deeded-by-parents",
+      "title": "Parents deed the home she lives in to her as a gift",
+      "cite": "POMS SI 00835.400",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835400",
+      "part": "F, Example 2: Eligible Individual Receives Gift of a House",
+      "passage_quotes": [
+        "On 12/15/16, Martha's parents deed the home to Martha as a gift.",
+        "charges the ISM in December (H type income capped at the PMV)",
+        "showing no ISM in January, since this gift of a house counts only in the month of December."
+      ],
+      "situation": "Martha receives SSI and lives with her three children in a home her parents own. On June 15, 2026 her parents deed the home to her as a gift. (SSA's example is in December; it is moved to June so one year's federal amounts apply.)",
+      "gifts": [{ "id": "g1", "date": "2026-06-15", "amount": 40000, "delivery": "item", "category": "mortgage", "giver": "parents" }],
+      "expected": {
+        "counts": true,
+        "values": [
+          { "month": "2026-06", "measure": "ism_value", "value": 351.33 },
+          { "month": "2026-07", "measure": "ism_value", "value": 0 }
+        ]
+      },
+      "ssa_answer": "In-kind support in the month the house is given, capped at the presumed maximum value ($351.33 in 2026), and none the month after."
+    },
+    {
+      "id": "mobile-home-bought-outright",
+      "title": "A sibling buys her mobile home outright, in her name only",
+      "cite": "POMS SI 00835.310",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835310",
+      "part": "E.3, ISM from outright gift of a home",
+      "passage_quotes": [
+        "Victoria's sibling buys the mobile home and pays for it in full, and registers the home in Victoria's 's name only.",
+        "The purchase of the home as a gift is ISM to Victoria in April, charged at the PMV.",
+        "Beginning in May, there is no chargeable ISM to Victoria"
+      ],
+      "situation": "Victoria receives SSI, is aged and lives alone. In April 2026 she moves into a mobile home that her sibling buys and pays for in full, registered in her name only, with no down payment, loan or mortgage.",
+      "gifts": [{ "id": "g1", "date": "2026-04-10", "amount": 40000, "delivery": "vendor", "category": "mortgage", "giver": "sibling" }],
+      "expected": {
+        "counts": true,
+        "values": [
+          { "month": "2026-04", "measure": "ism_value", "value": 351.33 },
+          { "month": "2026-05", "measure": "ism_value", "value": 0 }
+        ]
+      },
+      "ssa_answer": "In-kind support in April, charged at the presumed maximum value ($351.33 in 2026), and none from May."
+    },
+    {
+      "id": "home-from-son",
+      "title": "Her son gives her the home she lives in",
+      "cite": "POMS SI 00815.550",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500815550",
+      "part": "C.2, Receipt of shelter",
+      "passage_quotes": [
+        "Ethel Gibson, a Supplemental Security Income (SSI) recipient, is given the home they live in by their son.",
+        "The value of the gift is capped at the presumed maximum value"
+      ],
+      "situation": "Ethel receives SSI and lives alone in a home her son owns. In March 2026 he gives her the home. (SSA's example gives no month or value.)",
+      "gifts": [{ "id": "g1", "date": "2026-03-10", "amount": 40000, "delivery": "item", "category": "mortgage", "giver": "son" }],
+      "expected": {
+        "counts": true,
+        "values": [{ "month": "2026-03", "measure": "ism_value", "value": 351.33 }]
+      },
+      "ssa_answer": "Income in the month the home is given, its value capped at the presumed maximum value ($351.33 in 2026)."
+    },
+    {
+      "id": "rent-below-market-from-child",
+      "title": "Her child, the landlord, charges less than market rent",
+      "cite": "POMS SI 00835.380",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835380",
+      "part": "D.2.d, Example",
+      "passage_quotes": [
+        "The recipient pays $280 monthly required rent in October 2024.",
+        "The landlord (who is the recipient’s child) verifies the monthly required rent and states that the CMRV is $410.",
+        "Because the PMV ($334.33 in 2024) is less than the CMRV ($410)"
+      ],
+      "situation": "She receives SSI and rents from her child, paying the required rent of $280 a month in October 2026; the current market rental value is $410. Her child gives her the difference, $130 a month, by charging less.",
+      "gifts": [{ "id": "g1", "date": "2026-10-01", "amount": 130, "delivery": "vendor", "category": "rent", "giver": "child (landlord)", "recurring": true }],
+      "expected": {
+        "counts": true,
+        "values": [{ "month": "2026-10", "measure": "ism_value", "value": 71.33 }]
+      },
+      "ssa_answer": "A rental subsidy counted as in-kind support: because the presumed maximum value is less than the market rent, the subsidy is the presumed maximum value less the rent she pays. SSA's 2024 figures give $334.33 less $280, $54.33; at 2026 amounts, $351.33 less $280 is $71.33."
+    }
+  ]
+}
