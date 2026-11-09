@@ -173,7 +173,7 @@ The PayPal checkout and API suites write a redacted transcript as they run, `con
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 326 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 320 pass and 6 skip (6 need a database) |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 329 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 323 pass and 6 skip (6 need a database) |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |

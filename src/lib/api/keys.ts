@@ -21,9 +21,28 @@ export function newKey() {
 export const hashKey = (key: string) => createHash("sha256").update(key).digest("hex");
 export const displayPrefix = (key: string) => key.slice(0, 12);
 
+/**
+ * Where the caller's address is read from, most trusted first. The hosted site sits behind Cloudflare, which sets
+ * cf-connecting-ip and true-client-ip itself on every request, so a caller cannot choose them. X-Forwarded-For's
+ * first entry can be written by the caller, so it is used only when neither of those is present (a local server or
+ * the test suites), with x-real-ip after it.
+ */
+export const ADDRESS_HEADERS = ["cf-connecting-ip", "true-client-ip", "x-forwarded-for", "x-real-ip"] as const;
+export type AddressSource = (typeof ADDRESS_HEADERS)[number] | "none";
+
+/** The caller's address and the header it came from. The address never leaves this module unhashed. */
+export function clientAddress(req: Request): { ip: string; source: AddressSource } {
+  for (const name of ADDRESS_HEADERS) {
+    const raw = req.headers.get(name);
+    const ip = (name === "x-forwarded-for" ? raw?.split(",")[0] : raw)?.trim();
+    if (ip) return { ip, source: name };
+  }
+  return { ip: "local", source: "none" };
+}
+
 /** The caller's IP, hashed with a server secret so the request log never stores raw addresses. */
 export function clientId(req: Request) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "local";
+  const { ip } = clientAddress(req);
   return createHash("sha256")
     .update(`${process.env.AUDIT_SALT ?? "giftwise"}:${ip}`)
     .digest("hex")
