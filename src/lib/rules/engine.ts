@@ -7,6 +7,8 @@ import {
   type Every,
   type Gift,
   type GiftResult,
+  type HouseholdTest,
+  type Loan,
   type MonthTrace,
   type Profile,
   type Pronoun,
@@ -31,8 +33,53 @@ const isShelter = (c: Category) => SHELTER_CATEGORIES.includes(c);
 /** "2026-04-15" -> "2026-04" */
 export const monthOf = (date: string) => date.slice(0, 7);
 
-/** The one-third reduction's household test: all month in another's household, which also provides all meals (20 CFR 416.1131(a)). */
-export const vtrHousehold = (p: Profile) => p.livesInAnothersHousehold && p.householdProvidesAllMeals !== false;
+/** The one-third reduction's household test: all month in another's household, which gives her shelter and all meals (20 CFR 416.1131(a)). */
+export const vtrHousehold = (p: Profile) => householdTest(p)?.rule === "vtr";
+
+const amountOrNull = (n: unknown) => (typeof n === "number" && Number.isFinite(n) && n >= 0 ? n : null);
+
+/**
+ * Her place in another person's household for a month (R-SHEL-08). Her pro rata share is the household's monthly
+ * operating expenses divided by the people in it, both members' shares for a couple (20 CFR 416.1133(b), POMS
+ * SI 00835.160 C.1 and C.2), or the share stated directly. Paying it, or within $20 of it, she lives in her own household
+ * and gets no support from it (20 CFR 416.1133(a)). Paying less, the household gives her shelter: valued at the one-third
+ * reduction when it also gives her all her meals (20 CFR 416.1131(a)), and otherwise under the presumed maximum value,
+ * at her share less what she pays (POMS SI 00835.340 C.3), or at that value itself when her share is not known (20 CFR
+ * 416.1140). `lent` is the household's shelter lent to her that month under a bona fide loan, which counts with what she
+ * pays (POMS SI 00835.482 E.3, F.2.c); with no share known, such a loan is taken to cover it (F.2.b). Null when she
+ * does not live in another person's household.
+ */
+export function householdTest(p: Profile, lent = 0, cap = pmv(p.couple)): HouseholdTest | null {
+  if (!p.livesInAnothersHousehold) return null;
+  const members = p.couple ? 2 : 1;
+  const size = Math.floor(Number(p.householdSize) || 0);
+  const costs = amountOrNull(p.householdCosts);
+  const share = amountOrNull(p.proRataShare) ?? (costs !== null && size > members ? round2((costs / size) * members) : null);
+  const pays = round2((amountOrNull(p.householdPays) ?? 0) + lent);
+  const sharing = share === null ? lent > 0 : share - pays <= P.sharingTolerance;
+  const rule = sharing ? "none" : p.householdProvidesAllMeals === false ? "pmv" : "vtr";
+  const value = rule !== "pmv" ? 0 : share === null ? cap : round2(Math.max(0, share - pays));
+  return { share, pays, sharing, rule, value };
+}
+
+/**
+ * Why a loan is not a bona fide loan, test by test, in plain words; empty when it is one. All must hold for cash
+ * (POMS SI 01120.220 D) and for food or shelter lent in kind (SI 00835.482 B).
+ */
+export function loanFailures(l: Loan): string[] {
+  const out: string[] = [];
+  if (l.enforceable === false) out.push("it is not enforceable under the State's law");
+  if (!l.agreedWhenGiven) out.push("the two did not agree she would repay when it was given");
+  if (!l.mustRepay) out.push("repaying depends on a condition, such as her benefits starting");
+  if (!l.feasiblePlan) out.push("she has no plan to repay that she can meet");
+  return out;
+}
+
+/** A gift entered as a loan that meets every test (R-LOAN-01, R-LOAN-02). An ABLE deposit is never a loan. */
+export const isBonaFideLoan = (g: Gift) => Boolean(g.loan) && g.delivery !== "able" && loanFailures(g.loan!).length === 0;
+
+/** The household she lives in lending her its own shelter under a bona fide loan (POMS SI 00835.482 D to F). */
+const householdLends = (g: Gift, p: Profile) => isBonaFideLoan(g) && Boolean(g.loan!.fromHousehold) && p.livesInAnothersHousehold && isShelter(g.category) && g.delivery !== "cash";
 
 export function addMonths(month: string, n: number): string {
   const [y, m] = month.split("-").map(Number);
@@ -74,6 +121,7 @@ const CATEGORY_LABEL: Record<Category, string> = {
 /** How one gift is treated under the rules, before any month-level arithmetic. */
 export function classify(gift: Gift, profile: Profile): Treatment {
   const { delivery, category } = gift;
+  if (gift.loan && delivery !== "able") return loanTreatment(gift, profile);
   if (delivery === "able") {
     if (!profile.ableEligible) {
       return { kind: "not_possible", ruleIds: ["R-ABLE-01"], infrequentEligible: false, ambiguous: false, note: "not_able_eligible" };
@@ -110,6 +158,35 @@ export function classify(gift: Gift, profile: Profile): Treatment {
     infrequentEligible: !gift.recurring,
     ambiguous: false,
   };
+}
+
+/**
+ * Help entered as a loan (20 CFR 416.1103(f)). A bona fide cash loan is not income (R-LOAN-01, POMS SI 01120.220 C.1.a).
+ * Housing lent in kind from outside the household is valued as if there were no loan, less what she must repay
+ * (R-LOAN-02, SI 00835.482 G.4), in computeMonth(); the household's own shelter lent to her counts as what she pays toward
+ * her share (SI 00835.482 E.3, F.2), in householdTest(). Anything else lent in kind is not income either. A loan that
+ * fails any test is treated as the same help given (SI 00835.482 B, E.1; SI 01120.220 C.1.b), with the loan rule cited.
+ */
+function loanTreatment(gift: Gift, profile: Profile): Treatment {
+  const rule = gift.delivery === "cash" ? "R-LOAN-01" : "R-LOAN-02";
+  if (!isBonaFideLoan(gift)) {
+    const t = classify({ ...gift, loan: undefined }, profile);
+    return { ...t, ruleIds: [...t.ruleIds, rule], note: "not_a_loan" };
+  }
+  if (gift.delivery === "cash") return { kind: "excluded", ruleIds: ["R-LOAN-01"], infrequentEligible: false, ambiguous: false, note: "loan" };
+  if (householdLends(gift, profile)) return { kind: "excluded", ruleIds: ["R-LOAN-02", "R-SHEL-08"], infrequentEligible: false, ambiguous: false, note: "household_loan" };
+  if (isShelter(gift.category)) {
+    const t = classify({ ...gift, loan: undefined }, profile);
+    return t.kind === "ism_shelter" ? { ...t, ruleIds: [...t.ruleIds, "R-LOAN-02"], note: "loan" } : { ...t, ruleIds: [...t.ruleIds, "R-LOAN-02"] };
+  }
+  return { kind: "excluded", ruleIds: ["R-LOAN-02"], infrequentEligible: false, ambiguous: false, note: "loan" };
+}
+
+/** What she must repay of a bona fide loan of housing from outside her household, for the part of it in one month (SI 00835.482 G.4). */
+function loanRepaidInMonth(g: Gift, inMonth: number, profile: Profile): number {
+  if (!isBonaFideLoan(g) || g.delivery === "cash" || householdLends(g, profile) || !(g.amount > 0)) return 0;
+  const repay = Math.min(g.amount, amountOrNull(g.loan!.repay) ?? g.amount);
+  return (repay * inMonth) / g.amount;
 }
 
 /**
@@ -287,6 +364,9 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
   const items: { date: string; amount: number; shelter: boolean; infrequent: boolean }[] = [];
   const shares = monthShares(gifts, month);
   const share = householdShare(profile);
+  // The household's own shelter, lent to her this month under a bona fide loan, counts with what she pays (R-LOAN-02).
+  const lent = gifts.filter((g) => householdLends(g, profile)).reduce((s, g) => s + (shares.get(g) ?? 0), 0);
+  const household = householdTest(profile, round2(lent), cap);
 
   for (const g of gifts) {
     const inMonth = shares.get(g) ?? 0;
@@ -294,8 +374,10 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
     const t = classify(g, profile);
     // A rental subsidy is valued against the presumed maximum value for this month's check (R-SHEL-05).
     const value = t.ruleIds.includes("R-SHEL-05") ? rentalSubsidy(inMonth, g.rentPaid!, cap) : inMonth;
-    // Housing paid from outside the household is divided among its members, before the cap (R-SHEL-07).
-    const amount = t.kind === "ism_shelter" && sharedWithHousehold(g) ? value * share : value;
+    // Housing paid from outside the household is divided among its members, before the cap (R-SHEL-07). A bona fide loan
+    // of it counts only for what she is not required to repay, valued as if there were no loan (R-LOAN-02, SI 00835.482 G.4).
+    const divided = t.kind === "ism_shelter" && sharedWithHousehold(g) ? value * share : value;
+    const amount = t.kind === "ism_shelter" ? Math.max(0, divided - loanRepaidInMonth(g, inMonth, profile)) : divided;
     if (amount <= 0) continue;
     if (t.kind === "unearned_cash") cashIncome += amount;
     else if (t.kind === "unearned_in_kind") inKind += amount;
@@ -304,7 +386,11 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
     items.push({ date: g.date, amount, shelter: t.kind === "ism_shelter", infrequent: t.infrequentEligible });
   }
 
-  const vtrApplied = vtrHousehold(profile) && shelterPaid > 0;
+  // In another person's household without paying her share, its shelter counts every month, gift or not (R-SHEL-08): the
+  // one-third reduction, or under the presumed maximum value, where it joins housing paid from outside under one cap
+  // (POMS SI 00835.340 B.6). It is not one-off income, so it takes none of the $60 allowance.
+  const vtrApplied = household?.rule === "vtr";
+  shelterPaid += household?.rule === "pmv" ? household.value : 0;
   const ismValue = shelterPaid > 0 && !vtrApplied ? Math.min(shelterPaid, cap) : 0;
 
   // No exclusion applies to the one-third reduction (SI 00835.200A.6), so housing help under it takes none of the allowance.
@@ -343,6 +429,7 @@ export function computeMonth(month: string, gifts: Gift[], profile: Profile, qua
     shelterPaidByOthers: round2(shelterPaid),
     ismValue: round2(ismValue),
     vtrApplied,
+    household,
     infrequentExcluded: round2(infrequentExcluded),
     infrequentUsed: round2(infrequentUsed),
     generalExcludedFromUnearned: round2(generalExcludedFromUnearned),
@@ -403,9 +490,10 @@ export function evaluateGift(gift: Gift, profile: Profile = DEFAULT_PROFILE): Gi
   const possible = alternatives.filter((a) => a.possible);
   const best = possible.reduce((a, b) => (b.check > a.check ? b : a), possible[0] ?? { delivery: gift.delivery, check: trace.check, possible: true });
 
-  // On the 1st of next month: cash she keeps adds to her savings, and an ABLE deposit is in the account (R-RES-01, R-ABLE-03).
+  // On the 1st of next month: cash she keeps adds to her savings, lent cash included (POMS SI 01120.220 C.1), and an ABLE
+  // deposit is in the account (R-RES-01, R-ABLE-03).
   const nextFirst = addMonths(month, 1);
-  const retainedCash = treatment.kind === "unearned_cash" ? gift.amount : 0;
+  const retainedCash = keptAsCash(gift, treatment) ? gift.amount : 0;
   const ableIn = treatment.kind !== "not_possible" && gift.delivery === "able" ? gift.amount : 0;
   const resourcesBefore = resourceTest(profile, nextFirst);
   const resourcesAfter = resourceTest(profile, nextFirst, ableIn, retainedCash);
@@ -413,6 +501,11 @@ export function evaluateGift(gift: Gift, profile: Profile = DEFAULT_PROFILE): Gi
   const overResourceLimit = resourcesAfter.over;
 
   const ruleIds = [...treatment.ruleIds];
+  // A household she lives in without paying her share lowers the check whatever the gift (R-SHEL-08), so every answer cites it.
+  if (trace.household && trace.household.rule !== "none") {
+    if (trace.vtrApplied && !ruleIds.includes("R-SHEL-VTR")) ruleIds.push("R-SHEL-VTR");
+    if (!ruleIds.includes("R-SHEL-08")) ruleIds.push("R-SHEL-08");
+  }
   if (resourcesAfter.ableExcess > 0) ruleIds.push("R-ABLE-03");
   if (overResourceLimit || trace.resources.over) ruleIds.push("R-RES-01");
 
@@ -454,7 +547,7 @@ export function planMonths(gifts: Gift[], profile: Profile = DEFAULT_PROFILE) {
     const trace = computeMonth(month, withInfrequency, profile, used);
     usedByQuarter.set(q, used + trace.infrequentUsed);
     const cashKept = withInfrequency
-      .filter((g) => monthOf(g.date) === month && classify(g, profile).kind === "unearned_cash")
+      .filter((g) => monthOf(g.date) === month && keptAsCash(g, classify(g, profile)))
       .reduce((s, g) => s + g.amount, 0);
     savings = round2(savings + cashKept);
     // On the 1st of next month, if she keeps the cash: savings, and the part of her ABLE account over $100,000.
@@ -464,6 +557,9 @@ export function planMonths(gifts: Gift[], profile: Profile = DEFAULT_PROFILE) {
   });
   return { months: result, gifts: withInfrequency.map((g) => evaluateGift(g, profile)) };
 }
+
+/** Cash she holds afterwards: a cash gift, or cash lent to her, which counts toward savings if kept into the next month (POMS SI 01120.220 C.1). */
+const keptAsCash = (g: Gift, t: Treatment) => t.kind === "unearned_cash" || (g.delivery === "cash" && t.ruleIds.includes("R-LOAN-01"));
 
 /** A gift is infrequent when the same giver gives no other gift in the same quarter or the months either side. */
 export function markInfrequency(gifts: Gift[]): Gift[] {
@@ -503,6 +599,14 @@ function explain(
   if (t.kind === "not_possible") {
     // The one gift the engine cannot place is an ABLE deposit for someone who cannot have an account.
     plain = "An ABLE account is for people whose disability began before age 46. Another route will work better here.";
+  } else if (t.note === "loan" && gift.delivery === "cash") {
+    // A bona fide cash loan (R-LOAN-01, POMS SI 01120.220 C.1.a).
+    plain = `A loan ${w.subj} must repay is not income, so ${w.poss} ${pay} check stays ${usd(trace.check)}. Paying it back later does not lower ${w.poss} countable income, and cash ${w.subj} still ${w.has} the next month counts toward ${w.poss} savings.`;
+    if (after.over && !before.over) plain += ` Kept, ${w.poss} savings would be ${usd(after.countable)} on the 1st, over the limit.`;
+  } else if (t.note === "household_loan") {
+    plain = `The household lends ${w.obj} its shelter under a loan ${w.subj} must repay, so the amount borrowed counts as what ${w.subj} ${w.pays} toward ${w.poss} share of its costs (POMS SI 00835.482). ${w.Poss} ${pay} check would be ${usd(trace.check)}.`;
+  } else if (t.note === "loan" && t.kind === "excluded") {
+    plain = `Food or other things lent to ${w.obj}, to be repaid, are not income. ${w.Poss} ${pay} check stays ${usd(trace.check)}.`;
   } else if (t.kind === "unearned_cash") {
     const excl = round2(trace.infrequentExcluded + trace.generalExcludedFromUnearned);
     plain = `Cash counts as income. ${usd(gift.amount)} minus ${usd(excl)} in exclusions leaves ${usd(counted)} counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
@@ -516,7 +620,10 @@ function explain(
     const cap = usd(pmv(profile.couple, trace.paymentMonth));
     const result = `${usd(counted)} would be counted in ${inc}, so ${w.poss} ${pay} check would be ${usd(trace.check)}.`;
     if (trace.vtrApplied) {
-      plain = `Because ${w.subj} ${w.lives} in someone else's home, help with ${label} lowers ${w.poss} ${pay} check by a fixed ${usd(vtr(profile.couple, trace.paymentMonth))}, to ${usd(trace.check)}.`;
+      // The reduction comes from the household, not the gift; the household sentence below says so (R-SHEL-08).
+      plain = `With the one-third reduction, help with ${label} adds nothing more: no other housing help counts on top of it (20 CFR 416.1131(c)). ${w.Poss} ${pay} check would be ${usd(trace.check)}.`;
+    } else if (t.note === "loan") {
+      plain = `Housing paid as a loan ${w.subj} must repay counts only for the part ${w.subj} is not required to repay, valued as if there were no loan (POMS SI 00835.482 G.4). ${result}`;
     } else if (t.ruleIds.includes("R-SHEL-05")) {
       const rent = gift.rentPaid ?? 0;
       plain =
@@ -551,6 +658,14 @@ function explain(
   } else {
     plain = `Paid straight to the shop, so it is not counted. ${w.Poss} ${pay} check stays ${full}.`;
   }
+  // A loan that fails a test counts as the same help given, and the answer says which test (R-LOAN-01, R-LOAN-02).
+  if (t.note === "not_a_loan" && gift.loan) {
+    const why = loanFailures(gift.loan);
+    plain = `SSA would not treat this as a loan, because ${why.length > 1 ? `${why.slice(0, -1).join(", ")} and ${why[why.length - 1]}` : why[0]}, so it counts as the same help given. ${plain}`;
+  }
+  // A household she lives in without paying her share lowers the check before any gift, and every answer says so (R-SHEL-08).
+  const household = householdSentence(trace.household, profile, trace.paymentMonth);
+  if (household) plain += ` ${household}`;
   // Resources already over the limit on the balances she states: no SSI is paid whatever the gift (R-RES-01).
   if (before.over) {
     const parts = before.ableExcess > 0 ? `: ${usd(before.other)} in savings and ${usd(before.ableExcess)}, the part of ${w.poss} ABLE account over $100,000` : "";
@@ -560,6 +675,9 @@ function explain(
   const rules = t.ruleIds.map((id) => `${id} (${RULES[id]?.name})`).join("; ");
   const technical =
     `Rules ${rules}. Income month ${trace.month}, payment month ${trace.paymentMonth} (retrospective monthly accounting, lag ${P.rmaLagMonths}). ` +
+    (trace.household
+      ? `Household of another: pro rata share ${trace.household.share === null ? "not known" : usd(trace.household.share)}, pays ${usd(trace.household.pays)}, ${trace.household.sharing ? `sharing (within ${usd(P.sharingTolerance)})` : trace.household.rule === "vtr" ? "VTR" : `PMV rule, inside value ${usd(trace.household.value)}`}. `
+      : "") +
     `Cash ${usd(trace.cashIncome)}; in kind ${usd(trace.inKindIncome)}; shelter paid by others ${usd(trace.shelterPaidByOthers)}; ISM value ${usd(trace.ismValue)}${trace.vtrApplied ? " (VTR)" : ""}; ` +
     `infrequent exclusion ${usd(trace.infrequentExcluded)}; general exclusion ${usd(trace.generalExcludedFromUnearned)}; countable ${usd(trace.countableIncome)}; ` +
     `FBR for ${pay} ${usd(fbr(profile.couple, trace.paymentMonth))} gives ${usd(trace.incomeCheck)}. ` +
@@ -586,7 +704,42 @@ const overLimitSentence = (r: ResourceTest, w: ReturnType<typeof pronounWords>, 
 /** she/her, he/him or they/them, for the explanations. */
 export function pronounWords(p: Pronoun = "she") {
   const poss = p === "he" ? "his" : p === "they" ? "their" : "her";
-  return { subj: p, poss, Poss: poss[0].toUpperCase() + poss.slice(1), lives: p === "they" ? "live" : "lives" };
+  const they = p === "they";
+  return {
+    subj: p,
+    Subj: p[0].toUpperCase() + p.slice(1),
+    obj: p === "he" ? "him" : they ? "them" : "her",
+    poss,
+    Poss: poss[0].toUpperCase() + poss.slice(1),
+    lives: they ? "live" : "lives",
+    pays: they ? "pay" : "pays",
+    has: they ? "have" : "has",
+  };
+}
+
+/**
+ * The sentence every answer adds when she lives in another person's household without paying her share (R-SHEL-08):
+ * what that already does to the check, before any gift, and what paying her share would change. Empty otherwise.
+ * "She lives in someone else's household and pays $100 of her $150 share of its costs, so her June 2026 check is already
+ * reduced by a third, $331.33, gift or not. Paying at least $130 a month toward the household's costs would end that."
+ */
+export function householdSentence(h: HouseholdTest | null, profile: Profile, payMonth: string): string {
+  if (!h || h.rule === "none") return "";
+  const w = pronounWords(profile.pronoun);
+  const pay = checkMonthName(payMonth);
+  const paid =
+    h.share !== null
+      ? `${w.pays} ${usd(h.pays)} of ${w.poss} ${usd(h.share)} share of its costs`
+      : h.pays > 0
+        ? `${w.pays} ${usd(h.pays)} toward its costs, and ${w.poss} share of them is not known`
+        : `${w.pays} nothing toward its costs`;
+  const end =
+    h.share !== null
+      ? ` Paying at least ${usd(round2(Math.max(0, h.share - P.sharingTolerance)))} a month toward the household's costs would end that.`
+      : ` Paying ${w.poss} share of the household's costs, or within ${usd(P.sharingTolerance)} of it, would end that.`;
+  if (h.rule === "vtr") return `${w.Subj} ${w.lives} in someone else's household and ${paid}, so ${w.poss} ${pay} check is already reduced by a third, ${usd(vtr(profile.couple, payMonth))}, gift or not.${end}`;
+  const valued = h.share !== null ? `${usd(h.value)}, ${w.poss} share less what ${w.subj} ${w.pays}` : `${usd(h.value)}, the presumed maximum value, since the household's costs are not known`;
+  return `${w.Subj} ${w.lives} in someone else's household and ${paid}, so the shelter it gives ${w.obj} counts as housing support, gift or not: ${valued}, up to ${usd(pmv(profile.couple, payMonth))} a month with any other housing help.${end}`;
 }
 
 function routePhrase(d: Delivery, w = pronounWords()) {

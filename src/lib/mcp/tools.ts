@@ -7,13 +7,13 @@ import { API_VERSION } from "@/lib/api/version";
 import { getHousehold, openNeeds, pageProfile } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
 import { distinctPayees, routeGift } from "@/lib/routing";
-import { checkGiftData } from "@/lib/api/check-gift";
+import { checkGiftData, householdData } from "@/lib/api/check-gift";
 import { giftSubject } from "@/lib/report/data";
 import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
 import { easyRead } from "@/lib/report/easy";
 import { dbConfigured } from "@/lib/db";
 import { monthlyView, startMonthly } from "@/lib/monthly";
-import { DEFAULT_PROFILE, P, evaluateGift, fullCheckByYear, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, P, addMonths, computeMonth, evaluateGift, fullCheckByYear, householdSentence, monthOf, pronounWords, sourcesFor, usd, type Profile } from "@/lib/rules";
 import sources from "../../../content/sources.json";
 import { reportCode, verifyPath } from "../report/verify";
 import { findGifts } from "../channel3";
@@ -50,7 +50,7 @@ export const TOOLS = [
     name: "check_gift",
     title: "Check a gift",
     description:
-      `Before giving money or paying a bill for someone who receives SSI (Supplemental Security Income), check how the gift changes their monthly check and the benefit-safe way to give it. Cash usually counts as income; paying a shop directly for something other than housing usually does not. Uses the federal SSI amount for the month the check is paid (${fullCheckByYear()} for one person), names that month and year in every answer, and cites the regulation or SSA manual section.`,
+      `Before giving money or paying a bill for someone who receives SSI (Supplemental Security Income), check how the gift changes their monthly check and the benefit-safe way to give it. Cash usually counts as income; paying a shop directly for something other than housing usually does not. Uses the federal SSI amount for the month the check is paid (${fullCheckByYear()} for one person), names that month and year in every answer, and cites the regulation or SSA manual section. When the person lives in someone else's household and pays less than their share of its costs, the answer says that the household already lowers the check, gift or not. Help that is a loan can be checked with the loan facts; Giftwise itself moves gifts only and does not arrange loans (POMS SI 00835.482).`,
     input: z.object({
       amount: z.number().min(0).max(100000).describe("Gift amount in US dollars."),
       delivery: DeliverySchema,
@@ -80,18 +80,59 @@ export const TOOLS = [
         .max(20)
         .optional()
         .describe("The people in their household, themselves included, if others live there. Housing paid from outside is divided among them."),
+      lives_in_anothers_household: z
+        .boolean()
+        .optional()
+        .describe("True when they live all month in someone else's home with no ownership or rental liability. Unless they pay their share of its costs, the household's shelter lowers the check every month, gift or not."),
+      household_provides_all_meals: z.boolean().optional().describe("In someone else's household: whether it gives them all their meals. The one-third reduction applies only then. Leave it out to mean yes."),
+      household_costs: z
+        .number()
+        .min(0)
+        .max(100000)
+        .optional()
+        .describe("In someone else's household: its monthly costs for rent or mortgage, property tax and utilities, not food. With household_size it gives their pro rata share."),
+      household_pays: z.number().min(0).max(100000).optional().describe("What they pay toward those costs each month, in cash, not counting food money or services. Leave it out to mean nothing."),
+      loan: z
+        .object({
+          must_repay: z.boolean().describe("They must repay it whether or not any benefit is ever paid."),
+          agreed_when_given: z.boolean().describe("Both sides agreed to repayment when it was given."),
+          feasible_plan: z.boolean().describe("They have a plan to repay from their own income or property that they can meet."),
+          repay: z.number().min(0).max(100000).optional().describe("What they agreed to repay, when less than the amount."),
+          from_household: z.boolean().optional().describe("True when the household they live in lends them its own shelter."),
+        })
+        .optional()
+        .describe("Only for help that already exists and is a loan (20 CFR 416.1103(f); POMS SI 00835.482, SI 01120.220). A bona fide loan is not income; one that fails any test counts like a gift."),
     }),
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     run: async (i) => {
+      const profile: Profile = {
+        ...DEFAULT_PROFILE,
+        pronoun: "they",
+        ...(i.savings !== undefined ? { savings: i.savings } : {}),
+        ...(i.able_balance !== undefined ? { ableBalance: i.able_balance } : {}),
+        ...(i.household_size !== undefined ? { householdSize: i.household_size } : {}),
+        ...(i.lives_in_anothers_household !== undefined ? { livesInAnothersHousehold: i.lives_in_anothers_household } : {}),
+        ...(i.household_provides_all_meals !== undefined ? { householdProvidesAllMeals: i.household_provides_all_meals } : {}),
+        ...(i.household_costs !== undefined ? { householdCosts: i.household_costs } : {}),
+        ...(i.household_pays !== undefined ? { householdPays: i.household_pays } : {}),
+      };
       const r = evaluateGift(
-        { id: "mcp", date: i.date ?? today(), amount: i.amount, delivery: i.delivery, category: i.category, recurring: i.recurring, covers: i.covers, payerCoOwns: i.payer_co_owns, rentPaid: i.rent_paid, every: i.every },
         {
-          ...DEFAULT_PROFILE,
-          pronoun: "they",
-          ...(i.savings !== undefined ? { savings: i.savings } : {}),
-          ...(i.able_balance !== undefined ? { ableBalance: i.able_balance } : {}),
-          ...(i.household_size !== undefined ? { householdSize: i.household_size } : {}),
+          id: "mcp",
+          date: i.date ?? today(),
+          amount: i.amount,
+          delivery: i.delivery,
+          category: i.category,
+          recurring: i.recurring,
+          covers: i.covers,
+          payerCoOwns: i.payer_co_owns,
+          rentPaid: i.rent_paid,
+          every: i.every,
+          ...(i.loan
+            ? { loan: { mustRepay: i.loan.must_repay, agreedWhenGiven: i.loan.agreed_when_given, feasiblePlan: i.loan.feasible_plan, repay: i.loan.repay, fromHousehold: i.loan.from_household } }
+            : {}),
         },
+        profile,
       );
       return {
         text: `${r.explanation.plain} Sources: ${r.sourceKeys.map((k) => SRC[k]?.title ?? k).join("; ")}.`,
@@ -107,6 +148,8 @@ export const TOOLS = [
           savings_on_next_first: r.resourcesNextFirst,
           able_balance_on_next_first: r.resourcesAfter.ableBalance,
           resource_status: r.trace.resources.status,
+          // Living in someone else's household without paying their share: what that already does to the check (R-SHEL-08).
+          household: householdData(r, profile),
           rule_ids: r.ruleIds,
           sources: sourcesFor(r.ruleIds).map((k) => ({ title: SRC[k]?.title ?? k, url: SRC[k]?.url ?? null })),
         },
@@ -190,7 +233,11 @@ export const TOOLS = [
     run: async (i) => {
       const p = await page(i.slug);
       if (!p) return { text: `No gift page named "${i.slug}".`, isError: true };
-      const plan = routeGift(i.amount, openNeeds(p.needs), today(), p.profile, `${p.household.name}'s ABLE account`);
+      const day = today();
+      const plan = routeGift(i.amount, openNeeds(p.needs), day, p.profile, `${p.household.name}'s ABLE account`);
+      // A household the person lives in without paying their share lowers the check before any gift (R-SHEL-08).
+      const home = computeMonth(monthOf(day), [], p.profile).household;
+      const homeNote = householdSentence(home, p.profile, addMonths(monthOf(day), P.rmaLagMonths));
       const lines = plan.lines.map((l) => ({ paid_to: l.payeeName, for: l.title, amount: l.amount, rule_ids: l.ruleIds }));
       const w = pronounWords(p.profile.pronoun);
       // Why money is handed back when the ABLE account has no room: the yearly limit, or $100,000 in the account (R-ABLE-03).
@@ -201,8 +248,16 @@ export const TOOLS = [
             ? `: ${w.poss} ABLE account has reached this year's ${usd(P.ableAnnualLimit)} limit`
             : "";
       return {
-        text: `${usd(i.amount)} for ${p.household.name}: ${lines.length ? lines.map((l) => `${usd(l.amount)} to ${l.paid_to} (${l.for})`).join(", ") : "nothing routed"}. ${w.Poss} check stays ${usd(plan.checkWithRouting)}. Given as cash, it would be ${usd(plan.checkIfCash)}.${plan.unplaced > 0 ? ` ${usd(plan.unplaced)} has no benefit-safe place right now${why}.` : ""}`,
-        data: { amount: i.amount, lines, check_with_giftwise: plan.checkWithRouting, check_if_cash: plan.checkIfCash, unplaced: plan.unplaced, able_full: plan.ableFull ?? null },
+        text: `${usd(i.amount)} for ${p.household.name}: ${lines.length ? lines.map((l) => `${usd(l.amount)} to ${l.paid_to} (${l.for})`).join(", ") : "nothing routed"}. ${w.Poss} check stays ${usd(plan.checkWithRouting)}. Given as cash, it would be ${usd(plan.checkIfCash)}.${plan.unplaced > 0 ? ` ${usd(plan.unplaced)} has no benefit-safe place right now${why}.` : ""}${homeNote ? ` ${homeNote}` : ""}`,
+        data: {
+          amount: i.amount,
+          lines,
+          check_with_giftwise: plan.checkWithRouting,
+          check_if_cash: plan.checkIfCash,
+          unplaced: plan.unplaced,
+          able_full: plan.ableFull ?? null,
+          household: home ? { rule: home.rule, pro_rata_share: home.share, pays: home.pays, lowers_check_before_gift: home.rule !== "none", plain: homeNote || null } : null,
+        },
       };
     },
   }),

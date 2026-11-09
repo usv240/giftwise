@@ -25,10 +25,10 @@ const example = (id: string) => ENDPOINTS.find((e) => e.id === id)?.example;
 export function checkGiftData(body: unknown) {
   const { gift, profile } = CheckGiftRequest.parse(body);
   const r = evaluateGift(
-    { id: "api", date: gift.date ?? today(), amount: gift.amount, delivery: gift.delivery, category: gift.category, recurring: gift.recurring, giver: gift.giver, label: gift.label, covers: gift.covers, payerCoOwns: gift.payerCoOwns, rentPaid: gift.rentPaid, every: gift.every },
+    { id: "api", date: gift.date ?? today(), amount: gift.amount, delivery: gift.delivery, category: gift.category, recurring: gift.recurring, giver: gift.giver, label: gift.label, covers: gift.covers, payerCoOwns: gift.payerCoOwns, rentPaid: gift.rentPaid, every: gift.every, loan: gift.loan },
     { ...DEFAULT_PROFILE, ...profile },
   );
-  return checkGiftResponse(r);
+  return checkGiftResponse(r, { ...DEFAULT_PROFILE, ...profile });
 }
 
 /** The data of POST /api/v1/plan-month, mapped as src/app/api/v1/plan-month/route.ts maps it. */

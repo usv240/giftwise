@@ -24,7 +24,8 @@
     "able_resource_exclusion": { "value": 100000, "label": "ABLE balance not counted toward savings", "source": "poms-si-01130-740", "verified": true },
     "able_onset_age": { "value": 46, "label": "ABLE eligibility: disability began before this age (from Jan 1, 2026)", "source": "ssa-spotlight-able-2026", "verified": true },
     "ism_food_removed_on": { "value": "2024-09-30", "label": "Date food stopped counting as in-kind support", "source": "fr-89-21199", "verified": true },
-    "rma_lag_months": { "value": 2, "label": "Months between receiving income and the check it changes", "source": "poms-si-02005-001", "verified": true }
+    "rma_lag_months": { "value": 2, "label": "Months between receiving income and the check it changes", "source": "poms-si-02005-001", "verified": true },
+    "sharing_tolerance": { "value": 20, "label": "A payment within this much of her pro rata share of household costs counts as her share (since October 1, 2021)", "source": "poms-si-00835-160", "verified": true }
   },
   "audience": {
     "ssi_recipients": { "value": "7.3 million", "label": "People receiving SSI (Sept 2026)", "source": "ssa-monthly-snapshot", "verified": true },

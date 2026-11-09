@@ -76,8 +76,26 @@ export const RULES: Record<string, RuleRow> = {
   "R-SHEL-VTR": {
     id: "R-SHEL-VTR",
     name: "Living in another person's household",
-    plain: "When the person lives in someone else's home all month, gets shelter there without paying a share, and the household provides all meals, a fixed one-third reduction applies instead.",
+    plain: "When the person lives in someone else's home all month, gets shelter there without paying a share, and the household provides all meals, the check is reduced by a fixed one third every month, gift or not, and no other housing help counts on top of it.",
     sourceKeys: ["cfr-416-1131", "poms-si-00835-200", "poms-si-00835-901"],
+  },
+  "R-SHEL-08": {
+    id: "R-SHEL-08",
+    name: "Paying a share of another person's household",
+    plain: "Living in someone else's household, the person's pro rata share is its monthly housing costs divided by the people who live there. Paying that share, or within $20 of it, she gets no support from the household. Paying less, the one-third reduction applies every month if the household provides all her meals; otherwise the shelter it gives her counts up to the monthly cap, valued at her share less what she pays. Food is not part of the costs since 2024, so money she pays for food does not count toward the share.",
+    sourceKeys: ["cfr-416-1133", "cfr-416-1131", "poms-si-00835-160", "poms-si-00835-170", "poms-si-00835-340", "poms-si-00835-450", "fr-89-21199"],
+  },
+  "R-LOAN-01": {
+    id: "R-LOAN-01",
+    name: "Cash lent, not given",
+    plain: "Cash lent to the person is not income when it is a bona fide loan: she must repay it whatever happens with her benefits, both sides agreed to that when it was given, and she has a plan to repay that she can meet. Cash she still has the next month counts toward savings. If any of that is missing, it counts as a gift. Paying a loan back does not lower countable income.",
+    sourceKeys: ["cfr-416-1103-f", "poms-si-01120-220"],
+  },
+  "R-LOAN-02": {
+    id: "R-LOAN-02",
+    name: "Food or shelter lent, not given",
+    plain: "Housing someone pays for as a bona fide loan counts only for the part the person is not required to repay, valued as if there were no loan. When the household she lives in lends her its shelter, the amount borrowed counts as what she pays toward her share of its costs. A loan that fails any of SSA's tests counts like any other help.",
+    sourceKeys: ["poms-si-00835-482", "cfr-416-1103-f"],
   },
   "R-FOOD-01": {
     id: "R-FOOD-01",

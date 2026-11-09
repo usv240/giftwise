@@ -1,5 +1,5 @@
 {
-  "ran_at": "2026-11-09T12:29:06.336Z",
+  "ran_at": "2026-11-09T15:31:36.092Z",
   "rules_version": "2026.1",
   "tolerance_usd": 1,
   "rates": "Engine amounts are 2026: federal benefit rate $994, presumed maximum value $351.33, one-third reduction $331.33. Dollar figures are what the same help would mean to a person on SSI in 2026.",
@@ -196,7 +196,8 @@
         ],
         "values": [],
         "rule_ids": [
-          "R-SHEL-VTR"
+          "R-SHEL-VTR",
+          "R-SHEL-08"
         ],
         "counts_match": true,
         "basis_match": true,
@@ -262,7 +263,8 @@
         ],
         "values": [],
         "rule_ids": [
-          "R-SHEL-VTR"
+          "R-SHEL-VTR",
+          "R-SHEL-08"
         ],
         "counts_match": true,
         "basis_match": true,
@@ -328,7 +330,8 @@
         ],
         "values": [],
         "rule_ids": [
-          "R-SHEL-VTR"
+          "R-SHEL-VTR",
+          "R-SHEL-08"
         ],
         "counts_match": true,
         "basis_match": true,
@@ -395,7 +398,8 @@
         "values": [],
         "rule_ids": [
           "R-SHEL-01",
-          "R-GIE-01"
+          "R-GIE-01",
+          "R-SHEL-08"
         ],
         "counts_match": true,
         "basis_match": true,
@@ -482,7 +486,8 @@
         ],
         "values": [],
         "rule_ids": [
-          "R-SHEL-VTR"
+          "R-SHEL-VTR",
+          "R-SHEL-08"
         ],
         "counts_match": true,
         "basis_match": true,
@@ -657,7 +662,8 @@
         ],
         "values": [],
         "rule_ids": [
-          "R-SHEL-VTR"
+          "R-SHEL-VTR",
+          "R-SHEL-08"
         ],
         "counts_match": true,
         "basis_match": true,
@@ -1334,7 +1340,8 @@
         ],
         "values": [],
         "rule_ids": [
-          "R-SHEL-VTR"
+          "R-SHEL-VTR",
+          "R-SHEL-08"
         ],
         "counts_match": true,
         "basis_match": true,
@@ -1359,5 +1366,5 @@
       "overpayment": null
     }
   ],
-  "ms": 241
+  "ms": 341
 }

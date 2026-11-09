@@ -33,10 +33,11 @@ async function handle(req: Request) {
       payerCoOwns: gift.payerCoOwns,
       rentPaid: gift.rentPaid,
       every: gift.every,
+      loan: gift.loan,
     },
     { ...DEFAULT_PROFILE, ...profile },
   );
-  return ok(checkGiftData(r), started);
+  return ok(checkGiftData(r, { ...DEFAULT_PROFILE, ...profile }), started);
 }
 
 const postRoute = (req: Request) => guard(req, "check-gift", () => handle(req));

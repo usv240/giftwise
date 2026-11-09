@@ -327,6 +327,22 @@ r = await mcp("tools/call", { name: "check_gift", arguments: { amount: 1500, del
 j = await r.json();
 ok("MCP check_gift takes the ABLE balance: past $100,000 and over the limit, $0 and the item route instead", j.result?.structuredContent?.check_after === 0 && j.result.structuredContent.best_route === "item" && j.result.structuredContent.resource_status === "able_suspension", j.result?.content?.[0]?.text?.slice(0, 100));
 
+// The rules the fourth held-out set showed, with the facts of SSA's own examples (R-SHEL-08, R-LOAN-01, R-LOAN-02).
+{
+  const own = { "Content-Type": "application/json", "x-forwarded-for": "203.0.113.44" };
+  const grayson = await (await post("/api/v1/check-gift", { gift: { amount: 420, delivery: "vendor", category: "equipment", date: "2026-04-10" }, profile: { livesInAnothersHousehold: true, householdSize: 3, householdCosts: 450, householdPays: 100 } }, own)).json();
+  ok(
+    "check-gift paying $100 of a $150 share says the household already takes a third: $662.67 (POMS SI 00835.160 G)",
+    grayson.data?.check_before === 662.67 && grayson.data?.check_after === 662.67 && grayson.data?.household?.lowers_check_before_gift === true && /already reduced by a third/.test(grayson.data?.explanation?.plain ?? ""),
+    `got ${grayson.data?.check_after} ${JSON.stringify(grayson.data?.household)}`,
+  );
+  const loan = await (await post("/api/v1/check-gift", { gift: { amount: 150, delivery: "vendor", category: "utility", date: "2026-04-10", loan: { mustRepay: true, agreedWhenGiven: true, feasiblePlan: true } }, profile: { savings: 0 } }, own)).json();
+  ok("check-gift a utility bill paid as a loan she repays in full counts nothing (POMS SI 00835.482 G.4.c)", loan.data?.check_after === 994 && loan.data?.rule_ids?.includes("R-LOAN-02"), `got ${loan.data?.check_after} ${loan.data?.rule_ids}`);
+}
+r = await mcp("tools/call", { name: "check_gift", arguments: { amount: 420, delivery: "vendor", category: "equipment", date: "2026-04-10", lives_in_anothers_household: true, household_size: 3, household_costs: 450, household_pays: 175 } });
+j = await r.json();
+ok("MCP check_gift: paying $175 toward a $150 share is sharing, so the check is the full $994", j.result?.structuredContent?.check_after === 994 && j.result.structuredContent.household?.sharing === true, j.result?.content?.[0]?.text?.slice(0, 100));
+
 // PayPal webhooks: an event without a valid PayPal signature is never accepted (400, or 503 where webhooks are not set up)
 r = await post("/api/paypal/webhook", { id: "WH-TEST", event_type: "PAYMENT.CAPTURE.REFUNDED", resource: { id: "NOPE" } });
 ok("unsigned PayPal webhook is refused", r.status === 400 || r.status === 503, `${r.status}`);

@@ -11,11 +11,11 @@ Benefit-safe giving for people on SSI, their families and their benefits counsel
 ## Results
 
 - **$331 to $663 a month.** Help from family was counted against the person in all 14 real SSI court cases scored; routed through Giftwise, the same help keeps money in 4 as the opinions state the facts, and in 6 more, 10 in all, when the person can open an ABLE account. These are the rules engine's counterfactuals at 2026 rates, not outcomes anyone saw ([`/evidence/impact#kept`](https://giftwise-405i.onrender.com/evidence/impact#kept)).
-- **14 of 14 scored, of 36 cases:** of 36 federal court cases about help from others, 14 turn on whether a gift counts, and the engine reaches the outcome SSA and the court did in all 14; the other 22 turn on a loan, shared rent, a trust or a remand, and are listed with their reasons ([`/evidence/court-cases`](https://giftwise-405i.onrender.com/evidence/court-cases)).
-- **0 of 3** in a second class of court cases, where the court held the help was not income: each is a loan the person must repay, which the engine has no input for, so it counts the help ([`content/eval/field-cases-2.json`](content/eval/field-cases-2.json)).
+- **14 of 14 scored, of 36 cases:** of 36 federal court cases about help from others, 14 turn on whether a gift counts, and the engine reaches the outcome SSA and the court did in all 14; the other 22 turn on a loan, shared rent, a trust or a remand ([`/evidence/court-cases`](https://giftwise-405i.onrender.com/evidence/court-cases)).
+- **0 of 3** in a second class of court cases, where the court held the help was not income, on the first run, before the engine had a loan field: each is a loan. With each court's finding in the new loan field, 3 of 3, after the fix ([`/evidence/court-cases#not-income`](https://giftwise-405i.onrender.com/evidence/court-cases#not-income)).
 - **40 of 40** of Social Security's own worked examples match SSA's answer; Claude with no rulebook matches 32 of 40 ([`/evidence/ssa-examples`](https://giftwise-405i.onrender.com/evidence/ssa-examples)).
-- **20 groups** of SSA's examples are listed apart and not scored, each with its reason in `content/eval/ssa-examples.json`: they turn on something other than a gift to one person (a second car, a couple's wages, a parent's income counted for a child, a State energy program, a loan to repay), or on a rule the engine added later, which the held-out sets then tested.
-- **Three held-out sets of SSA examples, each run once on a frozen engine: 4 of 5, 1 of 5 and 1 of 5.** The first ran on the engine frozen at commit `3f3ea60`; its first run matched 1 of 5, and two expected answers were then corrected to SSA's text, with reasons in `content/eval/held-out.json`. The second and third were written before their run: `content/eval/held-out-2.json` (git blob `715607f`, frozen at `c5e94eb`) and `content/eval/held-out-3.json` (git blob `b9a5ece`, frozen at `7e24ed8`, 5 of 5 on whether the gift counts). The rules they showed are now in the engine.
+- **20 groups** of SSA's examples are listed apart and not scored, each with its reason in `content/eval/ssa-examples.json`: they turn on something other than a gift to one person, or on a rule the engine added later, which the held-out sets then tested.
+- **Four held-out sets of SSA examples, each run once on a frozen engine: 4 of 5, 1 of 5, 1 of 5 and 6 of 15.** The first ran at commit `3f3ea60`; its first run matched 1 of 5, and two expected answers were then corrected to SSA's text, with reasons in `content/eval/held-out.json`. The others were written before their run: `content/eval/held-out-2.json` (git blob `715607f`, frozen at `c5e94eb`), `content/eval/held-out-3.json` (git blob `b9a5ece`, frozen at `7e24ed8`, 5 of 5 on whether the gift counts) and `content/eval/held-out-4.json` (git blob `49ba930`, frozen at `201128b`, 7 of 15 on whether the help counts). The rules they showed are now in the engine ([docs/results.md](docs/results.md)).
 - **0 of 55** gifts that would lower the check were let through, over every case whose right answer is known ([`/evidence/rules#errors`](https://giftwise-405i.onrender.com/evidence/rules#errors)).
 - **6 of 51** fine gifts were sent another way, each with her check whole (`src/lib/error-rates.ts`).
 - **59 of 59 labeled bills** were routed so the check stays whole, 52 clear and 7 contested; Claude with no rulebook, 56 of 59.
@@ -26,25 +26,7 @@ Case by case: [docs/results.md](docs/results.md), [`/evidence/rules`](https://gi
 
 ## What the AI adds
 
-Two Claude reviewers read a bill, one against the regulations and one against SSA's manual; a referee in code acts only when both quotes check out and agree. On the 59 recorded bills, beside a router with no AI that always takes the route safe under both readings ([`/evidence/rules#what-ai-adds`](https://giftwise-405i.onrender.com/evidence/rules#what-ai-adds)):
-
-| All 59 bills | No AI | Regulations alone | Manual alone | Both reviewers, referee |
-|---|---|---|---|---|
-| Her check kept whole | 59 of 59 | 58 of 59 | 59 of 59 | 59 of 59 |
-| Wrong routes accepted | 0 | 1 | 0 | 0 |
-| Paid straight to the business, of the 28 that are not housing | 0 of 28 | 22 of 28 | 28 of 28 | 22 of 28 |
-
-On these bills a router with no AI is as safe, and the manual reviewer alone settles more. The referee is there for the cases in `src/lib/review/adversarial.ts`, where one reviewer would mislead the router: a quote that is not in its rulebook, a quote from the other rulebook, a made-up citation, and two readings that disagree. On those five cases, a $138 electric bill paid by family in April 2026, computed from the same code:
-
-| The five adversarial cases | Her check kept whole |
-|---|---|
-| Regulations reviewer alone, its quote checked | 5 of 5 |
-| Manual reviewer alone, its quote checked | 4 of 5 |
-| Regulations reviewer alone, its answer taken as sent | 4 of 5 |
-| Manual reviewer alone, its answer taken as sent | 3 of 5 |
-| Both reviewers and the referee | 5 of 5 |
-
-With its quote checked, the regulations reviewer alone is as safe as the referee here; the manual reviewer alone is not, because when the two disagree its quote checks out, its reading pays the company, and her June 2026 check drops from $994 to $876. The quote check catches the wrong quote, rulebook and citation; the second reviewer catches a reading that checks out and is still wrong.
+Two Claude reviewers read a bill, one against the regulations and one against SSA's manual; a referee in code acts only when both quotes check out and agree. On the 59 recorded bills a router with no AI keeps her check whole on 59 of 59 with 0 wrong routes, as the referee does; what the reviewers add is settling bills, 22 of the 28 that are not housing paid straight to the business, against 0 of 28 with no AI. On the five adversarial cases in `src/lib/review/adversarial.ts`, where one reviewer would mislead the router, the referee keeps her check whole on 5 of 5 and the manual reviewer alone on 4 of 5 ([docs/results.md](docs/results.md#what-the-ai-adds-measured)).
 
 ## Run it yourself
 
@@ -54,18 +36,18 @@ docker compose up -d          # Postgres 17
 cp .env.example .env.local    # PayPal sandbox keys, payee accounts, ANTHROPIC_API_KEY, DATABASE_URL (TESTING.md names each)
 npm run db:push               # create the tables; Maya's sample page is seeded the first time /g/maya opens
 npm run dev -- -p 3100        # http://localhost:3100
-npm test                      # a fresh clone with no .env.local: 402 pass and 7 skip (7 need a database); when .env.local names a reachable database: 409 of 409, no keys needed
+npm test                      # a fresh clone with no .env.local: 436 pass and 7 skip (7 need a database); when .env.local names a reachable database: 443 of 443, no keys needed
 ```
 
 `npm test` needs no keys: tests that need Postgres skip with the reason in their names; no test calls Claude or PayPal. [TESTING.md](TESTING.md) explains every variable and suite; `npm run checks:local` runs the same 25 outside checks as the nightly Render Workflow ([`render.yaml`](render.yaml)).
 
-[![CI](https://github.com/usv240/giftwise/actions/workflows/ci.yml/badge.svg)](https://github.com/usv240/giftwise/actions/workflows/ci.yml) on every push: audit, types, lint, unit tests, 20,000 fresh random gifts, the `ssi-gift-rules` package, and a production build with no keys where every page must answer and pass axe.
+[![CI](https://github.com/usv240/giftwise/actions/workflows/ci.yml/badge.svg)](https://github.com/usv240/giftwise/actions/workflows/ci.yml) on every push: audit, types, lint, unit tests, 20,000 fresh random gifts, the `ssi-gift-rules` package and a keyless production build checked with axe.
 
 ## Where to look
 
 | | Open | Then run |
 |---|---|---|
-| PayPal | [`src/lib/paypal/gift-order.ts`](src/lib/paypal/gift-order.ts), a payee per purchase unit; [`src/lib/paypal/capture.ts`](src/lib/paypal/capture.ts), captured once | `npm run e2e:api`, 116 of 116; `npm run e2e:paypal`, 14 of 14 (sandbox keys), with redacted transcripts ([`/evidence/operations#transcripts`](https://giftwise-405i.onrender.com/evidence/operations#transcripts)) |
+| PayPal | [`src/lib/paypal/gift-order.ts`](src/lib/paypal/gift-order.ts), a payee per purchase unit; [`src/lib/paypal/capture.ts`](src/lib/paypal/capture.ts), captured once | `npm run e2e:api`, 119 of 119; `npm run e2e:paypal`, 14 of 14 (sandbox keys), with redacted transcripts ([`/evidence/operations#transcripts`](https://giftwise-405i.onrender.com/evidence/operations#transcripts)) |
 | The product | [`/g/maya`](https://giftwise-405i.onrender.com/g/maya), [the month's report](https://giftwise-405i.onrender.com/g/maya/report?month=2026-10), the [organizer's page](https://giftwise-405i.onrender.com/manage/maya-sample-organizer) | `npm run e2e:ui`, 66 of 66 (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers); `npm run e2e:a11y`, 140 of 140 page views |
 | Who it helps | [`src/lib/impact.ts`](src/lib/impact.ts), [`src/lib/research.ts`](src/lib/research.ts), [`/evidence/impact`](https://giftwise-405i.onrender.com/evidence/impact) | `tests/docs-numbers.test.ts`; `tests/research.test.ts` |
 
@@ -73,7 +55,7 @@ npm test                      # a fresh clone with no .env.local: 402 pass and 7
 
 | | Here | File |
 |---|---|---|
-| Orders v2 | One order, a purchase unit and payee per recipient, up to 10, payees from the server. Created through the Server SDK and read over REST, because the SDK's schema turns away a captured multi-payee order. Real shops are paid by `payee.merchant_id` after Partner Referrals onboarding, which PayPal opens to approved partners ([docs/real-world.md](docs/real-world.md)) | `src/lib/paypal/gift-order.ts`, `src/lib/paypal/orders.ts` |
+| Orders v2 | One order, a purchase unit and payee per recipient, up to 10, payees from the server, created through the Server SDK and read over REST. Real shops are paid by `payee.merchant_id` after Partner Referrals onboarding, which PayPal opens to approved partners ([docs/real-world.md](docs/real-world.md)) | `src/lib/paypal/gift-order.ts`, `src/lib/paypal/orders.ts` |
 | JavaScript SDK v6 | The PayPal button on each need and on Give any amount, and the guest card button | `src/components/gift/PayPalPay.tsx` |
 | Capture | Server side, once, under one `PayPal-Request-Id`; a 5xx retried with the same id | `src/lib/paypal/capture.ts` |
 | Approval links | An assistant or a monthly gift starts an order; only the giver approves; Giftwise captures on return | `src/lib/paypal/gift-order.ts`, `src/app/api/paypal/return/` |
@@ -81,7 +63,7 @@ npm test                      # a fresh clone with no .env.local: 402 pass and 7
 | Webhooks | Captures a payment the giver never returned for, after checking PayPal's signature | `src/app/api/paypal/webhook/route.ts` |
 | PayPal MCP server | The assistant reads each checkout back through `get_order`; Giftwise's MCP server at `/api/mcp`, with nine tools, starts a checkout only the giver can approve | `src/lib/agent/paypal-mcp.ts`, `src/lib/mcp/tools.ts` |
 | Claude | Reads bills and fundraiser pages into checked data and acts as two reviewers; it never decides money. With no key or the budget spent, the samples replay its recorded answers, labelled Replayed | `src/lib/ai/tasks.ts`, `src/lib/ai/bill-review.ts`, `src/lib/ai/claude.ts` (`content/ai-replay`), `src/lib/rules/engine.ts` |
-| AG Studio, Bryntum, Channel3, KERNEL, Elasticsearch, Federal Register, Postman, Zapier, Render Workflows, Sentry | Maya's year as a dashboard, her benefit calendar, the gift finder, fundraiser pages read in a cloud browser, Ask the rulebook, the rules watch, the API collection, the organizer's webhook, 25 outside checks nightly, and error tracking with personal data masked: each with its job and file on [`/stack`](https://giftwise-405i.onrender.com/stack) | [docs/inside.md](docs/inside.md) |
+| AG Studio, Bryntum, Channel3, KERNEL, Elasticsearch, Federal Register, Postman, Zapier, Render Workflows, Sentry | Each with its job and file on [`/stack`](https://giftwise-405i.onrender.com/stack) | [docs/inside.md](docs/inside.md) |
 
 Every commit is from November 2026 (`git log --date=short`).
 
@@ -89,9 +71,9 @@ Every commit is from November 2026 (`git log --date=short`).
 
 - In the two real court cases whose opinions state how long the help lasted, the same help routed through Giftwise would have kept one family $13,584.53 over 41 months and another $24,518.79 over 37 months, $38,103.32 in all, at 2026 rates. The rules engine's counterfactual on each case's own facts: what it keeps each month ($331.33 and $662.67), repriced at 2026 rates, times the months the opinion states.
 - In Maya's sample year, one shared page keeps $1,747.33 that 10 of her monthly checks would lose with each giver paying on their own.
-- Paying a shop, a clinic or a school keeps the check whole for all 7.4 million people on SSI (January 2025, [CRS IF10482](https://www.congress.gov/crs-product/IF10482)). Rent and utilities stay whole through an ABLE account, open where blindness or a disability began before 46 ([POMS SI 01130.740](https://secure.ssa.gov/poms.nsf/lnx/0501130740)): all 1.0 million children on SSI, and the adults whose condition began before 46. Without ABLE, $800 of rent paid by family in November 2026 leaves her January 2027 check at $686 of $1,029, and through ABLE it stays $1,029 (`housingReach()` in [`src/lib/impact.ts`](src/lib/impact.ts)).
+- Paying a shop, a clinic or a school keeps the check whole for all 7.4 million people on SSI (January 2025, [CRS IF10482](https://www.congress.gov/crs-product/IF10482)). Rent and utilities stay whole through an ABLE account, open where blindness or a disability began before 46 ([POMS SI 01130.740](https://secure.ssa.gov/poms.nsf/lnx/0501130740)), all 1.0 million children on SSI among them. Without ABLE, $800 of rent paid by family in November 2026 leaves her January 2027 check at $686 of $1,029, and through ABLE it stays $1,029 (`housingReach()` in [`src/lib/impact.ts`](src/lib/impact.ts)).
 
-Computed by [`src/lib/impact.ts`](src/lib/impact.ts), the code the site uses; `tests/docs-numbers.test.ts` holds this file to it ([`/evidence/impact`](https://giftwise-405i.onrender.com/evidence/impact)).
+Computed by [`src/lib/impact.ts`](src/lib/impact.ts), the code the site uses ([`/evidence/impact`](https://giftwise-405i.onrender.com/evidence/impact)).
 
 ## What is at stake
 
@@ -107,7 +89,7 @@ Measured by the agency itself ([`/evidence/impact#stake`](https://giftwise-405i.
 
 ## Design
 
-For the giver on a phone, the total and payees sit beside the PayPal button. The person on SSI gets her report in Easy Read and Spanish (`tests/easy-read.test.ts`, `tests/gift-es.test.ts`). 140 of 140 page views pass axe (WCAG 2.2 AA), phone and desktop, light and dark. Light is the default; dark and Large text are one tap away ([`/evidence`](https://giftwise-405i.onrender.com/evidence#design), [docs/inside.md](docs/inside.md)).
+On a phone, the total and payees sit beside the PayPal button. The person on SSI gets her report in Easy Read and Spanish (`tests/easy-read.test.ts`, `tests/gift-es.test.ts`). 140 of 140 page views pass axe (WCAG 2.2 AA), phone and desktop, light and dark. Light is the default; dark and Large text are one tap away ([`/evidence`](https://giftwise-405i.onrender.com/evidence#design), [docs/inside.md](docs/inside.md)).
 
 ## What is first here
 
@@ -115,7 +97,7 @@ Of the products compared on [`/evidence/impact#compare`](https://giftwise-405i.o
 
 - **A third party's gift is routed by a rules engine built from the statute to the payee before it becomes the person's money**, and one PayPal order pays up to ten payees.
 - **A monthly report to Social Security anyone can verify against PayPal's records, with no login.**
-- **Two reviewers reading two different rulebooks (20 CFR 416 and POMS), quotes checked by code, and a referee that keeps the check whole under either reading when they disagree.** Its lineage, from LLM-as-judge to selective classification, is on [`/evidence/rules#lineage`](https://giftwise-405i.onrender.com/evidence/rules#lineage) (`src/lib/review/referee.ts`).
+- **Two reviewers reading two different rulebooks (20 CFR 416 and POMS), quotes checked by code, and a referee that keeps the check whole under either reading when they disagree.** Its lineage is on [`/evidence/rules#lineage`](https://giftwise-405i.onrender.com/evidence/rules#lineage) (`src/lib/review/referee.ts`).
 
 ## See it
 

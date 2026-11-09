@@ -1,6 +1,6 @@
 import { z } from "zod";
 import sources from "../../../content/sources.json";
-import type { GiftResult, ResourceTest } from "@/lib/rules";
+import { householdSentence, type GiftResult, type Profile, type ResourceTest } from "@/lib/rules";
 
 const SRC = sources as Record<string, { title: string; url: string }>;
 
@@ -8,12 +8,33 @@ const SRC = sources as Record<string, { title: string; url: string }>;
 const resources = (t: ResourceTest) => ({ on: t.on, countable: t.countable, other: t.other, able_balance: t.ableBalance, able_excess: t.ableExcess, limit: t.limit, over: t.over, status: t.status });
 
 /**
+ * Her place in another person's household for the payment month (R-SHEL-08), in the API's snake_case: her pro rata share
+ * of its costs, what she pays, and whether the household already lowers her check before any gift. Null when she does
+ * not live in another person's household.
+ */
+export function householdData(r: GiftResult, profile: Pick<Profile, "pronoun" | "couple"> = { couple: false }) {
+  const h = r.trace.household;
+  if (!h) return null;
+  const words = householdSentence(h, { couple: profile.couple, pronoun: profile.pronoun, livesInAnothersHousehold: true, otherUnearnedMonthly: 0, earnedMonthly: 0, ableEligible: false, ableBalance: 0, ableContributedThisYear: 0, savings: 0 }, r.trace.paymentMonth);
+  return {
+    rule: h.rule,
+    pro_rata_share: h.share,
+    pays: h.pays,
+    short_by: h.share === null ? null : Math.round(Math.max(0, h.share - h.pays) * 100) / 100,
+    sharing: h.sharing,
+    shelter_value: h.value,
+    lowers_check_before_gift: h.rule !== "none",
+    plain: words || null,
+  };
+}
+
+/**
  * The data of POST /api/v1/check-gift. The two resource tests are named for the day each is for, and each carries that
  * day: `resources_after_gift` on the 1st of the month after the gift, with the gift as given (cash she keeps adds to
  * savings, an ABLE deposit to the account), and `resources_for_check` on the 1st of the month the check is paid, the
  * test that decides that check. The four flat fields before them stay for API version 1 and describe the same days.
  */
-export function checkGiftData(r: GiftResult) {
+export function checkGiftData(r: GiftResult, profile?: Pick<Profile, "pronoun" | "couple">) {
   return {
     check_before: r.checkBaseline,
     check_after: r.checkAfter,
@@ -25,6 +46,7 @@ export function checkGiftData(r: GiftResult) {
     routes: r.alternatives,
     resources_after_gift: resources(r.resourcesAfter),
     resources_for_check: resources(r.trace.resources),
+    household: householdData(r, profile),
     // Kept for version 1: the same values as resources_after_gift.countable, .over and .able_balance, and resources_for_check.status.
     savings_on_next_first: r.resourcesNextFirst,
     over_savings_limit: r.overResourceLimit,
@@ -65,6 +87,19 @@ export const CheckGiftData = z.object({
   routes: z.array(z.object({ delivery: z.string(), check: z.number(), possible: z.boolean(), reason: z.string().optional() })).describe("Every way to give it, with the check each leaves."),
   resources_after_gift: Resources("The resource test on the 1st of the month after the gift arrives, with the gift as given: cash she keeps adds to savings, an ABLE deposit to the account."),
   resources_for_check: Resources("The resource test on the 1st of the payment month, which decides that check: over the limit, the check is $0. It counts the savings she states and the ABLE deposits; cash kept from the gift is in resources_after_gift."),
+  household: z
+    .object({
+      rule: z.enum(["vtr", "pmv", "none"]).describe("vtr: the one-third reduction, because the household gives her shelter and all her meals. pmv: the shelter it gives her counts as housing support up to the presumed maximum value. none: she pays her share."),
+      pro_rata_share: z.number().nullable().describe("Her pro rata share of the household's monthly costs (the couple's together), or null when not known."),
+      pays: z.number().describe("What she pays toward them each month, with any bona fide loan of the household's shelter."),
+      short_by: z.number().nullable().describe("How far what she pays falls short of her share, or null when her share is not known."),
+      sharing: z.boolean().describe("True when she pays her share, or within $20 of it, so the household does not lower her check."),
+      shelter_value: z.number().describe("Under pmv, the value of the shelter the household gives her; 0 otherwise."),
+      lowers_check_before_gift: z.boolean().describe("True when the household already lowers her check, whatever the gift."),
+      plain: z.string().nullable().describe("The same in plain words, as the explanation says it."),
+    })
+    .nullable()
+    .describe("Only when profile.livesInAnothersHousehold is true: her place in that household for the payment month (POMS SI 00835.160, 20 CFR 416.1131 and 416.1133). Null otherwise."),
   savings_on_next_first: z.number().describe("Deprecated, kept for version 1: resources_after_gift.countable."),
   over_savings_limit: z.boolean().describe("Deprecated, kept for version 1: resources_after_gift.over, for the 1st of the month after the gift."),
   able_balance_on_next_first: z.number().describe("Deprecated, kept for version 1: resources_after_gift.able_balance."),

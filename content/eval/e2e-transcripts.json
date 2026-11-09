@@ -2,613 +2,628 @@
   "about": "Redacted transcripts of the end-to-end suites that move PayPal sandbox money, one entry per suite: each step with its PayPal order and capture ids, payee count, statuses and timings. Written by tests/e2e/transcript.mjs from tests/e2e/paypal-button.mjs and tests/e2e/api.mjs; no email address, key or token is kept.",
   "suites": {
     "api": {
-      "ran_at": "2026-11-09T14:54:22.870Z",
+      "ran_at": "2026-11-09T16:44:53.781Z",
       "against": "a local production build, PayPal sandbox",
-      "passed": 116,
+      "passed": 119,
       "failed": 0,
-      "total_ms": 39454,
+      "total_ms": 41935,
       "steps": [
         {
           "step": "check-gift cash $1,000 -> $74",
-          "at_ms": 87,
+          "at_ms": 83,
           "ok": true
         },
         {
           "step": "check-gift vendor $420 -> $994",
-          "at_ms": 102,
+          "at_ms": 118,
           "ok": true
         },
         {
           "step": "check-gift rent $800 monthly -> $662.67",
-          "at_ms": 113,
+          "at_ms": 126,
           "ok": true
         },
         {
           "step": "check-gift ABLE rent -> $994",
-          "at_ms": 125,
+          "at_ms": 153,
           "ok": true
         },
         {
           "step": "check-gift a home given as itself counts at the presumed maximum value -> $662.67 (POMS SI 00835.400 F)",
-          "at_ms": 138,
+          "at_ms": 173,
           "ok": true
         },
         {
           "step": "check-gift a co-owner's $1,600 for eight months counts $200 in February -> $814 (POMS SI 00835.360 D.3)",
-          "at_ms": 148,
+          "at_ms": 196,
           "ok": true
         },
         {
           "step": "check-gift rent $130 below market from a child, $280 paid, counts $71.33 (POMS SI 00835.380 D)",
-          "at_ms": 159,
+          "at_ms": 216,
           "ok": true
         },
         {
           "step": "plan-month values a co-owner's payment in each of the eight months it covers",
-          "at_ms": 176,
+          "at_ms": 228,
           "ok": true
         },
         {
           "step": "check-gift covers that end before they start -> 400",
-          "at_ms": 184,
+          "at_ms": 235,
           "ok": true
         },
         {
           "step": "check-gift envelope has meta.request_id, rules_version, citations with urls",
-          "at_ms": 193,
-          "ok": true
-        },
-        {
-          "step": "check-gift default date (today) works",
-          "at_ms": 193,
-          "ok": true
-        },
-        {
-          "step": "check-gift bad JSON -> 400 invalid_request",
-          "at_ms": 200,
-          "ok": true
-        },
-        {
-          "step": "check-gift negative amount -> 400",
-          "at_ms": 208,
-          "ok": true
-        },
-        {
-          "step": "check-gift unknown delivery -> 400",
-          "at_ms": 218,
-          "ok": true
-        },
-        {
-          "step": "plan-month shares the $60 exclusion across the quarter (50 then 10)",
-          "at_ms": 233,
-          "ok": true
-        },
-        {
-          "step": "plan-month empty list -> 400",
           "at_ms": 243,
           "ok": true
         },
         {
-          "step": "preset wheelchair-repair download + expected result",
-          "at_ms": 255,
+          "step": "check-gift default date (today) works",
+          "at_ms": 243,
           "ok": true
         },
         {
-          "step": "preset birthday-cash download + expected result",
-          "at_ms": 259,
+          "step": "check-gift bad JSON -> 400 invalid_request",
+          "at_ms": 250,
           "ok": true
         },
         {
-          "step": "preset electric-bill download + expected result",
+          "step": "check-gift negative amount -> 400",
+          "at_ms": 257,
+          "ok": true
+        },
+        {
+          "step": "check-gift unknown delivery -> 400",
           "at_ms": 263,
           "ok": true
         },
         {
-          "step": "preset rent-help download + expected result",
-          "at_ms": 266,
+          "step": "plan-month shares the $60 exclusion across the quarter (50 then 10)",
+          "at_ms": 272,
           "ok": true
         },
         {
-          "step": "preset laptop-college download + expected result",
-          "at_ms": 271,
-          "ok": true
-        },
-        {
-          "step": "preset groceries download + expected result",
-          "at_ms": 275,
-          "ok": true
-        },
-        {
-          "step": "preset van-fundraiser download + expected result",
+          "step": "plan-month empty list -> 400",
           "at_ms": 278,
           "ok": true
         },
         {
-          "step": "preset march-month download + expected result",
-          "at_ms": 286,
+          "step": "preset wheelchair-repair download + expected result",
+          "at_ms": 283,
           "ok": true
         },
         {
-          "step": "preset CSV download has header + 6 rows",
-          "at_ms": 288,
+          "step": "preset birthday-cash download + expected result",
+          "at_ms": 287,
           "ok": true
         },
         {
-          "step": "unknown preset -> 404",
+          "step": "preset electric-bill download + expected result",
           "at_ms": 291,
           "ok": true
         },
         {
+          "step": "preset rent-help download + expected result",
+          "at_ms": 297,
+          "ok": true
+        },
+        {
+          "step": "preset laptop-college download + expected result",
+          "at_ms": 301,
+          "ok": true
+        },
+        {
+          "step": "preset groceries download + expected result",
+          "at_ms": 304,
+          "ok": true
+        },
+        {
+          "step": "preset van-fundraiser download + expected result",
+          "at_ms": 308,
+          "ok": true
+        },
+        {
+          "step": "preset march-month download + expected result",
+          "at_ms": 315,
+          "ok": true
+        },
+        {
+          "step": "preset CSV download has header + 6 rows",
+          "at_ms": 319,
+          "ok": true
+        },
+        {
+          "step": "unknown preset -> 404",
+          "at_ms": 322,
+          "ok": true
+        },
+        {
           "step": "read-bill with a broken image -> friendly 422 (or 503 without AI)",
-          "at_ms": 470,
+          "at_ms": 365,
           "ok": true
         },
         {
           "step": "read-bill replayed reads the electric bill as a $138 utility and routes to ABLE",
-          "at_ms": 538,
+          "at_ms": 444,
           "ok": true
         },
         {
           "step": "analyze-fundraiser replayed plans every use so her check stays $1029",
-          "at_ms": 573,
+          "at_ms": 462,
           "ok": true
         },
         {
           "step": "analyze-fundraiser rejects non-http url",
-          "at_ms": 586,
+          "at_ms": 494,
           "ok": true
         },
         {
           "step": "review-bill without a description -> 400",
-          "at_ms": 605,
+          "at_ms": 501,
           "ok": true
         },
         {
           "step": "review-bill replayed: both reviewers quote their own rulebook, agree it is housing, and the engine routes to ABLE at $994",
-          "at_ms": 625,
+          "at_ms": 515,
           "ok": true
         },
         {
           "step": "openapi lists review-bill with its request schema",
-          "at_ms": 638,
+          "at_ms": 519,
           "ok": true
         },
         {
           "step": "gift-pages: the lift is paid straight to the shop, rent goes to the ABLE account, check stays $1029",
-          "at_ms": 669,
+          "at_ms": 547,
           "ok": true
         },
         {
           "step": "the new page reads Help Jordan and uses their, never her or she",
-          "at_ms": 722,
+          "at_ms": 580,
           "ok": true
         },
         {
           "step": "gift-pages: a need toward a home goes to the ABLE account",
-          "at_ms": 740,
+          "at_ms": 610,
           "ok": true
         },
         {
           "step": "gift-pages rejects a name that is not letters",
-          "at_ms": 746,
+          "at_ms": 616,
           "ok": true
         },
         {
           "step": "paypal order for need 4 created (sandbox)",
-          "at_ms": 1541,
+          "at_ms": 1301,
           "ok": true
         },
         {
           "step": "the need order, as created (never approved: the API suite moves no money)",
-          "at_ms": 1541,
-          "order_id": "8G056495KY2627052",
+          "at_ms": 1301,
+          "order_id": "7304974162496854V",
           "payees": 1,
           "status": "PAYER_ACTION_REQUIRED"
         },
         {
           "step": "paypal order for unknown need -> 404",
-          "at_ms": 1546,
+          "at_ms": 1309,
           "ok": true
         },
         {
           "step": "paypal order with bad id -> 400 (or 403 from the host firewall)",
-          "at_ms": 1549,
+          "at_ms": 1311,
           "ok": true
         },
         {
           "step": "capture unknown order -> 404",
-          "at_ms": 1557,
+          "at_ms": 1315,
           "ok": true
         },
         {
           "step": "capture path traversal -> not 200",
-          "at_ms": 1581,
+          "at_ms": 1319,
           "ok": true
         },
         {
           "step": "capture before buyer approval -> PayPal refuses, app returns plain error",
-          "at_ms": 2102,
+          "at_ms": 1915,
           "ok": true
         },
         {
           "step": "gift-orders $1,500 -> one order, every open need plus ABLE",
-          "at_ms": 2990,
+          "at_ms": 2889,
           "ok": true
         },
         {
           "step": "gift-orders plan keeps her full check, cash would not",
-          "at_ms": 2990,
+          "at_ms": 2889,
           "ok": true
         },
         {
           "step": "gift-orders lines add up to the gift",
-          "at_ms": 2990,
+          "at_ms": 2889,
           "ok": true
         },
         {
           "step": "live order check returns each payee unit from PayPal",
-          "at_ms": 3361,
+          "at_ms": 3117,
           "ok": true
         },
         {
           "step": "the routed $1,500 order, read back from PayPal",
-          "at_ms": 3361,
-          "order_id": "24623123HN902394N",
+          "at_ms": 3117,
+          "order_id": "1TF33241AU0719200",
           "payees": 5,
           "paypal_status": "PAYER_ACTION_REQUIRED",
           "amount": 1500
         },
         {
           "step": "receipt page renders for a started order",
-          "at_ms": 3366,
+          "at_ms": 3122,
           "ok": true
         },
         {
           "step": "gift-orders $0 -> 400",
-          "at_ms": 3376,
+          "at_ms": 3127,
           "ok": true
         },
         {
           "step": "gift-orders unknown page -> 404",
-          "at_ms": 3398,
+          "at_ms": 3147,
           "ok": true
         },
         {
           "step": "live order check with bad id -> 400",
-          "at_ms": 3406,
+          "at_ms": 3151,
           "ok": true
         },
         {
           "step": "live order check on the recorded multi-payee order -> 200 COMPLETED, every capture",
-          "at_ms": 4206,
+          "at_ms": 4950,
           "ok": true
         },
         {
           "step": "receipt for unknown order -> not-found page, noindex",
-          "at_ms": 4238,
+          "at_ms": 4976,
           "ok": true
         },
         {
           "step": "ledger verifies end to end",
-          "at_ms": 4300,
+          "at_ms": 5030,
           "ok": true
         },
         {
           "step": "key created, shown once, gw_test_ plus 43 base62 characters",
-          "at_ms": 4340,
+          "at_ms": 5078,
           "ok": true
         },
         {
           "step": "key without accepting terms -> 400",
-          "at_ms": 4343,
+          "at_ms": 5081,
           "ok": true
         },
         {
           "step": "keyed call works and returns rate-limit headers",
-          "at_ms": 4436,
+          "at_ms": 5092,
           "ok": true
         },
         {
           "step": "unknown key -> 401 unauthorized",
-          "at_ms": 4442,
+          "at_ms": 5097,
           "ok": true
         },
         {
           "step": "usage lists the key and its call",
-          "at_ms": 4493,
+          "at_ms": 5106,
           "ok": true
         },
         {
           "step": "revoke from another browser -> 404",
-          "at_ms": 4501,
+          "at_ms": 5108,
           "ok": true
         },
         {
           "step": "rotate: old key stops, new key works",
-          "at_ms": 4548,
+          "at_ms": 5134,
           "ok": true
         },
         {
           "step": "openapi.json is 3.1 and lists every endpoint",
-          "at_ms": 4552,
+          "at_ms": 5139,
           "ok": true
         },
         {
           "step": "unknown preset -> 404 in the standard envelope",
-          "at_ms": 4556,
+          "at_ms": 5141,
           "ok": true
         },
         {
           "step": "ssa-report October as given: 5 gifts, nothing counts, check stays $994, due November 10",
-          "at_ms": 4653,
+          "at_ms": 5234,
           "ok": true
         },
         {
           "step": "ssa-report records every gift with a rule and a cited source",
-          "at_ms": 4653,
+          "at_ms": 5234,
           "ok": true
         },
         {
           "step": "ssa-report the same October as cash: 5 gifts to tell SSA, $538 counted, check $456, a call script",
-          "at_ms": 4744,
+          "at_ms": 5320,
           "ok": true
         },
         {
           "step": "ssa-report CSV download has a header and one row per gift",
-          "at_ms": 4839,
+          "at_ms": 5419,
           "ok": true
         },
         {
           "step": "ssa-report bad month -> 400",
-          "at_ms": 4848,
+          "at_ms": 5497,
           "ok": true
         },
         {
           "step": "ssa-report unknown page -> 404",
-          "at_ms": 4862,
+          "at_ms": 5533,
           "ok": true
         },
         {
           "step": "report page renders the verdict and the PayPal proof column",
-          "at_ms": 5031,
+          "at_ms": 5689,
           "ok": true
         },
         {
           "step": "checks: the workflow can list the eight failure cases",
-          "at_ms": 5040,
+          "at_ms": 5692,
           "ok": true
         },
         {
           "step": "checks: running a case without the secret -> 401 (or 503 if the server has none)",
-          "at_ms": 5044,
+          "at_ms": 5695,
           "ok": true
         },
         {
           "step": "checks: paying the card check without the secret -> 401 (or 503 if the server has none)",
-          "at_ms": 5052,
+          "at_ms": 5698,
           "ok": true
         },
         {
           "step": "checks: filing a run with the wrong secret -> 401 (or 503 if the server has none)",
-          "at_ms": 5060,
+          "at_ms": 5700,
           "ok": true
         },
         {
           "step": "checks: a malformed run with the right secret -> 400 with details",
-          "at_ms": 5065,
+          "at_ms": 5703,
           "ok": true
         },
         {
           "step": "workflow jobs: the active monthly gifts are listed by id and one month is planned ahead, with its split",
-          "at_ms": 5146,
+          "at_ms": 5757,
           "ok": true
         },
         {
           "step": "workflow jobs: listing monthly gifts without the secret -> 401",
-          "at_ms": 5150,
+          "at_ms": 5759,
           "ok": true
         },
         {
           "step": "workflow jobs: the rulebook index rebuilds on Elastic, or reports Elastic is not connected",
-          "at_ms": 11411,
+          "at_ms": 11936,
           "ok": true
         },
         {
           "step": "checks: the latest run is public, with a pass count",
-          "at_ms": 11425,
+          "at_ms": 11946,
           "ok": true
         },
         {
           "step": "checks: starting a run needs Render Workflows (503 here) or is rate limited (429)",
-          "at_ms": 11477,
+          "at_ms": 11949,
           "ok": true
         },
         {
           "step": "MCP initialize names the server and agrees a protocol version",
-          "at_ms": 11495,
+          "at_ms": 12059,
           "ok": true
         },
         {
           "step": "MCP notification -> 202 with no body",
-          "at_ms": 11506,
+          "at_ms": 12075,
           "ok": true
         },
         {
           "step": "MCP lists the nine tools with input schemas",
-          "at_ms": 11540,
+          "at_ms": 12098,
           "ok": true
         },
         {
           "step": "MCP start_monthly_gift returns the giver's page, nothing charged, check stays $1029",
-          "at_ms": 11594,
+          "at_ms": 12182,
           "ok": true
         },
         {
           "step": "MCP plan_gift splits $500 so her check stays $1029 (cash would be $609)",
-          "at_ms": 11610,
+          "at_ms": 12208,
           "ok": true
         },
         {
           "step": "MCP check_gift counts a home given as itself at the presumed maximum value -> $662.67 (POMS SI 00815.550 C.2)",
-          "at_ms": 11625,
+          "at_ms": 12222,
           "ok": true
         },
         {
           "step": "MCP check_gift values rent below market from a child as $351.33 less the $280 paid -> $942.67",
-          "at_ms": 11640,
+          "at_ms": 12234,
           "ok": true
         },
         {
           "step": "MCP plan_gift puts $1,500 toward her home through the ABLE account, check stays $1029",
-          "at_ms": 11658,
+          "at_ms": 12248,
           "ok": true
         },
         {
           "step": "MCP get_ssa_report: October needs no income report, due November 10",
-          "at_ms": 11750,
+          "at_ms": 12322,
           "ok": true
         },
         {
           "step": "MCP bad arguments come back as a tool error the agent can read",
-          "at_ms": 11763,
+          "at_ms": 12337,
           "ok": true
         },
         {
           "step": "MCP unknown method -> JSON-RPC -32601",
-          "at_ms": 11775,
+          "at_ms": 12349,
           "ok": true
         },
         {
           "step": "check-gift a $25 weekly rent counts $108.33 a month -> $905.67 (POMS SI 00835.474 B.3)",
-          "at_ms": 11783,
+          "at_ms": 12356,
           "ok": true
         },
         {
           "step": "plan-month divides a $1,200 tax bill between two in the household: $351.33, then $50 and $50 (POMS SI 00835.474 B.2)",
-          "at_ms": 11797,
+          "at_ms": 12368,
           "ok": true
         },
         {
           "step": "check-gift with $101,000 in ABLE and $1,500 saved pays no SSI, ABLE the reason (POMS SI 01130.740 D.1.c)",
-          "at_ms": 11807,
+          "at_ms": 12383,
           "ok": true
         },
         {
           "step": "check-gift an ABLE gift past $100,000 says the check stops and routes it elsewhere",
-          "at_ms": 11816,
+          "at_ms": 12395,
           "ok": true
         },
         {
           "step": "MCP check_gift takes the ABLE balance: past $100,000 and over the limit, $0 and the item route instead",
-          "at_ms": 11828,
+          "at_ms": 12414,
+          "ok": true
+        },
+        {
+          "step": "check-gift paying $100 of a $150 share says the household already takes a third: $662.67 (POMS SI 00835.160 G)",
+          "at_ms": 12424,
+          "ok": true
+        },
+        {
+          "step": "check-gift a utility bill paid as a loan she repays in full counts nothing (POMS SI 00835.482 G.4.c)",
+          "at_ms": 12432,
+          "ok": true
+        },
+        {
+          "step": "MCP check_gift: paying $175 toward a $150 share is sharing, so the check is the full $994",
+          "at_ms": 12442,
           "ok": true
         },
         {
           "step": "unsigned PayPal webhook is refused",
-          "at_ms": 11839,
+          "at_ms": 12462,
           "ok": true
         },
         {
           "step": "org payouts over the per-household sandbox limit -> 400",
-          "at_ms": 11847,
+          "at_ms": 12468,
           "ok": true
         },
         {
           "step": "org payouts to an unknown page -> 422",
-          "at_ms": 11851,
+          "at_ms": 12473,
           "ok": true
         },
         {
           "step": "org payouts preview routes a $10 grant and keeps the check at $1029",
-          "at_ms": 11859,
+          "at_ms": 12495,
           "ok": true
         },
         {
           "step": "org payouts sends one PayPal Payouts batch",
-          "at_ms": 12693,
+          "at_ms": 13377,
           "ok": true
         },
         {
           "step": "the fund's $10 grant as one PayPal Payouts batch",
-          "at_ms": 12693,
+          "at_ms": 13377,
           "payees": 1,
           "status": "PENDING",
           "amount": 10,
-          "batch_id": "U5EZMLHR8VLNU"
+          "batch_id": "ZG8ZGDFV44XMS"
         },
         {
           "step": "PayPal reports the batch sent, with a transaction id for every item",
-          "at_ms": 36731,
+          "at_ms": 39514,
           "ok": true
         },
         {
           "step": "each paid item is checked against PayPal's transaction report",
-          "at_ms": 36731,
+          "at_ms": 39514,
           "ok": true
         },
         {
           "step": "unknown payout batch -> 404",
-          "at_ms": 36745,
+          "at_ms": 39538,
           "ok": true
         },
         {
           "step": "rules-watch: the Federal Register answers live, every SSI income rule and amounts notice is reviewed, 2027 amounts in use",
-          "at_ms": 36888,
+          "at_ms": 39543,
           "ok": true
         },
         {
           "step": "report code: October's report names its check page, and the page says it matches",
-          "at_ms": 37191,
+          "at_ms": 39768,
           "ok": true
         },
         {
           "step": "report code: October is all sample year, and its check page says PayPal was not asked",
-          "at_ms": 37191,
+          "at_ms": 39768,
           "ok": true
         },
         {
           "step": "report code: the recorded order's month asks PayPal for every capture, and every one is completed",
-          "at_ms": 38294,
+          "at_ms": 40815,
           "ok": true
         },
         {
           "step": "report code: a code that does not match shows the current report's code",
-          "at_ms": 38473,
+          "at_ms": 40927,
           "ok": true
         },
         {
           "step": "ask-rules: the phone bill question finds SSA's own passage on bills paid by someone else, and every quote it shows is checked",
-          "at_ms": 39060,
+          "at_ms": 41680,
           "ok": true
         },
         {
           "step": "ask-rules: a question that is too short gets a plain 400",
-          "at_ms": 39073,
+          "at_ms": 41693,
           "ok": true
         },
         {
           "step": "discovery: the AI Catalog lists the MCP Server Card, and the card names /api/mcp with its protocol versions",
-          "at_ms": 39082,
+          "at_ms": 41702,
           "ok": true
         },
         {
           "step": "discovery: the Server Card answers 304 to a matching ETag",
-          "at_ms": 39086,
+          "at_ms": 41705,
           "ok": true
         },
         {
           "step": "llms.txt names the MCP server and every tool",
-          "at_ms": 39089,
+          "at_ms": 41707,
           "ok": true
         },
         {
           "step": "security headers: no framing by other sites, nosniff, a referrer policy, and HSTS",
-          "at_ms": 39096,
+          "at_ms": 41715,
           "ok": true
         },
         {
           "step": "the gift page has its own share image",
-          "at_ms": 39425,
+          "at_ms": 41914,
           "ok": true
         }
       ]

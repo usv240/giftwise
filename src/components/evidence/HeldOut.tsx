@@ -5,12 +5,14 @@ import second from "../../../content/eval/held-out-2-results.json";
 import secondSet from "../../../content/eval/held-out-2.json";
 import third from "../../../content/eval/held-out-3-results.json";
 import thirdSet from "../../../content/eval/held-out-3.json";
-import { HELD_OUT_2_NEW_FIELDS, HELD_OUT_3_NEW_FIELDS, heldOut2AfterFix, heldOut3AfterFix, type HeldOutCase } from "@/lib/held-out";
+import fourth from "../../../content/eval/held-out-4-results.json";
+import fourthSet from "../../../content/eval/held-out-4.json";
+import { HELD_OUT_2_NEW_FIELDS, HELD_OUT_3_NEW_FIELDS, HELD_OUT_4_NEW_FIELDS, heldOut2AfterFix, heldOut3AfterFix, heldOut4AfterFix, type HeldOutCase } from "@/lib/held-out";
 import * as rules from "@/lib/rules";
 
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" });
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: Number.isInteger(n) ? 0 : 2 });
-const WORDS = ["no", "one", "two", "three", "four", "five"];
+const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen"];
 const MEASURE: Record<string, string> = { after_infrequent: "income after the one-off exclusion", ism_value: "in-kind support", ssi_amount: "SSI amount" };
 
 /**
@@ -26,6 +28,9 @@ export function HeldOut() {
   const after3 = heldOut3AfterFix(thirdSet.cases as unknown as HeldOutCase[], rules);
   const titleOf3 = (id: string) => thirdSet.cases.find((c) => c.id === id)?.title.toLowerCase() ?? id;
   const s3 = third.summary;
+  // The fourth set: fifteen cases, the frozen run from its results file and the current engine labelled as after the fix.
+  const after4 = heldOut4AfterFix(fourthSet.cases as unknown as HeldOutCase[], rules);
+  const s4 = fourth.summary;
   return (
     <section id="held-out" className="page-section" aria-labelledby="held-out-h">
       <h2 id="held-out-h">Examples the engine never saw</h2>
@@ -178,6 +183,76 @@ export function HeldOut() {
             </thead>
             <tbody>
               {third.cases.map((c) => (
+                <tr key={c.id}>
+                  <td>
+                    {c.title}
+                    <span className="ev-basis">
+                      <a className="text-link" href={c.url} target="_blank" rel="noreferrer">
+                        {c.cite}
+                      </a>
+                      , {c.part}
+                    </span>
+                  </td>
+                  <td>{c.ssa_answer}</td>
+                  <td>
+                    {c.match ? "Matches" : "Differs"}: {c.engine_counts ? "counts" : "does not count"}
+                    {c.values.map((v) => `; ${MEASURE[v.measure]} ${v.month} ${money(v.got)}`).join("")}.
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <h3 id="held-out-4" className="ev-sub">
+        A fourth set of {WORDS[s4.cases]}, written before the run
+      </h3>
+      <p className="page-prose">
+        A fourth set, from sections of SSA&rsquo;s manual no earlier set used (loans of food and shelter, sharing a household&rsquo;s costs, earmarked sharing, cash from outside the household, and gifts to
+        children with life-threatening conditions), was written and fixed first with SSA&rsquo;s answers and the way each case is entered (content/eval/held-out-4.json, git blob{" "}
+        <code>{fourth.set.git_blob.slice(0, 10)}</code>), then run once on the engine frozen at commit <code>{fourth.engine.commit}</code>, {date(fourth.ran_at)}.{" "}
+        <strong className="tabular">
+          {s4.engine_matches} of {s4.cases}
+        </strong>{" "}
+        match on every value, and{" "}
+        <strong className="tabular">
+          {s4.counts_matches} of {s4.cases}
+        </strong>{" "}
+        agree with SSA on whether the help counts. The others showed two rules, now in the engine, each citing SSA&rsquo;s section: living in someone else&rsquo;s household and paying less than a pro rata share
+        of its costs, more than {money(rules.P.sharingTolerance)} short, the household&rsquo;s shelter lowers the check every month, gift or not, by the one-third reduction when it gives all meals (
+        <span className="rule-id">R-SHEL-08</span>, 20 CFR 416.1133, POMS SI 00835.160 C.2, SI 00835.170, SI 00835.450); and a bona fide loan, one she must repay whatever happens with her benefits, agreed
+        when it was given, with a plan she can meet, is not income, while a loan of housing counts only for what she need not repay (<span className="rule-id">R-LOAN-01</span>,{" "}
+        <span className="rule-id">R-LOAN-02</span>, 20 CFR 416.1103(f), POMS SI 00835.482, SI 01120.220).
+      </p>
+      <p className="page-prose" id="held-out-4-after">
+        <strong>After the fix, not a held-out result:</strong> these rules were written after seeing the {WORDS[s4.cases]}, so this line shows only that the current engine now follows them. On the same{" "}
+        {WORDS[s4.cases]} as written,{" "}
+        <strong className="tabular">
+          {after4.asWritten.matches} of {after4.asWritten.cases}
+        </strong>{" "}
+        match: the three arrangements SSA found were not loans now count the household&rsquo;s shelter from the profile alone. With the facts {WORDS[after4.newFields.length]} cases state in the new fields
+        (the loan, the household&rsquo;s costs or the person&rsquo;s share, and what the person pays, such as &ldquo;{HELD_OUT_4_NEW_FIELDS["sharing-short-by-20"].fact}&rdquo;),{" "}
+        <strong className="tabular">
+          {after4.withFields.matches} of {after4.withFields.cases}
+        </strong>{" "}
+        match. Each share is the household&rsquo;s housing costs only: food has not been one of them since September 30, 2024. The frozen run&rsquo;s record is unchanged.
+      </p>
+      <details className="dsc">
+        <summary>
+          <span className="dsc-k">The fourth set, SSA&rsquo;s answer and the frozen engine&rsquo;s</span>
+        </summary>
+        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label="Fourth held-out set, case by case">
+          <table className="doc-table">
+            <thead>
+              <tr>
+                <th scope="col">SSA&rsquo;s example</th>
+                <th scope="col">SSA&rsquo;s answer</th>
+                <th scope="col">The frozen engine</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fourth.cases.map((c) => (
                 <tr key={c.id}>
                   <td>
                     {c.title}

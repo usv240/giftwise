@@ -8,6 +8,7 @@
 // Writes content/eval/field-cases-results.json. Engine only, no API calls.
 // Usage: npx tsx --env-file=.env.local scripts/run-field-cases.ts
 //        npx tsx scripts/run-field-cases.ts --set content/eval/field-cases-2.json    another set, written to its own -results.json
+//        add --out <file> to write the run elsewhere, leaving a recorded first run as it is
 import { readFileSync, writeFileSync } from "node:fs";
 import type setShape from "../content/eval/field-cases.json";
 
@@ -15,12 +16,10 @@ import type setShape from "../content/eval/field-cases.json";
 const at = process.argv.indexOf("--set");
 const SET = at > 0 ? process.argv[at + 1] : "content/eval/field-cases.json";
 const data = JSON.parse(readFileSync(SET, "utf8")) as typeof setShape;
-import { DEFAULT_PROFILE, P, RULES_VERSION, SHELTER_CATEGORIES, planMonths, type Delivery, type Gift, type Profile } from "../src/lib/rules";
+import { P, RULES_VERSION, SHELTER_CATEGORIES, householdTest, planMonths, type Delivery, type Gift, type Profile } from "../src/lib/rules";
+import { courtAgreement, courtProfile, toGift, type Basis, type CourtGift } from "../src/lib/court-cases";
 
-/** "none": the court held the help is not income at all (the second class, content/eval/field-cases-2.json). */
-type Basis = "ism_vtr" | "ism_pmv" | "ism" | "unearned_cash" | "resources" | "income" | "none";
 type Value = { month: string; measure: "after_infrequent"; value: number };
-type FieldGift = Omit<Gift, "amount"> & { amount: number | null; amount_basis?: string; date_basis?: string };
 type Overpayment = { amount: number; period: string } | null;
 type Source = { court: string; citation: string; url: string; date: string };
 type Scored = {
@@ -29,7 +28,7 @@ type Scored = {
   title: string;
   source: Source;
   profile: Partial<Profile>;
-  gifts: FieldGift[];
+  gifts: CourtGift[];
   giftwise_routes: Record<string, Delivery[]>;
   months: Record<string, number>;
   dollars: boolean;
@@ -49,54 +48,27 @@ const CASES = data.cases as unknown as (Scored | NotScored)[];
 const SCORED = CASES.filter((c): c is Scored => c.status === "scored");
 const NOT_SCORED = CASES.filter((c): c is NotScored => c.status === "not_scored");
 const TOLERANCE = 1;
-const OUT = SET.replace(/\.json$/, "-results.json");
+/** Where the run is written: beside the set, unless --out names another file (a first run that stays as it was, for one). */
+const outAt = process.argv.indexOf("--out");
+const OUT = outAt > 0 ? process.argv[outAt + 1] : SET.replace(/\.json$/, "-results.json");
 const SPECIFIC: Basis[] = ["ism_vtr", "ism_pmv", "unearned_cash", "resources"];
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
-type PlanMonth = ReturnType<typeof planMonths>["months"][number];
-/** Income from the help in a month after the infrequent exclusion, before the $20 general exclusion (as in run-ssa-examples.ts). */
-const afterInfrequent = (m: PlanMonth) => round2(m.cashIncome + m.inKindIncome + m.ismValue - m.infrequentExcluded);
+const profileOf = (c: Scored, overrides: Partial<Profile> = {}) => courtProfile(c, overrides);
 
-/** Where the opinion gives no amount for shelter, use SSA's presumed maximum value (20 CFR 416.1140). */
-function toGift(g: FieldGift): Gift {
-  if (g.amount === null && !SHELTER_CATEGORIES.includes(g.category)) throw new Error(`${g.id}: no amount and not shelter`);
-  return { id: g.id, date: g.date, amount: g.amount ?? P.pmvIndividual, delivery: g.delivery, category: g.category, giver: g.giver, recurring: g.recurring, label: g.label };
-}
-
-function profileOf(c: Scored, overrides: Partial<Profile> = {}): Profile {
-  return { ...DEFAULT_PROFILE, ableEligible: false, savings: 0, ...c.profile, ...overrides };
-}
-
-/** (a) What the engine says about the help as it was given. */
+/** (a) What the engine says about the help as it was given (src/lib/court-cases.ts). */
 function engine(c: Scored) {
-  const profile = profileOf(c);
-  const plan = planMonths(c.gifts.map(toGift), profile);
-  const bases = new Set<string>();
-  for (const g of plan.gifts) if (g.treatment.kind === "unearned_cash") bases.add("unearned_cash");
-  for (const m of plan.months) {
-    if (m.vtrApplied) bases.add("ism_vtr");
-    if (m.ismValue > 0) bases.add("ism_pmv");
-    if (m.overResourceLimit) bases.add("resources");
-  }
-  const counts = plan.months.some((m) => afterInfrequent(m) > 0 || m.vtrApplied || m.overResourceLimit);
-  const values = c.determination.values.map((v) => {
-    const m = plan.months.find((x) => x.month === v.month);
-    return { ...v, got: m ? afterInfrequent(m) : 0 };
-  });
-  const expected = c.determination.basis;
-  const basisOk = expected === "none" ? !counts : expected === "ism" ? bases.has("ism_vtr") || bases.has("ism_pmv") : expected === "income" ? counts : bases.has(expected);
-  const countsOk = counts === c.determination.counts;
-  const valuesOk = values.every((v) => Math.abs(v.got - v.value) <= TOLERANCE);
+  const a = courtAgreement(c);
   return {
-    counts,
-    rules_applied: [...bases],
-    values,
-    rule_ids: [...new Set(plan.gifts.flatMap((g) => g.ruleIds))],
-    counts_match: countsOk,
-    basis_match: basisOk,
-    values_match: valuesOk,
-    match: countsOk && basisOk && valuesOk,
-    months: plan.months.map((m) => ({
+    counts: a.counts,
+    rules_applied: a.bases,
+    values: a.values,
+    rule_ids: a.ruleIds,
+    counts_match: a.countsOk,
+    basis_match: a.basisOk,
+    values_match: a.valuesOk,
+    match: a.match,
+    months: a.plan.months.map((m) => ({
       month: m.month,
       check_2026: m.check,
       countable_income: m.countableIncome,
@@ -106,6 +78,20 @@ function engine(c: Scored) {
       over_resource_limit: m.overResourceLimit,
     })),
   };
+}
+
+/**
+ * Living in another person's household without paying toward it, the help she gets in kind is worth her share of its
+ * costs. Routed through Giftwise, the same amount goes to her ABLE account and she pays it to the household as her share
+ * (POMS SI 00835.160; an ABLE withdrawal for housing spent that month is not income, R-ABLE-02), so the household's
+ * shelter no longer counts (R-SHEL-08). Where her share is not stated, the help's amount stands for it.
+ */
+function routedProfile(profile: Profile, gifts: Gift[], combo: Delivery[]): Profile {
+  if (!profile.livesInAnothersHousehold) return profile;
+  const moved = gifts.filter((g, i) => combo[i] === "able" && g.delivery !== "able" && SHELTER_CATEGORIES.includes(g.category)).map((g) => g.amount);
+  if (!moved.length) return profile;
+  const amount = Math.max(...moved);
+  return { ...profile, proRataShare: householdTest(profile)?.share ?? amount, householdPays: round2((profile.householdPays ?? 0) + amount) };
 }
 
 /** Every way to deliver the gifts using the as-given delivery or one of the allowed Giftwise routes. */
@@ -129,7 +115,7 @@ function routing(c: Scored, profile: Profile, allowAble: boolean) {
   for (const combo of combinations(gifts, allowed)) {
     const plan = planMonths(
       gifts.map((g, i) => ({ ...g, delivery: combo[i] })),
-      profile,
+      routedProfile(profile, gifts, combo),
     );
     if (total(plan) > total(best.plan) + 0.005) best = { plan, deliveries: combo };
   }
@@ -189,13 +175,11 @@ function overpaymentCheck(c: Scored) {
 
 /** What the engine would need, for each known miss. */
 const LOAN_GAP =
-  "An input for a bona fide loan of food, shelter or cash (20 CFR 416.1103(f); POMS SI 00835.482, SI 01120.220): help the person must repay is not income. The engine routes gifts and has no input for a loan, so it counts the help.";
+  "The loan the court found, in the gift's loan field (R-LOAN-01, R-LOAN-02; 20 CFR 416.1103(f), POMS SI 00835.482, SI 01120.220): help the person must repay is not income. The case records the help as given, with no loan field, so the engine counts it; with the court's finding in that field it agrees (src/lib/court-cases.ts).";
 const GAPS: Record<string, string> = {
   "son-room-and-board-loan": LOAN_GAP,
   "mother-back-rent-loan": LOAN_GAP,
   "attorney-monthly-cash-loan": LOAN_GAP,
-  "sons-home-own-food":
-    "Apply the one-third reduction only when the household also provides all of the person's meals (20 CFR 416.1131(a)(3)); otherwise value the shelter under the presumed value rule (20 CFR 416.1140). The engine applies the one-third reduction to anyone living in another person's household. The check comes out the same here ($662.67 at 2026 rates), but the rule cited and any rebuttal of the value differ.",
 };
 
 const describe = (e: ReturnType<typeof engine>) =>

@@ -17,9 +17,11 @@ import { DEFAULT_PROFILE, addMonths, checkMonthName, evaluateGift, monthOf, usd 
 import held2Set from "../content/eval/held-out-2.json";
 import held3 from "../content/eval/held-out-3-results.json";
 import held3Set from "../content/eval/held-out-3.json";
+import held4 from "../content/eval/held-out-4-results.json";
+import held4Set from "../content/eval/held-out-4.json";
 import invariantRun from "../content/eval/invariants-results.json";
 import { INVARIANTS } from "@/lib/invariants";
-import { heldOut2AfterFix, heldOut3AfterFix, type HeldOutCase } from "@/lib/held-out";
+import { HELD_OUT_4_NEW_FIELDS, heldOut2AfterFix, heldOut3AfterFix, heldOut4AfterFix, type HeldOutCase } from "@/lib/held-out";
 import * as rules from "@/lib/rules";
 
 /**
@@ -200,18 +202,20 @@ describe("one source for every dollar figure", () => {
     // Words as rendered: link targets and image paths are not read, so they are not counted.
     const shown = readme.replace(/\]\([^)]*\)/g, "]");
     const words = shown.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
-    // It carries the What the AI adds tables the evidence pages show, so the guard sits at 2,300 words.
-    expect(words).toBeLessThan(2300);
+    expect(words).toBeLessThan(2000);
   });
 
-  it("the README's What the AI adds tables are the code's, on the recorded bills and the adversarial cases", () => {
-    const ai = readme.slice(readme.indexOf("## What the AI adds"), readme.indexOf("## Run it yourself"));
+  it("the What the AI adds tables in docs/results.md, and the README's summary of them, are the code's", () => {
+    const ai = resultsDoc.slice(resultsDoc.indexOf("### What the AI adds, measured"), resultsDoc.indexOf("## The two errors that cost money"));
+    const summary = readme.slice(readme.indexOf("## What the AI adds"), readme.indexOf("## Run it yourself"));
     const t = whatAiAdds();
     const [none, regs, poms, ref] = t.columns;
     const row = (k: string, f: (c: typeof none) => string) => `| ${k} | ${[none, regs, poms, ref].map(f).join(" | ")} |`;
     expect(ai).toContain(row("Her check kept whole", (c) => `${c.whole} of ${t.bills}`));
     expect(ai).toContain(row("Wrong routes accepted", (c) => String(c.wrong)));
-    expect(ai).toContain(row(`Paid straight to the business, of the ${t.payable} that are not housing`, (c) => `${c.direct} of ${t.payable}`));
+    expect(ai).toContain(row(`Settled with nothing left for her to do: paid straight to the business, of the ${t.payable} that are not housing`, (c) => `${c.direct} of ${t.payable}`));
+    expect(summary).toContain(`a router with no AI keeps her check whole on ${none.whole} of ${t.bills} with ${none.wrong} wrong routes, as the referee does`);
+    expect(summary).toContain(`${ref.direct} of the ${t.payable} that are not housing paid straight to the business, against ${none.direct} of ${t.payable} with no AI`);
     // The design's reason holds only while the data shows it: no AI as safe, the manual reviewer alone settling more.
     expect(none.whole === ref.whole && none.wrong === ref.wrong).toBe(true);
     expect(poms.direct).toBeGreaterThan(ref.direct);
@@ -224,6 +228,7 @@ describe("one source for every dollar figure", () => {
       ["Both reviewers and the referee", "referee"],
     ] as const;
     for (const [label, k] of labels) expect(ai).toContain(`| ${label} | ${a[k].whole} of ${a.cases} |`);
+    expect(summary).toContain(`the referee keeps her check whole on ${a.referee.whole} of ${a.cases} and the manual reviewer alone on ${a.poms.whole} of ${a.cases}`);
     expect(a.regs.whole).toBe(a.referee.whole);
     expect(a.poms.wrong).toEqual(["disagree"]);
     const low = a.rows.find((r) => r.id === "disagree")!.outcome.poms.check;
@@ -247,18 +252,19 @@ describe("one source for every dollar figure", () => {
   });
 
   it("the README and docs/results.md state the held-out result as recorded", () => {
-    // One README line for the three sets together, each figure from its results file.
+    // One README line for the four sets together, each figure from its results file.
     const lines = readme.split(/\r?\n/).filter((l) => l.includes("content/eval/held-out"));
     expect(lines).toHaveLength(1);
     const [line] = lines;
     const tally = (r: { summary: { engine_matches: number; cases: number } }) => `${r.summary.engine_matches} of ${r.summary.cases}`;
-    expect(line).toContain(`**Three held-out sets of SSA examples, each run once on a frozen engine: ${tally(held)}, ${tally(held2)} and ${tally(held3)}.**`);
+    expect(line).toContain(`**Four held-out sets of SSA examples, each run once on a frozen engine: ${tally(held)}, ${tally(held2)}, ${tally(held3)} and ${tally(held4)}.**`);
     expect(line).toContain(`commit \`${held.engine.commit}\``);
-    for (const [r, file] of [[held2, "held-out-2.json"], [held3, "held-out-3.json"]] as const) {
+    for (const [r, file] of [[held2, "held-out-2.json"], [held3, "held-out-3.json"], [held4, "held-out-4.json"]] as const) {
       expect(line).toContain(`\`content/eval/${file}\` (git blob \`${r.set.git_blob.slice(0, 7)}\``);
       expect(line).toContain(`frozen at \`${r.engine.commit}\``);
     }
     expect(line).toContain(`${held3.summary.counts_matches} of ${held3.summary.cases} on whether the gift counts`);
+    expect(line).toContain(`${held4.summary.counts_matches} of ${held4.summary.cases} on whether the help counts`);
     expect(resultsDoc).toContain(`It matches ${held.summary.engine_matches} of ${held.summary.cases}.`);
     expect(resultsDoc).toContain(`frozen at commit \`${held.engine.commit}\``);
     // Both documents carry the first run's result and say that two expected answers were corrected afterwards, with the reasons in the set.
@@ -289,6 +295,21 @@ describe("one source for every dollar figure", () => {
     expect(resultsDoc).toContain(`On the third set's ${WORDS[after.asWritten.cases]} as written, the current engine matches ${after.asWritten.matches} of ${after.asWritten.cases}`);
     expect(resultsDoc).toContain(`The other ${WORDS[after.asWritten.misses.length]} turn on a fact the engine had no field for when the set was written (the rent is paid by the week`);
     expect(resultsDoc).toContain(`in the new field, ${after.withFields.matches} of ${after.withFields.cases} (\`heldOut3AfterFix()\``);
+  });
+
+  it("docs/results.md states the fourth set's frozen run and its after-fix line", () => {
+    const s = held4.summary;
+    expect(resultsDoc).toContain(`It ran once on the engine frozen at commit \`${held4.engine.commit}\`; the results file records the set's git blob hash (\`${held4.set.git_blob.slice(0, 7)}\`)`);
+    expect(resultsDoc).toContain(`It matches ${s.engine_matches} of ${s.cases} on every value and ${s.counts_matches} of ${s.cases} on whether the help counts. The ${WORDS[s.misses.length]} that differ showed two rules`);
+    const after = heldOut4AfterFix(held4Set.cases as unknown as HeldOutCase[], rules);
+    expect(resultsDoc).toContain("**After the fix on the fourth set, not a held-out result.**");
+    expect(resultsDoc).toContain(`On the fourth set's fifteen as written, the current engine matches ${after.asWritten.matches} of ${after.asWritten.cases}`);
+    expect(resultsDoc).toContain(`With the facts ${WORDS[Object.keys(HELD_OUT_4_NEW_FIELDS).length]} cases state in the new fields`);
+    expect(resultsDoc).toContain(`, ${after.withFields.matches} of ${after.withFields.cases} (\`heldOut4AfterFix()\``);
+    // The second class of court cases: the first run as recorded, then the current engine, labelled.
+    expect(resultsDoc).toContain(`On its first run, before the engine had a loan field, the engine agreed on ${COURT_NOT_INCOME.score}.`);
+    expect(resultsDoc).toContain(`${COURT_NOT_INCOME.now.asWritten.agreed} of ${COURT_NOT_INCOME.now.asWritten.scored} as the cases record the help, and ${COURT_NOT_INCOME.withLoans} with the loan each court found`);
+    expect(readme).toContain(`With each court's finding in the new loan field, ${COURT_NOT_INCOME.withLoans}, after the fix`);
   });
 
   it("every document names the number of promises the invariant run holds each gift to", () => {

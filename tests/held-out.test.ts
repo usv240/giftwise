@@ -5,13 +5,15 @@ import second from "../content/eval/held-out-2.json";
 import secondRun from "../content/eval/held-out-2-results.json";
 import third from "../content/eval/held-out-3.json";
 import thirdRun from "../content/eval/held-out-3-results.json";
+import fourth from "../content/eval/held-out-4.json";
+import fourthRun from "../content/eval/held-out-4-results.json";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { HeldOut } from "@/components/evidence/HeldOut";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { HELD_OUT_2_NEW_FIELDS, HELD_OUT_3_NEW_FIELDS, heldOut2AfterFix, heldOut3AfterFix, scoreHeldOut, type HeldOutCase } from "@/lib/held-out";
+import { HELD_OUT_2_NEW_FIELDS, HELD_OUT_3_NEW_FIELDS, HELD_OUT_4_NEW_FIELDS, heldOut2AfterFix, heldOut3AfterFix, heldOut4AfterFix, scoreHeldOut, type HeldOutCase } from "@/lib/held-out";
 import * as rules from "@/lib/rules";
 
 /**
@@ -127,5 +129,61 @@ describe("the third held-out set, written before it was run", () => {
     expect(html).toContain(`On the same five as written, ${after.asWritten.matches} of ${after.asWritten.cases} match.`);
     expect(html).toContain(`${after.withFields.matches} of ${after.withFields.cases} match. The frozen run’s record is unchanged.`);
     expect(html).toContain(thirdRun.set.git_blob.slice(0, 10));
+  });
+});
+
+/**
+ * The fourth set (content/eval/held-out-4.json), fifteen examples written and committed before it ran once on the engine
+ * frozen at 201128b. The record stays the frozen run; the current engine after R-SHEL-08, R-LOAN-01 and R-LOAN-02 is
+ * scored apart and labelled as not a held-out result, on /evidence/ssa-examples#held-out-4 and in docs/results.md.
+ */
+describe("the fourth held-out set, written before it was run", () => {
+  const cases = fourth.cases as unknown as HeldOutCase[];
+  const after = heldOut4AfterFix(cases, rules);
+  it("the file is byte for byte the one that ran", () => {
+    expect(createHash("sha256").update(readFileSync("content/eval/held-out-4.json", "utf8").replace(/\r\n/g, "\n")).digest("hex")).toBe(fourthRun.set.sha256);
+    expect(execFileSync("git", ["hash-object", "content/eval/held-out-4.json"], { encoding: "utf8" }).trim()).toBe(fourthRun.set.git_blob);
+  });
+  it("the record covers every case and stays the frozen run: 6 of 15 on every value and 7 of 15 on whether it counts, at 201128b", () => {
+    expect(fourthRun.cases.map((c) => c.id)).toEqual(fourth.cases.map((c) => c.id));
+    expect(fourthRun.summary.engine_matches).toBe(fourthRun.cases.filter((c) => c.match).length);
+    expect(fourthRun.summary.counts_matches).toBe(fourthRun.cases.filter((c) => c.counts_match).length);
+    expect({ commit: fourthRun.engine.commit, matches: fourthRun.summary.engine_matches, counts: fourthRun.summary.counts_matches, cases: fourthRun.summary.cases }).toEqual({ commit: "201128b", matches: 6, counts: 7, cases: 15 });
+  });
+  it("each new field's fact is in that case's own situation", () => {
+    for (const [id, f] of Object.entries(HELD_OUT_4_NEW_FIELDS)) expect(fourth.cases.find((x) => x.id === id)!.situation, id).toContain(f.fact);
+  });
+  it("as written, the three arrangements SSA found were not loans now match from the profile alone; the rest need their facts", () => {
+    expect(after.asWritten).toEqual({
+      matches: 9,
+      cases: 15,
+      misses: ["loan-outside-utility-repaid", "loan-outside-utility-share-of-two", "loan-ended-contribution-short", "cash-for-household-share-short", "sharing-short-by-20", "earmarked-food-short"],
+    });
+    const frozen = new Map(fourthRun.cases.map((c) => [c.id, c]));
+    const now = new Map(scoreHeldOut(cases, rules).map((c) => [c.id, c]));
+    const fixed = [...now.values()].filter((c) => c.match && !frozen.get(c.id)!.match).map((c) => c.id);
+    expect(fixed).toEqual(["loan-conditional-repayment", "loan-no-mutual-agreement", "loan-plan-not-feasible"]);
+    // The frozen run paid Jeff, Jane and Alex the full $994; the household's shelter now takes a third.
+    expect(fixed.map((id) => [frozen.get(id)!.values[0].got, now.get(id)!.values[0].got])).toEqual([[994, 662.67], [994, 662.67], [994, 662.67]]);
+  });
+  it("with the new fields, every case gives SSA's answer", () => {
+    expect(after.withFields).toEqual({ matches: 15, cases: 15, misses: [] });
+    const got = (id: string) => after.cases.find((c) => c.id === id)!.values.map((v) => v.got);
+    expect(got("loan-outside-utility-repaid")).toEqual([0]);
+    expect(got("loan-outside-utility-share-of-two")).toEqual([0]);
+    expect(got("cash-for-household-share-short")).toEqual([582.67]);
+    expect(got("sharing-short-by-20")).toEqual([662.67]);
+    expect(got("sharing-within-20")).toEqual([994]);
+    expect(got("earmarked-food-short")).toEqual([662.67]);
+  });
+  it("/evidence/ssa-examples shows the frozen run and the after-fix line from these files", () => {
+    const html = renderToStaticMarkup(createElement(HeldOut)).replace(/<[^>]+>/g, "").replace(/&rsquo;/g, "’").replace(/&#x27;|&#39;/g, "'").replace(/&ldquo;|&rdquo;/g, '"');
+    const s = fourthRun.summary;
+    expect(html).toContain(`then run once on the engine frozen at commit ${fourthRun.engine.commit}`);
+    expect(html).toContain(`${s.engine_matches} of ${s.cases} match on every value, and ${s.counts_matches} of ${s.cases} agree with SSA on whether the help counts`);
+    expect(html).toContain("After the fix, not a held-out result: these rules were written after seeing the fifteen");
+    expect(html).toContain(`On the same fifteen as written, ${after.asWritten.matches} of ${after.asWritten.cases} match`);
+    expect(html).toContain(`${after.withFields.matches} of ${after.withFields.cases} match. Each share is the household’s housing costs only`);
+    expect(html).toContain(fourthRun.set.git_blob.slice(0, 10));
   });
 });

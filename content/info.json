@@ -319,7 +319,7 @@
     "title": "Her situation",
     "what": "A few facts that change how gifts are counted.",
     "why": "For example, living in someone else's home changes how housing help is counted.",
-    "technical": "Profile fields: couple, livesInAnothersHousehold, otherUnearnedMonthly, earnedMonthly, ableEligible, savings."
+    "technical": "Profile fields: couple, livesInAnothersHousehold (with householdCosts, householdSize and householdPays for her share of its costs), otherUnearnedMonthly, earnedMonthly, ableEligible, savings."
   },
   "try.result": {
     "title": "The result",

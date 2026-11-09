@@ -4,6 +4,11 @@
     "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
     "publisher": "eCFR"
   },
+  "cfr-416-1103-f": {
+    "title": "20 CFR 416.1103(f): money borrowed is not income",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
+    "publisher": "eCFR"
+  },
   "cfr-416-1103": {
     "title": "20 CFR 416.1103: what is not income",
     "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1103",
@@ -18,6 +23,11 @@
   "cfr-416-1131": {
     "title": "20 CFR 416.1131: the one-third reduction rule",
     "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1131",
+    "publisher": "eCFR"
+  },
+  "cfr-416-1133": {
+    "title": "20 CFR 416.1133: a pro rata share of household operating expenses",
+    "url": "https://www.ecfr.gov/current/title-20/chapter-III/part-416/subpart-K/section-416.1133",
     "publisher": "eCFR"
   },
   "cfr-416-1121": {
@@ -71,6 +81,16 @@
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835200",
     "publisher": "Social Security Administration"
   },
+  "poms-si-00835-160": {
+    "title": "POMS SI 00835.160: Sharing (paying a pro rata share, the $20 tolerance)",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835160",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-170": {
+    "title": "POMS SI 00835.170: Earmarked sharing",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835170",
+    "publisher": "Social Security Administration"
+  },
   "poms-si-00835-350": {
     "title": "POMS SI 00835.350: Computing ISM from outside the household",
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835350",
@@ -104,6 +124,21 @@
   "poms-si-00835-400": {
     "title": "POMS SI 00835.400: In-kind support given only to the claimant",
     "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835400",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-340": {
+    "title": "POMS SI 00835.340: Computing in-kind support from within a household",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835340",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-450": {
+    "title": "POMS SI 00835.450: Cash income from within and from outside households",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835450",
+    "publisher": "Social Security Administration"
+  },
+  "poms-si-00835-482": {
+    "title": "POMS SI 00835.482: Loans of in-kind support and maintenance",
+    "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
     "publisher": "Social Security Administration"
   },
   "poms-si-00835-901": {

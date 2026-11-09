@@ -29,7 +29,11 @@ export interface Profile {
   /** Wording only; never changes the math. Defaults to she/her. */
   pronoun?: Pronoun;
   couple: boolean;
-  /** Lives all month in another person's household and does not pay a share of shelter costs. */
+  /**
+   * Lives all month in another person's household: someone else owns or rents the home, and she has neither ownership
+   * nor rental liability (POMS SI 00835.120). The household's own shelter then counts every month, gift or not, unless
+   * she pays her pro rata share of its costs (R-SHEL-08): with no householdPays stated she is taken to pay nothing.
+   */
   livesInAnothersHousehold: boolean;
   /**
    * In another person's household, whether the household pays for or provides all of the person's meals. The one-third
@@ -51,6 +55,45 @@ export interface Profile {
    * or a couple, with no one else in the household (R-SHEL-07).
    */
   householdSize?: number;
+  /**
+   * In another person's household: its monthly operating expenses, the rent or mortgage, property tax, heating fuel,
+   * gas, electricity, water, sewer and garbage, less any of them someone outside the household pays (20 CFR 416.1133(c)).
+   * Food has not been one of them since September 30, 2024. Divided by householdSize, times two for a couple, it gives
+   * her pro rata share (R-SHEL-08).
+   */
+  householdCosts?: number;
+  /** Her pro rata share of those expenses when it is stated directly (the couple's together); it takes the place of householdCosts. */
+  proRataShare?: number;
+  /**
+   * What she (or the couple) pays toward the household's operating expenses each month, in cash. Money set aside for her
+   * food is not part of it, and neither are services such as lawn care (POMS SI 00835.480 C). Leave it out to mean nothing.
+   */
+  householdPays?: number;
+}
+
+/**
+ * Help she must repay, not a gift (20 CFR 416.1103(f)). Cash lent to her follows POMS SI 01120.220; food or shelter lent
+ * in kind, paid to a business or given as itself, follows SI 00835.482. It is a bona fide loan only when every fact
+ * below holds; when one does not, the help counts as SSA counts any other help (R-LOAN-01, R-LOAN-02). Repaying a bona
+ * fide loan later does not lower her countable income.
+ */
+export interface Loan {
+  /** She must repay it whether or not SSI or any other benefit is ever paid: the obligation is unconditional (SI 00835.482 B.3, SI 01120.220 D.3). */
+  mustRepay: boolean;
+  /** She and the lender both agreed she would repay at the time it was given, not afterwards (SI 00835.482 B.2 and B.3). */
+  agreedWhenGiven: boolean;
+  /** A plan to repay from her own income, benefits she expects included, or property, that she can meet; services do not count (SI 00835.482 B.4 and B.5). */
+  feasiblePlan: boolean;
+  /** Enforceable under the State's law as an oral or written contract (SI 00835.482 B.1). Leave it out to mean yes. */
+  enforceable?: boolean;
+  /** What she agreed to repay, when it is less than the amount: her share of a bill paid for the household (SI 00835.482 B.4). Leave it out for the full amount. */
+  repay?: number;
+  /**
+   * The household she lives in is the lender, lending its own shelter (SI 00835.482 D to F). The amount borrowed each
+   * month counts with what she pays toward her share of its costs (R-SHEL-08); when those costs are not stated, a bona
+   * fide loan of the household's shelter is taken to cover her share (SI 00835.482 F.2.b).
+   */
+  fromHousehold?: boolean;
 }
 
 export interface Gift {
@@ -88,7 +131,30 @@ export interface Gift {
    * toward one bill in a month are one weekly amount (R-SHEL-06).
    */
   every?: Every;
+  /** Help she must repay: a loan, with the facts that decide whether SSA treats it as one (R-LOAN-01, R-LOAN-02). */
+  loan?: Loan;
   label?: string;
+}
+
+/**
+ * Her place in another person's household for one month (R-SHEL-08): her pro rata share of its operating expenses, what
+ * she pays toward them, and the rule that follows (20 CFR 416.1131 and 416.1133; POMS SI 00835.160, SI 00835.340).
+ */
+export interface HouseholdTest {
+  /** Her pro rata share of the household's monthly operating expenses, the couple's together; null when not known. */
+  share: number | null;
+  /** What she pays toward them, with any bona fide loan of the household's shelter that month (R-LOAN-02). */
+  pays: number;
+  /** She pays her share, or within $20 of it, so she lives in her own household and gets no support from it (SI 00835.160 C.2). */
+  sharing: boolean;
+  /**
+   * vtr: the one-third reduction, because the household gives her shelter and all her meals (20 CFR 416.1131(a)).
+   * pmv: the shelter it gives her counts as in-kind support under the presumed maximum value, because it does not give
+   * her all her meals (20 CFR 416.1131(a)(3), POMS SI 00835.340). none: she pays her share.
+   */
+  rule: "vtr" | "pmv" | "none";
+  /** Under pmv, the shelter's value: her share less what she pays, or the presumed maximum value when her share is not known. */
+  value: number;
 }
 
 /** unearned_in_kind: an item or service she receives that is not food, shelter or something for personal use, counted at its value. */
@@ -136,6 +202,8 @@ export interface MonthTrace {
   shelterPaidByOthers: number;
   ismValue: number;
   vtrApplied: boolean;
+  /** In another person's household: her share of its costs, what she pays, and the rule that follows (R-SHEL-08). Null otherwise. */
+  household: HouseholdTest | null;
   /** How much the one-off exclusion actually lowered countable income this month. */
   infrequentExcluded: number;
   /** How much of the quarter's $60 one-off allowance this month used up, which can be more than it lowered income once the housing cap applies. */

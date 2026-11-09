@@ -7,6 +7,7 @@ import invariantRun from "../content/eval/invariants-results.json";
 import first from "../content/eval/held-out-results.json";
 import second from "../content/eval/held-out-2-results.json";
 import third from "../content/eval/held-out-3-results.json";
+import fourth from "../content/eval/held-out-4-results.json";
 import { POST as checkGift } from "@/app/api/v1/check-gift/route";
 import { checkGiftDataSchema, openapi } from "@/lib/api/openapi";
 import { HELD_OUT_SCORES, HELD_OUT_SENTENCE, HELD_OUT_SETS, HELD_OUT_TOTAL } from "@/lib/held-out-summary";
@@ -46,9 +47,9 @@ describe("the promise count and the invariant run's date come from its results f
 
 describe("the held-out summary has one source", () => {
   it("lists every set's score from its results file", () => {
-    expect(HELD_OUT_SETS.map((s) => [s.matches, s.cases])).toEqual([first, second, third].map((r) => [r.summary.engine_matches, r.summary.cases]));
-    expect(HELD_OUT_SCORES).toBe([first, second, third].map((r) => `${r.summary.engine_matches} of ${r.summary.cases}`).join(", ").replace(/, ([^,]*)$/, " and $1"));
-    expect(HELD_OUT_TOTAL.counts).toBe(first.summary.counts_matches + second.summary.counts_matches + third.summary.counts_matches);
+    expect(HELD_OUT_SETS.map((s) => [s.matches, s.cases])).toEqual([first, second, third, fourth].map((r) => [r.summary.engine_matches, r.summary.cases]));
+    expect(HELD_OUT_SCORES).toBe([first, second, third, fourth].map((r) => `${r.summary.engine_matches} of ${r.summary.cases}`).join(", ").replace(/, ([^,]*)$/, " and $1"));
+    expect(HELD_OUT_TOTAL.counts).toBe(first.summary.counts_matches + second.summary.counts_matches + third.summary.counts_matches + fourth.summary.counts_matches);
     expect(HELD_OUT_SENTENCE).toContain(HELD_OUT_SCORES);
   });
 

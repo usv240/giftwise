@@ -109,3 +109,32 @@ export const HELD_OUT_3_NEW_FIELDS: NewFields = {
 export function heldOut3AfterFix(cases: HeldOutCase[], engine: Engine) {
   return afterFix(cases, engine, HELD_OUT_3_NEW_FIELDS);
 }
+
+/** A loan that meets every one of SSA's tests, as the case states it: "a bona fide loan agreement". */
+const BONA_FIDE = { mustRepay: true, agreedWhenGiven: true, feasiblePlan: true } as const;
+
+/**
+ * The fourth set (content/eval/held-out-4.json) after the rules it showed were added: R-SHEL-08 (the household's own
+ * shelter counts every month, gift or not, unless she pays her pro rata share of its costs, within $20) and R-LOAN-01
+ * with R-LOAN-02 (a bona fide loan is not income; a loan of housing counts only for what she need not repay). Not a
+ * held-out result: the rules were written after seeing these fifteen, and the held-out result stays the frozen run in
+ * held-out-4-results.json. Where a case states the loan or the household's costs and what the person pays, that fact,
+ * quoted from the case's own situation, goes in the new field; the three loans SSA found were not loans need none,
+ * because the household's shelter now counts from the profile alone. Every share is the household's shelter costs only:
+ * food has not been one of them since September 30, 2024, so Kathleen's $75 for food is not part of what she pays.
+ */
+export const HELD_OUT_4_NEW_FIELDS: NewFields = {
+  "loan-outside-utility-repaid": { fact: "under a bona fide loan agreement: she agreed to repay the whole $150", fields: { loan: { ...BONA_FIDE } } },
+  "loan-outside-utility-share-of-two": { fact: "under a bona fide loan agreement: she agreed to repay her share, $75", fields: { loan: { ...BONA_FIDE, repay: 75 } } },
+  "loan-ended-contribution-short": { fact: "he pays $300 a month toward his $400 pro rata share", profile: { livesInAnothersHousehold: true, proRataShare: 400, householdPays: 300 } },
+  "cash-for-household-share-met": { fact: "John's own $200 and Mabel's $100 cover his $300 share", profile: { livesInAnothersHousehold: true, proRataShare: 300, householdPays: 300 } },
+  "cash-for-household-share-short": { fact: "he pays $200 in April 2026 toward his $300 share of the household's $600 costs", profile: { livesInAnothersHousehold: true, householdCosts: 600, householdPays: 200 } },
+  "sharing-short-by-20": { fact: "The household's costs are $450 a month, so Grayson's share is $150, and in April 2026 he pays $100", profile: { livesInAnothersHousehold: true, householdCosts: 450, householdPays: 100 } },
+  "sharing-over-by-20": { fact: "Grayson pays $175 a month toward his $150 share", profile: { livesInAnothersHousehold: true, proRataShare: 150, householdPays: 175 } },
+  "sharing-within-20": { fact: "the household's costs are $435 a month, so Grayson's share is $145, and Grayson pays $125", profile: { livesInAnothersHousehold: true, householdCosts: 435, householdPays: 125 } },
+  "earmarked-food-short": { fact: "$75 for food and $75 for shelter. The household spends $450 a month on food and $600 on shelter", profile: { livesInAnothersHousehold: true, householdCosts: 600, householdPays: 75 } },
+};
+
+export function heldOut4AfterFix(cases: HeldOutCase[], engine: Engine) {
+  return afterFix(cases, engine, HELD_OUT_4_NEW_FIELDS);
+}

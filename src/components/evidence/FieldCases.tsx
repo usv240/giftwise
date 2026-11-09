@@ -3,6 +3,7 @@ import data from "../../../content/eval/field-cases.json";
 import results from "../../../content/eval/field-cases-results.json";
 import second from "../../../content/eval/field-cases-2.json";
 import secondResults from "../../../content/eval/field-cases-2-results.json";
+import { COURT_2_LOAN_FACTS } from "@/lib/court-cases";
 import { ASKED_BASIS, COURT_NOT_INCOME, IMPACT, KEPT_BASIS, KEPT_SENTENCE } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 
@@ -95,6 +96,13 @@ export function FieldCaseList() {
             </p>
             <p>The engine now asks who provides the meals, with a unit test, and agrees with SSA on that case.</p>
           </div>
+          <div className="sx-finding">
+            <p className="sx-finding-k">What the second class added</p>
+            <p>Three courts held that help the person had to repay was not income: room and board from a son, back rent owed to a mother, and cash lent by an attorney.</p>
+            <p>
+              The engine now takes a loan&rsquo;s facts, each of SSA&rsquo;s tests with a unit test, and agrees on <span className="tabular">{COURT_NOT_INCOME.withLoans}</span> when the courts&rsquo; findings are entered.
+            </p>
+          </div>
         </div>
 
         <ol className="sx-list">
@@ -159,12 +167,14 @@ export function FieldCaseList() {
         <div className="jx-sheet">
           <p className="sx-vs">{COURT_NOT_INCOME.sentence}</p>
           <p className="sx-meta muted">
-            Found by searching federal court opinions for help that did not count; {second.about.opinions_downloaded} opinions came back, {second.about.opinions_read_closely} were read closely, and these are the
+            The first run is kept as it came out ({COURT_NOT_INCOME.score}). The loan rules (<span className="rule-id">R-LOAN-01</span>, <span className="rule-id">R-LOAN-02</span>) were written after it, so the
+            line with the loan field is after the fix, not a first result. Found by searching federal court opinions for help that did not count; {second.about.opinions_downloaded} opinions came back, {second.about.opinions_read_closely} were read closely, and these are the
             ones where the court held the help was not income. Each links to the opinion.
           </p>
           <ol className="sx-list">
             {(secondResults.cases as unknown as Result[]).map((r) => {
               const c = (second.cases as unknown as Dataset[]).find((x) => x.id === r.id)!;
+              const now = COURT_NOT_INCOME.now.cases.find((x) => x.id === r.id);
               return (
                 <li key={r.id}>
                   <details className="sx-case">
@@ -172,9 +182,15 @@ export function FieldCaseList() {
                       <span className="sx-title">{r.title}</span>
                       <span className="sx-sides">
                         <span className="sx-side">
-                          <span className="sx-who">Giftwise</span>{" "}
+                          <span className="sx-who">First run</span>{" "}
                           <span className="sx-verdict" data-ok={r.engine.match ? "" : undefined}>
                             {r.engine.match ? "Agrees" : "Differs"}
+                          </span>
+                        </span>
+                        <span className="sx-side">
+                          <span className="sx-who">With the loan field</span>{" "}
+                          <span className="sx-verdict" data-ok={now?.match ? "" : undefined}>
+                            {now?.match ? "Agrees" : "Differs"}
                           </span>
                         </span>
                       </span>
@@ -183,7 +199,10 @@ export function FieldCaseList() {
                       <p>
                         <strong>Held:</strong> {r.determination.held}
                       </p>
-                      <p className="sx-rules tech-only">Rules {r.engine.rule_ids.join(", ")}</p>
+                      {COURT_2_LOAN_FACTS[r.id] ? <p className="muted">In the loan field, as the opinion found: &ldquo;{COURT_2_LOAN_FACTS[r.id].fact}.&rdquo;</p> : null}
+                      <p className="sx-rules tech-only">
+                        Rules on the first run {r.engine.rule_ids.join(", ")}; with the loan field {now?.ruleIds.join(", ")}
+                      </p>
                       <p>
                         <a className="text-link" href={c.source.url} target="_blank" rel="noreferrer">
                           {docket(c)}

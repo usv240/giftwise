@@ -1,5 +1,7 @@
 import field from "../../content/eval/field-cases-results.json";
 import notIncome from "../../content/eval/field-cases-2-results.json";
+import notIncomeSet from "../../content/eval/field-cases-2.json";
+import { courtNotIncomeAfterFix, type CourtCase } from "./court-cases";
 import sample from "../../content/sample-year.json";
 import { SAMPLE } from "./households";
 import { DEFAULT_PROFILE, P, SHELTER_CATEGORIES, evaluateGift, planMonths, usd, type Category, type Delivery, type Profile } from "./rules";
@@ -79,14 +81,21 @@ const dollarsCents = (n: number) => n.toLocaleString("en-US", { style: "currency
  */
 export const COURT_SCORE = `${field.summary.agreed} of ${field.summary.scored} scored, of ${field.summary.cases} cases`;
 /**
- * The second class of court cases (content/eval/field-cases-2-results.json): help the court held was not income. Run by
- * the same scorer; every case there turns on a loan the person must repay, which the engine has no input for.
+ * The second class of court cases: help the court held was not income, every one a loan the person must repay. The first
+ * run (content/eval/field-cases-2-results.json, at commit 201128b, before the engine had a loan field) stays as it came
+ * out; the current engine is scored apart, as the file records the help and with the loan each court found in the new
+ * loan field (src/lib/court-cases.ts), labelled as after the fix.
  */
+const notIncomeNow = courtNotIncomeAfterFix(notIncomeSet.cases as unknown as CourtCase[]);
 export const COURT_NOT_INCOME = {
   scored: notIncome.summary.scored,
   agreed: notIncome.summary.agreed,
+  /** The first run's count, frozen: "0 of 3". */
   score: `${notIncome.summary.agreed} of ${notIncome.summary.scored}`,
-  sentence: `In a second class, where the court held the help was not income, the engine agrees on ${notIncome.summary.agreed} of ${notIncome.summary.scored}: each is a loan the person must repay, which the engine has no input for, so it counts the help.`,
+  /** The current engine: as the file records the help (no loan field), and with each court's finding in the loan field. */
+  now: notIncomeNow,
+  withLoans: `${notIncomeNow.withLoans.agreed} of ${notIncomeNow.withLoans.scored}`,
+  sentence: `In a second class, where the court held the help was not income, each case is a loan the person must repay. On its first run, before the engine had a loan field, the engine agreed on ${notIncome.summary.agreed} of ${notIncome.summary.scored}. After the loan rules were added (not a first result): ${notIncomeNow.asWritten.agreed} of ${notIncomeNow.asWritten.scored} as the cases record the help, and ${notIncomeNow.withLoans.agreed} of ${notIncomeNow.withLoans.scored} with the loan each court found in the new loan field.`,
 };
 /** The cases whose dollars the engine computed, in the file's own word (summary.dollars.cases_computed). */
 export const COMPUTED_CASES = `all ${field.summary.dollars.cases_computed} cases computed in dollars`;

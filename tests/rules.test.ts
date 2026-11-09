@@ -300,7 +300,8 @@ describe("R-SHEL-05: rent below market from a parent or child (POMS SI 00835.380
     expect(evaluateGift(rent({ amount: 100, rentPaid: 360 }), profile).checkAfter).toBe(994);
   });
   it("in another's household that provides all meals the one-third reduction applies instead (SI 00835.380 B)", () => {
-    expect(evaluateGift(rent(), { ...profile, livesInAnothersHousehold: true }).ruleIds).toEqual(["R-SHEL-VTR"]);
+    // The household's own shelter sets the reduction every month (R-SHEL-08), so the answer cites that rule too.
+    expect(evaluateGift(rent(), { ...profile, livesInAnothersHousehold: true }).ruleIds).toEqual(["R-SHEL-VTR", "R-SHEL-08"]);
   });
 });
 
@@ -376,7 +377,7 @@ describe("R-SHEL-07: housing help shared by the household (POMS SI 00835.350 B.4
     expect(computeMonth("2026-06", [home], { ...profile, householdSize: 3 }).ismValue).toBe(351.33);
     expect(evaluateGift(home, { ...profile, householdSize: 3 }).ruleIds).not.toContain("R-SHEL-07");
     const vtr = evaluateGift(g({ delivery: "vendor", category: "rent", amount: 500, recurring: true }), { ...profile, livesInAnothersHousehold: true, householdSize: 4 });
-    expect(vtr.ruleIds).toEqual(["R-SHEL-VTR"]);
+    expect(vtr.ruleIds).toEqual(["R-SHEL-VTR", "R-SHEL-08"]);
     expect(vtr.checkAfter).toBe(662.67);
   });
   it("a household size of one, or two for a couple, changes nothing", () => {

@@ -51,6 +51,15 @@ export function makeCase(r: () => number): Case {
     ableContributedThisYear: r() < 0.6 ? 0 : cents(21_000),
     savings: cents(2_500),
   };
+  // In another person's household: its size, and for half of them its costs and what they pay toward them, from nothing
+  // to more than their share (R-SHEL-08).
+  if (lives) {
+    profile.householdSize = 2 + Math.floor(r() * 4);
+    if (r() < 0.5) {
+      profile.householdCosts = cents(3_000);
+      profile.householdPays = cents((profile.householdCosts / profile.householdSize) * 1.5);
+    }
+  }
   const month = 1 + Math.floor(r() * 12);
   const day = 1 + Math.floor(r() * 28);
   const date = `2026-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;

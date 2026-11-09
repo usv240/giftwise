@@ -19,6 +19,22 @@ export const EverySchema = z
   .enum(["week", "two_weeks"])
   .describe("For rent or another housing bill paid to the landlord or company weekly (week) or every two weeks (two_weeks): the amount is one payment, and the month counts the weekly amount times 13, divided by 3, a two-week amount halved first (POMS SI 00835.474 B.3).");
 
+export const LoanSchema = z
+  .object({
+    mustRepay: z.boolean().describe("She must repay it whether or not SSI or any other benefit is ever paid (POMS SI 00835.482 B.3)."),
+    agreedWhenGiven: z.boolean().describe("She and the lender both agreed she would repay at the time it was given, not afterwards (B.2, B.3)."),
+    feasiblePlan: z.boolean().describe("She has a plan to repay from her own income or property that she can meet; services do not count (B.4, B.5)."),
+    enforceable: z.boolean().optional().describe("Enforceable under the State's law (B.1). Leave it out to mean yes."),
+    repay: z.number().min(0).max(100000).optional().describe("What she agreed to repay, when less than the amount: her share of a bill paid for the household (B.4)."),
+    fromHousehold: z
+      .boolean()
+      .optional()
+      .describe("True when the household she lives in lends her its own shelter: the amount borrowed counts as what she pays toward her share of its costs (SI 00835.482 E, F)."),
+  })
+  .describe(
+    "Only for help that already exists and is a loan, to check how SSA counts it: a bona fide loan is not income (20 CFR 416.1103(f); cash, POMS SI 01120.220; food or shelter, SI 00835.482), and one that fails any test counts like the same help given. Giftwise moves gifts only; it does not arrange or record loans.",
+  );
+
 export const GiftSchema = z.object({
   amount: z.number().min(0).max(100000).describe("Gift amount in US dollars."),
   delivery: DeliverySchema,
@@ -47,6 +63,7 @@ export const GiftSchema = z.object({
     .optional()
     .describe("For rent below market from a landlord who is her parent or child: the monthly rent she pays, with category rent and amount the market rent less that rent. The subsidy counted is the lesser of the market rent and the presumed maximum value, less this rent (POMS SI 00835.380)."),
   every: EverySchema.optional(),
+  loan: LoanSchema.optional(),
 });
 
 export const ProfileSchema = z
@@ -55,7 +72,9 @@ export const ProfileSchema = z
     livesInAnothersHousehold: z
       .boolean()
       .default(false)
-      .describe("True when she lives all month in someone else's home and does not pay her share of the housing costs. Housing help is then counted with the one-third reduction ($331.33 in 2026)."),
+      .describe(
+        "True when she lives all month in someone else's home, with no ownership or rental liability. Unless she pays her pro rata share of the household's costs (householdCosts with householdSize, or proRataShare, and householdPays; within $20 counts), the household's shelter lowers her check every month, gift or not: by the one-third reduction ($331.33 in 2026) when it gives her all her meals. With no householdPays she is taken to pay nothing.",
+      ),
     householdProvidesAllMeals: z
       .boolean()
       .optional()
@@ -85,6 +104,19 @@ export const ProfileSchema = z
       .max(20)
       .optional()
       .describe("The people in her household, herself included (both members of a couple). Housing paid from outside the household is divided equally among them and she is charged her share (POMS SI 00835.350 B.4). Leave it out when no one else lives with her."),
+    householdCosts: z
+      .number()
+      .min(0)
+      .max(100000)
+      .optional()
+      .describe("In someone else's household: its monthly operating costs, rent or mortgage, property tax, heat, gas, electricity, water, sewer and garbage, not food (20 CFR 416.1133(c)). With householdSize it gives her pro rata share."),
+    proRataShare: z.number().min(0).max(100000).optional().describe("Her pro rata share of those costs, when it is known directly (the couple's together). It takes the place of householdCosts."),
+    householdPays: z
+      .number()
+      .min(0)
+      .max(100000)
+      .optional()
+      .describe("What she pays toward those costs each month, in cash, not counting money for her food or any services (POMS SI 00835.480 C). Leave it out to mean nothing."),
   })
   .partial()
   .describe("The person who receives SSI. Every field is optional; leave it out for one adult who lives on her own with $1,240 in savings.");

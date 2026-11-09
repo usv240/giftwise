@@ -28,6 +28,8 @@ export const P = {
   ableOnsetAge: num("able_onset_age"),
   rmaLagMonths: num("rma_lag_months"),
   ismFoodRemovedOn: String(facts.values.ism_food_removed_on.value),
+  /** Within this much of her pro rata share, what she pays counts as her share (POMS SI 00835.160 C.2). */
+  sharingTolerance: num("sharing_tolerance"),
 } as const;
 
 /**
