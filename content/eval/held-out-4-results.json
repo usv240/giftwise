@@ -1,0 +1,384 @@
+{
+  "ran_at": "2026-11-09T15:06:06.870Z",
+  "engine": {
+    "commit": "201128b",
+    "git_tree_src_lib_rules": "7604e1ca76765d04a84125ff49c02124f204e6ca",
+    "files_sha256": "04eddfcacc171066",
+    "rules_version": "2026.1"
+  },
+  "source": "content/eval/held-out-4.json",
+  "set": {
+    "git_blob": "49ba930a3a082e0b1652538f36a459e63e48627d",
+    "sha256": "9ad7b434e4d871b0d1b197bfdf5adf6c6a91e53e8f3a8fca24e884964745a38d"
+  },
+  "summary": {
+    "cases": 15,
+    "engine_matches": 6,
+    "counts_matches": 7,
+    "misses": [
+      "loan-outside-utility-repaid",
+      "loan-outside-utility-share-of-two",
+      "loan-conditional-repayment",
+      "loan-no-mutual-agreement",
+      "loan-plan-not-feasible",
+      "loan-ended-contribution-short",
+      "cash-for-household-share-short",
+      "sharing-short-by-20",
+      "earmarked-food-short"
+    ],
+    "not_scored": 0
+  },
+  "cases": [
+    {
+      "id": "loan-outside-utility-repaid",
+      "title": "Someone outside the household pays a utility bill as a loan she must repay in full",
+      "cite": "POMS SI 00835.482",
+      "part": "B.4, Example: Lender outside the household; G.4.c",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "The loan amount is $150 and she repays all of it, so the repayment equals the value of the help and she receives no outside in-kind support.",
+      "expected_counts": false,
+      "engine_counts": true,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ism_value",
+          "value": 0,
+          "got": 150,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01"
+      ],
+      "match": false
+    },
+    {
+      "id": "loan-outside-utility-share-of-two",
+      "title": "A utility bill paid as a loan, repaid only for her share of a household of two",
+      "cite": "POMS SI 00835.482",
+      "part": "B.4, Example: Lender outside the household; G.4.a and G.4.c",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "As if there were no loan, her share of the $150 bill in a household of two is $75. She repays $75, which equals that value, so she receives no outside in-kind support.",
+      "expected_counts": false,
+      "engine_counts": true,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ism_value",
+          "value": 0,
+          "got": 75,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01",
+        "R-SHEL-07"
+      ],
+      "match": false
+    },
+    {
+      "id": "outside-electric-household-of-three",
+      "title": "Someone outside pays the electric bill for a household of three",
+      "cite": "POMS SI 00835.482",
+      "part": "G.4.a",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "$100 is countable as in-kind support: the $300 bill divided among the three members of the household, which is under the presumed maximum value.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ism_value",
+          "value": 100,
+          "got": 100,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-SHEL-01",
+        "R-GIE-01",
+        "R-SHEL-07"
+      ],
+      "match": true
+    },
+    {
+      "id": "loan-conditional-repayment",
+      "title": "Food and shelter from an adult child, to be repaid only if SSI is paid",
+      "cite": "POMS SI 00835.482",
+      "part": "B.3, Example 2: Conditional requirement for repayment",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "There is no bona fide loan, because repayment depends on SSI being paid. The food and shelter are in-kind support under the normal rules; with both from the household and nothing paid toward it, the one-third reduction applies.",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 662.67,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "loan-no-mutual-agreement",
+      "title": "Food and shelter from a parent she feels bound to repay, though the parent expects nothing",
+      "cite": "POMS SI 00835.482",
+      "part": "B.3, Example 1: No obligation for repayment",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "There is no bona fide loan, because the two never agreed that Jane must repay. The food and shelter are in-kind support under the normal rules; with both from the household and nothing paid toward it, the one-third reduction applies.",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 662.67,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "loan-plan-not-feasible",
+      "title": "Food and shelter from a sibling under a repayment plan she cannot meet",
+      "cite": "POMS SI 00835.482",
+      "part": "B.5, Example 2: Prorata share greater than anticipated income",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "The repayment plan is not feasible, so the loan is not a bona fide loan of in-kind support, and the food and shelter count under the normal rules; with both from the household and nothing paid toward it, the one-third reduction applies.",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 662.67,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "loan-ended-contribution-meets-share",
+      "title": "After a loan of food and shelter ends, he pays his full share",
+      "cite": "POMS SI 00835.482",
+      "part": "F.4, Example 1",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "His contribution equals or exceeds his pro rata share, so he is in federal living arrangement A with no in-kind support, and the full SSI amount is paid.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 994,
+          "got": 994,
+          "match": true
+        }
+      ],
+      "rule_ids": [],
+      "match": true
+    },
+    {
+      "id": "loan-ended-contribution-short",
+      "title": "After a loan of food and shelter ends, he pays $300 of a $400 share",
+      "cite": "POMS SI 00835.482",
+      "part": "E.4, Example: Simultaneous development claim with RT diary for re-contact",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835482",
+      "ssa_answer": "He pays less than his pro rata share, so he is in federal living arrangement B and subject to the one-third reduction.",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 662.67,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "cash-for-household-share-met",
+      "title": "A sibling sends cash toward the household's costs, and he pays his full share",
+      "cite": "POMS SI 00835.450",
+      "part": "G, Example 1: Claimant's Contribution Equals Their Pro Rata Share",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835450",
+      "ssa_answer": "Mabel's $100 to John is cash income, not in-kind support, even though it pays household costs. John's contribution equals his pro rata share, so he receives no in-kind support.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "after_infrequent",
+          "value": 100,
+          "got": 100,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-CASH-01",
+        "R-GIE-01",
+        "R-RMA-01"
+      ],
+      "match": true
+    },
+    {
+      "id": "cash-for-household-share-short",
+      "title": "A sibling sends cash toward the household's costs, and he pays less than his share",
+      "cite": "POMS SI 00835.450",
+      "part": "G, Example 2: Claimant's Contribution Does Not Equal Their Pro Rata Share",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835450",
+      "ssa_answer": "Mabel's $100 is cash income, and because John pays only $200 of his $300 share he is also subject to the one-third reduction: at 2026 rates, $994 less $331.33, less the $100 after the $20 general exclusion, $582.67.",
+      "expected_counts": true,
+      "engine_counts": true,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 582.67,
+          "got": 914,
+          "match": false
+        }
+      ],
+      "rule_ids": [
+        "R-CASH-01",
+        "R-GIE-01",
+        "R-RMA-01"
+      ],
+      "match": false
+    },
+    {
+      "id": "sharing-short-by-20",
+      "title": "Paying $100 toward a $150 share of an apartment's costs",
+      "cite": "POMS SI 00835.160",
+      "part": "G, Example 1: Pro rata share exceeds the contribution by $20 or more",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835160",
+      "ssa_answer": "His share exceeds what he pays by at least $20, so he receives in-kind support valued at the one-third reduction (federal living arrangement B).",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 662.67,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "sharing-over-by-20",
+      "title": "Paying $175 toward a $150 share of an apartment's costs",
+      "cite": "POMS SI 00835.160",
+      "part": "G, Example 2: Contribution exceeds the pro rata share by $20",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835160",
+      "ssa_answer": "He pays more than his share, so he is in a sharing arrangement (federal living arrangement A) with no in-kind support from the household.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 994,
+          "got": 994,
+          "match": true
+        }
+      ],
+      "rule_ids": [],
+      "match": true
+    },
+    {
+      "id": "sharing-within-20",
+      "title": "Paying $125 toward a verified $145 share of an apartment's costs",
+      "cite": "POMS SI 00835.160",
+      "part": "G, Example 3: Contribution is within $20 of the pro rata share",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835160",
+      "ssa_answer": "What he pays is within $20 of his share, so a sharing arrangement exists: federal living arrangement A with no in-kind support.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 994,
+          "got": 994,
+          "match": true
+        }
+      ],
+      "rule_ids": [],
+      "match": true
+    },
+    {
+      "id": "earmarked-food-short",
+      "title": "Paying $150 a month, half for food and half for shelter, in a nephew's apartment",
+      "cite": "POMS SI 00835.170",
+      "part": "C.4, Example: Determining if double earmarking applies",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500835170",
+      "ssa_answer": "Neither earmarked payment meets its share, so she receives food and shelter throughout the month from the household and is subject to the one-third reduction.",
+      "expected_counts": true,
+      "engine_counts": false,
+      "counts_match": false,
+      "values": [
+        {
+          "month": "2026-04",
+          "measure": "ssi_amount",
+          "value": 662.67,
+          "got": 994,
+          "match": false
+        }
+      ],
+      "rule_ids": [],
+      "match": false
+    },
+    {
+      "id": "child-gift-timeshare-in-kind",
+      "title": "A charity gives a child with a life-threatening condition a timeshare",
+      "cite": "POMS SI 00830.750",
+      "part": "C.3.a, Example",
+      "url": "https://secure.ssa.gov/poms.nsf/lnx/0500830750",
+      "ssa_answer": "The timeshare is an in-kind gift from a tax-exempt organization to a child with a life-threatening condition, so its $15,000 value is not counted as income in the month it is received.",
+      "expected_counts": false,
+      "engine_counts": false,
+      "counts_match": true,
+      "values": [
+        {
+          "month": "2026-08",
+          "measure": "after_infrequent",
+          "value": 0,
+          "got": 0,
+          "match": true
+        }
+      ],
+      "rule_ids": [
+        "R-ITEM-01"
+      ],
+      "match": true
+    }
+  ]
+}
