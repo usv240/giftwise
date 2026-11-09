@@ -6,7 +6,7 @@ import { CASES } from "@/lib/cases/list";
 import held from "../content/eval/held-out-results.json";
 import heldOutSet from "../content/eval/held-out.json";
 import held2 from "../content/eval/held-out-2-results.json";
-import { ASKED_SENTENCE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, paypalShareSentence, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
+import { ASKED_SENTENCE, COMPUTED_CASES, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, paypalShareSentence, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
 import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
 import held2Set from "../content/eval/held-out-2.json";
@@ -123,12 +123,13 @@ describe("one source for every test number", () => {
     expect(inside).toContain(`${was.screens_1440x900} screens and ${n(was.words_with_sections_open)} words`);
   });
 
-  it("the two long evidence pages open short, measured before and after", () => {
-    const m = measured as typeof measured & { previous?: { pages: typeof measured.pages } };
-    expect(m.previous, "scripts/measure-pages.mjs keeps the run it replaced").toBeDefined();
-    for (const path of ["/evidence/impact", "/evidence/rules"]) {
-      const now = m.pages.find((p) => p.path === path)! as (typeof m.pages)[number] & { words_shown: number };
-      const then = m.previous!.pages.find((p) => p.path === path)! as typeof now;
+  it("the three evidence pages open short, measured before and after", () => {
+    type Page = (typeof measured.pages)[number] & { words_shown: number; before?: { screens_1440x900: number; words_shown: number } };
+    for (const path of ["/evidence", "/evidence/impact", "/evidence/rules"]) {
+      const now = measured.pages.find((p) => p.path === path)! as Page;
+      // scripts/measure-pages.mjs keeps each page's measurement from before its last change.
+      const then = now.before!;
+      expect(then, `${path} has a before`).toBeDefined();
       expect(now.screens_1440x900, path).toBeLessThan(then.screens_1440x900);
       expect(inside).toContain(`\`${path}\` opens at ${now.screens_1440x900} screens and ${n(now.words_shown)} words shown, against ${then.screens_1440x900} and ${n(then.words_shown)} before`);
     }
@@ -171,10 +172,13 @@ describe("one source for every dollar figure", () => {
     const strip = readme.slice(readme.indexOf("## Results"), readme.indexOf("## Where to look"));
     const whole = (x: number) => `$${Math.round(x).toLocaleString("en-US")}`;
     expect(strip).toContain(`| **${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month** |`);
-    // What the cases mean leads (family help counted against the person in every one), then how many routing keeps money in.
+    // Under the figure, short lines: where it is kept, that family help was counted in every case, and where money is kept with ABLE.
     expect(IMPACT.countedCases).toBe(IMPACT.scoredCases);
-    expect(strip).toContain(`help from family was counted against the person in all ${IMPACT.countedCases} real SSI court cases; routed through Giftwise, the same help keeps this in ${IMPACT.routedCases} of the ${IMPACT.scoredCases}`);
-    expect(strip).toContain(`keeps money in all ${IMPACT.keptIfAbleCases} with stated amounts if the person can open an ABLE account`);
+    expect(strip).toContain(`| kept in ${IMPACT.routedCases} of ${IMPACT.scoredCases} real SSI court cases, as the opinions state the facts<br>Family help was counted against the person in all ${IMPACT.countedCases}<br>`);
+    expect(strip).toContain(`<br>Money kept in ${COMPUTED_CASES}, with an ABLE account<br>`);
+    // No line of the cell runs long: each is a short line of its own.
+    const cell = strip.split(/\r?\n/).find((l) => l.startsWith("| kept in"))!.split(" | ")[0];
+    for (const line of cell.replace(/\]\([^)]*\)/g, "]").split("<br>")) expect(line.split(/\s+/).length, line).toBeLessThanOrEqual(16);
     expect(IMPACT.keptIfAbleCases).toBe(IMPACT.computedCases);
     expect(strip).toContain(`**${cents(IMPACT.familyTotal)}** over the ${IMPACT.familyCases.map((c) => c.months).join(" and ")} months`);
     expect(resultsDoc).toContain(`${cents(IMPACT.familyTotal)} in all`);

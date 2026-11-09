@@ -17,7 +17,7 @@ async function patchRoute(req: Request, { params }: Ctx) {
   if (!parsed.success) return fail("invalid_request", "Add what the need is for, an amount from $1 to $20,000 and a category.", 400, parsed.error.issues);
   const row = await editNeed(token, Number(id), parsed.data);
   if (!row) return notFound();
-  if ("error" in row) return fail("invalid_request", String(row.error), 409);
+  if ("error" in row) return fail("invalid_request", String(row.error), "invalid" in row ? 400 : 409);
   return ok({ id: row.id, route: row.route, paid_to: row.payeeName, status: row.status }, started);
 }
 

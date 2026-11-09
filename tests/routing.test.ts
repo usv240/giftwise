@@ -70,7 +70,22 @@ describe("ABLE's yearly limit counts the page's own ABLE gifts", () => {
       { route: "vendor", amount: "420.00", capturedAt: new Date("2026-04-01T00:00:00Z") },
       { route: "able", amount: "50.00", capturedAt: null },
     ];
-    expect(withAbleSoFar(base, pays, now).ableContributedThisYear).toBe(1250);
-    expect(withAbleSoFar(base, [], now)).toBe(base);
+    expect(withAbleSoFar(base, { payments: pays }, now).ableContributedThisYear).toBe(1250);
+    expect(withAbleSoFar(base, { payments: [] }, now)).toBe(base);
+  });
+
+  it("counts a fund's ABLE grants this year too, sent or paid, and not one PayPal returned", async () => {
+    const { withAbleSoFar } = await import("@/lib/households");
+    const base = { ...DEFAULT_PROFILE, ableContributedThisYear: 1000 };
+    const now = new Date("2026-11-08T12:00:00Z");
+    const payments = [{ route: "able", amount: "250.00", capturedAt: new Date("2026-03-01T00:00:00Z") }];
+    const payouts = [
+      { route: "able", amount: "200.00", status: "SUCCESS", createdAt: new Date("2026-05-01T00:00:00Z") },
+      { route: "able", amount: "40.00", status: "PENDING", createdAt: new Date("2026-11-07T00:00:00Z") },
+      { route: "able", amount: "75.00", status: "RETURNED", createdAt: new Date("2026-06-01T00:00:00Z") },
+      { route: "able", amount: "90.00", status: "SUCCESS", createdAt: new Date("2025-12-20T00:00:00Z") },
+      { route: "vendor", amount: "120.00", status: "SUCCESS", createdAt: new Date("2026-07-01T00:00:00Z") },
+    ];
+    expect(withAbleSoFar(base, { payments, payouts }, now).ableContributedThisYear).toBe(1490);
   });
 });

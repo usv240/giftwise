@@ -21,19 +21,20 @@ Use this login in the PayPal window that opens when you press a PayPal button on
 ## Make a payment (about 3 minutes)
 
 1. Open `/g/maya`. If any need already shows as paid, open **Testing in the sandbox** at the bottom of the right column and press **Reset the sample page**.
-2. In **Give any amount**, type `1500`. The preview shows where each dollar will go:
+2. In **Give any amount**, type `1500`. The preview shows where each dollar will go, one row per payee:
 
    | Paid to | For | Amount |
    |---|---|---|
    | Riverside Mobility Repair | Wheelchair repair | $420 |
    | Eastgate College Bookstore | Laptop for college | $649 |
-   | Maya's ABLE account | Electric bill, this month | $138 |
+   | Maya's ABLE account | Electric bill, this month and savings for later | $341 |
    | Northside Physical Therapy | Therapy co-pay | $90 |
-   | Maya's ABLE account | Savings for later | $203 |
+
+   PayPal pays all 4 directly, in one order with five purchase units: her ABLE account has one for the bill and one for savings.
 
    Her January check (set by gifts in November) stays $1,029 this way, the 2027 amount. The same $1,500 given as cash would bring it to $0.
 3. Press the PayPal button under the preview. In the PayPal window, log in with the sandbox login above and press **Complete Purchase**. PayPal asks for no shipping address, because nothing is shipped to you. No PayPal login needed: choose **Debit or Credit Card** instead and use PayPal's test card `4012 8888 8888 1881`, any future expiry and any CVV.
-4. The box thanks you and lists all five payments. The need cards update to **Paid by John**, and **Still needed** drops to $0.
+4. The box thanks you and lists all four payees. The need cards update to **Paid by John**, and **Still needed** drops to $0.
 5. Press **See the receipt**. It lists every payee with its PayPal capture ID, the rules that applied, and their sources.
 6. On the receipt, press **Check with PayPal now** to ask PayPal for the order live, then **Verify the ledger** to recompute the audit trail's hash chain.
 
@@ -50,12 +51,13 @@ Each payment in the order names its own payee, and PayPal captures each one sepa
 | Northside Physical Therapy | `sb-a6t8853656735@business.example.com` |
 | Maya's ABLE account | `sb-ros8g53657188@business.example.com` |
 | Shops on a page made from a fundraiser, or added on the organizer's page | `sb-viaij53657116@business.example.com` |
+| A need whose organizer typed the shop's own PayPal email | That email, in the sandbox only |
 
-The server picks the account from the need, never from the browser (`payeeEmail()` in `src/lib/households.ts`), and `/status` shows how many separate accounts the sample uses under **PayPal payees**.
+The server picks the account from the need, never from the browser (`payeeEmail()` in `src/lib/households.ts`), and `/status` shows how many separate accounts the sample uses under **PayPal payees**. On an organizer's page, **The shop's PayPal email** on a need stores that account on the need (checked for format) and the order pays it; the gift page and the receipt show it masked. The sample page's own shops keep their sandbox accounts. To try it, add a need on [`/manage/maya-sample-organizer`](http://localhost:3100/manage/maya-sample-organizer) with another sandbox business account's email.
 
 ## Checked every night, on Render Workflows
 
-On `/evidence/operations`, **Checked every night, from outside** shows the latest run of the `giftwise-checks` Render Workflow: 25 checks, each its own task, run in parallel with retries. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and eight public API promises (status, the ledger, the SSA report, the MCP tools, the Federal Register watch, the OpenAPI address, PayPal's return link, and a gift paid with a sandbox test card across its payees with no PayPal login, each capture checked at PayPal).
+On `/evidence/operations`, **Checked every night, from outside** shows the latest run and says where it ran: on Render Workflows (the `giftwise-checks` Render Workflow: 25 checks, each its own task, run in parallel with retries), or run locally with `npm run checks:local`, which runs the same checks. `/api/health` and `/status` name the same place under **Outside checks**. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and eight public API promises (status, the ledger, the SSA report, the MCP tools, the Federal Register watch, the OpenAPI address, PayPal's return link, and a gift paid with a sandbox test card across its payees with no PayPal login, each capture checked at PayPal).
 
 1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
 2. In about a minute the run files its results and the panel refreshes with the time of the run and its count. Open **All 25 checks, with each result**, or set **Display** to Technical to see what each check found.
@@ -173,13 +175,13 @@ The PayPal checkout and API suites write a redacted transcript as they run, `con
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 329 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 323 pass and 6 skip (6 need a database) |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 355 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 348 pass and 7 skip (6 need a database) |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
-| Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 agree with SSA and the court |
+| Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 scored, of 36 cases, agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All twelve promises kept by all 100,000 |
 | The rules watch, asked live | `GET /api/rules-watch` | Every Federal Register document reviewed; 2026 and 2027 amounts in use |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
-| API end to end | `npm run e2e:api` | 108 passed |
+| API end to end | `npm run e2e:api` | 111 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
 | The Postman collection, with Newman | `npm run test:postman` | 20 assertions over 16 requests |
 | Browser end to end (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers) | `npm run e2e:ui` | 66 passed |

@@ -8,6 +8,8 @@ import { AbleHandoff } from "@/components/gift/AbleHandoff";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { dbConfigured } from "@/lib/db";
 import { loadReceipt } from "@/lib/receipt";
+import { distinctPayees } from "@/lib/routing";
+import { maskEmail, ownPayee } from "@/lib/households";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
 import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import { asLang, checkMonthIn, monthIn, payeeIn, payeeInline, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
@@ -44,7 +46,10 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
       profile,
     );
     // A line with no need is the ABLE savings line; any other line without a need just says where it was paid.
-    return { row: r, title: need ? sampleIn(lang, need.title, household?.isSample ?? false) : r.route === "able" ? t.savingsIn(hers) : null, check };
+    // A need the organizer gave its own PayPal payee shows that account, masked; the site's sandbox accounts are not shown.
+    const own = need ? ownPayee(need.payeeAccount) : null;
+    const account = own && r.payeeEmail.toLowerCase() === own.toLowerCase() ? maskEmail(own) : null;
+    return { row: r, title: need ? sampleIn(lang, need.title, household?.isSample ?? false) : r.route === "able" ? t.savingsIn(hers) : null, check, account };
   });
   const captured = rows.every((r) => r.status === "captured");
   const total = rows.reduce((s, r) => s + Number(r.amount), 0);
@@ -59,6 +64,8 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
   const checkMonth = checkMonthIn(lang, trace.paymentMonth);
   const baseline = computeMonth(monthOf(date), [], profile).check;
   const payer = rows.find((r) => r.payerName)?.payerName?.split(" ")[0];
+  // Recipients are payees: her ABLE account paid on two lines is one recipient (each line keeps its own capture below).
+  const payees = distinctPayees(rows);
 
   return (
     <div lang={lang}>
@@ -72,10 +79,10 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
           <p id="rc-total" className="rc-total tabular">
             {usd(total)}
           </p>
-          <p className="rc-sub">{t.sub(payer, rows.length, when(rows[0].createdAt, lang))}</p>
+          <p className="rc-sub">{t.sub(payer, payees.length, rows.length, when(rows[0].createdAt, lang))}</p>
           {/* What happens next, in one sentence, then the reference to quote: the confirmation pattern. */}
           {captured ? (
-            <p className="rc-next-line">{t.next(rows.map((r) => payeeInline(lang, r.payeeName)), hers, checkMonth, usd(checkAfter), checkAfter === baseline)}</p>
+            <p className="rc-next-line">{t.next(payees.map((p) => payeeInline(lang, p)), hers, checkMonth, usd(checkAfter), checkAfter === baseline)}</p>
           ) : (
             rows.every((r) => r.status === "created") && <p className="rc-next-line">{t.nextStarted}</p>
           )}
@@ -110,13 +117,14 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
       <section className="page-section" aria-labelledby="rc-where">
         <h2 id="rc-where">{t.where}</h2>
         <ul className="rc-lines">
-          {lines.map(({ row, title }) => (
+          {lines.map(({ row, title, account }) => (
             <li key={row.id} className="rc-line">
               <div>
                 <p className="rc-payee">{payeeIn(lang, row.payeeName)}</p>
                 <p className="rc-for">
                   {title ? `${title}. ` : ""}
                   {row.route === "able" ? t.routeAble : row.route === "vendor" ? t.routeVendor : row.route}.
+                  {account && <> {t.payeeAccount(account)}</>}
                 </p>
                 <p className="rc-ids tabular">
                   {row.captureId ? t.capture(row.captureId) : t.order(row.orderId, row.status)}
@@ -203,7 +211,8 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
 
       {household && (
         <p className="page-section rc-next">
-          {!earlierRound && (
+          {/* The recorded sample order is listed on its month's report (src/lib/report/data.ts); other earlier rounds are not. */}
+          {(!earlierRound || orderId === RECORDED_RECEIPT.order_id) && (
             <Link className="text-link" href={lang === "es" ? `/g/${household.slug}/report/easy?month=${monthOf(date)}&lang=es` : `/g/${household.slug}/report?month=${monthOf(date)}`}>
               {t.onReport(hers, monthIn(lang, monthOf(date)))}
             </Link>

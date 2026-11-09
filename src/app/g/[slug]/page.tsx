@@ -15,11 +15,11 @@ import { SandboxLogin } from "@/components/SandboxLogin";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { cache } from "react";
-import { cashExample, getHousehold, openNeeds, withAbleSoFar } from "@/lib/households";
+import { cashExample, getHousehold, maskEmail, openNeeds, ownPayee, pageProfile, publicPayee } from "@/lib/households";
 import { pageOrigin } from "@/lib/origin";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
 import QRCode from "qrcode";
-import { DEFAULT_PROFILE, evaluateGift, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { evaluateGift, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import { asLang, checkMonthIn, giftText, monthIn, sampleIn } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "./gift.css";
@@ -67,8 +67,8 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     title: giftText(lang).help(name),
     description:
       lang === "es"
-        ? `Cada regalo de esta página se paga directamente a la tienda por PayPal, así el cheque de SSI de ${name} no cambia.`
-        : `Every gift on this page is paid straight to the shop through PayPal, so ${name}'s SSI check stays the same.`,
+        ? `Cada regalo de esta página se paga por PayPal directamente a la tienda o a la cuenta ABLE de ${name}, así su cheque de SSI no cambia.`
+        : `Every gift on this page is paid through PayPal straight to the shop or to ${name}'s ABLE account, so ${name}'s SSI check stays the same.`,
     robots: data && !data.household.isSample ? { index: false } : undefined,
   };
 }
@@ -85,7 +85,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
   if (!data) notFound();
   const { household, needs, payments } = data;
   // The same profile the server routes with: this year's ABLE gifts on the page count toward ABLE's yearly limit.
-  const profile: Profile = withAbleSoFar({ ...DEFAULT_PROFILE, ...(household.profile as Partial<Profile>) }, payments);
+  const profile: Profile = pageProfile(data);
   const w = pronounWords(profile.pronoun);
   const own = (s: string) => sampleIn(lang, s, household.isSample);
   const date = today();
@@ -107,6 +107,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
       amount: Number(n.amount),
       funded: Number(n.funded),
       payeeName: n.payeeName,
+      payeeAccountShown: ownPayee(n.payeeAccount) ? maskEmail(ownPayee(n.payeeAccount)!) : null,
       route: n.route,
       status: n.status,
       rulePlain: lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain,
@@ -121,7 +122,8 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
     };
   });
   // The giving card's suggested amounts and starting split, from the same inputs it would use in the browser.
-  const give = openNeeds(needs).map((n) => ({ ...n, title: own(n.title) }));
+  // The browser routes for display only (the server routes again before any order), so an organizer's address stays here.
+  const give = openNeeds(needs).map((n) => ({ ...n, payeeAccount: publicPayee(n.payeeAccount), title: own(n.title) }));
   const ableName = `${household.name}'s ABLE account`;
   const chips = remember(["chips", give, date, profile, ableName, lang], () => suggestedAmounts(give, date, profile, ableName, t.chipAll));
   const firstPlan = remember(["plan", give, date, profile, ableName], () => routeGift(DEFAULT_GIFT, give, date, profile, ableName));

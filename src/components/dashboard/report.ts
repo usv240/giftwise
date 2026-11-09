@@ -43,7 +43,7 @@ export function studioData(gifts: GiftRow[], months: MonthRow[]): AgDataSourcesD
           { id: "given", name: "Given that month", ...USD },
           { id: "checkWithGiftwise", name: "Her check, with Giftwise", ...USD },
           { id: "checkIfCash", name: "Her check, if it had been cash", ...USD },
-          { id: "kept", name: "Kept by Giftwise", ...USD },
+          { id: "kept", name: "Kept by Giftwise, against cash", ...USD },
         ],
       },
     ],
@@ -74,7 +74,7 @@ export const initialReport: AgReportState<GiftwiseRegistry> = {
           format: { ...title("Giver"), style: { selection: { type: "single" }, dimensions: { height: 30, minWidth: 64 } } },
         },
         given: { type: "value", dataMapping: { value: [sum("gifts.amount")] }, format: { ...title("Given this year"), ...figure } },
-        kept: { type: "value", dataMapping: { value: [sum("months.kept")] }, format: { ...title("Kept in her checks by Giftwise"), ...figure } },
+        kept: { type: "value", dataMapping: { value: [sum("months.kept")] }, format: { ...title("Kept in her checks, against cash"), ...figure } },
         check: {
           type: "giftwiseCheck",
           dataMapping: {

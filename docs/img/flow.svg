@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 260" width="1040" height="260" role="img" aria-labelledby="flow-title flow-desc" font-family="'Clash Grotesk', 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="flow-title">How a gift moves through Giftwise</title>
+  <desc id="flow-desc">Five steps: family and friends give one amount; the rules engine chooses each payee and amount; one PayPal order pays every payee; PayPal captures it once; the month's report to Social Security can be checked against PayPal.</desc>
+  <!-- One flat ground so it reads the same on a light or a dark page. -->
+  <rect width="1040" height="260" rx="20" fill="#f4f5f8"/>
+  <g font-size="21" font-weight="600" fill="#21232e">
+    <!-- Step boxes: white on the ground; the PayPal steps take the accent tint. -->
+    <rect x="24" y="44" width="176" height="172" rx="14" fill="#ffffff"/>
+    <rect x="228" y="44" width="176" height="172" rx="14" fill="#ffffff"/>
+    <rect x="432" y="44" width="176" height="172" rx="14" fill="#e3ecff"/>
+    <rect x="636" y="44" width="176" height="172" rx="14" fill="#e3ecff"/>
+    <rect x="840" y="44" width="176" height="172" rx="14" fill="#ffffff"/>
+    <text x="44" y="88">Family gives</text>
+    <text x="248" y="88">The rules</text>
+    <text x="248" y="114">choose payees</text>
+    <text x="452" y="88">One PayPal</text>
+    <text x="452" y="114">order</text>
+    <text x="656" y="88">Captured once</text>
+    <text x="860" y="88">The month&#8217;s</text>
+    <text x="860" y="114">report</text>
+  </g>
+  <g font-size="16" fill="#5a5d6b">
+    <text x="44" y="122">One amount, on a</text>
+    <text x="44" y="144">phone, by PayPal</text>
+    <text x="44" y="166">login or card</text>
+    <text x="248" y="148">Every line checked</text>
+    <text x="248" y="170">and cited; housing</text>
+    <text x="248" y="192">to ABLE</text>
+    <text x="452" y="148" fill="#2b3a66">A payee per</text>
+    <text x="452" y="170" fill="#2b3a66">purchase unit,</text>
+    <text x="452" y="192" fill="#2b3a66">up to 10</text>
+    <text x="656" y="122" fill="#2b3a66">One PayPal-</text>
+    <text x="656" y="144" fill="#2b3a66">Request-Id; each</text>
+    <text x="656" y="166" fill="#2b3a66">payee paid directly</text>
+    <text x="860" y="148">To Social Security,</text>
+    <text x="860" y="170">checked against</text>
+    <text x="860" y="192">PayPal by anyone</text>
+  </g>
+  <!-- Arrows between the steps. -->
+  <g stroke="#105bff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M204 130 H224 M216 122 L224 130 L216 138"/>
+    <path d="M408 130 H428 M420 122 L428 130 L420 138"/>
+    <path d="M612 130 H632 M624 122 L632 130 L624 138"/>
+    <path d="M816 130 H836 M828 122 L836 130 L828 138"/>
+  </g>
+</svg>

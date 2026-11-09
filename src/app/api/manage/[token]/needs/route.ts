@@ -12,6 +12,7 @@ async function postRoute(req: Request, { params }: { params: Promise<{ token: st
   if (!parsed.success) return fail("invalid_request", "Add what the need is for, an amount from $1 to $20,000 and a category.", 400, parsed.error.issues);
   const row = await addNeed((await params).token, parsed.data);
   if (!row) return fail("not_found", "That manage link does not match any page.", 404);
+  if ("error" in row) return fail("invalid_request", String(row.error), 400);
   return ok({ id: row.id, route: row.route, paid_to: row.payeeName }, started);
 }
 

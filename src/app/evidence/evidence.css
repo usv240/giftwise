@@ -1995,3 +1995,66 @@
   scroll-margin-top: 88px;
 }
 
+
+/* The Evidence page opens with one number, set large in the running sentence, then the path; the rest is in folds. */
+.ev-one {
+  max-width: 46ch;
+}
+.ev-one-fig {
+  display: block;
+  font-size: clamp(2.5rem, 1.8rem + 2.6vw, 4rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 0.35rem;
+}
+/* Each group's rows inside its fold: the same short rows the index had, one column, a link and one line each. */
+.ev-index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  max-width: 76ch;
+}
+.ev-index-list li {
+  scroll-margin-top: 96px;
+  line-height: 1.45;
+}
+.ev-index-list li:target {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.evidence .ev-fold-intro {
+  margin: 0;
+  max-width: 72ch;
+}
+.evidence .ev-fold-more {
+  margin: 0;
+  font-weight: 500;
+}
+/* A component whose own heading repeats its fold's title: inside the fold, the fold's heading is the one. */
+.ev-fold-body #ji-h,
+.ev-fold-body #new-h {
+  display: none;
+}
+.ev-fold-body .ji,
+.ev-fold-body .new3 {
+  margin-top: 0;
+}
+/* What the AI adds: its own heading inside the referee section, with more room above than below. */
+.ev-ai {
+  display: grid;
+  gap: 12px;
+  scroll-margin-top: 88px;
+}
+.ev-ai h3 {
+  margin: clamp(1rem, 0.75rem + 1vw, 1.75rem) 0 0;
+  font-size: 1.1875rem;
+  font-weight: 500;
+}
+.ev-ai .page-prose {
+  margin: 0;
+}

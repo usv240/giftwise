@@ -552,3 +552,13 @@
     font-size: 1.125rem;
   }
 }
+/* The payee field's one-line hint, and the organizer's own payee beside the shop's name. */
+.mg-field-hint {
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.mg-need-payee {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}

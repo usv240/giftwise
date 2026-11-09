@@ -102,7 +102,9 @@ await page.locator(".give-any paypal-button").click();
 const giftJson = await (await giftReq).json();
 const giftId = giftJson.data?.id;
 const units = giftJson.data?.plan?.lines?.length ?? 0;
-ok("Give any amount creates one routed order", Boolean(giftId) && units > 1, `${giftId}, ${units} payees`);
+// The page lists each payee once (her ABLE account can be paid on two lines); the order keeps a purchase unit per line.
+const payees = new Set((giftJson.data?.plan?.lines ?? []).map((l) => l.payeeName)).size;
+ok("Give any amount creates one routed order", Boolean(giftId) && units > 1, `${giftId}, ${units} lines to ${payees} payees`);
 T.step("the routed order, as created", { order_id: giftId, payees: units, status: giftJson.data?.status, amount: giftJson.data?.plan?.amount });
 const giftPopup = await giftPopupP;
 ok("PayPal checkout opens for the routed order", await opensFor(giftPopup, giftId));
@@ -112,7 +114,7 @@ if (giftPopup && email && pass) {
   await page.locator(".give-done").waitFor({ timeout: 90000 });
   const done = (await page.locator(".give-any").textContent())?.replace(/\s+/g, " ").trim();
   const shown = await page.locator(".give-any .give-lines li").count();
-  ok("thank-you shows every payee captured", shown === units, `${shown} of ${units}: ${done?.slice(0, 160)}`);
+  ok("thank-you shows every payee captured, each once", shown === payees, `${shown} of ${payees}: ${done?.slice(0, 160)}`);
   const thanked = (await page.locator(".give-any .give-lines").textContent())?.replace(/\s+/g, " ");
   ok("thank-you lists the same lines, in the same order, as the preview", thanked === preview, thanked);
   const refreshed = await page.waitForFunction(() => document.querySelectorAll(".need paypal-button").length === 0, null, { timeout: 20000 }).then(() => true).catch(() => false);
@@ -122,7 +124,7 @@ if (giftPopup && email && pass) {
   T.step("PayPal's record of the routed order", { order_id: giftId, ...(await captured(giftId)) });
   await page.goto(`${B}/r/${giftId}`, { waitUntil: "networkidle" });
   const rows = await page.locator(".rc-line").count();
-  ok("public receipt lists every payee", rows === units, `${rows} of ${units}`);
+  ok("public receipt lists every capture, one line per purchase unit", rows === units, `${rows} of ${units}`);
   await page.screenshot({ path: `${OUT}/pp-routed-receipt.png`, fullPage: true });
 } else if (giftPopup) {
   await giftPopup.close();

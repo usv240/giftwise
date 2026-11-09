@@ -40,6 +40,26 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export const MAX_UNITS = 10;
 
 /**
+ * The payees a set of lines pays, each once, in the order they first appear. One order can pay the same payee on two
+ * lines (her ABLE account for a bill and for savings); every count of recipients shown to a person counts payees.
+ */
+export function distinctPayees<T extends { payeeName: string }>(lines: T[]): string[] {
+  return [...new Set(lines.map((l) => l.payeeName))];
+}
+
+/** Lines merged by payee for display: each payee once, with what it is paid for and the total, in first-seen order. */
+export function byPayee<T extends { payeeName: string; amount: number }>(lines: T[]): { payeeName: string; lines: T[]; amount: number }[] {
+  const out = new Map<string, { payeeName: string; lines: T[]; amount: number }>();
+  for (const l of lines) {
+    const g = out.get(l.payeeName) ?? { payeeName: l.payeeName, lines: [], amount: 0 };
+    g.lines.push(l);
+    g.amount = round2(g.amount + l.amount);
+    out.set(l.payeeName, g);
+  }
+  return [...out.values()];
+}
+
+/**
  * Route one gift of any amount, benefit-safe: fill the open needs in order (paid straight to each shop),
  * then send what is left to the person's ABLE account. The rules engine checks every line.
  */

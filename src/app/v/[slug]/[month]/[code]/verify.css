@@ -57,6 +57,10 @@
   background: var(--positive);
   box-shadow: inset 0 0 0 3px var(--vf-bg);
 }
+/* Nothing to ask: a dashed ring, neither a pass nor a miss. */
+.vf-checks li[data-none]::before {
+  border-style: dashed;
+}
 .vf-check-k {
   font-weight: 500;
 }

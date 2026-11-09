@@ -1,8 +1,9 @@
 import Link from "next/link";
 import heldOut from "../../../content/eval/held-out-results.json";
-import fieldResults from "../../../content/eval/field-cases-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import { Info } from "@/components/Info";
+import { COURT_SCORE } from "@/lib/impact";
+import { RECORDED_MONTH_NAME, RECORDED_REPORT_CHECK } from "@/lib/recorded-month";
 import { MAX_UNITS } from "@/lib/routing";
 
 /**
@@ -12,9 +13,12 @@ import { MAX_UNITS } from "@/lib/routing";
 export function WhatIsFirst({
   headingId = "first-h",
   className,
+  inFold = false,
 }: {
   headingId?: string;
   className?: string;
+  /** Inside a Fold, whose heading already names it: the four rows only, with no heading and no disclosure of their own. */
+  inFold?: boolean;
 }) {
   const FIRST = [
     {
@@ -26,8 +30,8 @@ export function WhatIsFirst({
     {
       k: "A report to Social Security anyone can verify",
       v: "Each month's report carries a code; opening it asks PayPal live for every payment and recomputes the ledger's hash chain, with no login. None of the compared products publishes a report of this kind.",
-      href: "/g/maya/report?month=2026-10#rp-verify-h",
-      link: "October's report",
+      href: RECORDED_REPORT_CHECK,
+      link: `${RECORDED_MONTH_NAME}'s report`,
     },
     {
       k: "Two rulebooks, quotes checked by code, a referee",
@@ -37,11 +41,27 @@ export function WhatIsFirst({
     },
     {
       k: "Accuracy published against SSA's own material",
-      v: `${ssa.summary.engine_matches} of ${ssa.summary.cases} of Social Security's worked examples, ${heldOut.summary.engine_matches} of ${heldOut.summary.cases} the engine never saw, and ${fieldResults.summary.agreed} of ${fieldResults.summary.scored} federal court cases, each on its own page. None of the compared products publishes accuracy against SSA's material.`,
+      v: `${ssa.summary.engine_matches} of ${ssa.summary.cases} of Social Security's worked examples, ${heldOut.summary.engine_matches} of ${heldOut.summary.cases} the engine never saw, and federal court cases, ${COURT_SCORE}, each on its own page. None of the compared products publishes accuracy against SSA's material.`,
       href: "/evidence/rules",
       link: "How the rules were checked",
     },
   ];
+  const list = (
+    <dl className="why-list">
+      {FIRST.map((f) => (
+        <div key={f.k} className="why-row">
+          <dt>{f.k}</dt>
+          <dd>
+            {f.v}{" "}
+            <Link className="text-link" href={f.href}>
+              {f.link}
+            </Link>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+  if (inFold) return list;
   return (
     <section className={`first ${className ?? ""}`} aria-labelledby={headingId}>
       <div className="title-row">
@@ -56,21 +76,7 @@ export function WhatIsFirst({
       </p>
       <details className="jx-disc">
         <summary>The four, with the products each is measured against</summary>
-        <div className="jx-body">
-          <dl className="why-list">
-            {FIRST.map((f) => (
-              <div key={f.k} className="why-row">
-                <dt>{f.k}</dt>
-                <dd>
-                  {f.v}{" "}
-                  <Link className="text-link" href={f.href}>
-                    {f.link}
-                  </Link>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        <div className="jx-body">{list}</div>
       </details>
     </section>
   );

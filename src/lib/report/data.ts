@@ -1,7 +1,8 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import sample from "../../../content/sample-year.json";
 import { db, dbConfigured, schema } from "@/lib/db";
 import { SAMPLE, getHousehold } from "@/lib/households";
+import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
 import { DEFAULT_PROFILE, type Category, type Delivery, type Profile } from "@/lib/rules";
 import type { ReportGift } from "./ssa";
 
@@ -12,6 +13,10 @@ export type GiftSubject = { slug: string; name: string; isSample: boolean; profi
 /**
  * Every gift for one gift page, each with the record that proves where it went: the sample year for the demo
  * household, then every PayPal capture and every PayPal Payouts item the site recorded for that household.
+ *
+ * The sample page also carries its recorded sandbox order (content/sample-receipt.json): a real capture kept as an
+ * earlier round, so it never counts toward the page's open needs. It is listed in the month it was captured, so that
+ * month's report names real PayPal captures and its check page asks PayPal for each one.
  */
 export async function giftSubject(slug: string): Promise<GiftSubject | null> {
   const isMaya = slug === SAMPLE.slug;
@@ -30,7 +35,14 @@ export async function giftSubject(slug: string): Promise<GiftSubject | null> {
     profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
     const needOf = (id: number | null) => data.needs.find((n) => n.id === id);
 
-    for (const p of data.payments) {
+    // The current round's captures, then the recorded order's (archived) rows when this page is the sample.
+    const recorded = isMaya
+      ? await db()
+          .select()
+          .from(schema.payments)
+          .where(and(eq(schema.payments.householdId, data.household.id), eq(schema.payments.orderId, RECORDED_RECEIPT.order_id), eq(schema.payments.status, "captured"), isNotNull(schema.payments.archivedAt)))
+      : [];
+    for (const p of [...data.payments, ...recorded.filter((r) => !data.payments.some((c) => c.id === r.id))]) {
       const need = needOf(p.needId);
       gifts.push({
         id: `p${p.id}`,

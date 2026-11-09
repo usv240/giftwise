@@ -17,6 +17,7 @@ import { LoopVideo } from "@/components/landing/LoopVideo";
 import { ShowcaseBoard } from "@/components/landing/ShowcaseBoard";
 import { WhatIsNew } from "@/components/WhatIsNew";
 import { IMPACT, KEPT_LABEL, housingReach, payItYourself } from "@/lib/impact";
+import { RECORDED_REPORT_CHECK } from "@/lib/recorded-month";
 import { checkMonthName, usd } from "@/lib/rules";
 import "./landing.css";
 
@@ -112,8 +113,8 @@ export default function Home() {
             <Link href="/start" className="btn btn-primary">
               Start a gift page
             </Link>
-            <Link href="/evidence" className="text-link">
-              The five-minute path
+            <Link href="/g/maya" className="text-link">
+              Give on the sample page
             </Link>
           </div>
           <p className="hero-note muted">
@@ -128,23 +129,13 @@ export default function Home() {
               Money can reach only a payee the rules picked: one PayPal order, captured once, with a report anyone can check.
             </p>
             <p className="hero-proof-links">
-              <Link className="text-link" href="/g/maya/report?month=2026-10#rp-verify-h">
+              <Link className="text-link" href={RECORDED_REPORT_CHECK}>
                 Verify a report
               </Link>
             </p>
           </div>
         </div>
       </section>
-
-      {/* One referee moment, right under the Gift Checker: the two reviewers' quotes and the verdict, replayed through the real code. */}
-      <div className="frame grid-12 home-ref">
-        <RefereeMoment />
-      </div>
-
-      {/* What is new, in the first two screens: the report anyone can check, the referee, and the agent that asks first. */}
-      <div className="frame grid-12 home-new">
-        <WhatIsNew headingId="new-title" />
-      </div>
 
       {/* Intro: a statement with inline pictures */}
       <section className="intro frame" aria-labelledby="intro-title">
@@ -286,7 +277,7 @@ export default function Home() {
                 <span className="research-proof-fig tabular">
                   {fieldResults.summary.agreed} of {fieldResults.summary.scored}
                 </span>
-                <span>real SSI cases from federal courts reach the outcome SSA and the court did</span>
+                <span>scored, of {fieldResults.summary.cases} cases: real SSI cases from federal courts that reach the outcome SSA and the court did</span>
               </Link>
             </li>
             <li>
@@ -366,6 +357,15 @@ export default function Home() {
           </div>
         </details>
       </section>
+
+      {/* After the proof, for anyone who wants the inside: one referee moment (the two reviewers' quotes and the verdict,
+          replayed through the real code), then what is new. The first screens stay one path: the Gift Checker, then giving. */}
+      <div className="frame grid-12 home-ref">
+        <RefereeMoment />
+      </div>
+      <div className="frame grid-12 home-new">
+        <WhatIsNew headingId="new-title" />
+      </div>
 
       {/* FAQ: question index, one answer */}
       <section className="section frame faq-section" aria-labelledby="faq-title">

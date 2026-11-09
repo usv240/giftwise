@@ -1,3 +1,5 @@
+import { RECORDED_MONTH, RECORDED_MONTH_NAME } from "@/lib/recorded-month";
+
 /** The guided tour: the five-minute path on /evidence, one stop per thing to look at. */
 export type TourStep = { path: string; target: string; title: string; text: string };
 
@@ -21,10 +23,11 @@ export const TOUR: TourStep[] = [
     text: "Written from the gifts themselves: nothing counts this month, with the rule and the PayPal record behind every line. Press As cash for the report the same gifts would have needed.",
   },
   {
-    path: "/g/maya/report?month=2026-10",
+    // The recorded sandbox order's month, so the check really asks PayPal for each capture.
+    path: `/g/maya/report?month=${RECORDED_MONTH}`,
     target: ".rp-verify",
     title: "A report anyone can check",
-    text: "Every report carries a code. Open it and Giftwise rebuilds the report, asks PayPal for each payment live and checks the audit ledger, with no login.",
+    text: `${RECORDED_MONTH_NAME}'s report lists a real sandbox gift, and every report carries a code. Open it and Giftwise rebuilds the report, asks PayPal for each capture live and checks the audit ledger, with no login.`,
   },
   {
     path: "/g/maya/report/easy?month=2026-10&lang=es",
@@ -47,8 +50,8 @@ export const TOUR: TourStep[] = [
   {
     path: "/evidence",
     target: ".ji-three",
-    title: "Three numbers first",
-    text: "What routing would have kept in real court cases, Social Security's own examples, and the error that costs money. Each opens its page; every other result has its own page below.",
+    title: "The three headline results",
+    text: "What routing would have kept in real court cases, Social Security's own examples, and the error that costs money. Each opens its page; every other result is in the folds below, one press each.",
   },
 ];
 

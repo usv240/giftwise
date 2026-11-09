@@ -1,5 +1,5 @@
 import { ApiError, PaypalExperienceUserAction, PaypalWalletContextShippingPreference, type PaymentSource } from "@paypal/paypal-server-sdk";
-import { CheckoutPaymentIntent, orders } from "./client";
+import { CheckoutPaymentIntent, orders, paypalRest } from "./client";
 
 /** Nothing is shipped to the donor, so PayPal checkout asks for no address and shows who is asking. */
 const checkout: PaymentSource = {
@@ -11,7 +11,11 @@ export type PayeeOrder = {
   payeeEmail: string;
   description: string;
   referenceId: string;
-  /** Idempotency: the same plan never creates two orders. */
+  /**
+   * Sent as PayPal-Request-Id. Callers pass a fresh id per checkout, because two givers may make the same plan and each
+   * needs an order of their own; a retry of this one request gets the same order back. Capture is the idempotent step
+   * (src/lib/paypal/capture.ts): one capture per order, however many times it is asked.
+   */
   requestId: string;
   softDescriptor?: string;
 };
@@ -79,28 +83,80 @@ export async function createRoutedOrder(units: Unit[], requestId: string, redire
 }
 
 /**
- * Read an order back through the SDK. Capture is not in this file: src/lib/paypal/capture.ts captures over plain REST,
+ * An order as PayPal's REST API returns it (GET /v2/checkout/orders/{id}), the fields Giftwise reads. Orders are read
+ * over plain REST, not through the Server SDK: the SDK checks each answer against its schema, and PayPal returns a
+ * captured multi-payee order with `purchase_units[].shipping.address` as `{}` (no country_code), which the SDK rejects
+ * as a ResponseValidationError although PayPal answered 200 COMPLETED. Every order read (Check with PayPal now, the
+ * report check, capture, the assistant's fallback and the card check) reads this shape; the SDK still creates orders,
+ * where its request types help and PayPal's answer parses cleanly.
+ */
+export type RestOrder = {
+  id?: string;
+  status?: string;
+  name?: string;
+  message?: string;
+  details?: { issue?: string; description?: string }[];
+  debug_id?: string;
+  payer?: { name?: { given_name?: string; surname?: string } };
+  purchase_units?: {
+    reference_id?: string;
+    amount?: { currency_code?: string; value?: string };
+    payee?: { email_address?: string; merchant_id?: string };
+    payments?: { captures?: { id?: string; status?: string; amount?: { currency_code?: string; value?: string } }[] };
+  }[];
+  links?: { href?: string; rel?: string; method?: string }[];
+};
+
+/** What Check with PayPal now shows: the order's status, and each purchase unit with its payee and its capture. */
+export type OrderView = {
+  id: string | null;
+  status: string | null;
+  units: { reference_id: string | null; amount: string | null; payee_email: string | null; captures: { id: string | null; status: string | null; amount: string | null }[] }[];
+};
+
+/** The order as Check with PayPal now shows it, from PayPal's REST answer. Pure, so it is tested on a recorded answer. */
+export function orderView(o: RestOrder): OrderView {
+  return {
+    id: o.id ?? null,
+    status: o.status ?? null,
+    units: (o.purchase_units ?? []).map((pu) => ({
+      reference_id: pu.reference_id ?? null,
+      amount: pu.amount?.value ?? null,
+      payee_email: pu.payee?.email_address ?? null,
+      captures: (pu.payments?.captures ?? []).map((c) => ({ id: c.id ?? null, status: c.status ?? null, amount: c.amount?.value ?? null })),
+    })),
+  };
+}
+
+/**
+ * Read an order from PayPal over REST. Capture is not in this file: src/lib/paypal/capture.ts captures over plain REST,
  * so it can send PayPal's negative-testing header (PayPal-Mock-Response) for the failure-case runner and retry a 5xx
  * with the same PayPal-Request-Id.
  */
-export async function getOrder(orderId: string) {
-  const { result } = await orders().getOrder({ id: orderId });
-  return result;
+export async function readOrder(orderId: string) {
+  const res = await paypalRest<RestOrder>(`/v2/checkout/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
+  if (res.status >= 400) {
+    const issue = res.body.details?.[0]?.issue ?? res.body.name ?? "PAYPAL_ERROR";
+    return { ok: false as const, status: res.status, issue, plain: PLAIN[issue] ?? (res.status === 404 ? "PayPal has no order with that id." : GENERIC), debugId: res.debugId ?? res.body.debug_id ?? null };
+  }
+  return { ok: true as const, status: res.status, order: res.body, debugId: res.debugId };
 }
 
-/** A plain message for a PayPal error, plus the debug id for Technical mode. */
+const GENERIC = "PayPal could not complete this step. Please try again.";
+const PLAIN: Record<string, string> = {
+  INSTRUMENT_DECLINED: "That payment method was declined. Please try another one in PayPal.",
+  PAYER_ACTION_REQUIRED: "PayPal needs one more step from the payer. Please try again.",
+  ORDER_ALREADY_CAPTURED: "This payment is already complete.",
+  PAYEE_ACCOUNT_RESTRICTED: "The shop's PayPal account cannot receive payments right now.",
+  PAYEE_ACCOUNT_INVALID: "The shop's PayPal account is not set up correctly.",
+};
+
+/** A plain message for a PayPal error the Server SDK raised, plus the debug id for Technical mode. */
 export function describePayPalError(e: unknown) {
   if (e instanceof ApiError) {
     const body = e.result as { name?: string; message?: string; details?: { issue?: string; description?: string }[]; debug_id?: string } | undefined;
     const issue = body?.details?.[0]?.issue ?? body?.name ?? "PAYPAL_ERROR";
-    const PLAIN: Record<string, string> = {
-      INSTRUMENT_DECLINED: "That payment method was declined. Please try another one in PayPal.",
-      PAYER_ACTION_REQUIRED: "PayPal needs one more step from the payer. Please try again.",
-      ORDER_ALREADY_CAPTURED: "This payment is already complete.",
-      PAYEE_ACCOUNT_RESTRICTED: "The shop's PayPal account cannot receive payments right now.",
-      PAYEE_ACCOUNT_INVALID: "The shop's PayPal account is not set up correctly.",
-    };
-    return { status: e.statusCode, issue, plain: PLAIN[issue] ?? "PayPal could not complete this step. Please try again.", debugId: body?.debug_id ?? null };
+    return { status: e.statusCode, issue, plain: PLAIN[issue] ?? GENERIC, debugId: body?.debug_id ?? null };
   }
-  return { status: 500, issue: "UNKNOWN", plain: "PayPal could not complete this step. Please try again.", debugId: null };
+  return { status: 500, issue: "UNKNOWN", plain: GENERIC, debugId: null };
 }

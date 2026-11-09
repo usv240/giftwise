@@ -3,7 +3,7 @@ import { fail, ok, today } from "@/lib/api/envelope";
 import { log } from "@/lib/log";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
-import { getNeed, payeeEmail } from "@/lib/households";
+import { getNeed, ownPayee, payeeEmail } from "@/lib/households";
 import { createPayeeOrder, describePayPalError } from "@/lib/paypal/orders";
 import { eq } from "drizzle-orm";
 import { DEFAULT_PROFILE, evaluateGift, type Category, type Delivery, type Profile } from "@/lib/rules";
@@ -58,7 +58,7 @@ async function postRoute(req: Request) {
       amount: (Number(need.amount) - Number(need.funded)).toFixed(2),
       payeeEmail: email,
     });
-    await audit("person", "paypal.order.created", `need:${need.id}`, { orderId: order.id, amount: need.amount, payee: need.payeeAccount, ruleIds: check.ruleIds });
+    await audit("person", "paypal.order.created", `need:${need.id}`, { orderId: order.id, amount: need.amount, payee: ownPayee(need.payeeAccount) ? "organizer's PayPal account" : need.payeeAccount, ruleIds: check.ruleIds });
     return ok({ id: order.id, status: order.status, rule_ids: check.ruleIds, check_after: check.checkAfter }, started);
   } catch (e) {
     const d = describePayPalError(e);

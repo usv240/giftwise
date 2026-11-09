@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
-import { getHousehold, withAbleSoFar } from "@/lib/households";
+import { getHousehold, pageProfile } from "@/lib/households";
 import { routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
 import { DEFAULT_PROFILE, addMonths, computeMonth, evaluateGift, monthName, monthOf, usd, type Profile } from "@/lib/rules";
 
@@ -132,7 +132,7 @@ export async function planMonth(token: string, month: string) {
   if (!s) return null;
   const existing = s.runs.find((r) => r.month === month);
   if (existing) return existing;
-  const profile = withAbleSoFar({ ...DEFAULT_PROFILE, ...(s.data.household.profile as Partial<Profile>) }, s.data.payments);
+  const profile = pageProfile(s.data);
   const ableName = `${s.data.household.name}'s ABLE account`;
   const needs = needsForMonth(s.data.needs, s.data.payments, month, await orderMonths(s.data.household.id));
   const plan = planFor(Number(s.gift.amount), needs, month, profile, ableName);

@@ -40,8 +40,8 @@ const SAMPLE_ES: Record<string, string> = {
   "Therapy co-pay": "Copago de terapia",
   "Weekly physical therapy.": "Fisioterapia semanal.",
   "savings for later": "ahorro para después",
-  "Maya is 29 and lives on her own. She uses a wheelchair and is starting community college. Thank you for helping with these. Every gift on this page goes straight to the shop, so her SSI check stays the same. With love, Rosa (her mom)":
-    "Maya tiene 29 años y vive sola. Usa silla de ruedas y está empezando la universidad comunitaria. Gracias por ayudar con esto. Cada regalo de esta página va directamente a la tienda, así su cheque de SSI no cambia. Con cariño, Rosa (su mamá)",
+  "Maya is 29 and lives on her own. She uses a wheelchair and is starting community college. Thank you for helping with these. Every gift on this page is paid straight to the shop or clinic, or to her ABLE account, so her SSI check stays the same. With love, Rosa (her mom)":
+    "Maya tiene 29 años y vive sola. Usa silla de ruedas y está empezando la universidad comunitaria. Gracias por ayudar con esto. Cada regalo de esta página se paga directamente a la tienda o la clínica, o a su cuenta ABLE, así su cheque de SSI no cambia. Con cariño, Rosa (su mamá)",
 };
 export const sampleIn = (lang: Lang, s: string, isSample = true) => (lang === "es" && isSample ? (SAMPLE_ES[s] ?? s) : s);
 
@@ -61,6 +61,8 @@ const EN = {
   /** The line right above a need's PayPal button: what this payment is, and who gets it. */
   needPay: (amt: string, payee: string) => `You pay ${amt}, straight to ${payee}.`,
   needGoes: (payee: string) => `Goes straight to ${payee}.`,
+  /** The organizer's own PayPal payee for a need, masked: "PayPal account eastga…@example.com." */
+  payeeAccount: (masked: string) => `PayPal account ${masked}.`,
   orderLine: (id: string) => `PayPal order ${id}`,
   seeReceipt: "See the receipt",
   giveAny: "Give any amount",
@@ -92,6 +94,8 @@ const EN = {
   paidNext: (payees: string[], w: Words, month: string, amt: string) =>
     `PayPal paid ${payees.length === 1 ? payees[0] : payees.length === 2 ? `${payees[0]} and ${payees[1]}` : `all ${payees.length} recipients`}. ${w.Poss} ${month} check stays ${amt}.`,
   savingsLater: "savings for later",
+  /** What one payee is paid for, when an order pays it on more than one line: "Electric bill and savings for later". */
+  joinFor: (titles: string[]) => (titles.length <= 1 ? (titles[0] ?? "") : `${titles.slice(0, -1).join(", ")} and ${titles.at(-1)}`),
   seeOnReport: (name: string, month: string) => `See it on ${name}'s ${month} report`,
   giveAgain: "Give again",
   monthly: "Give this every month",
@@ -128,12 +132,12 @@ const EN = {
   reset: "Reset the sample page",
   resetting: "Resetting…",
   shareTitle: "Share this page",
-  shareText: "Anyone you send it to gives the same way, straight to the shop.",
+  shareText: "Anyone you send it to gives the same way, straight to the shop or the ABLE account.",
   shareBtn: "Share or copy the link",
   copied: "Link copied",
   showQr: "Show a QR code",
   qrAria: (url: string) => `QR code for ${url}`,
-  shareMessage: (n: string, w: Words) => `Help ${n}: every gift is paid straight to the shop through PayPal, so ${w.poss} SSI check stays whole.`,
+  shareMessage: (n: string, w: Words) => `Help ${n}: every gift is paid through PayPal straight to the shop or ${w.poss} ABLE account, so ${w.poss} SSI check stays whole.`,
   ppLoading: "Loading PayPal…",
   ppUnavailable: "PayPal checkout is not connected on this server yet.",
   ppCompleting: "Completing the payment with PayPal…",
@@ -165,6 +169,7 @@ const ES: GiftText = {
   paidLine: (payee, _w, month, amt, stays) => `Pagado a ${payee}. Su cheque de ${month} ${stays ? "se mantiene en" : "es de"} ${amt}.`,
   needPay: (amt, payee) => `Usted paga ${amt} directamente a ${payee}.`,
   needGoes: (payee) => `Va directamente a ${payee}.`,
+  payeeAccount: (masked) => `Cuenta de PayPal ${masked}.`,
   orderLine: (id) => `Orden de PayPal ${id}`,
   seeReceipt: "Ver el recibo",
   giveAny: "Dé la cantidad que quiera",
@@ -194,6 +199,7 @@ const ES: GiftText = {
   paidNext: (payees, _w, month, amt) =>
     `PayPal ${payees.length === 1 ? `le pagó a ${payees[0]}` : payees.length === 2 ? `les pagó a ${payees[0]} y a ${payees[1]}` : `les pagó a los ${payees.length} destinatarios`}. Su cheque de ${month} se mantiene en ${amt}.`,
   savingsLater: "ahorro para después",
+  joinFor: (titles) => (titles.length <= 1 ? (titles[0] ?? "") : `${titles.slice(0, -1).join(", ")} y ${titles.at(-1)}`),
   seeOnReport: (name, month) => `Verlo en el informe de ${month} de ${name}`,
   giveAgain: "Dar otra vez",
   monthly: "Dar esto cada mes",
@@ -230,12 +236,12 @@ const ES: GiftText = {
   reset: "Restablecer la página de muestra",
   resetting: "Restableciendo…",
   shareTitle: "Compartir esta página",
-  shareText: "Quien la reciba da de la misma manera, directamente a la tienda.",
+  shareText: "Quien la reciba da de la misma manera, directamente a la tienda o a la cuenta ABLE.",
   shareBtn: "Compartir o copiar el enlace",
   copied: "Enlace copiado",
   showQr: "Mostrar un código QR",
   qrAria: (url) => `Código QR para ${url}`,
-  shareMessage: (n) => `Ayude a ${n}: cada regalo se paga directamente a la tienda por PayPal, así su cheque de SSI se mantiene completo.`,
+  shareMessage: (n) => `Ayude a ${n}: cada regalo se paga por PayPal directamente a la tienda o a su cuenta ABLE, así su cheque de SSI se mantiene completo.`,
   ppLoading: "Cargando PayPal…",
   ppUnavailable: "El pago con PayPal todavía no está conectado en este servidor.",
   ppCompleting: "Completando el pago con PayPal…",
@@ -262,7 +268,9 @@ const RECEIPT_EN = {
   lede: "A public record of one gift: who was paid, how much, and the rule that kept the SSI check whole. Anyone with this link can check it against PayPal.",
   given: "Given",
   started: "Started, not yet completed",
-  sub: (payer: string | undefined, n: number, when: string) => `${payer ? `From ${payer}, ` : ""}${n === 1 ? "to one recipient" : `split across ${n} recipients`} in one PayPal payment on ${when}.`,
+  /** n recipients (payees), paid on lines purchase units; a payee paid on two lines is one recipient. */
+  sub: (payer: string | undefined, n: number, lines: number, when: string) =>
+    `${payer ? `From ${payer}, ` : ""}${n === 1 ? "to one recipient" : `split across ${n} recipients`}${lines > n ? ` on ${lines} lines` : ""} in one PayPal payment on ${when}.`,
   countedAs: (hers: string) => `Counted as ${hers} income`,
   checkAfter: (hers: string, month: string) => `${cap(hers)} ${month} SSI check after this gift`,
   sentTo: (hers: string) => `Sent to ${hers} bank or to Giftwise`,
@@ -273,6 +281,8 @@ const RECEIPT_EN = {
   nextStarted: "Nothing is paid until the giver approves it in PayPal.",
   where: "Where every dollar went",
   routeVendor: "Paid straight to the shop",
+  /** A line paid to the organizer's own PayPal payee for the need, masked. */
+  payeeAccount: (masked: string) => `PayPal account ${masked}.`,
   routeAble: "Paid to the ABLE account",
   savingsIn: (hers: string) => `Savings in ${hers} ABLE account`,
   ableHandoff: (hers: string) => `In this sandbox, ${hers} ABLE account is a PayPal test account. For real, Giftwise sends the giver to the ABLE plan's own gift page for the ABLE share: with a Ugift plan, the giver types the account's six-character Ugift code (shown like 1A2-B3C) at UgiftABLE.com, which opens the owner's personal gifting page; plans such as ABLE United give each account its own gifting link. The shops are still paid through PayPal.`,
@@ -288,7 +298,7 @@ const RECEIPT_EN = {
   onReport: (hers: string, month: string) => `See this gift on ${hers} ${month} report to Social Security`,
   earlierRound: "From an earlier round of the sample page. The page has been reset since, so this gift no longer counts toward its needs or its report. This receipt and PayPal’s record stay as they were.",
   back: (name: string) => `Back to ${name}’s page`,
-  recorded: (when: string) => `A recorded sandbox gift from ${when}, kept with the sample page so this receipt can be read without paying. It sits in an earlier round, so it does not count toward the page or its report. Check with PayPal now asks PayPal for this order live.`,
+  recorded: (when: string) => `A recorded sandbox gift from ${when}, kept with the sample page so this receipt can be read without paying. It sits in an earlier round, so it does not count toward the page's open needs; it is listed on that month's report, whose check page asks PayPal for each capture. Check with PayPal now asks PayPal for this order live.`,
   possessive: (name: string | undefined) => (name ? `${name}’s` : "the person’s"),
   checkPayPal: "Check with PayPal now",
   asking: "Asking PayPal…",
@@ -329,7 +339,8 @@ const RECEIPT_ES: ReceiptText = {
   lede: "Un registro público de un regalo: a quién se pagó, cuánto y la regla que mantuvo completo el cheque de SSI. Cualquier persona con este enlace puede comprobarlo con PayPal.",
   given: "Dado",
   started: "Empezado, todavía sin completar",
-  sub: (payer, n, when) => `${payer ? `De ${payer}, ` : ""}${n === 1 ? "a un destinatario" : `repartido entre ${n} destinatarios`} en un solo pago de PayPal el ${when.replace(/\.$/, "")}.`,
+  sub: (payer, n, lines, when) =>
+    `${payer ? `De ${payer}, ` : ""}${n === 1 ? "a un destinatario" : `repartido entre ${n} destinatarios`}${lines > n ? ` en ${lines} líneas` : ""} en un solo pago de PayPal el ${when.replace(/\.$/, "")}.`,
   countedAs: () => "Contado como ingreso",
   checkAfter: (_hers, month) => `Cheque de SSI de ${month} después de este regalo`,
   sentTo: () => "Enviado a su banco o a Giftwise",
@@ -339,6 +350,7 @@ const RECEIPT_ES: ReceiptText = {
   nextStarted: "No se paga nada hasta que quien da lo apruebe en PayPal.",
   where: "A dónde fue cada dólar",
   routeVendor: "Se pagó directamente a la tienda",
+  payeeAccount: (masked) => `Cuenta de PayPal ${masked}.`,
   routeAble: "Se pagó a la cuenta ABLE",
   savingsIn: () => "Ahorro en su cuenta ABLE",
   ableHandoff: () => "En este sandbox, su cuenta ABLE es una cuenta de prueba de PayPal. En la vida real, Giftwise lleva a quien regala a la página de regalos del propio plan ABLE para la parte de ABLE: con un plan Ugift, se escribe el código Ugift de seis caracteres de la cuenta (como 1A2-B3C) en UgiftABLE.com, que abre su página personal de regalos; planes como ABLE United dan a cada cuenta su propio enlace de regalos. Las tiendas se siguen pagando con PayPal.",
@@ -354,7 +366,7 @@ const RECEIPT_ES: ReceiptText = {
   onReport: (_hers, month) => `Ver este regalo en el informe de ${month} en lectura fácil`,
   earlierRound: "De una ronda anterior de la página de muestra. La página se reinició después, así que este regalo ya no cuenta para sus necesidades ni para su informe. Este recibo y el registro de PayPal siguen como estaban.",
   back: (name) => `Volver a la página de ${name}`,
-  recorded: (when) => `Un regalo grabado en el sandbox el ${when}, guardado con la página de muestra para que este recibo pueda leerse sin pagar. Está en una ronda anterior, así que no cuenta para la página ni para su informe. Comprobar con PayPal ahora le pregunta a PayPal por esta orden en vivo.`,
+  recorded: (when) => `Un regalo grabado en el sandbox el ${when}, guardado con la página de muestra para que este recibo pueda leerse sin pagar. Está en una ronda anterior, así que no cuenta para las necesidades abiertas de la página; aparece en el informe de ese mes, cuya página de comprobación le pregunta a PayPal por cada cobro. Comprobar con PayPal ahora le pregunta a PayPal por esta orden en vivo.`,
   possessive: () => "su",
   checkPayPal: "Comprobar con PayPal ahora",
   asking: "Preguntando a PayPal…",

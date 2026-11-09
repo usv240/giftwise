@@ -19,7 +19,8 @@ import { Results } from "@/components/evidence/Results";
 import { RulesWatch } from "@/components/evidence/RulesWatch";
 import { SsaExamples } from "@/components/evidence/SsaExamples";
 import { ERROR_RATES } from "@/lib/error-rates";
-import { IMPACT } from "@/lib/impact";
+import { COURT_SCORE, IMPACT } from "@/lib/impact";
+import { WhatAiAdds } from "@/components/evidence/WhatAiAdds";
 import { reviewedWatch } from "@/lib/rules-watch";
 import "../../pages.css";
 import "../../developers/dev.css";
@@ -62,13 +63,13 @@ export default function RulesCheckedPage() {
           <span className="tabular">
             {fc.agreed} of {fc.scored}
           </span>{" "}
-          court outcomes.
+          court outcomes scored, of <span className="tabular">{fc.cases}</span> cases.
         </p>
         <p className="ev-fold-note muted">Each check opens on a press, against answers Giftwise did not write.</p>
       </header>
 
       <div className="ev-folds">
-        <Fold id="results" title="Four checks, at a glance" what={`${ssa.engine_matches} of ${ssa.cases} SSA examples, ${fc.agreed} of ${fc.scored} court cases, ${b.referee.check_kept_whole} of ${b.referee.all_cases} bills, ${invResults.gifts.toLocaleString("en-US")} random gifts`}>
+        <Fold id="results" title="Four checks, at a glance" what={`${ssa.engine_matches} of ${ssa.cases} SSA examples; court cases, ${COURT_SCORE}; ${b.referee.check_kept_whole} of ${b.referee.all_cases} bills; ${invResults.gifts.toLocaleString("en-US")} random gifts`}>
           <Results />
         </Fold>
 
@@ -76,9 +77,10 @@ export default function RulesCheckedPage() {
           <ErrorRates />
         </Fold>
 
-        <Fold id="referee-fold" title="One bill, two reviewers" what="Two Claude reviewers read different rulebooks and disagree; code checks both quotes and keeps her check whole either way">
+        <Fold id="referee-fold" title="One bill, two reviewers" what="Two Claude reviewers read different rulebooks and disagree; code checks both quotes and keeps her check whole either way; and what the AI adds over a router with no AI">
           <RefereeExample />
           <Adversarial />
+          <WhatAiAdds />
         </Fold>
 
         <Fold id="lineage-fold" title="Where the two-reviewer design comes from" what="The published designs it builds on, and the one part that is new: independence from the text each reviewer reads">
@@ -101,7 +103,7 @@ export default function RulesCheckedPage() {
           <SsaExamples />
         </Fold>
 
-        <Fold id="field-cases" title="Real cases, from federal courts" what={`Help from family was counted against the person in all ${IMPACT.countedCases}; the engine reaches SSA's and the court's outcome in ${fc.agreed} of ${fc.scored}`}>
+        <Fold id="field-cases" title="Real cases, from federal courts" what={`Help from family was counted against the person in all ${IMPACT.countedCases}; the engine reaches SSA's and the court's outcome in ${COURT_SCORE}`}>
           <p className="page-prose jp-intro">
             The examples above are SSA&rsquo;s teaching cases. These are real people&rsquo;s cases: help from family that SSA counted, appealed to a federal court. Giftwise did not write them.{" "}
             <Info id="evidence.field_cases" label="" />

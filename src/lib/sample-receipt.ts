@@ -8,7 +8,8 @@ export type RecordedReceipt = { about: string; recorded_at: string; source: stri
 /**
  * One captured sandbox order from a real `npm run e2e:paypal` run, kept in content/sample-receipt.json so its receipt
  * (/r/{order_id}) can be read on any deployment without paying. It is seeded with the sample household as an earlier
- * round, so it never counts toward Maya's open needs, her totals or her report; the receipt labels it as recorded.
+ * round, so it never counts toward Maya's open needs; the receipt labels it as recorded. Her report for the month it
+ * was captured lists it (src/lib/report/data.ts), so that report's check page asks PayPal for real captures.
  */
 export const RECORDED_RECEIPT = recorded as RecordedReceipt;
 

@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Info } from "@/components/Info";
 import { FamilyDashboard } from "@/components/dashboard/FamilyDashboard";
-import { dashboardData } from "@/lib/dashboard/data";
+import { KEPT_VS_CASH, dashboardData, keptAgainstCash, keptSentence } from "@/lib/dashboard/data";
 import { ROUTE_LABEL } from "@/lib/dashboard/labels";
 import { P, addMonths, fbr, fullCheckByYear, usd, type Delivery } from "@/lib/rules";
 import "../pages.css";
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Maya's year", description: "Every gi
 async function Dashboard() {
   await connection();
   const { gifts, months } = await dashboardData();
-  const kept = months.reduce((s, m) => s + m.kept, 0);
+  const kept = keptAgainstCash(months);
   const given = gifts.reduce((s, g) => s + g.amount, 0);
   const checks = months.map((m) => m.checkWithGiftwise);
   const lowest = Math.min(...checks);
@@ -31,7 +31,7 @@ async function Dashboard() {
   return (
     <>
       <p className="lede">
-        Every gift to Maya this year, how it reached her, and what her SSI check would have been as cash. Giftwise kept {usd(kept)} in her checks over {months.length} months.
+        Every gift to Maya this year, how it reached her, and what her SSI check would have been as cash. {keptSentence(months, usd)}
       </p>
       <p className="muted fd-note">
         A fictional sample year plus every gift paid on this site for Maya. Each check is computed by the rules engine. Built with AG Studio.{" "}
@@ -51,7 +51,7 @@ async function Dashboard() {
             <dd className="tabular">{usd(given)}</dd>
           </div>
           <div>
-            <dt>Kept in her checks by Giftwise</dt>
+            <dt>Kept in her checks, {KEPT_VS_CASH}</dt>
             <dd className="tabular">{usd(kept)}</dd>
           </div>
           <div>

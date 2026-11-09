@@ -29,7 +29,8 @@
     "measure:pages": "node scripts/measure-pages.mjs",
     "test:results": "node scripts/test-results.mjs",
     "checks:local": "cd workflows && tsx --env-file=../.env.local src/local.ts",
-    "eval:ssa": "tsx --env-file=.env.local scripts/run-ssa-examples.ts"
+    "eval:ssa": "tsx --env-file=.env.local scripts/run-ssa-examples.ts",
+    "eval:held-out": "node scripts/held-out-frozen.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

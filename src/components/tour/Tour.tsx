@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { openAround } from "@/components/OpenOnHash";
 import { TOUR, TOUR_KEY, onStepPage } from "./steps";
@@ -29,6 +29,9 @@ const write = (i: number | null) => {
 export function Tour() {
   const router = useRouter();
   const pathname = usePathname();
+  // Two stops can share a path and differ only in the query (October's report, then November's), so the query counts
+  // as a new page too. The card renders inside a Suspense boundary (src/app/layout.tsx), as useSearchParams needs.
+  const search = useSearchParams().toString();
   const [step, setStep] = useState<number | null>(null);
   const [here, setHere] = useState(false);
   const [side, setSide] = useState<"right" | "left">("right");
@@ -53,7 +56,7 @@ export function Tour() {
     const onResize = () => placeFor(document.querySelector<HTMLElement>(TOUR[step].target));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [step, pathname, placeFor]);
+  }, [step, pathname, search, placeFor]);
 
   // Read the step after each navigation, and mark the element it describes once it has rendered.
   useEffect(() => {
@@ -96,7 +99,7 @@ export function Tour() {
     }, 200);
     head.current?.focus({ preventScroll: true });
     return () => window.clearInterval(timer);
-  }, [step, pathname, placeFor]);
+  }, [step, pathname, search, placeFor]);
 
   const go = useCallback(
     (i: number | null) => {

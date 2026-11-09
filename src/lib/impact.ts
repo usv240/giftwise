@@ -71,8 +71,16 @@ const dollarsCents = (n: number) => n.toLocaleString("en-US", { style: "currency
  * the person in every one), then the engine's counterfactual on them, not an observed outcome. Of the 10 other cases, 6
  * were help with housing or everyday living costs, which routing keeps whole only through ABLE, and 4 do not state the amounts the check needs.
  */
+/**
+ * The court-case score, one label wherever it is shown: how many scored cases reach SSA's and the court's outcome, and
+ * how many cases the set holds (content/eval/field-cases-results.json: 87 opinions read closely, 36 cases kept, 14
+ * scored). "14 of 14 scored, of 36 cases". tests/court-label.test.ts holds every page and document to it.
+ */
+export const COURT_SCORE = `${field.summary.agreed} of ${field.summary.scored} scored, of ${field.summary.cases} cases`;
+/** The cases whose dollars the engine computed, in the file's own word (summary.dollars.cases_computed). */
+export const COMPUTED_CASES = `all ${field.summary.dollars.cases_computed} cases computed in dollars`;
 export const COURT_MEANING = `Social Security counted help from family or friends against the person in all ${IMPACT.countedCases} real SSI court cases scored.`;
-export const KEPT_SENTENCE = `${COURT_MEANING} Routed through Giftwise, the same help would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month at 2026 rates in ${IMPACT.routedCases} of the ${IMPACT.scoredCases} as the opinions state the facts, and money in all ${IMPACT.keptIfAbleCases} whose amounts are stated if the person could open an ABLE account.`;
+export const KEPT_SENTENCE = `${COURT_MEANING} Routed through Giftwise, the same help would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month at 2026 rates in ${IMPACT.routedCases} of the ${IMPACT.scoredCases} as the opinions state the facts, and money in ${COMPUTED_CASES} if the person could open an ABLE account.`;
 /** The same claim as a short label under the per-month figure. */
 export const KEPT_LABEL = `family help counted against the person in all ${IMPACT.countedCases} real court cases; routed through Giftwise, the same help keeps this in ${IMPACT.routedCases} of them at 2026 rates`;
 const COUNT_WORD = ["no", "one", "two", "three", "four", "five", "six"];

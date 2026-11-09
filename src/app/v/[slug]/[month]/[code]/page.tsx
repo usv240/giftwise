@@ -46,12 +46,17 @@ async function Check({ params }: { params: Promise<Params> }) {
   const v = await verifyReport(slug, month, code, today());
   if (!v) notFound();
   const r = v.report;
+  // A month whose gifts are all from the sample year has nothing to ask PayPal, and the page says so in one sentence.
+  const nothingAsked = v.paypal.asked === 0;
   const head =
-    v.verdict === "matches"
-      ? `This report matches ${v.name}'s records and PayPal's.`
-      : v.verdict === "changed"
-        ? `${v.name}'s ${v.monthLabel} has new activity since this report was made.`
-        : `This report matches ${v.name}'s records. PayPal's side is shown line by line below.`;
+    v.verdict === "changed"
+      ? `${v.name}'s ${v.monthLabel} has new activity since this report was made.`
+      : nothingAsked
+        ? `This report matches ${v.name}'s records. Its gifts are all from the sample year, which has no PayPal record, so nothing was asked of PayPal.`
+        : v.verdict === "matches"
+          ? `This report matches ${v.name}'s records and PayPal's.`
+          : `This report matches ${v.name}'s records. PayPal's side is shown line by line below.`;
+  const asked = new Date(v.checkedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   return (
     <>
       <section className="vf-verdict" data-state={v.verdict} aria-labelledby="vf-h">
@@ -71,12 +76,12 @@ async function Check({ params }: { params: Promise<Params> }) {
             <span className="vf-check-k">Rebuilt from Giftwise&rsquo;s records</span>
             <span>{v.codeMatches ? "Same gifts, routes, rules and check as the report" : `Now code ${v.currentCode}`}</span>
           </li>
-          <li data-ok={v.paypal.asked === v.paypal.confirmed ? "" : undefined}>
-            <span className="vf-check-k">Asked PayPal just now</span>
+          <li data-ok={!nothingAsked && v.paypal.asked === v.paypal.confirmed ? "" : undefined} data-none={nothingAsked ? "" : undefined}>
+            <span className="vf-check-k">{nothingAsked ? "PayPal" : "Asked PayPal just now"}</span>
             <span>
-              {v.paypal.asked
-                ? `${v.paypal.confirmed} of ${v.paypal.asked} ${v.paypal.asked === 1 ? "payment" : "payments"} completed, each for the amount and to the account named`
-                : `No PayPal payments this month${v.samples ? `: the ${v.samples} gifts are the sample year's` : ""}`}
+              {nothingAsked
+                ? `Not asked: no gift this month was paid through PayPal${v.samples ? `; the ${v.samples} gifts are the sample year's` : ""}`
+                : `${v.paypal.confirmed} of ${v.paypal.asked} ${v.paypal.asked === 1 ? "payment" : "payments"} completed, each for the amount and to the account named${v.samples ? `; ${v.samples} more ${v.samples === 1 ? "gift is" : "gifts are"} from the sample year, with no PayPal record` : ""}`}
             </span>
           </li>
           <li data-ok={v.ledger.ok ? "" : undefined}>
@@ -97,7 +102,7 @@ async function Check({ params }: { params: Promise<Params> }) {
                 <th scope="col">Date</th>
                 <th scope="col">Gift</th>
                 <th scope="col">Paid to</th>
-                <th scope="col">PayPal, asked just now</th>
+                <th scope="col">{nothingAsked ? "PayPal" : "PayPal, asked just now"}</th>
                 <th scope="col">Ledger</th>
               </tr>
             </thead>
@@ -127,9 +132,19 @@ async function Check({ params }: { params: Promise<Params> }) {
       <section className="page-section" aria-labelledby="vf-what-h">
         <h2 id="vf-what-h">What this check shows</h2>
         <p className="page-prose">
-          Every gift on the report went to the shop or the ABLE account named, through PayPal, and none of it went to {v.name}&rsquo;s bank or to Giftwise. Each payment above was read from PayPal at{" "}
-          {new Date(v.checkedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })}, and each capture was written to an append-only ledger whose every entry carries the
-          fingerprint of the one before it, so an edited entry would stop matching.
+          {nothingAsked ? (
+            <>
+              Every gift on this report is from the fictional sample year, which has no PayPal record, so this check rebuilt the report from Giftwise&rsquo;s records and checked the ledger, and asked PayPal
+              nothing. A month with gifts paid on this site lists each PayPal capture, and its check asks PayPal for every one.
+            </>
+          ) : (
+            <>
+              Every gift paid on this site went to the shop or the ABLE account named, through PayPal, and none of it went to {v.name}&rsquo;s bank or to Giftwise. Each PayPal payment above was read from
+              PayPal at {asked}
+              {v.samples ? ", and the sample year's gifts, which have no PayPal record, are marked as such" : ""}. Each capture was written to an append-only ledger whose every entry carries the fingerprint of the
+              one before it, so an edited entry would stop matching.
+            </>
+          )}
         </p>
         <p className="page-prose">
           <Link className="text-link vf-link" href={`/g/${v.slug}/report?month=${v.month}`}>

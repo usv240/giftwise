@@ -1,5 +1,6 @@
 import Link from "next/link";
 import bills from "../../content/eval-results.json";
+import { RECORDED_MONTH_NAME, RECORDED_REPORT_CHECK } from "@/lib/recorded-month";
 
 /**
  * The three things no other way of giving does, in the same words on the home page and the Evidence page: a report to
@@ -10,8 +11,8 @@ const NEW = [
   {
     k: "A report anyone can check",
     v: "PayPal pays only the payees the rules picked, in one order captured once, so every gift has a PayPal record. Each month's report to Social Security carries a code and a QR code: opening it rebuilds the report, asks PayPal live for every payment in it and checks the audit ledger, with no login.",
-    href: "/g/maya/report?month=2026-10#rp-verify-h",
-    link: "October's report",
+    href: RECORDED_REPORT_CHECK,
+    link: `${RECORDED_MONTH_NAME}'s report, with real sandbox payments`,
   },
   {
     k: "Two rulebooks, and a referee in code",

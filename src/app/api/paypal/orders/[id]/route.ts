@@ -1,31 +1,23 @@
 import { fail, ok } from "@/lib/api/envelope";
-import { describePayPalError, getOrder } from "@/lib/paypal/orders";
+import { orderView, readOrder } from "@/lib/paypal/orders";
 import { api } from "@/lib/api/handler";
+import { log } from "@/lib/log";
 
-/** GET /api/paypal/orders/{id}: the order as PayPal sees it right now (status, each payee, each capture). */
+/**
+ * GET /api/paypal/orders/{id}: the order as PayPal sees it right now (status, each payee, each capture). Read over REST
+ * (readOrder in src/lib/paypal/orders.ts), so a captured order with several payees reads as PayPal sends it.
+ */
 async function getRoute(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const started = Date.now();
   const { id } = await ctx.params;
   if (!/^[A-Z0-9]{10,24}$/.test(id)) return fail("invalid_request", "That order id does not look right.", 400);
   try {
-    const o = await getOrder(id);
-    return ok(
-      {
-        id: o.id,
-        status: o.status,
-        units: (o.purchaseUnits ?? []).map((pu) => ({
-          reference_id: pu.referenceId,
-          amount: pu.amount?.value,
-          payee_email: pu.payee?.emailAddress ?? null,
-          captures: (pu.payments?.captures ?? []).map((c) => ({ id: c.id, status: c.status, amount: c.amount?.value })),
-        })),
-      },
-      started,
-      { source: "PayPal Orders v2, live" },
-    );
+    const r = await readOrder(id);
+    if (!r.ok) return fail(r.status === 404 ? "not_found" : "upstream_unavailable", r.plain, r.status < 600 ? r.status : 502, { issue: r.issue, debug_id: r.debugId });
+    return ok(orderView(r.order), started, { source: "PayPal Orders v2, live" });
   } catch (e) {
-    const d = describePayPalError(e);
-    return fail("upstream_unavailable", d.plain, d.status >= 400 && d.status < 600 ? d.status : 502, { issue: d.issue });
+    log.warn("order read did not reach PayPal", { err: e });
+    return fail("upstream_unavailable", "PayPal could not complete this step. Please try again.", 502, { issue: "UNREACHABLE" });
   }
 }
 

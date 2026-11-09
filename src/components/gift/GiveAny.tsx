@@ -8,7 +8,7 @@ import { usePrefs } from "../prefs";
 import { DEFAULT_GIFT, MAX_GIFT, asTyped, readAmount, suggestedAmounts, type Chip } from "./amount";
 import { StartMonthly } from "./MonthlyActions";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
-import { routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
+import { byPayee, routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
 import { DEFAULT_PROFILE, P, addMonths, monthOf, pronounWords, usd, type Profile } from "@/lib/rules";
 import { checkMonthIn, giftText, monthIn, payeeIn, payeeInline, type Lang } from "@/lib/i18n/gift";
 
@@ -70,6 +70,8 @@ export function GiveAny({
   );
   const chips = useMemo(() => givenChips ?? suggestedAmounts(needs, date, profile, ableName, giftText(lang).chipAll), [givenChips, needs, date, profile, ableName, lang]);
   const total = round2(plan.lines.reduce((s, l) => s + l.amount, 0));
+  // What the giver reads is by payee; the order itself keeps one purchase unit per line.
+  const payees = byPayee(plan.lines);
   const ready = payable && plan.lines.length > 0;
   const giftMonth = monthIn(lang, monthOf(date));
   const checkMonthKey = addMonths(monthOf(date), P.rmaLagMonths);
@@ -81,22 +83,24 @@ export function GiveAny({
     const titles = new Map(lines.map((l) => [l.referenceId, lineTitle(l.referenceId, l.title)]));
     const order = new Map(lines.map((l, i) => [l.referenceId, i]));
     const captures = [...receipt.captures].sort((a, b) => (order.get(a.reference_id) ?? 99) - (order.get(b.reference_id) ?? 99));
+    // One row per payee, as the preview showed it: a payee paid on two lines (her ABLE account) is listed once.
+    const paid = byPayee(captures.map((c) => ({ payeeName: c.payee, amount: Number(c.amount ?? 0), title: titles.get(c.reference_id) })));
     return (
       <div className="give-any" data-ui role="status">
         <p className="give-done">{t.thanks(receipt.payerFirstName)}</p>
         <p>{t.doneLine(usd(Number(receipt.amount)))}</p>
         <ul className="give-lines">
-          {captures.map((c) => (
-            <li key={c.reference_id}>
+          {paid.map((g) => (
+            <li key={g.payeeName}>
               <span>
-                {payeeIn(lang, c.payee)}
-                {titles.has(c.reference_id) && <span className="muted"> ({titles.get(c.reference_id)})</span>}
+                {payeeIn(lang, g.payeeName)}
+                {g.lines.some((l) => l.title) && <span className="muted"> ({t.joinFor(g.lines.flatMap((l) => (l.title ? [l.title] : [])))})</span>}
               </span>
-              <span className="tabular">{usd(Number(c.amount ?? 0))}</span>
+              <span className="tabular">{usd(g.amount)}</span>
             </li>
           ))}
         </ul>
-        {paidPlan && captures.length > 0 && <p className="give-next">{t.paidNext(captures.map((c) => payeeInline(lang, c.payee)), w, checkMonth, usd(paidPlan.baseline))}</p>}
+        {paidPlan && paid.length > 0 && <p className="give-next">{t.paidNext(paid.map((g) => payeeInline(lang, g.payeeName)), w, checkMonth, usd(paidPlan.baseline))}</p>}
         <p className="give-order tabular">{t.orderLine(receipt.orderId)}</p>
         <p className="give-actions">
           <Link className="text-link" href={`/r/${receipt.orderId}${q}`}>
@@ -157,19 +161,20 @@ export function GiveAny({
           <p className="give-k">{t.sendsHere}</p>
           {/* The one number, split: each segment is a recipient, sized by what it receives. The list below carries the same facts for screen readers. */}
           <div className="give-split" aria-hidden="true">
-            {plan.lines.map((l, i) => (
-              <span key={l.referenceId} className="give-seg" data-able={l.route === "able" ? "" : undefined} style={{ flexGrow: l.amount, ["--tone" as string]: tone(i) }} />
+            {payees.map((g, i) => (
+              <span key={g.payeeName} className="give-seg" data-able={g.lines[0].route === "able" ? "" : undefined} style={{ flexGrow: g.amount, ["--tone" as string]: tone(i) }} />
             ))}
             {plan.unplaced > 0 && <span key="unplaced" className="give-seg" data-unplaced="" style={{ flexGrow: plan.unplaced }} />}
           </div>
+          {/* One row per payee: her ABLE account, paid for a bill and for savings, is one row with both named. */}
           <ul className="give-lines" aria-live="polite">
-            {plan.lines.map((l, i) => (
-              <li key={l.referenceId}>
+            {payees.map((g, i) => (
+              <li key={g.payeeName}>
                 <span>
-                  <span className="give-swatch" data-able={l.route === "able" ? "" : undefined} style={{ ["--tone" as string]: tone(i) }} aria-hidden="true" />
-                  {payeeIn(lang, l.payeeName)} <span className="muted">({lineTitle(l.referenceId, l.title)})</span>
+                  <span className="give-swatch" data-able={g.lines[0].route === "able" ? "" : undefined} style={{ ["--tone" as string]: tone(i) }} aria-hidden="true" />
+                  {payeeIn(lang, g.payeeName)} <span className="muted">({t.joinFor(g.lines.map((l) => lineTitle(l.referenceId, l.title)))})</span>
                 </span>
-                <span className="tabular">{usd(l.amount)}</span>
+                <span className="tabular">{usd(g.amount)}</span>
               </li>
             ))}
           </ul>
@@ -201,7 +206,7 @@ export function GiveAny({
               <p className="give-note">{t.nothingTo(w)}</p>
               {prefs.mode === "technical" && (
                 <p className="give-tech">
-                  One Orders v2 order with {plan.lines.length} purchase {plan.lines.length === 1 ? "unit" : "units"}, each with its own payee. Rules:{" "}
+                  One Orders v2 order with {plan.lines.length} purchase {plan.lines.length === 1 ? "unit" : "units"} to {payees.length} {payees.length === 1 ? "payee" : "payees"}, each unit naming its payee. Rules:{" "}
                   {[...new Set(plan.lines.flatMap((l) => l.ruleIds))].join(", ")}.
                 </p>
               )}
@@ -217,7 +222,7 @@ export function GiveAny({
         </p>
       ) : ready ? (
         <p key="total" id={payId} className="give-pay">
-          {t.payYou} <strong className="tabular">{usd(total)}</strong> {t.payRest(plan.lines.length, payeeInline(lang, plan.lines[0].payeeName))}
+          {t.payYou} <strong className="tabular">{usd(total)}</strong> {t.payRest(payees.length, payeeInline(lang, plan.lines[0].payeeName))}
         </p>
       ) : (
         <p key="hint" id={payId} className="give-pay" data-tone="hint" role="status">

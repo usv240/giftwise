@@ -64,7 +64,8 @@ export function NightlyLive({ current, nightly }: { current: { id: string; title
   }
   const hosted = run.source === "render-workflow";
   const secs = Math.max(1, Math.round((Date.parse(run.finishedAt) - Date.parse(run.startedAt)) / 1000));
-  const where = hosted ? `on Render Workflows${run.runId ? `, task run ${run.runId}` : ""}` : "on the developer's machine";
+  // The same words /api/health and /status use for where the run happened (src/lib/health.ts).
+  const where = hosted ? `on Render Workflows${run.runId ? `, task run ${run.runId}` : ""}` : "run locally with npm run checks:local";
   const groups = GROUPS.map((g) => ({ ...g, rows: run.results.filter((r) => r.group === g.id) })).filter((g) => g.rows.length);
   const earlier = !sameList(run, current);
   return (

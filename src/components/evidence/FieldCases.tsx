@@ -27,7 +27,7 @@ export function FieldCases() {
           <span className="tabular">
             {S.agreed} of {S.scored}
           </span>{" "}
-          real cases agree
+          scored, of {S.cases} cases, agree
         </p>
         <p className="sx-lead">The rules engine reaches the outcome SSA and the court did.</p>
         <p className="sx-vs">

@@ -1,9 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-// A fresh copy of the module for each test, so one test's pause never carries into the next.
+/** The log lines the fresh module wrote, read back here instead of printed: the pause is logged as an error by design. */
+let logged: { level: string; msg: string }[] = [];
+
+// A fresh copy of the module for each test, so one test's pause never carries into the next. Its logger is fresh too,
+// and its lines go to `logged`, so a clean run prints no error line while each test can still read what was logged.
 async function load() {
   vi.resetModules();
+  const { setLogSink } = await import("@/lib/log");
+  logged = [];
+  setLogSink((line, level) => logged.push({ level, msg: (JSON.parse(line) as { msg: string }).msg }));
   return import("@/lib/ai/claude");
 }
 
@@ -25,6 +32,8 @@ describe("Claude errors fall back the way a missing key does", () => {
     expect(err).toBeInstanceOf(ai.AiUnavailableError);
     expect(ai.aiAvailable()).toBe(false);
     expect(ai.aiPaused()).toBe(true);
+    // The pause is logged once, as an error, so the operator sees it on /ops.
+    expect(logged.filter((l) => l.level === "error").map((l) => l.msg)).toEqual(["Claude API turned the account away; AI features use their fallbacks for three minutes"]);
     vi.advanceTimersByTime(3 * 60_000 + 1);
     expect(ai.aiAvailable()).toBe(true);
   });
@@ -34,6 +43,7 @@ describe("Claude errors fall back the way a missing key does", () => {
     const ai = await load();
     ai.aiError(new Anthropic.AuthenticationError(401, { type: "error" }, "invalid x-api-key", new Headers()));
     expect(ai.aiAvailable()).toBe(false);
+    expect(logged.some((l) => l.level === "error" && /turned the account away/.test(l.msg))).toBe(true);
   });
 
   it("a busy or unreachable API falls back for that request only", async () => {

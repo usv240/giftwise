@@ -145,6 +145,13 @@ export const ManageNeedRequest = z.object({
   amount: z.number().min(1).max(20000).describe("Dollars still needed."),
   category: CategorySchema,
   vendor: z.string().trim().max(80).nullable().optional().describe("Who is paid: the shop, clinic or school. Housing always goes to the ABLE account."),
+  payeePaypal: z
+    .string()
+    .trim()
+    .max(254)
+    .nullable()
+    .optional()
+    .describe("The shop's own PayPal email, so this need pays that account (sandbox only). Leave it out to keep the need's payee; send null or an empty string for the shared sandbox shop account. Housing always goes to the ABLE account."),
   recurring: z.boolean().optional(),
   link: z
     .string()

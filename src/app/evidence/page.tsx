@@ -3,11 +3,11 @@ import Link from "next/link";
 import facts from "../../../content/facts.json";
 import results from "../../../content/test-results.json";
 import billResults from "../../../content/eval-results.json";
-import fieldResults from "../../../content/eval/field-cases-results.json";
 import ssaResults from "../../../content/eval/ssa-examples-results.json";
 import invResults from "../../../content/eval/invariants-results.json";
 import loadHosted from "../../../content/public/load-test-hosted.json";
 import { Info } from "@/components/Info";
+import { Fold } from "@/components/evidence/Fold";
 import { OpenOnHash } from "@/components/OpenOnHash";
 import { Impact } from "@/components/evidence/Impact";
 import { TourStart } from "@/components/tour/Tour";
@@ -17,26 +17,27 @@ import { WhatIsFirst } from "@/components/evidence/WhatIsFirst";
 import { CASES } from "@/lib/cases/list";
 import { ERROR_RATES } from "@/lib/error-rates";
 import heldOut from "../../../content/eval/held-out-results.json";
-import { ASKED_SENTENCE, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, sampleYearSentence } from "@/lib/impact";
+import { ASKED_SENTENCE, COURT_SCORE, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, sampleYearSentence } from "@/lib/impact";
+import { RECORDED_MONTH_NAME, RECORDED_REPORT_CHECK } from "@/lib/recorded-month";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
 import "../pages.css";
 import "../developers/dev.css";
 import "./evidence.css";
 
-export const metadata: Metadata = { title: "Evidence", description: "One result line, a five-minute path through the product, and every result in five groups, each with where it comes from." };
+export const metadata: Metadata = { title: "Evidence", description: "One result, a five-minute path through the product, and every result in five groups, each with where it comes from." };
 
 const whole = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
 /**
- * The result line the page opens with: the three numbers in one sentence, each computed from the files in content/
- * (src/lib/error-rates.ts, content/eval/ssa-examples-results.json, src/lib/impact.ts).
+ * The one number the page opens with, the error that costs money, from src/lib/error-rates.ts. The other results sit
+ * in the folds below, each under its own heading with one line of what it holds.
  */
-const RESULT_LINE = `${ERROR_RATES.lowered.errors} of ${ERROR_RATES.lowered.of} gifts that would lower the check were let through; ${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} of Social Security's own worked examples match SSA's answer; help from family was counted against the person in all ${IMPACT.countedCases} real court cases, and routed through Giftwise the same help would have kept ${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month in ${IMPACT.routedCases} of them.`;
+const LOWERED = ERROR_RATES.lowered;
 
 /** The five-minute path: six steps, under a minute and a half each, in the order the story runs. */
 const PATH = [
   { href: "/", label: "The problem in one number", time: "20 s", look: "In the Gift Checker, $1,000 sent as cash cuts her check two months later. Press Pay the shop: she keeps all of it." },
-  { href: "/g/maya", label: "Give, and pay in the sandbox", time: "90 s", look: "Type $1,500 in Give any amount. The rules split it across her needs and her ABLE account, and one PayPal checkout pays all five recipients. Pay with the sandbox buyer below, or as a guest with PayPal's test card, then open the receipt." },
+  { href: "/g/maya", label: "Give, and pay in the sandbox", time: "90 s", look: "Type $1,500 in Give any amount. The rules split it across her needs and her ABLE account, and one PayPal checkout pays each shop and her ABLE account directly. Pay with the sandbox buyer below, or as a guest with PayPal's test card, then open the receipt." },
   { href: "/g/maya/report?month=2026-10", label: "Her report to Social Security", time: "40 s", look: "SSI asks for changes in income by the 10th. October's report says nothing counts, with the rule behind every gift. Press As cash: the same gifts would have counted $538 and cut her check to $456." },
   { href: "/g/maya/report/easy?month=2026-10", label: "Her own copy, in Easy Read", time: "20 s", look: "The same report written to Maya: the answer first, then one idea per line with a picture beside each. Press En español, and Remind me by the 10th for a calendar reminder." },
   { href: "/agents", label: "An AI assistant asks first", time: "40 s", look: "A Claude assistant with no SSI knowledge calls the Giftwise MCP server, talks June out of sending cash, starts a checkout only she can approve, and reads the order back from PayPal." },
@@ -47,17 +48,21 @@ const A11Y = results.suites.find((s) => s.id === "a11y")!;
 const SAMPLE_RECEIPT = `/r/${RECORDED_RECEIPT.order_id}`;
 
 /**
- * Every result and every place to look, under five headings, each row a link to the page that shows it in full. Each
- * row keeps the id its section had on this page, so an old link such as /evidence#field-cases still lands on it.
+ * Every result and every place to look, under five headings, each closed in a fold with one line of what it holds and
+ * each row a link to the page that shows it in full. Each row keeps the id its section had on this page, so an old link
+ * such as /evidence#field-cases still lands on it, and opens its fold.
  */
-const INDEX = [
+const INDEX: { id: string; title: string; what: string; intro?: string; href: string; more: string; rows: { id: string; href: string; label: string; what: string }[] }[] = [
   {
+    id: "group-rules",
     title: "Does it get the rules right?",
+    what: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} SSA examples; court cases, ${COURT_SCORE}; ${billResults.summary.referee.check_kept_whole} of ${billResults.summary.referee.all_cases} bills; ${invResults.gifts.toLocaleString("en-US")} random gifts`,
     href: "/evidence/rules",
+    more: "All of it on one page: the rules, checked",
     rows: [
       { id: "ssa-examples", href: "/evidence/ssa-examples", label: "Social Security's own examples", what: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answer; Claude with no rulebook, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
       { id: "held-out", href: "/evidence/ssa-examples#held-out", label: "Examples the engine never saw", what: `${heldOut.summary.engine_matches} of ${heldOut.summary.cases} worked examples from SSA's own pages, run on the engine frozen at ${heldOut.engine.commit}.` },
-      { id: "field-cases", href: "/evidence/court-cases", label: "Real cases from federal courts", what: `${fieldResults.summary.agreed} of ${fieldResults.summary.scored} reach the outcome SSA and the court did.` },
+      { id: "field-cases", href: "/evidence/court-cases", label: "Real cases from federal courts", what: `${COURT_SCORE}, reach the outcome SSA and the court did.` },
       { id: "evaluation", href: "/evidence/rules#evaluation", label: "The two reviewers, measured", what: `${billResults.summary.referee.check_kept_whole} of ${billResults.summary.referee.all_cases} labeled bills keep her check whole, with each reviewer alone shown beside the referee.` },
       { id: "referee", href: "/evidence/rules#referee", label: "The referee, under pressure", what: "A wrong quote, a quote from the wrong rulebook, a right answer with a made-up citation, and two reviewers who disagree: what the code does with each, and the check whole every time." },
       { id: "errors", href: "/evidence/rules#errors", label: "The two errors that cost money", what: `${ERROR_RATES.lowered.errors} of ${ERROR_RATES.lowered.of} let through that would lower the check; ${ERROR_RATES.held.errors} of ${ERROR_RATES.held.of} fine gifts sent another way, each with the check whole.` },
@@ -67,11 +72,15 @@ const INDEX = [
     ],
   },
   {
+    id: "group-money",
     title: "Does the money go only where the rules say?",
+    what: `A receipt to read without paying, a report checked against PayPal, every PayPal API it calls, and ${CASES.length} failure cases run live`,
+    intro: "PayPal is where the rules are enforced: money reaches only a payee the rules picked, in one order, captured once, and anyone can check a month's report against PayPal.",
     href: "/stack#paypal-apis-all",
+    more: "Every PayPal API, with its job and its file",
     rows: [
       { id: "receipt", href: SAMPLE_RECEIPT, label: "A receipt you can read without paying", what: "A recorded sandbox gift, seeded with the sample page: every payee and capture id, the rule behind each line, and Check with PayPal now asks PayPal for the order live." },
-      { id: "verify", href: "/g/maya/report?month=2026-11#rp-verify-h", label: "A report anyone can check", what: "After a gift on Maya's page, November's report carries a QR code: Giftwise rebuilds it, asks PayPal for each payment live and checks the audit ledger." },
+      { id: "verify", href: RECORDED_REPORT_CHECK, label: "A report anyone can check", what: `${RECORDED_MONTH_NAME}'s report lists the recorded sandbox gift and carries a QR code: Giftwise rebuilds it, asks PayPal for each capture live and checks the audit ledger.` },
       { id: "bill-live", href: "/try/presets/electric-bill#read-live", label: "Claude reads a bill, live", what: "Press Read this bill live: Claude reads the sample bill now, within the daily AI budget, and the rules engine routes it." },
       { id: "paypal-apis", href: "/stack#paypal-apis-all", label: "Every PayPal API it calls", what: "One order paying several payees, capture once with PayPal-Request-Id, approval links for agents, Payouts, Transaction Search and signed webhooks, each with its file." },
       { id: "transcripts", href: "/evidence/operations#transcripts", label: "The PayPal suites, step by step", what: "The checkout and API suites write a redacted transcript: each step with its PayPal order and capture ids, payee count, statuses and timings." },
@@ -82,8 +91,11 @@ const INDEX = [
     ],
   },
   {
+    id: "group-impact",
     title: "What it changes",
+    what: `${whole(IMPACT.familyTotal)} for two families in real court cases; the problem as Social Security measures it; who each route reaches; how it compares`,
     href: "/evidence/impact",
+    more: "All of it on one page: what it changes",
     rows: [
       { id: "stake", href: "/evidence/impact#stake", label: "The problem, measured by Social Security", what: "454,843 checks lowered for shelter help in December 2024, by $247 a month on average; in-kind support 8.59 percent of SSI improper payments; no tools to find living arrangement errors; the $2,000 limit and ABLE's reach, each from its source with the date." },
       { id: "kept", href: "/evidence/impact#kept", label: "What routing would have kept", what: `${KEPT_SENTENCE} ${FAMILY_SENTENCE}` },
@@ -95,8 +107,11 @@ const INDEX = [
     ],
   },
   {
+    id: "group-ops",
     title: "Running it",
+    what: `Checked every night from outside, ${results.suites.length} test suites, the site under load, and what a real deployment changes`,
     href: "/evidence/operations",
+    more: "All of it on one page: running it",
     rows: [
       { id: "nightly", href: "/evidence/operations#nightly", label: "Checked every night, from outside", what: "Every page on the path, the public API, a gift paid by test card across its payees, and each failure case, on Render Workflows." },
       { id: "tests", href: "/evidence/operations#tests", label: "Test results", what: `${results.suites.length} suites, each with its command and date; WCAG 2.2 AA on ${A11Y.total} page views.` },
@@ -106,8 +121,11 @@ const INDEX = [
     ],
   },
   {
+    id: "group-built",
     title: "How it is built and designed",
+    what: `Every sponsor tool with its file, designed for the people who use it, WCAG 2.2 AA on ${A11Y.total} page views`,
     href: "/stack",
+    more: "How it is built, part by part",
     rows: [
       { id: "parts", href: "/stack", label: "How it is built", what: "Every sponsor tool and PayPal API with its job and file, and Claude's structured outputs checked by the rules engine." },
       {
@@ -134,7 +152,12 @@ export default function EvidencePage() {
           <h1 className="page-title">Evidence</h1>
           <Info id="page.evidence" />
         </div>
-        <p className="lede ev-result">{RESULT_LINE}</p>
+        <p className="lede ev-result ev-one">
+          <span className="ev-one-fig tabular">
+            {LOWERED.errors} of {LOWERED.of}
+          </span>{" "}
+          gifts that would lower the check were let through, over every case whose right answer is known: Social Security&rsquo;s own examples, real court cases and labeled bills.
+        </p>
       </header>
 
       {/* Ninety seconds: the path as six links, one action, and everything else one press away. */}
@@ -194,39 +217,42 @@ export default function EvidencePage() {
         </div>
       </section>
 
-      <Impact />
-      <p className="page-prose jp-intro ev-paypal">
-        PayPal is where the rules are enforced: money reaches only a payee the rules picked, in one order, captured once, and anyone can check a month&rsquo;s report against PayPal.
-      </p>
-
-      <WhatIsNew headingId="new-h" className="page-section" />
-
-      <WhatIsFirst headingId="first-h" className="page-section" />
-
-      <section id="results" className="page-section" aria-labelledby="index-h">
-        <h2 id="index-h">Every result, in five groups</h2>
-        <div className="ev-index">
-          {INDEX.map((g) => (
-            <div key={g.title}>
-              <h3>
-                <Link className="text-link" href={g.href}>
-                  {g.title}
-                </Link>
-              </h3>
-              <ul>
-                {g.rows.map((r) => (
-                  <li key={r.id} id={r.id}>
-                    <Link className="text-link" href={r.href}>
-                      {r.label}
-                    </Link>
-                    <span className="ev-index-what muted">{r.what}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Everything else, closed under its heading with one line of what it holds; a link to anything inside opens it. */}
+      <div className="ev-folds" aria-label="Every result">
+        <Fold
+          id="three"
+          title="The three headline results"
+          what={`${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month kept in real court cases; ${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} of SSA's own examples; ${LOWERED.errors} of ${LOWERED.of} let through that would lower the check`}
+        >
+          <Impact />
+        </Fold>
+        {INDEX.map((g) => (
+          <Fold key={g.id} id={g.id} title={g.title} what={g.what}>
+            {g.intro && <p className="page-prose ev-fold-intro">{g.intro}</p>}
+            <ul className="ev-index-list">
+              {g.rows.map((r) => (
+                <li key={r.id} id={r.id}>
+                  <Link className="text-link" href={r.href}>
+                    {r.label}
+                  </Link>
+                  <span className="ev-index-what muted">{r.what}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="ev-fold-more">
+              <Link className="text-link" href={g.href}>
+                {g.more}
+              </Link>
+            </p>
+          </Fold>
+        ))}
+        <Fold id="new" title="What is new" what="A report anyone can check against PayPal, a referee in code over two rulebooks, and an assistant that asks before a gift">
+          <WhatIsNew headingId="new-h" />
+        </Fold>
+        <Fold id="first" title="What is first here" what="Four things none of the compared products does, each tied to its comparison row">
+          <WhatIsFirst inFold />
+        </Fold>
+      </div>
     </div>
   );
 }

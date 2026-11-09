@@ -18,6 +18,19 @@ export function monthsFor(gifts: (Gift & { recurring?: boolean })[], profile: Pr
   });
 }
 
+/**
+ * The dashboard's kept figure and its baseline, in one place: what Giftwise kept in her checks against the same gifts
+ * given as cash, summed over the months shown. The home page's sample-year figure has a different baseline (six givers
+ * each paying the shop on their own, src/lib/impact.ts payItYourself), and each page names its own beside the number.
+ */
+export const KEPT_VS_CASH = "against the same gifts given as cash";
+export function keptAgainstCash(months: MonthRow[]) {
+  return Math.round(months.reduce((s, m) => s + m.kept, 0) * 100) / 100;
+}
+export function keptSentence(months: MonthRow[], usd: (n: number) => string) {
+  return `Giftwise kept ${usd(keptAgainstCash(months))} in her checks over ${months.length} ${months.length === 1 ? "month" : "months"}, ${KEPT_VS_CASH}.`;
+}
+
 const SOURCE: Record<ReportGift["evidence"]["kind"], string> = { sample: "Sample year", paypal_capture: "Paid on this site", paypal_payout: "Fund payout on this site" };
 
 /** The sample year plus every gift actually paid on this site for the sample household. Same loader as the SSA report. */

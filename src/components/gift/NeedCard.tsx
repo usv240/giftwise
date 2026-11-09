@@ -15,6 +15,8 @@ export type NeedView = {
   amount: number;
   funded: number;
   payeeName: string;
+  /** The organizer's PayPal account for this need, masked ("eastga…@example.com"), or null for the site's own account. */
+  payeeAccountShown?: string | null;
   route: string;
   status: string;
   rulePlain: string;
@@ -88,7 +90,10 @@ export function NeedCard({ need, pronoun = "she", lang = "en", closed = false }:
           <>
             <p className="need-pay">
               {/* The amount above is what this button pays, unless part is given already: then the line says the rest. */}
-              <span id={payId}>{need.funded > 0 ? t.needPay(usd(remaining), payee) : t.needGoes(payee)}</span>
+              <span id={payId}>
+                {need.funded > 0 ? t.needPay(usd(remaining), payee) : t.needGoes(payee)}
+                {need.payeeAccountShown && <span className="need-payee-account"> {t.payeeAccount(need.payeeAccountShown)}</span>}
+              </span>
               <Info id={need.route === "able" ? "gift.route.able" : "gift.route.vendor"} label="" topic={`${t.paidStraightTo} ${payee}`} lang={lang} />
             </p>
             <PayPalPay

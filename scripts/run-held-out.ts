@@ -7,6 +7,8 @@
 // Writes content/eval/held-out-results.json. tests/held-out.test.ts reruns the cases on the current engine.
 // The second set, written before it was run: add --set content/eval/held-out-2.json. Its results file records the set's
 // git blob hash, so the exact file that ran can be found in history (git log --find-object=<hash>).
+// A later set (content/eval/held-out-3.json) runs the same way; npm run eval:held-out -- --set <file> freezes the
+// engine and runs it in one command (scripts/held-out-frozen.mjs).
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";

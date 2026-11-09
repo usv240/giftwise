@@ -7,6 +7,7 @@ import { ShareGift } from "@/components/gift/ShareGift";
 import { ManageNeeds, Notifications, PageStatus, type ManageNeed } from "@/components/manage/ManageClient";
 import { dbConfigured } from "@/lib/db";
 import { SAMPLE_MANAGE_TOKEN, manageView } from "@/lib/manage";
+import { ownPayee } from "@/lib/households";
 import { pageOrigin } from "@/lib/origin";
 import { pronounWords, usd } from "@/lib/rules";
 import "../../pages.css";
@@ -45,6 +46,8 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
     category: n.category,
     route: n.route,
     paidTo: n.payeeName,
+    payeePaypal: ownPayee(n.payeeAccount),
+    fixedPayee: n.payeeAccount.startsWith("vendor:"),
     amount: Number(n.amount),
     funded: Number(n.funded),
     status: n.status,
@@ -165,7 +168,7 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
           <section className="page-section" aria-labelledby="mg-share-h">
             <h2 id="mg-share-h">Share the page</h2>
             <div className="mg-share">
-              <ShareGift url={pageUrl} title={`Help ${h.name}`} text={`Help ${h.name}: every gift is paid straight to the shop through PayPal, so ${w.poss} SSI check stays whole.`} qrSvg={qrSvg} />
+              <ShareGift url={pageUrl} title={`Help ${h.name}`} text={`Help ${h.name}: every gift is paid through PayPal straight to the shop or ${w.poss} ABLE account, so ${w.poss} SSI check stays whole.`} qrSvg={qrSvg} />
             </div>
           </section>
 

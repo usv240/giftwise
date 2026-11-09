@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db, schema } from "./db";
+import { paypalEnv } from "./paypal/env";
 import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Profile, type Pronoun } from "./rules";
 import { SAMPLE_MANAGE_TOKEN, hashToken, newToken, resetSampleManage, routeNeed } from "./manage";
 import { sampleNeedPositions, seedRecordedReceipt } from "./sample-receipt";
@@ -13,7 +14,7 @@ export const SAMPLE = {
   slug: "maya",
   name: "Maya",
   caregiverName: "Rosa",
-  note: "Maya is 29 and lives on her own. She uses a wheelchair and is starting community college. Thank you for helping with these. Every gift on this page goes straight to the shop, so her SSI check stays the same. With love, Rosa (her mom)",
+  note: "Maya is 29 and lives on her own. She uses a wheelchair and is starting community college. Thank you for helping with these. Every gift on this page is paid straight to the shop or clinic, or to her ABLE account, so her SSI check stays the same. With love, Rosa (her mom)",
   profile: { pronoun: "she", couple: false, livesInAnothersHousehold: false, otherUnearnedMonthly: 0, earnedMonthly: 0, ableEligible: true, savings: 1240 },
   needs: [
     { title: "Wheelchair repair", detail: "New push rims and a brake adjustment.", category: "equipment", route: "vendor", payeeName: "Riverside Mobility Repair", payeeAccount: "vendor:riverside", amount: "420.00", recurring: false },
@@ -61,14 +62,32 @@ export async function ensureSample() {
   return household;
 }
 
+/** PayPal Payouts item statuses where the money did not reach the payee; every other item counts as sent. */
+const PAYOUT_NOT_SENT = new Set(["FAILED", "RETURNED", "REFUNDED", "REVERSED", "BLOCKED", "DENIED"]);
+
+type AblePayment = { route: string; amount: string | number; capturedAt: Date | null };
+type AblePayout = { route: string; amount: string | number; status: string; createdAt: Date };
+
 /**
  * ABLE's yearly limit counts every giver's deposits together. The profile carries what went in from elsewhere; the
- * page's own ABLE gifts captured this calendar year are added to it, so each new gift is routed against the real total.
+ * page's own ABLE gifts this calendar year are added to it, so each new gift is routed against the real total: every
+ * captured PayPal payment, and every PayPal Payouts item a fund sent to the ABLE account (still pending or paid, since
+ * a pending item is on its way), so a grant and a gift together never cross the limit.
  */
-export function withAbleSoFar(profile: Profile, payments: { route: string; amount: string | number; capturedAt: Date | null }[], now = new Date()): Profile {
+export function withAbleSoFar(profile: Profile, page: { payments: AblePayment[]; payouts?: AblePayout[] }, now = new Date()): Profile {
   const year = now.getUTCFullYear();
-  const onPage = payments.filter((p) => p.route === "able" && p.capturedAt && p.capturedAt.getUTCFullYear() === year).reduce((s, p) => s + Number(p.amount), 0);
+  const paid = page.payments.filter((p) => p.route === "able" && p.capturedAt && p.capturedAt.getUTCFullYear() === year).reduce((s, p) => s + Number(p.amount), 0);
+  const granted = (page.payouts ?? []).filter((o) => o.route === "able" && !PAYOUT_NOT_SENT.has(o.status) && o.createdAt.getUTCFullYear() === year).reduce((s, o) => s + Number(o.amount), 0);
+  const onPage = paid + granted;
   return onPage > 0 ? { ...profile, ableContributedThisYear: Math.round((profile.ableContributedThisYear + onPage) * 100) / 100 } : profile;
+}
+
+/**
+ * The profile every path routes a gift to this page with: the household's own facts, and this year's ABLE deposits on
+ * the page. The gift button, the MCP tools, the monthly planner and a fund's grants all call this, so they agree.
+ */
+export function pageProfile(data: { household: { profile: unknown }; payments: AblePayment[]; payouts?: AblePayout[] }, now = new Date()): Profile {
+  return withAbleSoFar({ ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) }, data, now);
 }
 
 /** The sample is created once and never deleted (a reset reopens its needs), so each server process checks for it once. */
@@ -87,15 +106,20 @@ export async function getHousehold(slug: string) {
   if (!h) return null;
   // The needs and the payments do not depend on each other, so they are read at the same time. Rows from an earlier
   // round of the sample page (before its last reset) stay on record for their receipts but are not part of the page.
-  const [needs, pays] = await Promise.all([
+  // A fund's grants to the ABLE account are read with them: ABLE's yearly limit counts them too (withAbleSoFar).
+  const [needs, pays, payouts] = await Promise.all([
     d.select().from(schema.needs).where(and(eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt))).orderBy(asc(schema.needs.sortOrder)),
     d
       .select()
       .from(schema.payments)
       .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured"), isNull(schema.payments.archivedAt)))
       .orderBy(desc(schema.payments.capturedAt)),
+    d
+      .select({ route: schema.payouts.route, amount: schema.payouts.amount, status: schema.payouts.status, createdAt: schema.payouts.createdAt })
+      .from(schema.payouts)
+      .where(and(eq(schema.payouts.householdId, h.id), eq(schema.payouts.route, "able"))),
   ]);
-  return { household: h, needs, payments: pays };
+  return { household: h, needs, payments: pays, payouts };
 }
 
 export async function getNeedWithHousehold(id: number) {
@@ -126,12 +150,32 @@ export async function getNeed(id: number) {
   return n ?? null;
 }
 
+/** An organizer's own payee for a need, stored on the need as "paypal:<email>" (src/lib/manage.ts). */
+export const PAYPAL_PAYEE_PREFIX = "paypal:";
+/** A PayPal account email as an organizer types it: one @, a dotted domain, no spaces, at most 254 characters. */
+export const PAYPAL_EMAIL = /^[^\s@<>()"',;:]{1,64}@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+export const isPayPalEmail = (s: string) => s.length <= 254 && PAYPAL_EMAIL.test(s);
+/** The organizer's PayPal email for a need, or null when the need pays one of the site's sandbox accounts. */
+export const ownPayee = (account: string) => (account.startsWith(PAYPAL_PAYEE_PREFIX) ? account.slice(PAYPAL_PAYEE_PREFIX.length) : null);
+/** A payee account as it may leave the server: an organizer's email becomes "paypal", the site's own names stay. */
+export const publicPayee = (account: string) => (ownPayee(account) === null ? account : "paypal");
+/** Enough of an address to tell accounts apart on a public page, not enough to write to it: "eastga…@example.com". */
+export const maskEmail = (email: string) => email.replace(/^([^@]{1,6})[^@]*(@.*)$/, "$1…$2");
+
 /**
  * Resolve the sandbox account for a payee. The browser never chooses where money goes. A sample shop ("vendor:riverside")
  * has its own sandbox business account when PAYPAL_VENDOR_EMAIL_RIVERSIDE is set, so each shop is paid separately;
- * otherwise every shop shares the one test business account in PAYPAL_VENDOR_EMAIL.
+ * otherwise every shop shares the one test business account in PAYPAL_VENDOR_EMAIL. A need an organizer gave its own
+ * PayPal email ("paypal:<email>") pays that account, in the sandbox only: live payments to a shop go by its merchant ID
+ * after Partner Referrals onboarding, so an organizer-typed email is refused there.
  */
 export function payeeEmail(account: string) {
+  const own = ownPayee(account);
+  if (own !== null) {
+    if (paypalEnv() !== "sandbox") throw new Error("An organizer's own PayPal payee is for the sandbox only.");
+    if (!isPayPalEmail(own)) throw new Error("The need's PayPal payee is not a valid email.");
+    return own;
+  }
   const shop = account.startsWith("vendor:") ? process.env[`PAYPAL_VENDOR_EMAIL_${account.slice(7).toUpperCase()}`]?.trim() : undefined;
   const email = account === "able" ? process.env.PAYPAL_ABLE_EMAIL : shop || process.env.PAYPAL_VENDOR_EMAIL;
   if (!email) throw new Error(`No sandbox payee configured for ${account}`);

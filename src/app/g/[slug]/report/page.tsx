@@ -299,8 +299,10 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
                 <Info id="page.verify" label="" />
               </div>
               <p>
-                Scan the code, or open the link, and Giftwise rebuilds this report from its records, asks PayPal for every payment in it, and checks the audit ledger. A benefits counselor or caseworker
-                can do it without logging in.
+                {r.lines.some((l) => l.evidence.kind !== "sample")
+                  ? "Scan the code, or open the link, and Giftwise rebuilds this report from its records, asks PayPal for every payment in it, and checks the audit ledger."
+                  : "Scan the code, or open the link, and Giftwise rebuilds this report from its records and checks the audit ledger. This month's gifts are from the sample year, which has no PayPal record, so there is nothing to ask PayPal."}{" "}
+                A benefits counselor or caseworker can do it without logging in.
               </p>
               <p className="rp-verify-code">
                 Report code <span className="tabular">{code}</span>

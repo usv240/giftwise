@@ -4,8 +4,9 @@ import { useState } from "react";
 import { usd } from "@/lib/rules";
 import { receiptText, type Lang } from "@/lib/i18n/gift";
 
-type Unit = { reference_id: string; amount: string; captures: { id: string; status: string; amount: string }[] };
-type Live = { status: string; units: Unit[] };
+/** What GET /api/paypal/orders/{id} returns: orderView() in src/lib/paypal/orders.ts. */
+type Unit = { reference_id: string | null; amount: string | null; captures: { id: string | null; status: string | null; amount: string | null }[] };
+type Live = { status: string | null; units: Unit[] };
 type Ledger = { ok: boolean; count: number; brokenAt?: number };
 
 
@@ -60,14 +61,14 @@ export function ReceiptChecks({ orderId, lang = "en" }: { orderId: string; lang?
         {live && (
           <div className="rc-live" data-ui>
             <p className="rc-live-head">
-              {t.paypalSays} <strong>{t.status[live.status] ?? live.status.toLowerCase().replace(/_/g, " ")}</strong>.
+              {t.paypalSays} <strong>{(live.status && t.status[live.status]) ?? (live.status ?? "").toLowerCase().replace(/_/g, " ")}</strong>.
             </p>
             <ul>
-              {live.units.map((u) => (
-                <li key={u.reference_id}>
-                  <span>{u.reference_id === "able-savings" ? t.ableUnit : t.needUnit(u.reference_id.replace("need-", ""))}</span>
-                  <span className="tabular">{usd(Number(u.amount))}</span>
-                  <span className="muted">{u.captures[0] ? t.captureLine(u.captures[0].id, u.captures[0].status.toLowerCase()) : t.notCaptured}</span>
+              {live.units.map((u, i) => (
+                <li key={u.reference_id ?? i}>
+                  <span>{u.reference_id === "able-savings" ? t.ableUnit : t.needUnit((u.reference_id ?? String(i + 1)).replace("need-", ""))}</span>
+                  <span className="tabular">{usd(Number(u.amount ?? 0))}</span>
+                  <span className="muted">{u.captures[0] ? t.captureLine(u.captures[0].id ?? "", (u.captures[0].status ?? "").toLowerCase()) : t.notCaptured}</span>
                 </li>
               ))}
             </ul>

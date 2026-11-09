@@ -9,6 +9,7 @@ import { isIP } from "node:net";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { audit } from "./audit";
 import { db, schema } from "./db";
+import { PAYPAL_PAYEE_PREFIX, isPayPalEmail } from "./households";
 import { DEFAULT_PROFILE, SHELTER_CATEGORIES, computeMonth, evaluateGift, monthName, monthOf, pronounWords, type Category, type Delivery, type Profile, type Pronoun } from "./rules";
 
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
@@ -17,7 +18,12 @@ export const newToken = () => randomBytes(18).toString("base64url");
 /** The sample page has a fixed, public manage link so visitors can try the organizer's side; a reset restores it. */
 export const SAMPLE_MANAGE_TOKEN = "maya-sample-organizer";
 
-export type NeedInput = { title: string; detail?: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean; link?: string | null };
+/**
+ * payeePaypal: the shop's own PayPal email, so the need pays that account (sandbox only; src/lib/households.ts
+ * payeeEmail). Unset, a new need pays the site's shared sandbox shop account and an edit keeps the payee it had; null or
+ * empty sets it back to the shared account. Housing needs always pay the ABLE account.
+ */
+export type NeedInput = { title: string; detail?: string; amount: number; category: Category; vendor?: string | null; recurring?: boolean; link?: string | null; payeePaypal?: string | null };
 
 /** "a van conversion shop" -> "Van conversion shop". */
 export function payeeLabel(vendor: string | null | undefined) {
@@ -29,12 +35,25 @@ export function payeeLabel(vendor: string | null | undefined) {
 export function routeNeed(name: string, pronoun: Pronoun, n: NeedInput) {
   const w = pronounWords(pronoun);
   const housing = SHELTER_CATEGORIES.includes(n.category);
+  const own = !housing && n.payeePaypal ? `${PAYPAL_PAYEE_PREFIX}${n.payeePaypal}` : null;
   return {
     route: housing ? "able" : "vendor",
     payeeName: housing ? `${name}'s ABLE account` : payeeLabel(n.vendor),
-    payeeAccount: housing ? "able" : "vendor",
+    payeeAccount: housing ? "able" : (own ?? "vendor"),
     detail: n.detail?.trim() || (housing ? `Housing paid by someone else lowers the check, so this goes to ${w.poss} ABLE account.` : ""),
   };
+}
+
+/**
+ * The payee an edit leaves on a need. Housing pays the ABLE account. A sample shop with its own sandbox account
+ * ("vendor:riverside") keeps it, so the sample page's payees stay as they are. Otherwise the organizer's PayPal email
+ * when one is given, the shared shop account when it is cleared, and the need's current payee when it is not sent.
+ */
+export function editedPayee(cur: { route: string; payeeAccount: string }, routed: { route: string; payeeAccount: string }, payeePaypal: string | null | undefined) {
+  if (routed.route !== "vendor") return routed.payeeAccount;
+  if (cur.payeeAccount.startsWith("vendor:")) return cur.payeeAccount;
+  if (payeePaypal === undefined) return cur.route === "vendor" ? cur.payeeAccount : routed.payeeAccount;
+  return payeePaypal ? `${PAYPAL_PAYEE_PREFIX}${payeePaypal}` : "vendor";
 }
 
 export async function householdByToken(token: string) {
@@ -76,12 +95,21 @@ export async function manageView(token: string) {
 
 function sanitize(n: NeedInput) {
   const link = n.link && /^https:\/\/[^\s]+$/.test(n.link) ? n.link.slice(0, 2000) : null;
-  return { ...n, title: n.title.trim().slice(0, 80), detail: n.detail?.trim().slice(0, 200), amount: Math.round(n.amount * 100) / 100, link };
+  const payee = n.payeePaypal === undefined ? undefined : n.payeePaypal?.trim().toLowerCase() || null;
+  return { ...n, title: n.title.trim().slice(0, 80), detail: n.detail?.trim().slice(0, 200), amount: Math.round(n.amount * 100) / 100, link, payeePaypal: payee };
+}
+
+/** The organizer's PayPal email, checked for format; a plain message when it does not look like one. */
+export function checkPayee(payeePaypal: string | null | undefined): string | null {
+  if (!payeePaypal) return null;
+  return isPayPalEmail(payeePaypal.trim().toLowerCase()) ? null : "The shop's PayPal email does not look right. Use the email address its PayPal account signs in with.";
 }
 
 export async function addNeed(token: string, input: NeedInput) {
   const h = await householdByToken(token);
   if (!h) return null;
+  const bad = checkPayee(input.payeePaypal);
+  if (bad) return { error: bad, invalid: true } as const;
   const n = sanitize(input);
   const pronoun = ((h.profile as Partial<Profile>).pronoun ?? "she") as Pronoun;
   const r = routeNeed(h.name, pronoun, n);
@@ -90,7 +118,8 @@ export async function addNeed(token: string, input: NeedInput) {
     .insert(schema.needs)
     .values({ householdId: h.id, title: n.title, detail: r.detail, category: n.category, route: r.route, payeeName: r.payeeName, payeeAccount: r.payeeAccount, amount: n.amount.toFixed(2), recurring: Boolean(n.recurring), link: r.route === "vendor" ? n.link : null, sortOrder: Number(max) + 1 })
     .returning();
-  await audit("person", "gift_page.need_added", `household:${h.id}`, { need: row.id, category: row.category, route: row.route });
+  // The ledger notes that the organizer named a payee, never the address itself.
+  await audit("person", "gift_page.need_added", `household:${h.id}`, { need: row.id, category: row.category, route: row.route, own_payee: row.payeeAccount.startsWith(PAYPAL_PAYEE_PREFIX) });
   return row;
 }
 
@@ -100,6 +129,8 @@ export async function editNeed(token: string, id: number, input: NeedInput) {
   if (!h) return null;
   const [cur] = await db().select().from(schema.needs).where(and(eq(schema.needs.id, id), eq(schema.needs.householdId, h.id), isNull(schema.needs.archivedAt))).limit(1);
   if (!cur) return null;
+  const bad = checkPayee(input.payeePaypal);
+  if (bad) return { error: bad, invalid: true } as const;
   const n = sanitize(input);
   if (n.amount < Number(cur.funded)) return { error: `Givers have already paid $${Number(cur.funded).toFixed(2)} toward this need, so the amount can be no lower.` } as const;
   const pronoun = ((h.profile as Partial<Profile>).pronoun ?? "she") as Pronoun;
@@ -108,10 +139,10 @@ export async function editNeed(token: string, id: number, input: NeedInput) {
   const status = funded <= 0 ? "open" : funded >= n.amount ? "paid" : "partial";
   const [row] = await db()
     .update(schema.needs)
-    .set({ title: n.title, detail: r.detail, category: n.category, route: r.route, payeeName: r.payeeName, payeeAccount: cur.route === r.route && r.route === "vendor" ? cur.payeeAccount : r.payeeAccount, amount: n.amount.toFixed(2), recurring: Boolean(n.recurring), link: r.route === "vendor" ? (n.link === undefined ? cur.link : n.link) : null, status })
+    .set({ title: n.title, detail: r.detail, category: n.category, route: r.route, payeeName: r.payeeName, payeeAccount: editedPayee(cur, r, n.payeePaypal), amount: n.amount.toFixed(2), recurring: Boolean(n.recurring), link: r.route === "vendor" ? (n.link === undefined ? cur.link : n.link) : null, status })
     .where(eq(schema.needs.id, id))
     .returning();
-  await audit("person", "gift_page.need_edited", `household:${h.id}`, { need: id, category: row.category, route: row.route });
+  await audit("person", "gift_page.need_edited", `household:${h.id}`, { need: id, category: row.category, route: row.route, own_payee: row.payeeAccount.startsWith(PAYPAL_PAYEE_PREFIX) });
   return row;
 }
 

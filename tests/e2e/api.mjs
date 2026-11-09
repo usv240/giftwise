@@ -1,4 +1,5 @@
 // End-to-end API checks against the running dev server. Prints PASS/FAIL lines only.
+import { readFileSync } from "node:fs";
 import { transcript } from "./transcript.mjs";
 const B = process.env.BASE_URL ?? "http://localhost:3100";
 let pass = 0, fail = 0;
@@ -166,6 +167,15 @@ r = await post("/api/paypal/gift-orders", { slug: "nobody-here", amount: 50 });
 ok("gift-orders unknown page -> 404", r.status === 404, `${r.status}`);
 r = await fetch(`${B}/api/paypal/orders/bad-id`);
 ok("live order check with bad id -> 400", r.status === 400);
+// The recorded sample receipt's order: captured, four purchase units to three payees, and PayPal's answer gives each
+// unit an empty shipping address. Read over REST, it comes back 200 COMPLETED with every capture (src/lib/paypal/orders.ts).
+{
+  const sample = JSON.parse(readFileSync("content/sample-receipt.json", "utf8"));
+  r = await fetch(`${B}/api/paypal/orders/${sample.order_id}`);
+  const s = await r.json();
+  const each = sample.lines.every((l) => s.data?.units?.some((u) => u.captures.some((c) => c.id === l.capture_id && c.status === "COMPLETED")));
+  ok("live order check on the recorded multi-payee order -> 200 COMPLETED, every capture", r.status === 200 && s.data?.status === "COMPLETED" && s.data.units.length === sample.lines.length && each, `${r.status} ${s.data?.status ?? s.error?.code}`);
+}
 r = await fetch(`${B}/r/ZZZZZZZZZZZZZZZZ`);
 // Streaming has begun by then, so Next keeps 200 and renders the not-found UI with noindex (docs: streaming.md, Status codes).
 const nf = await r.text();
@@ -346,6 +356,21 @@ j = await r.json();
 const vurl = j.data?.verify?.url ?? "";
 const vpage = vurl ? await (await fetch(vurl.replace(/^https?:\/\/[^/]+/, B))).text() : "";
 ok("report code: October's report names its check page, and the page says it matches", /^[0-9A-Z]{5}-[0-9A-Z]{5}$/.test(j.data?.verify?.code ?? "") && /This report matches/.test(vpage) && /every fingerprint matches/.test(vpage), j.data?.verify?.url);
+ok("report code: October is all sample year, and its check page says PayPal was not asked", /nothing was asked of PayPal/.test(vpage) && !/was read from PayPal|were read from|Asked PayPal just now/.test(vpage));
+// The recorded sample order's month: its report lists real captures, and the check page asks PayPal for each one.
+{
+  const sample = JSON.parse(readFileSync("content/sample-receipt.json", "utf8"));
+  const month = new Date(sample.captured_at).toISOString().slice(0, 7);
+  const rep = await (await fetch(`${B}/api/v1/ssa-report?page=maya&month=${month}`)).json();
+  const url = rep.data?.verify?.url ?? "";
+  const page = url ? await (await fetch(url.replace(/^https?:\/\/[^/]+/, B))).text() : "";
+  const m = /(\d+) of (\d+) payments? completed/.exec(page);
+  ok(
+    "report code: the recorded order's month asks PayPal for every capture, and every one is completed",
+    Boolean(m) && m[1] === m[2] && Number(m[2]) >= sample.lines.length && sample.lines.every((l) => page.includes(l.capture_id)) && /This report matches .* and PayPal/.test(page),
+    m ? m[0] : url,
+  );
+}
 const wrong = await (await fetch(`${B}/v/maya/2026-10/00000-00000`)).text();
 ok("report code: a code that does not match shows the current report's code", /has new activity since this report was made/.test(wrong) && wrong.includes(j.data?.verify?.code ?? "none"));
 

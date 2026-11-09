@@ -4,9 +4,9 @@ import { reviewPayload, runReviewers } from "@/lib/ai/reviewers";
 import { today } from "@/lib/api/envelope";
 import { CategorySchema, CoversSchema, DeliverySchema } from "@/lib/api/schemas";
 import { API_VERSION } from "@/lib/api/version";
-import { getHousehold, openNeeds, withAbleSoFar } from "@/lib/households";
+import { getHousehold, openNeeds, pageProfile } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
-import { routeGift } from "@/lib/routing";
+import { distinctPayees, routeGift } from "@/lib/routing";
 import { giftSubject } from "@/lib/report/data";
 import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
 import { easyRead } from "@/lib/report/easy";
@@ -40,7 +40,7 @@ const slug = z.string().trim().min(1).max(60).describe('The gift page id, the pa
 async function page(id: string) {
   const data = await getHousehold(id);
   if (!data) return null;
-  const profile: Profile = withAbleSoFar({ ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) }, data.payments);
+  const profile: Profile = pageProfile(data);
   return { ...data, profile };
 }
 
@@ -198,7 +198,7 @@ export const TOOLS = [
     name: "get_ssa_report",
     title: "Write the monthly report to Social Security",
     description:
-      "People on SSI must tell Social Security about changes in income, including help from friends and family, within 10 days after the month ends. For a Giftwise gift page, this writes one month's report from the gifts themselves: which gifts to tell SSA about, what counts, the check it decides, and the PayPal record that shows every other gift went straight to a shop or the ABLE account. Read-only; it never contacts Social Security.",
+      "Writes one month's report to Social Security for a Giftwise gift page, from the gifts themselves: which gifts to tell SSA about, what counts, the check it decides, and the PayPal record that shows every other gift went straight to a shop or the ABLE account. People on SSI tell Social Security about changes in income, including help from friends and family, within 10 days after the month ends. Read-only; it never contacts Social Security.",
     input: z.object({
       slug,
       month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional().describe("Income month, YYYY-MM. Defaults to the month whose report is due next."),
@@ -242,7 +242,7 @@ export const TOOLS = [
       const r = await startRoutedGift(i.slug, i.amount, { actor: "agent", redirect: { returnUrl: `${ctx.origin}/api/paypal/return`, cancelUrl: `${ctx.origin}/g/${i.slug}` } });
       if (!r.ok) return { text: r.message, isError: true };
       return {
-        text: `PayPal checkout ready for ${usd(r.plan.amount)} to ${r.name}, paid to ${r.plan.lines.length} ${r.plan.lines.length === 1 ? "recipient" : "recipients"}. The person giving should open this link and approve in PayPal: ${r.approveUrl}. After they approve, the receipt will be at ${ctx.origin}/r/${r.orderId}.`,
+        text: `PayPal checkout ready for ${usd(r.plan.amount)} to ${r.name}, paid to ${distinctPayees(r.plan.lines).length} ${distinctPayees(r.plan.lines).length === 1 ? "recipient" : "recipients"}. The person giving should open this link and approve in PayPal: ${r.approveUrl}. After they approve, the receipt will be at ${ctx.origin}/r/${r.orderId}.`,
         data: { order_id: r.orderId, approve_url: r.approveUrl, receipt_url: `${ctx.origin}/r/${r.orderId}`, lines: r.plan.lines.map((l) => ({ paid_to: l.payeeName, for: l.title, amount: l.amount })), check_with_giftwise: r.plan.checkWithRouting },
       };
     },
@@ -276,6 +276,9 @@ export const TOOLS = [
     },
   }),
 ];
+
+/** A tool's one-line summary, as /llms.txt lists it: the first sentence of its description, which says what it does. */
+export const toolSummary = (t: { description: string }) => `${t.description.split(". ")[0].replace(/\.$/, "")}.`;
 
 export const SERVER_INFO = { name: "giftwise", title: "Giftwise", version: API_VERSION };
 export const INSTRUCTIONS =

@@ -1408,13 +1408,12 @@
   }
 }
 
-/* What is new sits right under the hero, on its grid (from the hero text to the checker edge), so it is in the first
-   two screens and lines up with both. */
+/* What is new sits after the proof, across the frame, under the referee moment. */
 .home-new {
   margin-top: clamp(1.5rem, 1rem + 2vw, 3rem);
 }
 .home-new > .new3 {
-  grid-column: 2 / -1;
+  grid-column: 1 / -1;
 }
 @media (max-width: 900px) {
   .home-new > .new3 {
@@ -1503,10 +1502,10 @@
 /* The referee moment under the Gift Checker: the two reviewers' quotes side by side, then the verdict code reached. A
    product fragment (data-ui) on the checker's surface, so the two read as one column. */
 .home-ref {
-  margin-top: clamp(0.5rem, 0.25rem + 1vw, 1.5rem);
+  margin-top: clamp(4rem, 3rem + 4vw, 8rem);
 }
 .home-ref > .refm {
-  grid-column: 2 / -1;
+  grid-column: 1 / -1;
 }
 @media (max-width: 900px) {
   .home-ref > .refm {

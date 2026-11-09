@@ -74,7 +74,7 @@ export default function CheckWidget(params: AgWidgetParams<CheckDef>) {
           <p className="gw-check-note">{r.whole ? `Every month, ${r.months} ${r.months === 1 ? "month" : "months"} in view: the full ${r.years.join(" and ")} check.` : `Lowest month in view.`}</p>
           <p className="gw-check-cash">
             As cash, her {r.lowestCashMonth} check would have dropped to <strong className="tabular">{usd(r.lowestCash)}</strong>. Giftwise kept <strong className="tabular">{usd(r.kept)}</strong> in her
-            checks.
+            checks, against the same gifts as cash.
           </p>
         </div>
       )}

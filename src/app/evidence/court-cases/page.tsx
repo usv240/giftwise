@@ -28,7 +28,7 @@ export default function CourtCasesPage() {
           <span className="tabular">
             {S.agreed} of {S.scored}
           </span>{" "}
-          reach the outcome SSA and the court did. Each case shows what the court held, what routing the same help keeps, and a link to the opinion.
+          scored, of <span className="tabular">{S.cases}</span> cases, reach the outcome SSA and the court did. Each case shows what the court held, what routing the same help keeps, and a link to the opinion.
         </p>
       </header>
       <FieldCaseList />

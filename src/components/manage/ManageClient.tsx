@@ -11,6 +11,10 @@ export type ManageNeed = {
   category: string;
   route: string;
   paidTo: string;
+  /** The shop's own PayPal email, when the organizer set one; this page is private, so it is shown in full. */
+  payeePaypal: string | null;
+  /** A sample shop with its own sandbox account: its payee stays as it is. */
+  fixedPayee: boolean;
   amount: number;
   funded: number;
   status: string;
@@ -104,15 +108,21 @@ function useLeaveGuard(dirty: boolean) {
   }, [dirty]);
 }
 
-type Draft = { title: string; detail: string; amount: string; category: string; vendor: string; recurring: boolean };
-const empty: Draft = { title: "", detail: "", amount: "", category: "equipment", vendor: "", recurring: false };
+type Draft = { title: string; detail: string; amount: string; category: string; vendor: string; payeePaypal: string; recurring: boolean };
+const empty: Draft = { title: "", detail: "", amount: "", category: "equipment", vendor: "", payeePaypal: "", recurring: false };
 
-function NeedForm({ initial, submitLabel, onSubmit, onCancel, w }: { initial: Draft; submitLabel: string; onSubmit: (d: Draft) => Promise<void>; onCancel?: () => void; w: Words }) {
+/** The same format check the server makes (isPayPalEmail in src/lib/households.ts), so a typo shows before saving. */
+const PAYPAL_EMAIL = /^[^\s@<>()"',;:]{1,64}@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+const payeeProblem = (s: string) => (!s.trim() || (s.trim().length <= 254 && PAYPAL_EMAIL.test(s.trim())) ? "" : "Type the email the shop's PayPal account signs in with, like shop@example.com.");
+
+function NeedForm({ initial, submitLabel, onSubmit, onCancel, w, fixedPayee = false }: { initial: Draft; submitLabel: string; onSubmit: (d: Draft) => Promise<void>; onCancel?: () => void; w: Words; fixedPayee?: boolean }) {
   const [d, setD] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const [amountNote, setAmountNote] = useState("");
+  const [payeeNote, setPayeeNote] = useState("");
   const amountRef = useRef<HTMLInputElement>(null);
+  const payeeRef = useRef<HTMLInputElement>(null);
   const id = useId();
   const housing = HOUSING.has(d.category);
   const dirty = (Object.keys(initial) as (keyof Draft)[]).some((k) => d[k] !== initial[k]);
@@ -127,6 +137,12 @@ function NeedForm({ initial, submitLabel, onSubmit, onCancel, w }: { initial: Dr
         if (problem) {
           setAmountNote(problem);
           amountRef.current?.focus();
+          return;
+        }
+        const payee = housing || fixedPayee ? "" : payeeProblem(d.payeePaypal);
+        if (payee) {
+          setPayeeNote(payee);
+          payeeRef.current?.focus();
           return;
         }
         setBusy(true);
@@ -192,6 +208,37 @@ function NeedForm({ initial, submitLabel, onSubmit, onCancel, w }: { initial: Dr
         <span>{housing ? "Paid to" : "Who is paid: the shop, clinic or school"}</span>
         <input value={housing ? `${w.Poss} ABLE account. Housing always goes there.` : d.vendor} onChange={(e) => set("vendor", e.target.value)} disabled={housing} maxLength={80} placeholder="Riverside Mobility Repair" />
       </label>
+      {!housing && (
+        <div className="mg-field mg-wide">
+          <label htmlFor={`${id}-payee`}>The shop&rsquo;s PayPal email (optional)</label>
+          <input
+            ref={payeeRef}
+            id={`${id}-payee`}
+            type="email"
+            value={fixedPayee ? "" : d.payeePaypal}
+            onChange={(e) => {
+              set("payeePaypal", e.target.value);
+              if (payeeNote) setPayeeNote(payeeProblem(e.target.value));
+            }}
+            onBlur={(e) => setPayeeNote(payeeProblem(e.target.value))}
+            disabled={fixedPayee}
+            maxLength={254}
+            autoComplete="off"
+            spellCheck={false}
+            placeholder={fixedPayee ? "This sample shop keeps its own sandbox account" : "shop@example.com"}
+            aria-invalid={payeeNote ? true : undefined}
+            aria-describedby={`${id}-payee-hint${payeeNote ? ` ${id}-payee-note` : ""}`}
+          />
+          <p id={`${id}-payee-hint`} className="mg-field-hint">
+            {fixedPayee ? "The sample page pays its own sandbox test shops." : "PayPal pays this account directly for this need, in the sandbox. Left empty, the shared sandbox shop account is paid."}
+          </p>
+          {payeeNote && (
+            <p id={`${id}-payee-note`} className="mg-field-note" role="alert">
+              {payeeNote}
+            </p>
+          )}
+        </div>
+      )}
       <label className="mg-field mg-wide">
         <span>A line for givers (optional)</span>
         <input value={d.detail} onChange={(e) => set("detail", e.target.value)} maxLength={200} placeholder="New push rims and a brake adjustment." />
@@ -216,12 +263,14 @@ function NeedForm({ initial, submitLabel, onSubmit, onCancel, w }: { initial: Dr
   );
 }
 
-const toBody = (d: Draft) => ({
+const toBody = (d: Draft, fixedPayee = false) => ({
   title: d.title,
   detail: d.detail || undefined,
   amount: readAmount(d.amount) ?? 0,
   category: d.category,
   vendor: d.vendor || null,
+  // A sample shop's payee is not sent, so it stays; otherwise an empty field sets the shared sandbox account.
+  ...(fixedPayee || HOUSING.has(d.category) ? {} : { payeePaypal: d.payeePaypal.trim() || null }),
   recurring: d.recurring,
 });
 
@@ -240,11 +289,12 @@ export function ManageNeeds({ token, needs, w }: { token: string; needs: ManageN
             {editing === n.id ? (
               <NeedForm
                 w={w}
-                initial={{ title: n.title, detail: n.detail, amount: String(n.amount), category: n.category, vendor: n.route === "able" ? "" : n.paidTo, recurring: n.recurring }}
+                initial={{ title: n.title, detail: n.detail, amount: String(n.amount), category: n.category, vendor: n.route === "able" ? "" : n.paidTo, payeePaypal: n.payeePaypal ?? "", recurring: n.recurring }}
+                fixedPayee={n.fixedPayee}
                 submitLabel="Save changes"
                 onCancel={() => setEditing(null)}
                 onSubmit={async (d) => {
-                  await send(`${base}/needs/${n.id}`, "PATCH", toBody(d));
+                  await send(`${base}/needs/${n.id}`, "PATCH", toBody(d, n.fixedPayee));
                   setEditing(null);
                   router.refresh();
                 }}
@@ -255,6 +305,7 @@ export function ManageNeeds({ token, needs, w }: { token: string; needs: ManageN
                   <p className="mg-need-title">{n.title}</p>
                   <p className="mg-need-to">
                     Paid straight to <strong>{n.paidTo}</strong>
+                    {n.payeePaypal && <span className="mg-need-payee">, PayPal account {n.payeePaypal}</span>}
                   </p>
                   {/* The line above already says where it is paid, so the rule starts with what it means. */}
                   <p className="mg-need-rule">{n.rule.replace(/^Paid straight to the shop, so it is not counted\./, "Not counted as income.")}</p>

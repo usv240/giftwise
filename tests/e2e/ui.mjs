@@ -233,8 +233,10 @@ await page.goto(B + "/g/maya/calendar", { waitUntil: "networkidle" });
 await page.locator(".b-cal-event").first().waitFor({ timeout: 60000 }).catch(() => {});
 const calEvents = await page.locator(".b-cal-event").count();
 await page.getByRole("button", { name: "As cash" }).click();
-const lastOpt = (await page.locator(".bc-move select option").count()) - 1;
-await page.locator(".bc-move select").selectOption({ index: lastOpt });
+// The last gift of the sample year: Aunt June's $150 on October 28, the one the five-minute path moves into November.
+// (The recorded sandbox gift of November 9 is listed after it, so the option is picked by its date, not its place.)
+const octLast = await page.locator(".bc-move select option").evaluateAll((os) => os.filter((o) => /^Oct 28/.test(o.textContent ?? "")).map((o) => o.value).at(-1));
+await page.locator(".bc-move select").selectOption(octLast ?? { index: 0 });
 await page.locator(".bc-move input[type=date]").fill("2026-11-02");
 await page.getByRole("button", { name: "Move it" }).click();
 const moved = (await page.locator(".bc-moves").innerText()).replace(/\s+/g, " ");

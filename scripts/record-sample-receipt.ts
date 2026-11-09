@@ -40,7 +40,7 @@ async function main() {
 
   const out = {
     about:
-      "One captured PayPal sandbox order from a real run of npm run e2e:paypal on the sample page, recorded here so a receipt can be read on any deployment without paying. It is seeded with the sample household as an earlier round (archived), so it never counts toward Maya's open needs or her report. Check with PayPal now on its receipt asks PayPal's sandbox for this order live. Written by scripts/record-sample-receipt.ts; no email address or key is kept.",
+      "One captured PayPal sandbox order from a real run of npm run e2e:paypal on the sample page, recorded here so a receipt can be read on any deployment without paying. It is seeded with the sample household as an earlier round (archived), so it never counts toward Maya's open needs; it is listed on the report for the month it was captured, so that report's check page asks PayPal for each capture. Check with PayPal now on its receipt asks PayPal's sandbox for this order live. Written by scripts/record-sample-receipt.ts; no email address or key is kept.",
     recorded_at: new Date().toISOString(),
     source: "npm run e2e:paypal, Give any amount, routed across the open needs and the ABLE account",
     order_id: orderId,

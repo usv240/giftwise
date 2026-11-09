@@ -3,10 +3,10 @@ import { today } from "@/lib/api/envelope";
 import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
 import { log } from "@/lib/log";
-import { getHousehold, openNeeds, payeeEmail } from "@/lib/households";
+import { getHousehold, openNeeds, pageProfile, payeeEmail } from "@/lib/households";
 import { paypalRest } from "@/lib/paypal/client";
 import { routeGift } from "@/lib/routing";
-import { DEFAULT_PROFILE, usd, type Profile } from "@/lib/rules";
+import { usd, type Profile } from "@/lib/rules";
 
 /**
  * PayPal Payouts for organizations that already hold money for families: a disability foundation, a mutual-aid fund,
@@ -30,7 +30,8 @@ export async function planGrants(grants: Grant[]) {
   for (const g of grants) {
     const data = await getHousehold(g.slug);
     if (!data) return { error: `No gift page named "${g.slug}".` } as const;
-    const profile: Profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
+    // The same profile a gift to this page is routed with: ABLE's yearly limit counts this year's gifts and grants.
+    const profile: Profile = pageProfile(data);
     const plan = routeGift(g.amount, openNeeds(data.needs), today(), profile, `${data.household.name}'s ABLE account`);
     if (plan.lines.length === 0) return { error: `There is no benefit-safe place for a grant to ${data.household.name} right now.` } as const;
     if (plan.checkWithRouting < plan.baseline) return { error: `A grant to ${data.household.name} would lower the SSI check, so it was not sent.` } as const;
