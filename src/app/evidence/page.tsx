@@ -16,7 +16,7 @@ import { WhatIsNew } from "@/components/WhatIsNew";
 import { WhatIsFirst } from "@/components/evidence/WhatIsFirst";
 import { CASES } from "@/lib/cases/list";
 import { ERROR_RATES } from "@/lib/error-rates";
-import heldOut from "../../../content/eval/held-out-results.json";
+import { HELD_OUT_SENTENCE } from "@/lib/held-out-summary";
 import { ASKED_SENTENCE, COURT_SCORE, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, sampleYearSentence } from "@/lib/impact";
 import { RECORDED_MONTH_NAME, RECORDED_REPORT_CHECK } from "@/lib/recorded-month";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
@@ -61,7 +61,7 @@ const INDEX: { id: string; title: string; what: string; intro?: string; href: st
     more: "All of it on one page: the rules, checked",
     rows: [
       { id: "ssa-examples", href: "/evidence/ssa-examples", label: "Social Security's own examples", what: `${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} match SSA's answer; Claude with no rulebook, ${ssaResults.summary.claude_matches} of ${ssaResults.summary.claude_answered}.` },
-      { id: "held-out", href: "/evidence/ssa-examples#held-out", label: "Examples the engine never saw", what: `${heldOut.summary.engine_matches} of ${heldOut.summary.cases} worked examples from SSA's own pages, run on the engine frozen at ${heldOut.engine.commit}.` },
+      { id: "held-out", href: "/evidence/ssa-examples#held-out", label: "Examples the engine never saw", what: HELD_OUT_SENTENCE },
       { id: "field-cases", href: "/evidence/court-cases", label: "Real cases from federal courts", what: `${COURT_SCORE}, reach the outcome SSA and the court did.` },
       { id: "evaluation", href: "/evidence/rules#evaluation", label: "The two reviewers, measured", what: `${billResults.summary.referee.check_kept_whole} of ${billResults.summary.referee.all_cases} labeled bills keep her check whole, with each reviewer alone shown beside the referee.` },
       { id: "referee", href: "/evidence/rules#referee", label: "The referee, under pressure", what: "A wrong quote, a quote from the wrong rulebook, a right answer with a made-up citation, and two reviewers who disagree: what the code does with each, and the check whole every time." },

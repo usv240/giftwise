@@ -53,17 +53,17 @@ Each payment in the order names its own payee, and PayPal captures each one sepa
 | Shops on a page made from a fundraiser, or added on the organizer's page | `sb-viaij53657116@business.example.com` |
 | A need whose organizer typed the shop's own PayPal email | That email, in the sandbox only |
 
-The server picks the account from the need, never from the browser (`payeeEmail()` in `src/lib/households.ts`), and `/status` shows how many separate accounts the sample uses under **PayPal payees**. On an organizer's page, **The shop's PayPal email** on a need stores that account on the need (checked for format) and the order pays it; the gift page and the receipt show it masked. The sample page's own shops keep their sandbox accounts. To try it, add a need on [`/manage/maya-sample-organizer`](http://localhost:3100/manage/maya-sample-organizer) with another sandbox business account's email.
+The server picks the account from the need, never from the browser (`payeeEmail()` in `src/lib/households.ts`), and `/status` shows how many separate accounts the sample uses under **PayPal payees**. On an organizer's page, **The shop's PayPal email** on a need stores that account on the need (checked for format) and the order pays it; the gift page and the receipt show it masked. The sample page's own shops keep their sandbox accounts. To try it, add a need on [`/manage/maya-sample-organizer`](https://giftwise-405i.onrender.com/manage/maya-sample-organizer) with another sandbox business account's email (on your own server, `http://localhost:3100/manage/maya-sample-organizer`).
 
 ## Checked every night, on Render Workflows
 
 On `/evidence/operations`, **Checked every night, from outside** shows the latest run and says where it ran: on Render Workflows (the `giftwise-checks` Render Workflow: 25 checks, each its own task, run in parallel with retries), or run locally with `npm run checks:local`, which runs the same checks. `/api/health` and `/status` name the same place under **Outside checks**. That covers the eight failure cases against the PayPal sandbox, every page on the five-minute path, and eight public API promises (status, the ledger, the SSA report, the MCP tools, the Federal Register watch, the OpenAPI address, PayPal's return link, and a gift paid with a sandbox test card across its payees with no PayPal login, each capture checked at PayPal).
 
 1. Press **Run the checks now**. The page starts a task run on Render Workflows and names it.
-2. In about a minute the run files its results and the panel refreshes with the time of the run and its count. Open **All 25 checks, with each result**, or set **Display** to Technical to see what each check found.
+2. In about a minute the run files its results and the panel refreshes with the time of the run and its count. Open **All 25 checks, with each result**, or set **Text and theme** to Technical to see what each check found.
 3. `/status` shows the same run under **Outside checks**.
 
-A run can start every 10 minutes. The nightly run starts from a Render cron job at 09:00 UTC.
+A run can start every 10 minutes. The nightly run starts from a Render cron job at 09:00 UTC, which is 1 AM Pacific time in winter and 2 AM in summer.
 
 ## Failure cases, live
 
@@ -113,7 +113,7 @@ Without an AG Studio license key the dashboard shows AG Studio's trial watermark
 1. Open `/g/maya/report`. It opens on the month whose report is due next, with the deadline (10 days after the month ends).
 2. The verdict for the gifts as given: nothing counts as income. Each gift is listed with the rule that says why, a link to the regulation or SSA manual section, and its PayPal capture or payout as proof. Gifts from the fictional sample year say they have no PayPal record; gifts you pay on Maya's page appear with their PayPal capture id and a link to the receipt.
 3. Press **As cash**. The same month becomes the report Maya would have had to file: every gift to tell SSA about, what counts, her lower check two months later, and a call script.
-4. **Print or save as PDF** keeps just the report; **Download CSV** gives the same lines as a spreadsheet. Set **Display** to Technical to see the rule ids.
+4. **Print or save as PDF** keeps just the report; **Download CSV** gives the same lines as a spreadsheet. Set **Text and theme** to Technical to see the rule ids.
 
 The same report is at `GET /api/v1/ssa-report?page=maya&month=2026-10` and as the MCP tool `get_ssa_report`.
 
@@ -175,7 +175,7 @@ The PayPal checkout and API suites write a redacted transcript as they run, `con
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 386 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 379 pass and 7 skip (6 need a database) |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 409 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 402 pass and 7 skip (6 need a database) |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 scored, of 36 cases, agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All thirteen promises kept by all 100,000 |

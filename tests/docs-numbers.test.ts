@@ -6,9 +6,14 @@ import { CASES } from "@/lib/cases/list";
 import held from "../content/eval/held-out-results.json";
 import heldOutSet from "../content/eval/held-out.json";
 import held2 from "../content/eval/held-out-2-results.json";
-import { ASKED_SENTENCE, COMPUTED_CASES, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, paypalShareSentence, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
+import { ASKED_SENTENCE, COURT_NOT_INCOME, COURT_SCORE, FAMILY_BASIS, FAMILY_SENTENCE, IMPACT, KEPT_SENTENCE, housingReach, payItYourself, paypalShareSentence, sampleYearSentence, sampleYearSplit } from "@/lib/impact";
+import ssaSet from "../content/eval/ssa-examples.json";
+import fieldRun from "../content/eval/field-cases-results.json";
+import secondClass from "../content/eval/field-cases-2-results.json";
+import { whatAiAdds } from "@/lib/review/what-ai-adds";
+import { ADVERSARIAL_BILL, adversarialAlone } from "@/lib/review/adversarial";
 import { R as BILL_RUN, refereeExample } from "@/lib/review/example";
-import { DEFAULT_PROFILE, checkMonthName, evaluateGift, usd } from "@/lib/rules";
+import { DEFAULT_PROFILE, addMonths, checkMonthName, evaluateGift, monthOf, usd } from "@/lib/rules";
 import held2Set from "../content/eval/held-out-2.json";
 import held3 from "../content/eval/held-out-3-results.json";
 import held3Set from "../content/eval/held-out-3.json";
@@ -172,19 +177,22 @@ describe("one source for every dollar figure", () => {
     expect(dollars).toContain(FAMILY_BASIS);
     expect(dollars).toContain(sampleYearSentence());
     expect(IMPACT.familyTotal).toBe(38103.32);
-    // The result strip above leads with the per-month range, then the two-family total over the same months.
-    const strip = readme.slice(readme.indexOf("## Results"), readme.indexOf("## Where to look"));
+    // Results: one plain sentence per number, the court result led by what it shows.
+    const strip = readme.slice(readme.indexOf("## Results"), readme.indexOf("## What the AI adds"));
     const whole = (x: number) => `$${Math.round(x).toLocaleString("en-US")}`;
-    expect(strip).toContain(`| **${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month** |`);
-    // Under the figure, short lines: where it is kept, that family help was counted in every case, and where money is kept with ABLE.
     expect(IMPACT.countedCases).toBe(IMPACT.scoredCases);
-    expect(strip).toContain(`| kept in ${IMPACT.routedCases} of ${IMPACT.scoredCases} real SSI court cases, as the opinions state the facts<br>Family help was counted against the person in all ${IMPACT.countedCases}<br>`);
-    expect(strip).toContain(`<br>Money kept in ${COMPUTED_CASES}, with an ABLE account<br>`);
-    // No line of the cell runs long: each is a short line of its own.
-    const cell = strip.split(/\r?\n/).find((l) => l.startsWith("| kept in"))!.split(" | ")[0];
-    for (const line of cell.replace(/\]\([^)]*\)/g, "]").split("<br>")) expect(line.split(/\s+/).length, line).toBeLessThanOrEqual(16);
     expect(IMPACT.keptIfAbleCases).toBe(IMPACT.computedCases);
-    expect(strip).toContain(`**${cents(IMPACT.familyTotal)}** over the ${IMPACT.familyCases.map((c) => c.months).join(" and ")} months`);
+    expect(strip).toContain(
+      `- **${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month.** Help from family was counted against the person in all ${IMPACT.countedCases} real SSI court cases scored; routed through Giftwise, the same help keeps money in ${IMPACT.routedCases} as the opinions state the facts, and in ${IMPACT.keptIfAbleCases - IMPACT.routedCases} more, ${IMPACT.keptIfAbleCases} in all, when the person can open an ABLE account.`,
+    );
+    const S = fieldRun.summary;
+    expect(strip).toContain(`- **${COURT_SCORE}:** of ${S.cases} federal court cases about help from others, ${S.scored} turn on whether a gift counts`);
+    expect(strip).toContain(`the other ${S.not_scored} turn on`);
+    expect(strip).toContain(`- **${COURT_NOT_INCOME.score}** in a second class of court cases, where the court held the help was not income`);
+    expect(secondClass.cases.every((c) => /loan/i.test(c.determination.held))).toBe(true);
+    expect(strip).toContain(`- **${ssaSet.out_of_scope.length} groups** of SSA's examples are listed apart and not scored`);
+    // Each result line is one figure: no line carries a table cell's stack of qualified lines.
+    for (const line of strip.split(/\r?\n/).filter((l) => l.startsWith("- **"))) expect(line, line.slice(0, 40)).not.toContain("<br>");
     expect(resultsDoc).toContain(`${cents(IMPACT.familyTotal)} in all`);
   });
 
@@ -192,7 +200,34 @@ describe("one source for every dollar figure", () => {
     // Words as rendered: link targets and image paths are not read, so they are not counted.
     const shown = readme.replace(/\]\([^)]*\)/g, "]");
     const words = shown.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w)).length;
-    expect(words).toBeLessThan(2000);
+    // It carries the What the AI adds tables the evidence pages show, so the guard sits at 2,300 words.
+    expect(words).toBeLessThan(2300);
+  });
+
+  it("the README's What the AI adds tables are the code's, on the recorded bills and the adversarial cases", () => {
+    const ai = readme.slice(readme.indexOf("## What the AI adds"), readme.indexOf("## Run it yourself"));
+    const t = whatAiAdds();
+    const [none, regs, poms, ref] = t.columns;
+    const row = (k: string, f: (c: typeof none) => string) => `| ${k} | ${[none, regs, poms, ref].map(f).join(" | ")} |`;
+    expect(ai).toContain(row("Her check kept whole", (c) => `${c.whole} of ${t.bills}`));
+    expect(ai).toContain(row("Wrong routes accepted", (c) => String(c.wrong)));
+    expect(ai).toContain(row(`Paid straight to the business, of the ${t.payable} that are not housing`, (c) => `${c.direct} of ${t.payable}`));
+    // The design's reason holds only while the data shows it: no AI as safe, the manual reviewer alone settling more.
+    expect(none.whole === ref.whole && none.wrong === ref.wrong).toBe(true);
+    expect(poms.direct).toBeGreaterThan(ref.direct);
+    const a = adversarialAlone();
+    const labels = [
+      ["Regulations reviewer alone, its quote checked", "regs"],
+      ["Manual reviewer alone, its quote checked", "poms"],
+      ["Regulations reviewer alone, its answer taken as sent", "regsUnchecked"],
+      ["Manual reviewer alone, its answer taken as sent", "pomsUnchecked"],
+      ["Both reviewers and the referee", "referee"],
+    ] as const;
+    for (const [label, k] of labels) expect(ai).toContain(`| ${label} | ${a[k].whole} of ${a.cases} |`);
+    expect(a.regs.whole).toBe(a.referee.whole);
+    expect(a.poms.wrong).toEqual(["disagree"]);
+    const low = a.rows.find((r) => r.id === "disagree")!.outcome.poms.check;
+    expect(ai).toContain(`her ${checkMonthName(addMonths(monthOf(ADVERSARIAL_BILL.date), 2))} check drops from ${usd(a.full)} to ${usd(low)}`);
   });
 
   it("the README's one-number example is what the Gift Checker shows for a gift made in November 2026", () => {

@@ -89,6 +89,15 @@ describe("reading a captured multi-payee order", () => {
     expect(j.meta.source).toBe("PayPal Orders v2, live");
   });
 
+  it("a 5xx from PayPal is read again, and one that persists answers 502 with PayPal's issue", async () => {
+    const { readOrder } = await import("@/lib/paypal/orders");
+    const before = rest.calls.length;
+    rest.answer = { status: 500, body: { name: "INTERNAL_SERVER_ERROR", debug_id: "e500" }, debugId: "e500" };
+    const r = await readOrder(recorded.order_id, { retryMs: 1 });
+    expect(rest.calls.length - before).toBe(3);
+    expect(r).toMatchObject({ ok: false, status: 502, issue: "INTERNAL_SERVER_ERROR", debugId: "e500" });
+  });
+
   it("a PayPal refusal keeps its status and issue, in plain words", async () => {
     rest.answer = { status: 404, body: { name: "RESOURCE_NOT_FOUND", details: [{ issue: "INVALID_RESOURCE_ID" }], debug_id: "abc" }, debugId: "abc" };
     const { GET } = await import("@/app/api/paypal/orders/[id]/route");

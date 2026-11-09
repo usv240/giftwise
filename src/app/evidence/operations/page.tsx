@@ -14,6 +14,7 @@ import { VAULT_FINDING } from "@/lib/monthly";
 import { OpenOnHash } from "@/components/OpenOnHash";
 import { CaseRunner } from "@/components/evidence/CaseRunner";
 import { NightlyChecks } from "@/components/evidence/NightlyChecks";
+import { latestRun, suiteRows } from "@/lib/test-results";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../evidence.css";
@@ -45,6 +46,8 @@ const RUNS = [
 ] as const;
 
 export default function OperationsPage() {
+  // Each suite as recorded, the invariant run read from its own results file (src/lib/test-results.ts).
+  const suites = suiteRows();
   return (
     <div className="page frame evidence evidence-sub">
       <OpenOnHash />
@@ -89,11 +92,11 @@ export default function OperationsPage() {
           <Info id="evidence.tests" label="" />
         </div>
         <p className="page-prose jp-intro">
-          Latest run {day(results.ranAt)}; each suite&rsquo;s own date is with its command. {results.build}. The counts are written by scripts/test-results.mjs after each run, and the README
+          Latest run {day(latestRun())}; each suite&rsquo;s own date is with its command. {results.build}. The counts are written by scripts/test-results.mjs after each run, and the README
           and TESTING.md are checked against the same file.
         </p>
         <ul className="jp-tests" aria-label="Each suite, passed of total">
-          {results.suites.map((s) => (
+          {suites.map((s) => (
             <li key={s.id} className="jp-test">
               <span className="jp-test-name">{s.name}</span>
               <span className="jp-test-score tabular">
@@ -107,7 +110,7 @@ export default function OperationsPage() {
             <summary>What each checks, and its command</summary>
             <div className="jx-body">
               <ul className="jp-test-whats">
-                {results.suites.map((s) => (
+                {suites.map((s) => (
                   <li key={s.id}>
                     <p className="jp-test-name">
                       {s.name}{" "}

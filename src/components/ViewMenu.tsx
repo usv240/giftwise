@@ -41,16 +41,16 @@ function Segmented<K extends keyof Prefs>({ name, label, options, infoId }: { na
 /** The menu's words; the Spanish gift page, receipt and Easy Read report show them in Spanish. */
 const WORDS = {
   en: {
-    button: "Display",
-    title: "Display settings",
+    button: "Text and theme",
+    title: "Text, theme and explanations",
     mode: ["Explanations", "Plain", "Technical"],
     labels: ["Info labels", "Show", "Hide"],
     theme: ["Theme", "Light", "Dark", "System"],
     text: ["Text size", "Standard", "Large"],
   },
   es: {
-    button: "Vista",
-    title: "Ajustes de vista",
+    button: "Texto y tema",
+    title: "Texto, tema y explicaciones",
     mode: ["Explicaciones", "Sencillas", "Técnicas"],
     labels: ["Etiquetas de información", "Mostrar", "Ocultar"],
     theme: ["Tema", "Claro", "Oscuro", "Sistema"],

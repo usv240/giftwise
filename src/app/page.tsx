@@ -79,6 +79,21 @@ const FOR_DEVELOPERS = [
   { href: "/stack", label: "How it is built", what: "Every PayPal API and tool, with its file" },
 ];
 
+/** One part of the home page, closed on load: its heading and one line of what it holds, the rest one press away. */
+function HomeFold({ id, title, what, children }: { id: string; title: string; what: string; children: React.ReactNode }) {
+  return (
+    <details id={id} className="home-fold">
+      <summary className="home-fold-sum">
+        <h2 id={`${id}-h`} className="home-fold-h">
+          {title}
+        </h2>
+        <span className="home-fold-what">{what}</span>
+      </summary>
+      <div className="home-fold-body">{children}</div>
+    </details>
+  );
+}
+
 /** One published count: the figure leading its line, then what it counts and its source. */
 function ReachRow({ r }: { r: { fig: string; text: string; src: string; srcLabel: string } }) {
   return (
@@ -113,6 +128,9 @@ export default function Home() {
             <Link href="/start" className="btn btn-primary">
               Start a gift page
             </Link>
+            <Link href="/evidence#path" className="text-link">
+              See it work in five minutes
+            </Link>
             <Link href="/g/maya" className="text-link">
               Give on the sample page
             </Link>
@@ -135,28 +153,6 @@ export default function Home() {
             </p>
           </div>
         </div>
-      </section>
-
-      {/* Intro: a statement with inline pictures */}
-      <section className="intro frame" aria-labelledby="intro-title">
-        <h2 id="intro-title" className="sr-only">
-          The rule in one sentence
-        </h2>
-        <p className="intro-statement" data-reveal>
-          Cash gifts count as income. Paying the shop for her wheelchair{" "}
-          <span className="thumb">
-            <Image src="/images/paralympic-wheelchair-tyre-inflation.jpg" alt="Two technicians repairing a wheelchair tyre" width={120} height={80} />
-          </span>
-          , laptop{" "}
-          <span className="thumb">
-            <Image src="/images/laptop-on-desk-book-stacks-unsplash.jpg" alt="A laptop on a desk beside a stack of books" width={120} height={80} />
-          </span>{" "}
-          or medicine{" "}
-          <span className="thumb">
-            <Image src="/images/pharmacy-shop-interior-counter-work-fortepan-74179.jpg" alt="Pharmacists at work behind a pharmacy counter" width={120} height={80} />
-          </span>{" "}
-          does not. <Info id="intro.rule" />
-        </p>
       </section>
 
       {/* How it works: one card, four fields. On a phone the four fields sit in one row that scrolls sideways, the next
@@ -185,207 +181,242 @@ export default function Home() {
         </ol>
       </section>
 
-      {/* What routing keeps, in dollars: below How it works, so the Gift Checker leads the first screen. */}
-      <section className="frame home-kept" aria-labelledby="kept-title">
-        <h2 id="kept-title" className="section-title">
+      {/* One proof line on load, from the court cases; every other section below is folded under its heading. */}
+      <section className="frame home-proof" aria-labelledby="proof-title">
+        <h2 id="proof-title" className="sr-only">
           What routing keeps
         </h2>
-        <ul className="hero-impact home-kept-list" aria-label="What routing keeps, measured by the rules engine">
-          <li>
-            <Link className="hero-impact-link" href="/evidence/impact#kept">
-              <span className="hero-impact-fig tabular" data-kept="">
-                {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month
-              </span>
-              <span className="hero-impact-what">{KEPT_LABEL.charAt(0).toUpperCase() + KEPT_LABEL.slice(1)}</span>
-              <span className="hero-impact-base tabular">
-                {usd(Math.round(IMPACT.familyTotal))} kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families over the {IMPACT.familyCases.map((c) => c.months).join(" and ")} months their cases cover
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link className="hero-impact-link" href="/evidence/impact#why">
-              <span className="hero-impact-fig tabular" data-kept="">
-                {cents(YEAR.totalLowered)}
-              </span>
-              <span className="hero-impact-what">kept in Maya&rsquo;s sample year by one shared page, against {YEAR.givers} givers each paying on their own</span>
-              <span className="hero-impact-base tabular">
-                {YEAR.monthsLowered} monthly checks whole that would have dropped
-              </span>
-            </Link>
-          </li>
-        </ul>
+        <Link className="home-proof-link" href="/evidence/impact#kept">
+          <span className="home-proof-fig tabular" data-kept="">
+            {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month
+          </span>{" "}
+          <span className="home-proof-what">
+            kept at 2026 rates in {IMPACT.routedCases} of {IMPACT.scoredCases} real SSI court cases, where help from family was counted against the person in all {IMPACT.countedCases}.
+          </span>
+        </Link>
       </section>
 
-      {/* Showcase: rows as a board */}
-      <section className="showcase" aria-labelledby="showcase-title">
-        <div className="frame showcase-head">
-          <div className="showcase-copy">
-            <h2 id="showcase-title" className="section-title">
-              Every request, routed
-            </h2>
-            <p className="lede">Repairs, school costs, bills and birthdays. Each need has a best way to arrive, and Giftwise picks it.</p>
-          </div>
-          <figure className="showcase-photo">
-            <LoopVideo src="/media/wheelchair-basketball.webm" poster="/media/wheelchair-basketball-poster.jpg" width={854} height={480} />
-            <Image className="loop-poster" src="/media/wheelchair-basketball-poster.jpg" alt="" width={854} height={480} aria-hidden="true" />
-            <figcaption className="muted">Life, uninterrupted. Wheelchair basketball at the University of Worcester.</figcaption>
-          </figure>
-        </div>
-        <ShowcaseBoard />
-      </section>
-
-      {/* The proof: who each route reaches, measured, then the three checks open, then one disclosure for the published
-          counts, the sample year month by month and every source. */}
-      <section className="section frame evidence" aria-labelledby="reach-title">
-        <h2 id="reach-title" className="section-title">
-          Who it reaches
-        </h2>
-        <ul className="reach-list">
-          <li className="reach-row">
-            <span className="reach-fig tabular">{A.ssi_jan2025_total.value}</span>
-            <span className="reach-text">
-              people on SSI keep their full check when a gift pays the shop, the clinic, the pharmacy or the school. Items, care and school costs reach everyone.{" "}
-              <a className="text-link muted reach-src" href={SRC["crs-if10482"].url} target="_blank" rel="noreferrer">
-                CRS, January 2025
-              </a>
-            </span>
-          </li>
-          <li className="reach-row">
-            <span className="reach-fig tabular">Rent</span>
-            <span className="reach-text">
-              stays whole through an ABLE account, for anyone whose disability began before {HOUSING.onsetAge}, including all {A.ssi_jan2025_children.value} children on SSI. Without one, the rules cap the cut:{" "}
-              {usd(HOUSING.amount)} of rent from family leaves the {checkMonthName(later.paymentMonth)} check at {usd(later.rentWithoutAble)} of {usd(later.full)}, and Giftwise says so first.{" "}
-              <Link className="text-link muted reach-src" href="/evidence/impact#reach">
-                Measured
-              </Link>
-            </span>
-          </li>
-        </ul>
-        <div className="ev-checks">
-          <h3 className="ev-sub">How the rules were checked</h3>
-          <ul className="research-proof">
+      {/* Everything else on the page, closed under its heading with one line of what it holds. Nothing is removed, and a
+          link to anything inside opens its fold (OpenOnHash below). */}
+      <div className="frame home-folds" aria-label="More about Giftwise">
+        <HomeFold id="kept" title="What routing keeps, in dollars" what={`${usd(Math.round(IMPACT.familyTotal))} for two families in real court cases; ${cents(YEAR.totalLowered)} in Maya's sample year`}>
+          <ul className="hero-impact home-kept-list" aria-label="What routing keeps, measured by the rules engine">
             <li>
-              <Link className="research-proof-link" href="/evidence/ssa-examples">
-                <span className="research-proof-fig tabular">
-                  {ssaResults.summary.engine_matches} of {ssaResults.summary.cases}
+              <Link className="hero-impact-link" href="/evidence/impact#kept">
+                <span className="hero-impact-fig tabular" data-kept="">
+                  {usd(Math.round(IMPACT.keptMin))} to {usd(Math.round(IMPACT.keptMax))} a month
                 </span>
-                <span>of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer</span>
+                <span className="hero-impact-what">{KEPT_LABEL.charAt(0).toUpperCase() + KEPT_LABEL.slice(1)}</span>
+                <span className="hero-impact-base tabular">
+                  {usd(Math.round(IMPACT.familyTotal))} kept by {IMPACT.familyCases.length === 2 ? "two" : IMPACT.familyCases.length} families over the {IMPACT.familyCases.map((c) => c.months).join(" and ")} months their cases cover
+                </span>
               </Link>
             </li>
             <li>
-              <Link className="research-proof-link" href="/evidence/court-cases">
-                <span className="research-proof-fig tabular">
-                  {fieldResults.summary.agreed} of {fieldResults.summary.scored}
+              <Link className="hero-impact-link" href="/evidence/impact#why">
+                <span className="hero-impact-fig tabular" data-kept="">
+                  {cents(YEAR.totalLowered)}
                 </span>
-                <span>scored, of {fieldResults.summary.cases} cases: real SSI cases from federal courts that reach the outcome SSA and the court did</span>
-              </Link>
-            </li>
-            <li>
-              <Link className="research-proof-link" href="/evidence/rules#evaluation">
-                <span className="research-proof-fig tabular">
-                  {billResults.summary.referee.check_kept_whole} of {billResults.summary.referee.all_cases}
+                <span className="hero-impact-what">kept in Maya&rsquo;s sample year by one shared page, against {YEAR.givers} givers each paying on their own</span>
+                <span className="hero-impact-base tabular">
+                  {YEAR.monthsLowered} monthly checks whole that would have dropped
                 </span>
-                <span>labeled bills routed so her check stays whole</span>
               </Link>
             </li>
           </ul>
-        </div>
-        <details id="evidence-more" className="ev-more">
-          <summary>Housing and ABLE counts, the sample year month by month, and all {RESEARCH.length} sources</summary>
-          <div className="ev-more-body">
-            <ul className="reach-list">
-              {[...HOUSING_HARM, ...ABLE_COUNTS].map((r) => (
-                <ReachRow key={r.fig} r={r} />
-              ))}
-            </ul>
+        </HomeFold>
+        <HomeFold id="routed" title="Every request, routed" what="Cash counts as income and paying the shop does not: repairs, school costs, bills and birthdays, each the way it should arrive">
+          {/* The rule in one sentence, then the showcase: rows as a board. */}
+          <section className="intro" aria-labelledby="intro-title">
+            <h3 id="intro-title" className="sr-only">
+              The rule in one sentence
+            </h3>
+            <p className="intro-statement" data-reveal>
+              Cash gifts count as income. Paying the shop for her wheelchair{" "}
+              <span className="thumb">
+                <Image src="/images/paralympic-wheelchair-tyre-inflation.jpg" alt="Two technicians repairing a wheelchair tyre" width={120} height={80} />
+              </span>
+              , laptop{" "}
+              <span className="thumb">
+                <Image src="/images/laptop-on-desk-book-stacks-unsplash.jpg" alt="A laptop on a desk beside a stack of books" width={120} height={80} />
+              </span>{" "}
+              or medicine{" "}
+              <span className="thumb">
+                <Image src="/images/pharmacy-shop-interior-counter-work-fortepan-74179.jpg" alt="Pharmacists at work behind a pharmacy counter" width={120} height={80} />
+              </span>{" "}
+              does not. <Info id="intro.rule" />
+            </p>
+          </section>
 
-            {/* The sample year: bars standing on the edge */}
-            <div className="stats">
-              <div className="stats-head">
-                <h3 className="stats-title">
-                  <span className="stats-figure tabular">$0</span> <span className="stats-claim">counted against her all year</span>
-                </h3>
-                <p className="stats-sub">
-                  Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {YEAR.givers} people, every gift through Giftwise. Her check stayed {usd(facts.values.fbr_individual.value)} every month, the
-                  full 2026 check.
-                </p>
+          <section className="showcase" aria-labelledby="routed-h">
+            <div className="showcase-head">
+              <div className="showcase-copy">
+                <p className="lede">Repairs, school costs, bills and birthdays. Each need has a best way to arrive, and Giftwise picks it.</p>
               </div>
-              <div className="bars" data-ui role="list" aria-label="Help delivered each month in the sample year">
-                {HELP.map((h, i) => (
-                  <div
-                    key={h.m}
-                    role="listitem"
-                    className="bar"
-                    data-accent={i === HELP_MAX ? "" : undefined}
-                    data-print={PRINTED.includes(i) ? "" : undefined}
-                    tabIndex={0}
-                    style={{ ["--h" as string]: `${(h.v / HELP[HELP_MAX].v) * 84}%` }}
-                    aria-label={`${h.m}: ${usd(h.v)} of help, $0 counted`}
-                  >
-                    <span className="bar-value tabular">{usd(h.v)}</span>
-                    <span className="bar-fill" aria-hidden="true" />
-                    <span className="bar-month">{h.m}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Grounded in research: names as one line */}
-            <div className="research">
-              <figure className="research-photo">
-                <Image
-                  src="/images/pharmacy-shop-interior-counter-work-fortepan-74179.jpg"
-                  alt="Archival photograph of pharmacists working at a pharmacy counter"
-                  width={960}
-                  height={680}
-                  sizes="(max-width: 900px) 100vw, 30vw"
-                />
-                <figcaption className="muted">A pharmacy counter. Medicine paid straight to the pharmacy is not counted as income.</figcaption>
+              <figure className="showcase-photo">
+                <LoopVideo src="/media/wheelchair-basketball.webm" poster="/media/wheelchair-basketball-poster.jpg" width={854} height={480} />
+                <Image className="loop-poster" src="/media/wheelchair-basketball-poster.jpg" alt="" width={854} height={480} aria-hidden="true" />
+                <figcaption className="muted">Life, uninterrupted. Wheelchair basketball at the University of Worcester.</figcaption>
               </figure>
-              <p className="research-line">
-                Grounded in{" "}
-                {RESEARCH.map((k, i) => (
-                  <span key={k}>
-                    <a className="text-link" href={SRC[k].url} target="_blank" rel="noreferrer">
-                      {RESEARCH_LABEL[k]}
-                    </a>
-                    {i < RESEARCH.length - 2 ? ", " : i === RESEARCH.length - 2 ? " and " : "."}
-                  </span>
-                ))}
-              </p>
             </div>
+            <ShowcaseBoard />
+          </section>
+        </HomeFold>
+        <HomeFold
+          id="reach"
+          title="Who it reaches, and how the rules were checked"
+          what={`${A.ssi_jan2025_total.value} people on SSI; ${ssaResults.summary.engine_matches} of ${ssaResults.summary.cases} of SSA's own examples, ${fieldResults.summary.agreed} of ${fieldResults.summary.scored} court cases scored, ${billResults.summary.referee.check_kept_whole} of ${billResults.summary.referee.all_cases} bills`}
+        >
+          {/* The proof: who each route reaches, measured, then the three checks open, then one disclosure for the published
+              counts, the sample year month by month and every source. */}
+          <section className="evidence" aria-labelledby="reach-h">
+            <ul className="reach-list">
+              <li className="reach-row">
+                <span className="reach-fig tabular">{A.ssi_jan2025_total.value}</span>
+                <span className="reach-text">
+                  people on SSI keep their full check when a gift pays the shop, the clinic, the pharmacy or the school. Items, care and school costs reach everyone.{" "}
+                  <a className="text-link muted reach-src" href={SRC["crs-if10482"].url} target="_blank" rel="noreferrer">
+                    CRS, January 2025
+                  </a>
+                </span>
+              </li>
+              <li className="reach-row">
+                <span className="reach-fig tabular">Rent</span>
+                <span className="reach-text">
+                  stays whole through an ABLE account, for anyone whose disability began before {HOUSING.onsetAge}, including all {A.ssi_jan2025_children.value} children on SSI. Without one, the rules cap the cut:{" "}
+                  {usd(HOUSING.amount)} of rent from family leaves the {checkMonthName(later.paymentMonth)} check at {usd(later.rentWithoutAble)} of {usd(later.full)}, and Giftwise says so first.{" "}
+                  <Link className="text-link muted reach-src" href="/evidence/impact#reach">
+                    Measured
+                  </Link>
+                </span>
+              </li>
+            </ul>
+            <div className="ev-checks">
+              <h3 className="ev-sub">How the rules were checked</h3>
+              <ul className="research-proof">
+                <li>
+                  <Link className="research-proof-link" href="/evidence/ssa-examples">
+                    <span className="research-proof-fig tabular">
+                      {ssaResults.summary.engine_matches} of {ssaResults.summary.cases}
+                    </span>
+                    <span>of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link className="research-proof-link" href="/evidence/court-cases">
+                    <span className="research-proof-fig tabular">
+                      {fieldResults.summary.agreed} of {fieldResults.summary.scored}
+                    </span>
+                    <span>scored, of {fieldResults.summary.cases} cases: real SSI cases from federal courts that reach the outcome SSA and the court did</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link className="research-proof-link" href="/evidence/rules#evaluation">
+                    <span className="research-proof-fig tabular">
+                      {billResults.summary.referee.check_kept_whole} of {billResults.summary.referee.all_cases}
+                    </span>
+                    <span>labeled bills routed so her check stays whole</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <details id="evidence-more" className="ev-more">
+              <summary>Housing and ABLE counts, the sample year month by month, and all {RESEARCH.length} sources</summary>
+              <div className="ev-more-body">
+                <ul className="reach-list">
+                  {[...HOUSING_HARM, ...ABLE_COUNTS].map((r) => (
+                    <ReachRow key={r.fig} r={r} />
+                  ))}
+                </ul>
+
+                {/* The sample year: bars standing on the edge */}
+                <div className="stats">
+                  <div className="stats-head">
+                    <h3 className="stats-title">
+                      <span className="stats-figure tabular">$0</span> <span className="stats-claim">counted against her all year</span>
+                    </h3>
+                    <p className="stats-sub">
+                      Sample household, {HELP_SPAN}: {usd(HELP_TOTAL)} of help from {YEAR.givers} people, every gift through Giftwise. Her check stayed {usd(facts.values.fbr_individual.value)} every month, the
+                      full 2026 check.
+                    </p>
+                  </div>
+                  <div className="bars" data-ui role="list" aria-label="Help delivered each month in the sample year">
+                    {HELP.map((h, i) => (
+                      <div
+                        key={h.m}
+                        role="listitem"
+                        className="bar"
+                        data-accent={i === HELP_MAX ? "" : undefined}
+                        data-print={PRINTED.includes(i) ? "" : undefined}
+                        tabIndex={0}
+                        style={{ ["--h" as string]: `${(h.v / HELP[HELP_MAX].v) * 84}%` }}
+                        aria-label={`${h.m}: ${usd(h.v)} of help, $0 counted`}
+                      >
+                        <span className="bar-value tabular">{usd(h.v)}</span>
+                        <span className="bar-fill" aria-hidden="true" />
+                        <span className="bar-month">{h.m}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grounded in research: names as one line */}
+                <div className="research">
+                  <figure className="research-photo">
+                    <Image
+                      src="/images/pharmacy-shop-interior-counter-work-fortepan-74179.jpg"
+                      alt="Archival photograph of pharmacists working at a pharmacy counter"
+                      width={960}
+                      height={680}
+                      sizes="(max-width: 900px) 100vw, 30vw"
+                    />
+                    <figcaption className="muted">A pharmacy counter. Medicine paid straight to the pharmacy is not counted as income.</figcaption>
+                  </figure>
+                  <p className="research-line">
+                    Grounded in{" "}
+                    {RESEARCH.map((k, i) => (
+                      <span key={k}>
+                        <a className="text-link" href={SRC[k].url} target="_blank" rel="noreferrer">
+                          {RESEARCH_LABEL[k]}
+                        </a>
+                        {i < RESEARCH.length - 2 ? ", " : i === RESEARCH.length - 2 ? " and " : "."}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            </details>
+          </section>
+        </HomeFold>
+        {/* For anyone who wants the inside: one referee moment (the two reviewers' quotes and the verdict, replayed
+            through the real code), then what is new. */}
+        <HomeFold id="referee" title="Two reviewers and a referee" what="Two Claude reviewers read two rulebooks; the referee in code keeps her check whole when they disagree">
+          <div className="home-ref">
+            <RefereeMoment />
           </div>
-        </details>
-      </section>
-
-      {/* After the proof, for anyone who wants the inside: one referee moment (the two reviewers' quotes and the verdict,
-          replayed through the real code), then what is new. The first screens stay one path: the Gift Checker, then giving. */}
-      <div className="frame grid-12 home-ref">
-        <RefereeMoment />
+          <div className="home-new">
+            <WhatIsNew headingId="new-title" />
+          </div>
+        </HomeFold>
+        <HomeFold id="faq" title="Plain answers" what="Who can use it, why pay the shop instead of cash, rent and utilities, ABLE accounts, and who holds the money">
+          <section className="faq-section" aria-labelledby="faq-h">
+            <Faq bills={billResults.summary.referee.all_cases} billsKeptWhole={billResults.summary.referee.check_kept_whole} />
+          </section>
+        </HomeFold>
+        <HomeFold id="start" title="Start with one gift" what="Paste a fundraiser's link, or start from the sample">
+          {/* The first step, already open inside the fold. */}
+          <section className="cta" aria-labelledby="start-h">
+            <div className="cta-copy">
+              <p className="cta-title">
+                Start with <br />
+                one gift
+              </p>
+              <p className="cta-sub">Paste a fundraiser&rsquo;s link, or start from the sample. Giftwise turns each need into a gift that arrives the <span className="cta-keep">benefit-safe way</span>.</p>
+            </div>
+            <CtaDialog />
+          </section>
+        </HomeFold>
       </div>
-      <div className="frame grid-12 home-new">
-        <WhatIsNew headingId="new-title" />
-      </div>
-
-      {/* FAQ: question index, one answer */}
-      <section className="section frame faq-section" aria-labelledby="faq-title">
-        <h2 id="faq-title" className="section-title">
-          Plain answers
-        </h2>
-        <Faq bills={billResults.summary.referee.all_cases} billsKeptWhole={billResults.summary.referee.check_kept_whole} />
-      </section>
-
-      {/* CTA: first step, already open */}
-      <section className="cta section" aria-labelledby="cta-title">
-        <div className="cta-copy">
-          <h2 id="cta-title" className="cta-title">
-            Start with <br />
-            one gift
-          </h2>
-          <p className="cta-sub">Paste a fundraiser&rsquo;s link, or start from the sample. Giftwise turns each need into a gift that arrives the <span className="cta-keep">benefit-safe way</span>.</p>
-        </div>
-        <CtaDialog />
-      </section>
 
       {/* For developers and anyone running it: one row, out of the giver's way. */}
       <nav className="frame home-dev" aria-labelledby="home-dev-title">

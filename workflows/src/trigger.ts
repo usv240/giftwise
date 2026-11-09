@@ -10,10 +10,11 @@ const render = new Render();
 const run = await render.workflows.startTask(`${slug}/nightlyCheck`, [{ trigger: "nightly" }]);
 console.log(`Started ${slug}/nightlyCheck as ${run.taskRunId}`);
 
-// On the 1st, plan every monthly gift's month; on Sundays, rebuild the rulebook index.
+// On the 1st, plan every monthly gift's month (09:00 UTC is 1 or 2 AM Pacific, the same day, and the month is read
+// in Pacific time like every gift's date in the app); on Sundays, rebuild the rulebook index.
 const now = new Date();
 if (now.getUTCDate() === 1) {
-  const m = await render.workflows.startTask(`${slug}/monthlyRun`, [{ month: now.toISOString().slice(0, 7) }]);
+  const m = await render.workflows.startTask(`${slug}/monthlyRun`, [{ month: new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(now).slice(0, 7) }]);
   console.log(`Started ${slug}/monthlyRun as ${m.taskRunId}`);
 }
 if (now.getUTCDay() === 0) {

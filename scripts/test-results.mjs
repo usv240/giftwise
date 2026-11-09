@@ -49,6 +49,8 @@ if (!ids.length || ids.includes("--list")) {
 }
 
 const n = (x) => x.toLocaleString("en-US");
+/** A day in Pacific time, YYYY-MM-DD: the one calendar the site keeps (src/lib/time.ts). */
+const pacificDay = (d = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(d);
 
 /**
  * Rewrite the counts in every table row that names this suite's command: "N of M" in docs/tests.md, the first count in
@@ -158,8 +160,8 @@ let short = false;
 for (const id of ids) {
   const suite = doc.suites.find((s) => s.id === id);
   if (!suite || !RUN[id]) throw new Error(`No runnable suite "${id}". Try --list.`);
-  const record = ({ passed, total, requests, bare, with_database }) => {
-    Object.assign(suite, { passed, total, ...(requests ? { requests } : {}), ...(bare ? { bare } : {}), ...(with_database ? { with_database } : {}), ranAt: new Date().toISOString().slice(0, 10) });
+  const record = ({ passed, total, requests, bare, with_database, ranAt }) => {
+    Object.assign(suite, { passed, total, ...(requests ? { requests } : {}), ...(bare ? { bare } : {}), ...(with_database ? { with_database } : {}), ranAt: ranAt ?? pacificDay() });
     writeFileSync(FILE, JSON.stringify(doc, null, 2) + "\n");
     writeDocs(suite);
   };
@@ -179,6 +181,12 @@ for (const id of ids) {
     }
   } else {
     r = runOnce(id);
+  }
+  // The invariant run writes its own results file; its counts and day are read from there, so this row and the pages
+  // that read that file (src/lib/test-results.ts) always state the same run.
+  if (id === "invariants") {
+    const inv = JSON.parse(readFileSync("content/eval/invariants-results.json", "utf8"));
+    r = { passed: inv.gifts - Math.max(0, ...inv.results.map((x) => x.broken)), total: inv.gifts, ranAt: pacificDay(new Date(inv.ran_at)) };
   }
   record(r);
   if (suite.passed !== suite.total) short = true;

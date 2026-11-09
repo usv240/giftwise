@@ -1,16 +1,6 @@
-"use client";
+import { shownTime } from "@/lib/time";
 
-import { useSyncExternalStore } from "react";
-
-const noSubscribe = () => () => {};
-
-/** The time the checks ran, in the reader's own time zone. The server's first render names UTC until the browser takes over. */
+/** The time the checks ran, in Pacific time with the zone named, the one zone every time on the site is shown in (src/lib/time.ts). */
 export function CheckedAt({ iso }: { iso: string }) {
-  const d = new Date(iso);
-  const text = useSyncExternalStore(
-    noSubscribe,
-    () => d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" }),
-    () => d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit", timeZone: "UTC", timeZoneName: "short" }),
-  );
-  return <time dateTime={iso}>{text}</time>;
+  return <time dateTime={iso}>{shownTime(iso, { seconds: true })}</time>;
 }

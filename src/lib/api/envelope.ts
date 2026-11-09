@@ -32,7 +32,5 @@ export function fail(code: ApiErrorCode, message: string, status: number, detail
   );
 }
 
-/** Today's date in US Pacific time, YYYY-MM-DD. */
-export function today() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
-}
+/** Today's date in US Pacific time, YYYY-MM-DD: the one calendar src/lib/time.ts keeps for every income date. */
+export { today } from "@/lib/time";

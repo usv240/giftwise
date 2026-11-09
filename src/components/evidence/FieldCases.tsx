@@ -1,7 +1,9 @@
 import Link from "next/link";
 import data from "../../../content/eval/field-cases.json";
 import results from "../../../content/eval/field-cases-results.json";
-import { ASKED_BASIS, IMPACT, KEPT_BASIS, KEPT_SENTENCE } from "@/lib/impact";
+import second from "../../../content/eval/field-cases-2.json";
+import secondResults from "../../../content/eval/field-cases-2-results.json";
+import { ASKED_BASIS, COURT_NOT_INCOME, IMPACT, KEPT_BASIS, KEPT_SENTENCE } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 
 type Dataset = { id: string; status: string; title: string; not_scored_reason?: string; source: { court: string; citation: string; url: string; date: string }; determination?: { held?: string } };
@@ -81,7 +83,7 @@ export function FieldCaseList() {
         </p>
         <p className="sx-meta muted">
           Every scored case is one where SSA counted the help and the court agreed; the other opinions turn on loans, shared rent, trusts or deeming, separate questions from a gift, so they are listed
-          with what each turns on. Passages and amounts are checked against each opinion&rsquo;s text. The person&rsquo;s name is left out; each case links to the opinion.
+          with what each turns on, and the loans a court held were not income are scored as their own class below. Passages and amounts are checked against each opinion&rsquo;s text. The person&rsquo;s name is left out; each case links to the opinion.
         </p>
 
         <div className="sx-findings">
@@ -147,6 +149,54 @@ export function FieldCaseList() {
         </ol>
         <p className="sx-cmd muted tech-only">npx tsx --env-file=.env.local scripts/run-field-cases.ts</p>
       </div>
+      </section>
+
+      {/* The second class: help the court held was not income, scored by the same runner (--set content/eval/field-cases-2.json). */}
+      <section id="not-income" className="page-section" aria-labelledby="not-income-h">
+        <h2 id="not-income-h">
+          {COURT_NOT_INCOME.scored} cases where the court held the help was not income
+        </h2>
+        <div className="jx-sheet">
+          <p className="sx-vs">{COURT_NOT_INCOME.sentence}</p>
+          <p className="sx-meta muted">
+            Found by searching federal court opinions for help that did not count; {second.about.opinions_downloaded} opinions came back, {second.about.opinions_read_closely} were read closely, and these are the
+            ones where the court held the help was not income. Each links to the opinion.
+          </p>
+          <ol className="sx-list">
+            {(secondResults.cases as unknown as Result[]).map((r) => {
+              const c = (second.cases as unknown as Dataset[]).find((x) => x.id === r.id)!;
+              return (
+                <li key={r.id}>
+                  <details className="sx-case">
+                    <summary>
+                      <span className="sx-title">{r.title}</span>
+                      <span className="sx-sides">
+                        <span className="sx-side">
+                          <span className="sx-who">Giftwise</span>{" "}
+                          <span className="sx-verdict" data-ok={r.engine.match ? "" : undefined}>
+                            {r.engine.match ? "Agrees" : "Differs"}
+                          </span>
+                        </span>
+                      </span>
+                    </summary>
+                    <div className="sx-body">
+                      <p>
+                        <strong>Held:</strong> {r.determination.held}
+                      </p>
+                      <p className="sx-rules tech-only">Rules {r.engine.rule_ids.join(", ")}</p>
+                      <p>
+                        <a className="text-link" href={c.source.url} target="_blank" rel="noreferrer">
+                          {docket(c)}
+                        </a>
+                      </p>
+                    </div>
+                  </details>
+                </li>
+              );
+            })}
+          </ol>
+          <p className="sx-cmd muted tech-only">npx tsx scripts/run-field-cases.ts --set content/eval/field-cases-2.json</p>
+        </div>
       </section>
 
       <section id="other" className="page-section" aria-labelledby="other-h">

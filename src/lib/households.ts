@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db, schema } from "./db";
 import { paypalEnv } from "./paypal/env";
+import { today } from "./time";
 import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Profile, type Pronoun } from "./rules";
 import { SAMPLE_MANAGE_TOKEN, hashToken, newToken, resetSampleManage, routeNeed } from "./manage";
 import { sampleNeedPositions, seedRecordedReceipt } from "./sample-receipt";
@@ -283,7 +284,7 @@ export async function createGiftPage(o: { name: string; pronoun: Pronoun; organi
     .returning();
   const rows = o.needs.map((n, i) => {
     const r = routeNeed(o.name, o.pronoun, { ...n, detail: o.sourceUrl ? "From the fundraiser." : "" });
-    const check = evaluateGift({ id: `new-${i}`, date: new Date().toISOString().slice(0, 10), amount: n.amount, delivery: r.route as "vendor" | "able", category: n.category, recurring: n.recurring }, { ...DEFAULT_PROFILE, pronoun: o.pronoun });
+    const check = evaluateGift({ id: `new-${i}`, date: today(), amount: n.amount, delivery: r.route as "vendor" | "able", category: n.category, recurring: n.recurring }, { ...DEFAULT_PROFILE, pronoun: o.pronoun });
     const row = {
       householdId: household.id,
       title: n.title.slice(0, 80),

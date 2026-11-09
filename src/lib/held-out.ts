@@ -21,7 +21,7 @@ type Month = { month: string; check: number; cashIncome: number; inKindIncome: n
 type Engine = {
   DEFAULT_PROFILE: Profile;
   planMonths: (gifts: Gift[], profile: Profile) => { months: Month[]; gifts: { ruleIds: string[] }[] };
-  computeMonth: (month: string, gifts: Gift[], profile: Profile) => { check: number };
+  computeMonth: (month: string, gifts: Gift[], profile: Profile) => { check: number; vtrApplied?: boolean };
 };
 
 const TOLERANCE = 1;
@@ -39,8 +39,10 @@ export function scoreHeldOut(cases: HeldOutCase[], engine: Engine) {
       return Math.round((t.cashIncome + t.inKindIncome + t.ismValue - t.infrequentExcluded) * 100) / 100;
     };
     const values = c.expected.values.map((v) => ({ ...v, got: read(v.month, v.measure), match: Math.abs(read(v.month, v.measure) - v.value) <= TOLERANCE }));
-    // SSA counts the one-third reduction as income too (20 CFR 416.1131), so a month under it counts.
-    const counts = plan.months.some((m) => m.cashIncome + m.inKindIncome + m.ismValue - m.infrequentExcluded > 0 || m.vtrApplied);
+    // SSA counts the one-third reduction as income too (20 CFR 416.1131), so a month under it counts. A month the case
+    // scores with no payment in it (help from inside the household, set by the profile alone) is read the same way.
+    const quiet = c.expected.values.map((v) => v.month).filter((m) => !byMonth.has(m));
+    const counts = plan.months.some((m) => m.cashIncome + m.inKindIncome + m.ismValue - m.infrequentExcluded > 0 || m.vtrApplied) || quiet.some((m) => engine.computeMonth(m, [], profile).vtrApplied === true);
     const countsMatch = counts === c.expected.counts;
     return {
       id: c.id,

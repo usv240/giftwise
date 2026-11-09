@@ -91,7 +91,7 @@ const missing = await page.$$eval("[data-info-id]", (els) => els.filter((e) => !
 ok("every Info button renders", missing === 0);
 
 // 3. View menu: Technical mode + Dark theme persist across navigation
-await page.getByRole("button", { name: "Display", exact: true }).click();
+await page.getByRole("button", { name: "Text and theme", exact: true }).click();
 await page.locator("label", { hasText: "Technical" }).click();
 await page.locator("label", { hasText: "Dark" }).click();
 await page.keyboard.press("Escape");
@@ -234,7 +234,7 @@ await page.locator(".b-cal-event").first().waitFor({ timeout: 60000 }).catch(() 
 const calEvents = await page.locator(".b-cal-event").count();
 await page.getByRole("button", { name: "As cash" }).click();
 // The last gift of the sample year: Aunt June's $150 on October 28, the one the five-minute path moves into November.
-// (The recorded sandbox gift of November 9 is listed after it, so the option is picked by its date, not its place.)
+// (The recorded sandbox gift of November 8, Pacific time, is listed after it, so the option is picked by its date, not its place.)
 const octLast = await page.locator(".bc-move select option").evaluateAll((os) => os.filter((o) => /^Oct 28/.test(o.textContent ?? "")).map((o) => o.value).at(-1));
 await page.locator(".bc-move select").selectOption(octLast ?? { index: 0 });
 await page.locator(".bc-move input[type=date]").fill("2026-11-02");

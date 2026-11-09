@@ -176,7 +176,7 @@ export default function LearnPage() {
           <Info id="page.learn" />
         </div>
         <p className="lede">How Social Security counts gifts for people on SSI. Each rule has a worked example and links to its source.</p>
-        <p className="learn-mode">For rule numbers and details, choose Technical in the Display menu.</p>
+        <p className="learn-mode">For rule numbers and details, choose Technical in the Text and theme menu.</p>
         <AskRulebook />
       </header>
 

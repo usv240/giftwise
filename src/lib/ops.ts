@@ -120,18 +120,38 @@ export async function lastDay() {
 
 export type FeedEvent = { kind: "ledger" | "request"; at: string; text: string; detail: string; id: string; tone: "ok" | "attention" | "plain" };
 
-/** The last 50 events from the ledger and the request log as one feed, newest first, masked. */
+type LedgerRow = { id: number; at: Date | string; actor: string; action: string; ref: string; request_id: string | null };
+type RequestRow = { id?: number; request_id: string; route: string; method: string; status: number; ms: number; created_at: Date | string };
+
+/**
+ * One feed, newest first: the latest `limit` events from the ledger and the request log, and every 5xx of the last
+ * hour, which the "answered 5xx" tile counts. A busy hour can push an error past the latest events, so each counted
+ * error is kept in the feed by its own query and listed once.
+ */
+export function mergeFeed(ledger: LedgerRow[], requests: RequestRow[], errorsLastHour: RequestRow[], limit = 50): FeedEvent[] {
+  const asRequest = (r: RequestRow): FeedEvent => ({ kind: "request", at: new Date(r.created_at).toISOString(), text: `${r.method} ${r.route}`, detail: `${r.status} in ${r.ms} ms`, id: r.request_id, tone: r.status >= 500 ? "attention" : r.status >= 400 ? "plain" : "ok" });
+  const latest: FeedEvent[] = [
+    ...ledger.map((r) => ({ kind: "ledger" as const, at: new Date(r.at).toISOString(), text: r.action, detail: `${r.actor}, ${shortId(r.ref)}`, id: r.request_id ?? `ledger:${r.id}`, tone: /declined|failed|unverified|tampered/.test(r.action) ? ("attention" as const) : ("ok" as const) })),
+    ...requests.map(asRequest),
+  ]
+    .sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0))
+    .slice(0, limit);
+  const key = (e: FeedEvent) => `${e.kind}:${e.id}:${e.at}`;
+  const shown = new Set(latest.map(key));
+  const errors = errorsLastHour.map(asRequest).filter((e) => !shown.has(key(e)));
+  return [...latest, ...errors].sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
+}
+
+/** The last 50 events from the ledger and the request log as one feed, newest first, masked, with every 5xx of the last hour. */
 export async function feed(limit = 50): Promise<FeedEvent[]> {
   if (!dbConfigured()) return [];
-  const [ledger, requests] = await Promise.all([
-    q<{ id: number; at: Date | string; actor: string; action: string; ref: string; request_id: string | null }>(sql`select id, at, actor, action, ref, detail->>'request_id' as request_id from audit_events order by id desc limit ${limit}`),
-    q<{ request_id: string; route: string; method: string; status: number; ms: number; created_at: Date | string }>(sql`select request_id, route, method, status, ms, created_at from request_log order by id desc limit ${limit}`),
+  const [ledger, requests, errors] = await Promise.all([
+    q<LedgerRow>(sql`select id, at, actor, action, ref, detail->>'request_id' as request_id from audit_events order by id desc limit ${limit}`),
+    q<RequestRow>(sql`select id, request_id, route, method, status, ms, created_at from request_log order by id desc limit ${limit}`),
+    // The same rows the "answered 5xx" tile counts (rightNow below).
+    q<RequestRow>(sql`select id, request_id, route, method, status, ms, created_at from request_log where status >= 500 and created_at >= now() - interval '1 hour' order by id desc`),
   ]);
-  const events: FeedEvent[] = [
-    ...ledger.map((r) => ({ kind: "ledger" as const, at: new Date(r.at).toISOString(), text: r.action, detail: `${r.actor}, ${shortId(r.ref)}`, id: r.request_id ?? `ledger:${r.id}`, tone: /declined|failed|unverified|tampered/.test(r.action) ? ("attention" as const) : ("ok" as const) })),
-    ...requests.map((r) => ({ kind: "request" as const, at: new Date(r.created_at).toISOString(), text: `${r.method} ${r.route}`, detail: `${r.status} in ${r.ms} ms`, id: r.request_id, tone: r.status >= 500 ? ("attention" as const) : r.status >= 400 ? ("plain" as const) : ("ok" as const) })),
-  ];
-  return events.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0)).slice(0, limit);
+  return mergeFeed(ledger, requests, errors, limit);
 }
 
 export type HourPoint = { hour: string; requests: number; errors: number };

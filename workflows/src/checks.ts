@@ -209,8 +209,8 @@ export async function reindexRulebook(e: Env) {
   return j.data;
 }
 
-/** This month, YYYY-MM, in UTC: the month the workflow plans. */
-export const thisMonth = (d = new Date()) => d.toISOString().slice(0, 7);
+/** This month, YYYY-MM, in Pacific time: the month the workflow plans, on the calendar the app dates every gift in (src/lib/time.ts). */
+export const thisMonth = (d = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(d).slice(0, 7);
 
 export async function fileRun(e: Env, run: { source: "render-workflow" | "local"; runId: string; startedAt: string; results: CheckResult[] }) {
   const res = await call(`${e.app}/api/checks`, {

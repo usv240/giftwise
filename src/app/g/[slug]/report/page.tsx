@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Info } from "@/components/Info";
 import { Checklist, CopyScript, PrintButton } from "@/components/report/ReportActions";
 import { today } from "@/lib/api/envelope";
+import { ZONE_NAME, shownDay } from "@/lib/time";
 import { giftSubject } from "@/lib/report/data";
 import { reportCode, verifyPath } from "@/lib/report/verify";
 import { pageOrigin } from "@/lib/origin";
@@ -20,8 +21,8 @@ export const metadata: Metadata = {
 };
 
 type Search = { month?: string; view?: string };
-const DAY = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-const short = (iso: string) => DAY.format(new Date(`${iso}T12:00:00Z`));
+// Each gift's income date, already a Pacific-time day (src/lib/time.ts), the same day its receipt shows.
+const short = (iso: string) => shownDay(iso);
 /** "POMS SI 00815.400: Bills Paid by Third Party" -> "POMS SI 00815.400"; "SSA: Spotlight on ABLE accounts" -> "Spotlight on ABLE accounts". */
 const sourceLabel = (title: string) => (title.startsWith("SSA: ") ? title.slice(5).replace(/ \(\d{4} edition\)$/, "") : title.split(":")[0]);
 
@@ -329,7 +330,7 @@ async function Report({ params, searchParams }: { params: Promise<{ slug: string
             ))}
           </ul>
           <p className="rp-scope muted">
-            Written by Giftwise from the gifts made through it, with rules version {r.rulesVersion}. It covers gifts only. Giftwise does not know about other changes. It is not legal advice, and Giftwise never contacts Social Security for anyone.
+            Written by Giftwise from the gifts made through it, with rules version {r.rulesVersion}. Each gift is dated the day PayPal paid it, in {ZONE_NAME}, the day its receipt shows. It covers gifts only. Giftwise does not know about other changes. It is not legal advice, and Giftwise never contacts Social Security for anyone.
           </p>
         </footer>
       </article>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import sources from "../../content/sources.json";
 import { parseDollars } from "@/lib/parseDollars";
+import { today as pacificToday } from "@/lib/time";
 import { CHECKER_PROFILE, checkerGift, type CheckerMode } from "@/lib/checker";
 import { checkMonthName, evaluateGift, monthName, usd, type Delivery, type GiftResult } from "@/lib/rules";
 import { Info } from "./Info";
@@ -37,8 +38,8 @@ function plainReason(r: GiftResult, mode: Mode): string {
   return "Paid straight to the shop, so it is not counted.";
 }
 
-/** Today in US Pacific time, YYYY-MM-DD: the same day today() in src/lib/api/envelope.ts gives the gift page. */
-const todayPacific = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+/** Today in US Pacific time, YYYY-MM-DD: the same day the gift page prices a gift in (src/lib/time.ts). */
+const todayPacific = pacificToday;
 const noSubscribe = () => () => {};
 /** Set in next.config.ts at build time. */
 const BUILD_DAY = process.env.NEXT_PUBLIC_BUILD_DAY || "2026-11-08";

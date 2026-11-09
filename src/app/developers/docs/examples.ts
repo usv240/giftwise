@@ -7,17 +7,16 @@
  * so their responses were recorded from the running API (recorded.json).
  */
 import { createHash } from "node:crypto";
-import sources from "../../../../content/sources.json";
 import { today } from "@/lib/api/envelope";
 import { ENDPOINTS, type Endpoint } from "@/lib/api/endpoints";
 import { openapi } from "@/lib/api/openapi";
+import { checkGiftData as checkGiftResponse } from "@/lib/api/check-gift";
 import { CheckGiftRequest, PlanMonthRequest } from "@/lib/api/schemas";
 import { HOSTED_URL } from "@/lib/origin";
 import { getPreset, runPreset } from "@/lib/presets";
 import { DEFAULT_PROFILE, RULES_VERSION, evaluateGift, planMonths } from "@/lib/rules";
 import recorded from "./recorded.json";
 
-const SRC = sources as Record<string, { title: string; url: string }>;
 const HOST = (process.env.RENDER_EXTERNAL_URL || HOSTED_URL).replace(/\/$/, "");
 const pretty = (v: unknown) => JSON.stringify(v, null, 2);
 const example = (id: string) => ENDPOINTS.find((e) => e.id === id)?.example;
@@ -29,26 +28,7 @@ export function checkGiftData(body: unknown) {
     { id: "api", date: gift.date ?? today(), amount: gift.amount, delivery: gift.delivery, category: gift.category, recurring: gift.recurring, giver: gift.giver, label: gift.label, covers: gift.covers, payerCoOwns: gift.payerCoOwns, rentPaid: gift.rentPaid, every: gift.every },
     { ...DEFAULT_PROFILE, ...profile },
   );
-  return {
-    check_before: r.checkBaseline,
-    check_after: r.checkAfter,
-    counted_amount: r.countedAmount,
-    income_month: r.incomeMonth,
-    payment_month: r.paymentMonth,
-    best_route: r.bestRoute,
-    check_with_best_route: r.checkWithBestRoute,
-    routes: r.alternatives,
-    savings_on_next_first: r.resourcesNextFirst,
-    over_savings_limit: r.overResourceLimit,
-    able_balance_on_next_first: r.resourcesAfter.ableBalance,
-    resource_status: r.trace.resources.status,
-    ambiguous: r.ambiguous,
-    ambiguity_reason: r.ambiguityReason ?? null,
-    rule_ids: r.ruleIds,
-    citations: r.sourceKeys.map((k) => ({ id: k, title: SRC[k]?.title ?? k, url: SRC[k]?.url ?? null })),
-    explanation: r.explanation,
-    trace: r.trace,
-  };
+  return checkGiftResponse(r);
 }
 
 /** The data of POST /api/v1/plan-month, mapped as src/app/api/v1/plan-month/route.ts maps it. */

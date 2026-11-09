@@ -10,6 +10,7 @@ import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { audit } from "./audit";
 import { db, schema } from "./db";
 import { PAYPAL_PAYEE_PREFIX, isPayPalEmail } from "./households";
+import { paymentDay, today as todayPacific } from "./time";
 import { DEFAULT_PROFILE, SHELTER_CATEGORIES, computeMonth, evaluateGift, monthName, monthOf, pronounWords, type Category, type Delivery, type Profile, type Pronoun } from "./rules";
 
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
@@ -81,7 +82,7 @@ export async function manageView(token: string) {
     .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured"), isNull(schema.payments.archivedAt)))
     .orderBy(sql`${schema.payments.capturedAt} desc nulls last`);
   const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPacific();
   return {
     household: h,
     profile,
@@ -293,7 +294,7 @@ export async function notifyGift(orderId: string, origin: string) {
   if (!h?.webhookUrl) return { sent: false as const, reason: "no_webhook" };
   const needs = await d.select().from(schema.needs).where(eq(schema.needs.householdId, hid));
   const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
-  const date = (rows[0].capturedAt ?? rows[0].createdAt).toISOString().slice(0, 10);
+  const date = paymentDay(rows[0]);
   const month = computeMonth(
     monthOf(date),
     rows.map((r) => ({ id: r.referenceId, date, amount: Number(r.amount), delivery: r.route as Delivery, category: (needs.find((n) => n.id === r.needId)?.category ?? "other") as Category })),
@@ -321,7 +322,7 @@ export async function sendTest(token: string, origin: string) {
   if (!h) return null;
   if (!h.webhookUrl) return { sent: false as const, reason: "Add a webhook address first." };
   const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
-  const m = computeMonth(monthOf(new Date().toISOString().slice(0, 10)), [], profile);
+  const m = computeMonth(monthOf(todayPacific()), [], profile);
   return deliver(h.id, {
     event: "gift.test",
     page: { name: h.name, url: `${origin}/g/${h.slug}` },

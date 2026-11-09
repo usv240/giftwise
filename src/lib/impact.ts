@@ -1,4 +1,5 @@
 import field from "../../content/eval/field-cases-results.json";
+import notIncome from "../../content/eval/field-cases-2-results.json";
 import sample from "../../content/sample-year.json";
 import { SAMPLE } from "./households";
 import { DEFAULT_PROFILE, P, SHELTER_CATEGORIES, evaluateGift, planMonths, usd, type Category, type Delivery, type Profile } from "./rules";
@@ -77,6 +78,16 @@ const dollarsCents = (n: number) => n.toLocaleString("en-US", { style: "currency
  * scored). "14 of 14 scored, of 36 cases". tests/court-label.test.ts holds every page and document to it.
  */
 export const COURT_SCORE = `${field.summary.agreed} of ${field.summary.scored} scored, of ${field.summary.cases} cases`;
+/**
+ * The second class of court cases (content/eval/field-cases-2-results.json): help the court held was not income. Run by
+ * the same scorer; every case there turns on a loan the person must repay, which the engine has no input for.
+ */
+export const COURT_NOT_INCOME = {
+  scored: notIncome.summary.scored,
+  agreed: notIncome.summary.agreed,
+  score: `${notIncome.summary.agreed} of ${notIncome.summary.scored}`,
+  sentence: `In a second class, where the court held the help was not income, the engine agrees on ${notIncome.summary.agreed} of ${notIncome.summary.scored}: each is a loan the person must repay, which the engine has no input for, so it counts the help.`,
+};
 /** The cases whose dollars the engine computed, in the file's own word (summary.dollars.cases_computed). */
 export const COMPUTED_CASES = `all ${field.summary.dollars.cases_computed} cases computed in dollars`;
 export const COURT_MEANING = `Social Security counted help from family or friends against the person in all ${IMPACT.countedCases} real SSI court cases scored.`;

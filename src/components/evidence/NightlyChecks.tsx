@@ -13,6 +13,5 @@ export function NightlyChecks() {
     ...PATH.map((p) => ({ id: `path:${p.id}`, title: p.title })),
     ...API.map((a) => ({ id: `api:${a.id}`, title: a.title })),
   ];
-  const nightly = `${String(NIGHTLY_UTC.hour).padStart(2, "0")}:${String(NIGHTLY_UTC.minute).padStart(2, "0")} UTC`;
-  return <NightlyLive current={current} nightly={nightly} />;
+  return <NightlyLive current={current} nightlyUtc={NIGHTLY_UTC} />;
 }

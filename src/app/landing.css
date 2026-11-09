@@ -1583,20 +1583,185 @@
   }
 }
 
-/* What routing keeps: the dollar figures, moved below How it works, on the page frame. */
-.home-kept {
-  margin-top: var(--section-gap);
+
+
+/* One proof line on load, under How it works: the court-case range in the kept colour, then what it measures. */
+.home-proof {
+  margin-top: clamp(2.5rem, 2rem + 2vw, 4rem);
 }
-.home-kept .home-kept-list {
+.home-proof-link {
+  display: block;
+  max-width: 58ch;
+  font-size: var(--step-lead);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  text-wrap: pretty;
+}
+.home-proof-fig {
+  font-weight: 500;
+  color: var(--positive);
+  white-space: nowrap;
+}
+.home-proof-what {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .home-proof-link:hover .home-proof-what {
+    text-decoration-color: currentColor;
+  }
+}
+.home-proof-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* The rest of the home page, each part closed under its heading with one line of what it holds: the same disclosure
+   the evidence pages use, a tone step and no rules. Inside, each part keeps its own composition. */
+.home-folds {
+  margin-top: clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  margin-bottom: clamp(2.5rem, 2rem + 2vw, 4rem);
+  display: grid;
+  gap: 8px;
+}
+.home-fold {
+  background: var(--surface);
+  border-radius: 14px;
+  scroll-margin-top: 88px;
+}
+.home-fold-sum {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 2px;
+  min-height: 44px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  transition: background-color var(--dur-press) var(--ease-out);
+}
+.home-fold-sum::-webkit-details-marker {
+  display: none;
+}
+.home-fold-h {
+  grid-column: 1;
+  margin: 0;
+  font-size: var(--step-lead);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.home-fold-what {
+  grid-column: 1;
+  font-size: var(--step-small);
+  color: var(--muted);
+  line-height: 1.4;
+  max-width: 80ch;
+}
+.home-fold-sum::after {
+  content: "";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 12px;
+  height: 12px;
+  color: var(--muted);
+  background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 12px 1.5px, 1.5px 12px;
+  transition: background-size 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.home-fold[open] > .home-fold-sum::after {
+  background-size: 12px 1.5px, 1.5px 0;
+  transform: rotate(180deg);
+}
+@media (hover: hover) and (pointer: fine) {
+  .home-fold-sum:hover {
+    background: var(--surface-2);
+  }
+}
+.home-fold-sum:active {
+  background: var(--surface-2);
+}
+.home-fold-sum:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.home-fold[open] > .home-fold-sum {
+  border-radius: 14px 14px 0 0;
+}
+.home-fold-body {
+  padding: 8px 20px 28px;
+  display: grid;
+  gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+}
+.home-fold-body > * {
+  margin-top: 0;
+  min-width: 0;
+}
+.home-fold .intro,
+.home-fold .showcase,
+.home-fold .home-ref,
+.home-fold .home-new,
+.home-fold .faq {
+  margin-top: 0;
+}
+.home-fold .showcase-head {
+  margin-bottom: 1.5rem;
+}
+.home-fold .home-kept-list {
   max-width: 60rem;
-  margin-top: 1.25rem;
+  margin-top: 0;
   gap: 1rem 2.5rem;
 }
-.home-kept .hero-impact-fig {
+.home-fold .home-kept-list .hero-impact-fig {
   font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.5rem);
 }
-.home-kept .hero-impact-what {
+.home-fold .home-kept-list .hero-impact-what {
   font-size: 1rem;
   max-width: 44ch;
 }
-
+/* The referee moment and the closing call sit on the fold's surface: a step in tone keeps each its own panel. */
+.home-fold .refm {
+  background: var(--surface-2);
+}
+/* Folded, the answers sit beside the questions from the first row: the section's own heading is the fold's. */
+@media (min-width: 901px) {
+  .home-fold .faq-section {
+    grid-template-rows: auto;
+  }
+  .home-fold .faq-section .faq-list,
+  .home-fold .faq-section .faq-pane {
+    grid-row: 1;
+    margin-top: 0;
+  }
+}
+.home-fold .cta {
+  min-height: 0;
+  border-radius: 14px;
+  padding: clamp(1.5rem, 1rem + 2.5vw, 3rem);
+}
+.home-fold .cta-title {
+  font-size: var(--step-head);
+}
+@media (max-width: 640px) {
+  .home-fold-sum {
+    padding: 14px 16px;
+  }
+  .home-fold-body {
+    padding: 6px 16px 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-fold-sum,
+  .home-fold-sum::after {
+    transition: none;
+  }
+}

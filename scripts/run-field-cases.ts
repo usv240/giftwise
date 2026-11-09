@@ -7,11 +7,18 @@
 //       engine's own best route.
 // Writes content/eval/field-cases-results.json. Engine only, no API calls.
 // Usage: npx tsx --env-file=.env.local scripts/run-field-cases.ts
-import { writeFileSync } from "node:fs";
-import data from "../content/eval/field-cases.json";
+//        npx tsx scripts/run-field-cases.ts --set content/eval/field-cases-2.json    another set, written to its own -results.json
+import { readFileSync, writeFileSync } from "node:fs";
+import type setShape from "../content/eval/field-cases.json";
+
+/** The set to run (field-cases.json unless --set names another), read from disk; its results go beside it. */
+const at = process.argv.indexOf("--set");
+const SET = at > 0 ? process.argv[at + 1] : "content/eval/field-cases.json";
+const data = JSON.parse(readFileSync(SET, "utf8")) as typeof setShape;
 import { DEFAULT_PROFILE, P, RULES_VERSION, SHELTER_CATEGORIES, planMonths, type Delivery, type Gift, type Profile } from "../src/lib/rules";
 
-type Basis = "ism_vtr" | "ism_pmv" | "ism" | "unearned_cash" | "resources" | "income";
+/** "none": the court held the help is not income at all (the second class, content/eval/field-cases-2.json). */
+type Basis = "ism_vtr" | "ism_pmv" | "ism" | "unearned_cash" | "resources" | "income" | "none";
 type Value = { month: string; measure: "after_infrequent"; value: number };
 type FieldGift = Omit<Gift, "amount"> & { amount: number | null; amount_basis?: string; date_basis?: string };
 type Overpayment = { amount: number; period: string } | null;
@@ -42,7 +49,7 @@ const CASES = data.cases as unknown as (Scored | NotScored)[];
 const SCORED = CASES.filter((c): c is Scored => c.status === "scored");
 const NOT_SCORED = CASES.filter((c): c is NotScored => c.status === "not_scored");
 const TOLERANCE = 1;
-const OUT = "content/eval/field-cases-results.json";
+const OUT = SET.replace(/\.json$/, "-results.json");
 const SPECIFIC: Basis[] = ["ism_vtr", "ism_pmv", "unearned_cash", "resources"];
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -77,7 +84,7 @@ function engine(c: Scored) {
     return { ...v, got: m ? afterInfrequent(m) : 0 };
   });
   const expected = c.determination.basis;
-  const basisOk = expected === "ism" ? bases.has("ism_vtr") || bases.has("ism_pmv") : expected === "income" ? counts : bases.has(expected);
+  const basisOk = expected === "none" ? !counts : expected === "ism" ? bases.has("ism_vtr") || bases.has("ism_pmv") : expected === "income" ? counts : bases.has(expected);
   const countsOk = counts === c.determination.counts;
   const valuesOk = values.every((v) => Math.abs(v.got - v.value) <= TOLERANCE);
   return {
@@ -181,7 +188,12 @@ function overpaymentCheck(c: Scored) {
 }
 
 /** What the engine would need, for each known miss. */
+const LOAN_GAP =
+  "An input for a bona fide loan of food, shelter or cash (20 CFR 416.1103(f); POMS SI 00835.482, SI 01120.220): help the person must repay is not income. The engine routes gifts and has no input for a loan, so it counts the help.";
 const GAPS: Record<string, string> = {
+  "son-room-and-board-loan": LOAN_GAP,
+  "mother-back-rent-loan": LOAN_GAP,
+  "attorney-monthly-cash-loan": LOAN_GAP,
   "sons-home-own-food":
     "Apply the one-third reduction only when the household also provides all of the person's meals (20 CFR 416.1131(a)(3)); otherwise value the shelter under the presumed value rule (20 CFR 416.1140). The engine applies the one-third reduction to anyone living in another person's household. The check comes out the same here ($662.67 at 2026 rates), but the rule cited and any rebuttal of the value differ.",
 };

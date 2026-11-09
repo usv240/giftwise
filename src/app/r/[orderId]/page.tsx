@@ -7,7 +7,8 @@ import { Info } from "@/components/Info";
 import { AbleHandoff } from "@/components/gift/AbleHandoff";
 import { ReceiptChecks } from "@/components/gift/ReceiptChecks";
 import { dbConfigured } from "@/lib/db";
-import { loadReceipt } from "@/lib/receipt";
+import { loadReceipt, receiptMoment } from "@/lib/receipt";
+import { incomeDay, shownAt, shownDay } from "@/lib/time";
 import { distinctPayees } from "@/lib/routing";
 import { maskEmail, ownPayee } from "@/lib/households";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
@@ -22,7 +23,7 @@ export const metadata: Metadata = { title: "Receipt", description: "Where a Gift
 
 const SRC = sources as Record<string, { title: string; url: string; publisher?: string }>;
 const SRC_UGIFT = SRC["ugift-iable"];
-const when = (d: Date, lang: Lang = "en") => d.toLocaleString(lang === "es" ? "es-US" : "en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" });
+const when = (d: Date, lang: Lang = "en") => shownAt(d, lang);
 type Search = { lang?: string };
 
 async function Receipt({ params, searchParams }: { params: Promise<{ orderId: string }>; searchParams: Promise<Search> }) {
@@ -38,7 +39,8 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
   const name = household?.name ?? "the person";
   const hers = t.possessive(household?.name);
   const profile: Profile = { ...DEFAULT_PROFILE, ...((household?.profile ?? {}) as Partial<Profile>) };
-  const date = rows[0].createdAt.toISOString().slice(0, 10);
+  // The income date and time: the capture, in Pacific time, the day the month's report lists this gift under.
+  const { date, at } = receiptMoment(rows);
   const lines = rows.map((r) => {
     const need = needs.find((n) => n.id === r.needId);
     const check = evaluateGift(
@@ -79,7 +81,7 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
           <p id="rc-total" className="rc-total tabular">
             {usd(total)}
           </p>
-          <p className="rc-sub">{t.sub(payer, payees.length, rows.length, when(rows[0].createdAt, lang))}</p>
+          <p className="rc-sub">{t.sub(payer, payees.length, rows.length, when(at, lang))}</p>
           {/* What happens next, in one sentence, then the reference to quote: the confirmation pattern. */}
           {captured ? (
             <p className="rc-next-line">{t.next(payees.map((p) => payeeInline(lang, p)), hers, checkMonth, usd(checkAfter), checkAfter === baseline)}</p>
@@ -90,7 +92,7 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
           {/* The sample page was reset after this gift: it stays on record here and at PayPal, outside the page's current round. */}
           {orderId === RECORDED_RECEIPT.order_id ? (
             <p className="rc-earlier muted" data-recorded="">
-              {t.recorded(new Date(RECORDED_RECEIPT.captured_at).toLocaleDateString(lang === "es" ? "es-US" : "en-US", { dateStyle: "long", timeZone: "America/Los_Angeles" }))}
+              {t.recorded(shownDay(incomeDay(RECORDED_RECEIPT.captured_at), { dateStyle: "long" }, lang))}
             </p>
           ) : (
             earlierRound && <p className="rc-earlier muted">{t.earlierRound}</p>

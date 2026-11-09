@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { RunChecks } from "./RunChecks";
+import { shownAt } from "@/lib/time";
 
 type Group = "case" | "path" | "api";
 type Result = { id: string; group: Group; title: string; ok: boolean; detail: string; ms: number };
@@ -13,7 +14,12 @@ const GROUPS: { id: Group; title: string }[] = [
   { id: "path", title: "The product path, page by page" },
   { id: "api", title: "The public API" },
 ];
-const WHEN = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" });
+/** The next start of the nightly run after `now`, from its time in UTC (render.yaml's cron schedule). */
+export function nextNightly(now: Date, at: { hour: number; minute: number }) {
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), at.hour, at.minute));
+  if (next.getTime() <= now.getTime()) next.setUTCDate(next.getUTCDate() + 1);
+  return next;
+}
 /** Runs filed before the page was renamed carry its old title. */
 const titleOf = (t: string) => (t === "For judges" ? "Evidence" : t);
 
@@ -25,7 +31,7 @@ function sameList(run: Run, current: { id: string; title: string }[]) {
 }
 
 /** The latest outside check, read from GET /api/checks/latest, with the time it ran and what each check found. */
-export function NightlyLive({ current, nightly }: { current: { id: string; title: string }[]; nightly: string }) {
+export function NightlyLive({ current, nightlyUtc }: { current: { id: string; title: string }[]; nightlyUtc: { hour: number; minute: number } }) {
   const [latest, setLatest] = useState<Latest | null>(null);
   const [unreachable, setUnreachable] = useState(false);
 
@@ -48,7 +54,7 @@ export function NightlyLive({ current, nightly }: { current: { id: string; title
       <div className="jx-result nc" data-ui aria-busy={!unreachable}>
         <p className="nc-verdict">{unreachable ? "The latest run could not be read just now." : "Reading the latest run…"}</p>
         <p className="nc-meta muted">
-          {current.length} checks run every night at {nightly}, and on demand.
+          {current.length} checks run every night on Render Workflows, and on demand.
         </p>
       </div>
     );
@@ -58,7 +64,7 @@ export function NightlyLive({ current, nightly }: { current: { id: string; title
     return (
       <div className="jx-result nc" data-ui>
         <RunChecks canStart={canStart} onDone={load} />
-        <p className="nc-empty">No run has been filed on this server yet. The nightly run at {nightly} fills this in.</p>
+        <p className="nc-empty">No run has been filed on this server yet. The nightly run on Render Workflows fills this in.</p>
       </div>
     );
   }
@@ -78,8 +84,9 @@ export function NightlyLive({ current, nightly }: { current: { id: string; title
           checks passed in the latest run.
         </p>
         <p className="nc-meta muted">
-          Last run <time dateTime={run.finishedAt}>{WHEN.format(new Date(run.finishedAt))} ET</time>, {where}. Every check ran at once and the whole run took {secs} seconds. The next nightly run starts at{" "}
-          {nightly}.
+          Last run <time dateTime={run.finishedAt}>{shownAt(run.finishedAt)}</time>, {where}. Every check ran at once and the whole run took {secs} seconds.{" "}
+          {/* A local run says so, and when the hosted run comes back; a hosted run names the next start, always ahead. */}
+          {hosted ? <>The next nightly run starts {shownAt(nextNightly(new Date(), nightlyUtc))}.</> : <>The hosted nightly run on Render Workflows files here again after the next deploy.</>}
         </p>
         {earlier && (
           <p className="nc-meta muted">

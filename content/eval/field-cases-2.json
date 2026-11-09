@@ -1,0 +1,143 @@
+{
+  "about": {
+    "summary": "The second class of real SSI cases from federal courts: help from others that the court held was not income for the person on SSI. Giftwise did not write these cases. Each is recorded the way content/eval/field-cases.json records the first class (help counted against the person), and run through the same scorer, scripts/run-field-cases.ts --set content/eval/field-cases-2.json, which compares the rules engine with what the court held.",
+    "source": "United States federal court opinions: GovInfo's USCOURTS collection (govinfo.gov) for the district court opinions, and Public.Resource.Org's copy of the Federal Reporter for the court of appeals opinion. The file calls each person the claimant, replaces names inside quoted passages with bracketed words, and keeps the citation and link to the source.",
+    "read_on": "2026-11-09",
+    "how_chosen": [
+      "Full-text searches of GovInfo's USCOURTS collection through the GovInfo API with the public DEMO_KEY: \"bona fide loan\" \"supplemental security income\" (22 opinions); \"loan of in-kind support\" (4, all among the 22); \"not income\" \"in-kind support and maintenance\" reversed (2, both among the 22). Web searches for district and appeals court decisions on loans of in-kind support led to the Ninth Circuit's opinion, read from Public.Resource.Org.",
+      "The outcome of each opinion was read. Three hold that the help the person received was not income: the three cases below. The others affirmed SSA's counting of the help (Collins v. Colvin, S.D. Ind. 2013; Salgado, D. Kan. 2016; Basith v. Astrue and Massey v. Astrue, S.D. Tex. 2008; Lee v. Commissioner, W.D. Ky. 2013; and others), sent the case back without deciding whether it counted (Hassbrock v. Astrue, S.D. Tex. 2009), or turned on another question (a plan to achieve self-support, Medicaid, a disability finding).",
+      "All three turn on a loan: help the person must repay is not income (20 CFR 416.1103(f); POMS SI 00835.482 for food and shelter, SI 01120.220 for cash). No opinion found in these searches holds that a gift from family itself was not income."
+    ],
+    "opinions_downloaded": 23,
+    "opinions_read_closely": 7
+  },
+  "cases": [
+    {
+      "id": "son-room-and-board-loan",
+      "status": "scored",
+      "title": "Room and board from her son while her appeal was pending, to be repaid",
+      "source": {
+        "court": "U.S. Court of Appeals for the Ninth Circuit",
+        "citation": "Ceguerra v. Secretary of Health & Human Services, 933 F.2d 735 (9th Cir. 1991)",
+        "url": "https://law.resource.org/pub/us/case/reporter/F2/933/933.F2d.735.89-16720.html",
+        "date": "1991-05-15"
+      },
+      "passage": "Because [the claimant] entered into a valid and enforceable agreement to repay her son for her share of the household expenses, the shelter and maintenance she received did not constitute income. We therefore reverse the Secretary's decision to reduce [the claimant's] retroactive benefits by one-third.",
+      "facts": "The claimant, an elderly woman on SSI, lived in her son's home and had paid him $250 a month as her share of the household expenses. When SSA wrongly stopped her SSI in 1982, she kept living there while she appealed, under an agreement to repay her share once her benefits were restored. SSA reduced her retroactive award by one-third for the room and board. The court of appeals held the agreement was a valid loan, so the food and shelter were not income, and ordered her full retroactive benefits restored.",
+      "profile": { "livesInAnothersHousehold": true, "householdProvidesAllMeals": true, "ableEligible": false, "savings": 0 },
+      "able": "Aged, not disabled: no ABLE account.",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "1983-06-01",
+          "amount": null,
+          "delivery": "vendor",
+          "category": "rent",
+          "giver": "son",
+          "recurring": true,
+          "label": "Room and board in her son's home, under an agreement to repay",
+          "amount_basis": "Not stated as a monthly value for the period; the one-third reduction does not depend on the amount."
+        }
+      ],
+      "giftwise_routes": { "g1": [] },
+      "months": {},
+      "dollars": false,
+      "dollars_note": "The court held the help was not income, so routing has nothing to keep.",
+      "determination": {
+        "by": "Court of appeals, reversing SSA and the district court",
+        "court_outcome": "reversed and remanded to restore full retroactive benefits",
+        "counts": false,
+        "basis": "none",
+        "values": [],
+        "overpayment": null,
+        "held": "A valid and enforceable agreement to repay the value of food and shelter received in kind is a loan, and the shelter and maintenance are not income; no one-third reduction."
+      }
+    },
+    {
+      "id": "mother-back-rent-loan",
+      "status": "scored",
+      "title": "Back rent owed to his mother, a bona fide loan",
+      "source": {
+        "court": "U.S. District Court District of Oregon",
+        "citation": "Michael L. v. Berryhill, No. 3:18-cv-01115 (2019-08-23)",
+        "url": "https://www.govinfo.gov/content/pkg/USCOURTS-ord-3_18-cv-01115/pdf/USCOURTS-ord-3_18-cv-01115-0.pdf",
+        "details": "https://www.govinfo.gov/app/details/USCOURTS-ord-3_18-cv-01115/USCOURTS-ord-3_18-cv-01115-0",
+        "date": "2019-08-23",
+        "govinfo_id": "USCOURTS-ord-3_18-cv-01115-0"
+      },
+      "passage": "In sum, plaintiff met his burden of establishing the existence of a bona fide loan, and the ALJ erred in concluding otherwise.",
+      "facts": "The claimant had lived in his mother's home since 2007, paying her $550 a month for rent and his share of the utilities. After an accident in 2010 he stopped working and stopped paying; his mother let him stay on the condition that he pay the back rent when he could, and by June 2016 he owed $41,800. SSA reduced his SSI for in-kind support from June 2013 through August 2016. The court held the arrangement was a bona fide loan, so the shelter was not income, and ordered the benefits recalculated and paid. The same opinion is listed, not scored, in content/eval/field-cases.json; it is scored here, in the class it belongs to.",
+      "profile": { "livesInAnothersHousehold": true, "ableEligible": false, "savings": 0 },
+      "able": "The opinion does not say when the disability began.",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2015-08-01",
+          "amount": null,
+          "delivery": "vendor",
+          "category": "rent",
+          "giver": "mother",
+          "recurring": true,
+          "label": "Shelter in his mother's home, under an agreement to repay the back rent",
+          "amount_basis": "The $550 a month rent and utilities is the debt, not a value SSA assigned; SSA's reduction was the one-third reduction, which does not depend on the amount."
+        }
+      ],
+      "giftwise_routes": { "g1": [] },
+      "months": {},
+      "dollars": false,
+      "dollars_note": "The court held the help was not income, so routing has nothing to keep.",
+      "determination": {
+        "by": "Court, reversing SSA",
+        "court_outcome": "reversed and remanded for immediate recalculation and payment of benefits",
+        "counts": false,
+        "basis": "none",
+        "values": [],
+        "overpayment": null,
+        "held": "A bona fide loan of in-kind support, so the shelter does not count as income."
+      }
+    },
+    {
+      "id": "attorney-monthly-cash-loan",
+      "status": "scored",
+      "title": "About $900 a month lent by her attorney while her claim was pending",
+      "source": {
+        "court": "U.S. District Court Northern District of California",
+        "citation": "Linda J R. v. Commissioner of Social Security, No. 1:23-cv-03934 (2024-09-18)",
+        "url": "https://www.govinfo.gov/content/pkg/USCOURTS-cand-1_23-cv-03934/pdf/USCOURTS-cand-1_23-cv-03934-0.pdf",
+        "details": "https://www.govinfo.gov/app/details/USCOURTS-cand-1_23-cv-03934/USCOURTS-cand-1_23-cv-03934-0",
+        "date": "2024-09-18",
+        "govinfo_id": "USCOURTS-cand-1_23-cv-03934-0"
+      },
+      "passage": "the record is clear that counsel only loaned Plaintiff the sums in question to tide her over in consideration of her agreement to repay him.",
+      "facts": "While her SSI claim was pending, from October 2018, the claimant's attorney lent her about $900 a month for 26 months, so she could pay her rent of about $525 and keep her apartment, on the understanding that she would repay him from her back pay. SSA treated the money as gifts and denied all back pay from October 2018 through March 2021. The court held the payments were loans, not gifts, and ordered the back pay calculated and paid.",
+      "profile": { "livesInAnothersHousehold": false, "ableEligible": false, "savings": 0 },
+      "able": "The opinion does not say when the disability began.",
+      "gifts": [
+        {
+          "id": "g1",
+          "date": "2019-06-15",
+          "amount": 900,
+          "delivery": "cash",
+          "category": "other",
+          "giver": "her attorney",
+          "recurring": true,
+          "label": "Monthly cash from her attorney, to be repaid from her back pay",
+          "amount_basis": "About $900 a month, as the opinion states the parties agreed."
+        }
+      ],
+      "giftwise_routes": { "g1": [] },
+      "months": {},
+      "dollars": false,
+      "dollars_note": "The court held the help was not income, so routing has nothing to keep.",
+      "determination": {
+        "by": "Court, reversing SSA",
+        "court_outcome": "reversed and remanded for the immediate calculation and award of back pay",
+        "counts": false,
+        "basis": "none",
+        "values": [],
+        "overpayment": null,
+        "held": "Cash lent under an oral agreement to repay from back pay is a loan, not a gift, and is not income."
+      }
+    }
+  ]
+}

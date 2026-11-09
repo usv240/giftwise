@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { RULES_VERSION } from "../rules";
+import { CheckGiftData } from "./check-gift";
 import { ENDPOINTS, ERRORS } from "./endpoints";
 import { API_VERSION } from "./version";
 import { AnalyzeFundraiserRequest, CheckGiftRequest, GiftPageRequest, KeyRequest, PlanMonthRequest, ReviewBillRequest, AskRulesRequest } from "./schemas";
@@ -9,6 +10,17 @@ const json = (s: z.ZodType) => {
   void _drop;
   return rest;
 };
+
+/** The check-gift answer's fields; the four kept for version 1 are marked deprecated, each naming the field that replaces it. */
+export function checkGiftDataSchema() {
+  const { $schema: _drop, ...rest } = z.toJSONSchema(CheckGiftData, { io: "output" }) as Record<string, unknown> & { properties: Record<string, Record<string, unknown>> };
+  void _drop;
+  for (const k of ["savings_on_next_first", "over_savings_limit", "able_balance_on_next_first", "resource_status"]) rest.properties[k] = { ...rest.properties[k], deprecated: true };
+  return rest;
+}
+
+/** Answers with their own schema: the envelope with data described. */
+const DATA: Record<string, string> = { "check-gift": "CheckGiftData" };
 
 const BODIES: Record<string, Record<string, unknown>> = {
   "check-gift": json(CheckGiftRequest),
@@ -30,7 +42,10 @@ export function openapi(server: string) {
       tags: [e.keyed ? "Checks" : "Utilities"],
       security: e.keyed ? [{ apiKey: [] }, {}] : [],
       responses: {
-        "200": { description: "Success. The answer is in data; meta has request_id, version, rules_version and latency_ms.", content: { "application/json": { schema: { $ref: "#/components/schemas/Envelope" } } } },
+        "200": {
+          description: "Success. The answer is in data; meta has request_id, version, rules_version and latency_ms.",
+          content: { "application/json": { schema: DATA[e.id] ? { allOf: [{ $ref: "#/components/schemas/Envelope" }, { type: "object", properties: { data: { $ref: `#/components/schemas/${DATA[e.id]}` } } }] } : { $ref: "#/components/schemas/Envelope" } } },
+        },
         ...(e.keyed ? { "429": { $ref: "#/components/responses/RateLimited" } } : {}),
         default: { $ref: "#/components/responses/Error" },
       },
@@ -74,6 +89,7 @@ export function openapi(server: string) {
     components: {
       securitySchemes: { apiKey: { type: "http", scheme: "bearer", description: "A gw_test_ key from the Developers page." } },
       schemas: {
+        CheckGiftData: checkGiftDataSchema(),
         Envelope: {
           type: "object",
           properties: {

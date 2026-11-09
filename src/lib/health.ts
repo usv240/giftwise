@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { apiKeyState, cachedKeyCheck, keyAccepted, replayAvailable } from "./ai/claude";
 import { log } from "./log";
+import { shownAt } from "./time";
 import { latestRun } from "./checks";
 import { db, dbConfigured } from "./db";
 import { accessToken, paypalConfigured } from "./paypal/client";
@@ -202,7 +203,7 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
   const agKey = Boolean(process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY?.trim());
   const run = database?.ok ? await latestRun().catch(() => null) : null;
   // The time of the run itself, so the line reads the same however long ago it was.
-  const at = run ? `${new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" }).format(new Date(run.finishedAt))} ET` : "";
+  const at = run ? shownAt(run.finishedAt) : "";
   return [
     { id: "paypal", name: "PayPal sandbox", mode: pp?.ok ? "live" : "not_connected", detail: pp ? pp.detail : "Credentials not set", ms: pp?.ms },
     payees(),
@@ -257,7 +258,10 @@ export async function runChecks({ probeMcp = false }: { probeMcp?: boolean } = {
       id: "checks",
       name: "Outside checks",
       mode: run ? "live" : "not_connected",
-      detail: run ? `${run.passed} of ${run.total} passed in the latest run, ${at}, ${run.source === "render-workflow" ? "on Render Workflows" : "run locally"}` : "No run filed yet; the nightly Render Workflow fills this in",
+      // A local run names when it ran and that the hosted nightly run files again after the next deploy; never a past "next run".
+      detail: run
+        ? `${run.passed} of ${run.total} passed in the latest run, ${at}, ${run.source === "render-workflow" ? "on Render Workflows" : "run locally; the hosted nightly run files here again after the next deploy"}`
+        : "No run filed yet; the nightly Render Workflow fills this in",
     },
   ];
 }

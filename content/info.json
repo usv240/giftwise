@@ -228,9 +228,9 @@
   },
   "evidence.invariants": {
     "title": "Random gifts, every promise kept",
-    "what": "A program makes up gifts, needs and people at random, routes each gift, and checks every answer against twelve promises.",
+    "what": "A program makes up gifts, needs and people at random, routes each gift, and checks every answer against each promise listed with the result.",
     "why": "Hand-written tests cover the cases someone thought of. Random ones cover the rest: odd amounts, many small needs, ABLE accounts near the limit, people with wages and other income.",
-    "technical": "src/lib/invariants.ts: a seeded mulberry32 generator, so the same seed gives the same cases. routeGift() is checked for cent conservation, check equal to the no-gift check, never below cash, need caps, ABLE yearly limit and eligibility, at most 10 PayPal purchase units, whole cents, rule ids from the rule table, checks within the federal rate, recomputation and determinism."
+    "technical": "src/lib/invariants.ts: a seeded mulberry32 generator, so the same seed gives the same cases. routeGift() is checked for cent conservation, check equal to the no-gift check, never below cash, need caps, ABLE yearly limit, the $100,000 ABLE balance line and eligibility, at most 10 PayPal purchase units, whole cents, rule ids from the rule table, checks within the federal rate, recomputation and determinism."
   },
   "evidence.rules_watch": {
     "title": "The rules watch",

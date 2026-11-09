@@ -257,7 +257,7 @@ if (process.env.CHECKS_SECRET && /localhost|127\.0\.0\.1/.test(B)) {
   r = await fetch(B + "/api/ops/monthly", { headers: secret });
   j = await r.json();
   const ids = j.data?.ids ?? [];
-  const planned = ids.length ? await post(`/api/ops/monthly/${ids.at(-1)}/plan`, { month: new Date().toISOString().slice(0, 7) }, secret) : null;
+  const planned = ids.length ? await post(`/api/ops/monthly/${ids.at(-1)}/plan`, { month: new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date()).slice(0, 7) }, secret) : null;
   const pj = planned ? await planned.json() : null;
   ok("workflow jobs: the active monthly gifts are listed by id and one month is planned ahead, with its split", started.status === 200 && r.status === 200 && ids.length >= 1 && planned?.status === 200 && pj?.data?.lines >= 1, `${ids.length} active, ${pj?.data?.lines} lines`);
   r = await fetch(B + "/api/ops/monthly", { headers: { Authorization: "Bearer not-the-secret" } });
@@ -377,7 +377,8 @@ ok("report code: October is all sample year, and its check page says PayPal was 
 // The recorded sample order's month: its report lists real captures, and the check page asks PayPal for each one.
 {
   const sample = JSON.parse(readFileSync("content/sample-receipt.json", "utf8"));
-  const month = new Date(sample.captured_at).toISOString().slice(0, 7);
+  // Its income month, in Pacific time, the calendar src/lib/time.ts keeps.
+  const month = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date(sample.captured_at)).slice(0, 7);
   const rep = await (await fetch(`${B}/api/v1/ssa-report?page=maya&month=${month}`)).json();
   const url = rep.data?.verify?.url ?? "";
   const page = url ? await (await fetch(url.replace(/^https?:\/\/[^/]+/, B))).text() : "";

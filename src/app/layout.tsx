@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // Light is the default theme; Dark and System are a choice in the Display menu.
+  // Light is the default theme; Dark and System are a choice in the Text and theme menu.
   themeColor: "#f4f5f8",
 };
 

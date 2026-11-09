@@ -132,9 +132,21 @@ export function orderView(o: RestOrder): OrderView {
  * Read an order from PayPal over REST. Capture is not in this file: src/lib/paypal/capture.ts captures over plain REST,
  * so it can send PayPal's negative-testing header (PayPal-Mock-Response) for the failure-case runner and retry a 5xx
  * with the same PayPal-Request-Id.
+ *
+ * A read is safe to repeat, so a 5xx from PayPal's sandbox is read again twice, a moment apart; one that persists is
+ * PayPal's side, so it is reported as 502 (a gateway's upstream failed), with PayPal's issue and debug id.
  */
-export async function readOrder(orderId: string) {
-  const res = await paypalRest<RestOrder>(`/v2/checkout/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
+export async function readOrder(orderId: string, o: { retryMs?: number } = {}) {
+  const read = () => paypalRest<RestOrder>(`/v2/checkout/orders/${encodeURIComponent(orderId)}`, { method: "GET" });
+  let res = await read();
+  for (let attempt = 1; res.status >= 500 && attempt <= 2; attempt++) {
+    await new Promise((r) => setTimeout(r, (o.retryMs ?? 400) * attempt));
+    res = await read();
+  }
+  if (res.status >= 500) {
+    const issue = res.body.details?.[0]?.issue ?? res.body.name ?? "PAYPAL_UNAVAILABLE";
+    return { ok: false as const, status: 502, issue, plain: GENERIC, debugId: res.debugId ?? res.body.debug_id ?? null };
+  }
   if (res.status >= 400) {
     const issue = res.body.details?.[0]?.issue ?? res.body.name ?? "PAYPAL_ERROR";
     return { ok: false as const, status: res.status, issue, plain: PLAIN[issue] ?? (res.status === 404 ? "PayPal has no order with that id." : GENERIC), debugId: res.debugId ?? res.body.debug_id ?? null };

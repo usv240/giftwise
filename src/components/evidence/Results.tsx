@@ -1,8 +1,8 @@
 import bills from "../../../content/eval-results.json";
 import field from "../../../content/eval/field-cases-results.json";
-import heldOut from "../../../content/eval/held-out-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import inv from "../../../content/eval/invariants-results.json";
+import { HELD_OUT_SCORES, HELD_OUT_TOTAL } from "@/lib/held-out-summary";
 import { IMPACT } from "@/lib/impact";
 import { usd } from "@/lib/rules";
 
@@ -25,8 +25,8 @@ export function Results() {
           </span>
           <span className="jr-what">of Social Security&rsquo;s own worked examples match SSA&rsquo;s answer.</span>
           <span className="jr-base">
-            Claude with no rulebook: <span className="tabular">{ex.claude_matches} of {ex.claude_answered}</span>. New examples the engine never saw, run
-            on it frozen: <span className="tabular">{heldOut.summary.engine_matches} of {heldOut.summary.cases}</span>.
+            Claude with no rulebook: <span className="tabular">{ex.claude_matches} of {ex.claude_answered}</span>. New examples the engine never saw, each set
+            run once on it frozen: <span className="tabular">{HELD_OUT_SCORES}</span> on every value, <span className="tabular">{HELD_OUT_TOTAL.counts} of {HELD_OUT_TOTAL.cases}</span> on whether the gift counts.
           </span>
         </a>
       </li>

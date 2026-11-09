@@ -2,10 +2,8 @@ import { guard } from "@/lib/api/keys";
 import { fail, ok, today } from "@/lib/api/envelope";
 import { CheckGiftRequest } from "@/lib/api/schemas";
 import { DEFAULT_PROFILE, evaluateGift } from "@/lib/rules";
-import sources from "../../../../../content/sources.json";
 import { api } from "@/lib/api/handler";
-
-const SRC = sources as Record<string, { title: string; url: string }>;
+import { checkGiftData } from "@/lib/api/check-gift";
 
 /** POST /api/v1/check-gift: how one gift affects SSI, and the best way to deliver it. */
 async function handle(req: Request) {
@@ -38,29 +36,7 @@ async function handle(req: Request) {
     },
     { ...DEFAULT_PROFILE, ...profile },
   );
-  return ok(
-    {
-      check_before: r.checkBaseline,
-      check_after: r.checkAfter,
-      counted_amount: r.countedAmount,
-      income_month: r.incomeMonth,
-      payment_month: r.paymentMonth,
-      best_route: r.bestRoute,
-      check_with_best_route: r.checkWithBestRoute,
-      routes: r.alternatives,
-      savings_on_next_first: r.resourcesNextFirst,
-      over_savings_limit: r.overResourceLimit,
-      able_balance_on_next_first: r.resourcesAfter.ableBalance,
-      resource_status: r.trace.resources.status,
-      ambiguous: r.ambiguous,
-      ambiguity_reason: r.ambiguityReason ?? null,
-      rule_ids: r.ruleIds,
-      citations: r.sourceKeys.map((k) => ({ id: k, title: SRC[k]?.title ?? k, url: SRC[k]?.url ?? null })),
-      explanation: r.explanation,
-      trace: r.trace,
-    },
-    started,
-  );
+  return ok(checkGiftData(r), started);
 }
 
 const postRoute = (req: Request) => guard(req, "check-gift", () => handle(req));

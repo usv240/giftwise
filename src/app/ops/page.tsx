@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Info } from "@/components/Info";
 import { MODE_LABEL, liveSummary, optionalOffSentence } from "@/lib/health";
 import { alerts, describeCheckPayments, feed, lastDay, rightNow, week, type HourPoint } from "@/lib/ops";
+import { incomeDay, shownAt, shownDay } from "@/lib/time";
 import { LiveStream } from "./LiveStream";
 import { TraceBox } from "./TraceBox";
 import "../pages.css";
@@ -214,7 +215,6 @@ async function Stream() {
   return <LiveStream initial={await feed()} />;
 }
 
-const DAY = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short", day: "numeric" });
 
 function WeekChart({ points }: { points: HourPoint[] }) {
   const W = 840;
@@ -226,7 +226,8 @@ function WeekChart({ points }: { points: HourPoint[] }) {
   const y = (v: number) => base - (v / max) * (base - top);
   const requests = points.reduce((n, p) => n + p.requests, 0);
   const errors = points.reduce((n, p) => n + p.errors, 0);
-  const days = points.map((p, i) => ({ i, d: new Date(p.hour) })).filter(({ d }) => d.getUTCHours() === 0);
+  // A tick where a new day starts in Pacific time, the one zone the site shows times in (src/lib/time.ts).
+  const days = points.map((p, i) => ({ i, day: incomeDay(p.hour) })).filter(({ day }, i, all) => i > 0 && day !== all[i - 1].day);
   return (
     <figure className="ops-chart">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="ops-chart-title ops-chart-desc" preserveAspectRatio="none">
@@ -249,17 +250,17 @@ function WeekChart({ points }: { points: HourPoint[] }) {
             {p.errors > 0 && <rect x={i * bw + 0.5} y={y(p.errors)} width={Math.max(1, bw - 1)} height={base - y(p.errors)} className="ops-bar-err" />}
           </g>
         ))}
-        {days.map(({ i, d }) => (
+        {days.map(({ i, day }) => (
           <g key={i}>
             <line x1={i * bw} y1={base} x2={i * bw} y2={base + 5} className="ops-axis" />
             <text x={i * bw + 3} y={H - 8} className="ops-tick">
-              {DAY.format(d)}
+              {shownDay(day)}
             </text>
           </g>
         ))}
       </svg>
       <figcaption className="muted tabular">
-        <span className="ops-key ops-key-req" aria-hidden="true" /> Requests, <span className="ops-key ops-key-err" aria-hidden="true" /> errors (5xx), one bar an hour in UTC. {requests.toLocaleString("en-US")} requests and {errors.toLocaleString("en-US")} errors in seven days.
+        <span className="ops-key ops-key-req" aria-hidden="true" /> Requests, <span className="ops-key ops-key-err" aria-hidden="true" /> errors (5xx), one bar an hour, days in Pacific time. {requests.toLocaleString("en-US")} requests and {errors.toLocaleString("en-US")} errors in seven days.
       </figcaption>
     </figure>
   );
@@ -294,8 +295,8 @@ async function Alerts() {
       <p className="ops-note">
         {run ? (
           <>
-            The outside checks last ran {new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" }).format(new Date(run.finishedAt))} ET on{" "}
-            {run.source === "render-workflow" ? "Render Workflows" : "a developer's machine"}: {run.passed} of {run.total} passed.{" "}
+            The outside checks last ran {shownAt(run.finishedAt)} {run.source === "render-workflow" ? "on Render Workflows" : "locally, with npm run checks:local"}: {run.passed} of {run.total} passed.
+            {run.source === "render-workflow" ? " " : " The hosted nightly run files here again after the next deploy. "}
           </>
         ) : (
           <>No outside check run has been filed on this server yet. </>

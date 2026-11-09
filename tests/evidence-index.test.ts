@@ -25,21 +25,25 @@ describe("the claims-to-evidence index", () => {
     }
   });
 
-  it("the symbols it points at are in the files it names", () => {
+  it("every cited line holds the symbol or text named beside it", () => {
+    // `path:N` or `path:N-M`, or `:N` for the same file again, then "(" and the anchor: a `symbol` or a "quoted text".
+    // A symbol written as name() is looked for as name.
+    const cited = [...doc.matchAll(/`((?:src|tests|scripts|content|docs|workflows|postman|public|\.github)\/[\w./@\[\]-]+?)?:(\d+)(?:-(\d+))?`( \((?:`([^`]+)`|"([^"]+)"))?/g)];
+    expect(cited.length).toBeGreaterThanOrEqual(14);
+    let path = "";
+    for (const m of cited) {
+      path = m[1] ?? path;
+      const from = Number(m[2]);
+      const to = Number(m[3] ?? m[2]);
+      const anchor = (m[5] ?? m[6] ?? "").replace(/\(\)$/, "");
+      expect(anchor, `${path}:${from} names what is there`).not.toBe("");
+      const lines = readFileSync(path, "utf8").split("\n").slice(from - 1, to).join("\n");
+      expect(lines, `${path}:${from}${to !== from ? `-${to}` : ""} holds ${anchor}`).toContain(anchor);
+    }
+  });
+
+  it("the counts it states are in the files it names", () => {
     const at = (path: string) => readFileSync(path, "utf8");
-    expect(at("src/lib/paypal/gift-order.ts").split("\n").slice(40, 56).join("\n")).toContain("payeeEmail(");
-    expect(at("src/lib/paypal/capture.ts").split("\n").slice(39, 42).join("\n")).toContain("PayPal-Request-Id");
-    expect(at("src/lib/error-rates.ts").split("\n")[74]).toContain("ERROR_RATES");
-    const audit = at("src/lib/audit.ts").split("\n");
-    expect(audit[16]).toContain("hashEvent");
-    expect(audit[47]).toContain("verifyChain");
-    expect(audit[62]).toContain("verifyLedger");
-    const impact = at("src/lib/impact.ts").split("\n");
-    expect(impact[37]).toContain("IMPACT");
-    expect(impact[91]).toContain("FAMILY_SENTENCE");
-    expect(impact[95]).toContain("FAMILY_BASIS");
-    expect(at("tests/e2e/api.mjs").split("\n")[284]).toContain("nine tools");
-    expect(at("content/eval/held-out-results.json").split("\n")[3]).toContain("commit");
     expect(at("scripts/run-field-cases.ts")).toContain("overpaymentCheck");
     expect((at("src/lib/mcp/tools.ts").match(/^\s*name: "/gm) ?? []).length).toBe(9);
   });

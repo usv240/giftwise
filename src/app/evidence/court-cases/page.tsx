@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import results from "../../../../content/eval/field-cases-results.json";
 import { FieldCaseList } from "@/components/evidence/FieldCases";
+import { COURT_NOT_INCOME } from "@/lib/impact";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../evidence.css";
@@ -28,7 +29,7 @@ export default function CourtCasesPage() {
           <span className="tabular">
             {S.agreed} of {S.scored}
           </span>{" "}
-          scored, of <span className="tabular">{S.cases}</span> cases, reach the outcome SSA and the court did. Each case shows what the court held, what routing the same help keeps, and a link to the opinion.
+          scored, of <span className="tabular">{S.cases}</span> cases, reach the outcome SSA and the court did; in each of them help from family was counted against the person. {COURT_NOT_INCOME.sentence} Each case shows what the court held, what routing the same help keeps, and a link to the opinion.
         </p>
       </header>
       <FieldCaseList />

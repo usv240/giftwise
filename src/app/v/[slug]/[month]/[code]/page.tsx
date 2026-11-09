@@ -7,6 +7,7 @@ import { connection } from "next/server";
 import { today } from "@/lib/api/envelope";
 import { verifyReport, type LineCheck } from "@/lib/report/verify";
 import { usd } from "@/lib/rules";
+import { ZONE_NAME, shownDay, shownTime } from "@/lib/time";
 import "../../../../pages.css";
 import "../../../../developers/dev.css";
 import "./verify.css";
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 
 type Params = { slug: string; month: string; code: string };
 
-const day = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const day = (d: string) => shownDay(d);
 
 function PayPalCell({ c }: { c: LineCheck }) {
   const ev = c.line.evidence;
@@ -56,7 +57,7 @@ async function Check({ params }: { params: Promise<Params> }) {
         : v.verdict === "matches"
           ? `This report matches ${v.name}'s records and PayPal's.`
           : `This report matches ${v.name}'s records. PayPal's side is shown line by line below.`;
-  const asked = new Date(v.checkedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+  const asked = shownTime(v.checkedAt);
   return (
     <>
       <section className="vf-verdict" data-state={v.verdict} aria-labelledby="vf-h">
@@ -141,7 +142,7 @@ async function Check({ params }: { params: Promise<Params> }) {
             <>
               Every gift paid on this site went to the shop or the ABLE account named, through PayPal, and none of it went to {v.name}&rsquo;s bank or to Giftwise. Each PayPal payment above was read from
               PayPal at {asked}
-              {v.samples ? ", and the sample year's gifts, which have no PayPal record, are marked as such" : ""}. Each capture was written to an append-only ledger whose every entry carries the fingerprint of the
+              {v.samples ? ", and the sample year's gifts, which have no PayPal record, are marked as such" : ""}. Each gift is dated the day PayPal paid it, in {ZONE_NAME}, as on its receipt and the report. Each capture was written to an append-only ledger whose every entry carries the fingerprint of the
               one before it, so an edited entry would stop matching.
             </>
           )}

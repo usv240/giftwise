@@ -107,6 +107,9 @@ export default function DocsPage() {
                 const op = (spec.paths[e.path] as Record<string, { requestBody?: { content?: Record<string, { schema?: JsonSchema }> } }>)[e.method.toLowerCase()];
                 const schema = op?.requestBody?.content?.["application/json"]?.schema ?? op?.requestBody?.content?.["multipart/form-data"]?.schema;
                 const rows = schema ? fields(schema) : [];
+                // An answer with its own schema lists its fields too: the top level, and one resource test's fields (both share them).
+                const data = e.id === "check-gift" ? (spec.components.schemas.CheckGiftData as JsonSchema) : null;
+                const out = data ? fields(data).filter((r) => !r.name.includes(".") || r.name.startsWith("resources_after_gift.")) : [];
                 const ex = examples[e.id];
                 return (
                   <details key={e.id} id={e.id} className="dsc doc-ep doc-sec">
@@ -139,6 +142,33 @@ export default function DocsPage() {
                                   <td className="doc-name">
                                     <code>{r.name}</code>
                                     {r.required && <span className="doc-req"> required</span>}
+                                  </td>
+                                  <td className="doc-type">
+                                    <code>{r.type}</code>
+                                  </td>
+                                  <td>{r.about}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                      {out.length > 0 && (
+                        <div className="doc-table-wrap" tabIndex={0} role="region" aria-label={`${e.title} response fields`}>
+                          <table className="doc-table doc-fields">
+                            <caption className="doc-cap">Response fields, in data</caption>
+                            <thead>
+                              <tr>
+                                <th scope="col">Field</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">About</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {out.map((r) => (
+                                <tr key={r.name}>
+                                  <td className="doc-name">
+                                    <code>{r.name}</code>
                                   </td>
                                   <td className="doc-type">
                                     <code>{r.type}</code>

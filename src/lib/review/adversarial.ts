@@ -1,4 +1,4 @@
-import { AUTHORITY, PASSAGES, referee, routeForDecision, type AuthorityId, type Review } from "./referee";
+import { AUTHORITY, PASSAGES, checkVote, referee, routeForDecision, type AuthorityId, type Decision, type Review } from "./referee";
 import { usd, type Gift } from "@/lib/rules";
 
 /**
@@ -110,3 +110,42 @@ export function runAdversarial(): AdversarialRow[] {
 
 /** The bill in one line, for the table's caption. */
 export const ADVERSARIAL_BILL_LINE = `${usd(ADVERSARIAL_BILL.amount)} electric bill, paid by family in April 2026`;
+
+export type AloneSetup = "regs" | "poms" | "regsUnchecked" | "pomsUnchecked" | "referee";
+export type AloneRow = { id: string; sent: string; outcome: Record<AloneSetup, { decision: Decision; route: "able" | "vendor"; check: number; whole: boolean }> };
+
+/**
+ * Each reviewer alone on the same adversarial cases, beside the referee, computed with the same code and no model call.
+ * A reviewer alone is scored as scripts/run-eval.ts scores it on the bills: its answer is acted on when its quote checks
+ * out, and otherwise the bill takes the route safe under both readings (`regs`, `poms`). The unchecked setups act on the
+ * answer as sent, with no quote check. Every route is priced under the housing reading, the one both rulebooks give
+ * when quoted honestly (the control case), so a check below the full one is a wrong route.
+ */
+export function adversarialAlone() {
+  const full = routeForDecision(ADVERSARIAL_BILL, "not_shelter").check as number;
+  const priced = (route: "able" | "vendor") => routeForDecision(ADVERSARIAL_BILL, "shelter").routes.find((r) => r.delivery === route)!.check as number;
+  const act = (decision: Decision) => {
+    const route = routeForDecision(ADVERSARIAL_BILL, decision).route as "able" | "vendor";
+    const check = priced(route);
+    return { decision, route, check, whole: check === full };
+  };
+  const asSent = (r: Review): Decision => (r.answer === "unclear" ? "unsure" : r.answer);
+  const checked = (r: Review): Decision => (checkVote(r).valid && r.answer !== "unclear" ? r.answer : "unsure");
+  const rows: AloneRow[] = ADVERSARIAL.map((c) => {
+    const regs = c.reviews.find((r) => r.authority === "regs")!;
+    const poms = c.reviews.find((r) => r.authority === "poms")!;
+    return {
+      id: c.id,
+      sent: c.sent,
+      outcome: {
+        regs: act(checked(regs)),
+        poms: act(checked(poms)),
+        regsUnchecked: act(asSent(regs)),
+        pomsUnchecked: act(asSent(poms)),
+        referee: act(referee(c.reviews).decision),
+      },
+    };
+  });
+  const tally = (k: AloneSetup) => ({ whole: rows.filter((r) => r.outcome[k].whole).length, wrong: rows.filter((r) => !r.outcome[k].whole).map((r) => r.id) });
+  return { cases: rows.length, full, rows, regs: tally("regs"), poms: tally("poms"), regsUnchecked: tally("regsUnchecked"), pomsUnchecked: tally("pomsUnchecked"), referee: tally("referee") };
+}

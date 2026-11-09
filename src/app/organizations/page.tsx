@@ -12,6 +12,7 @@ import { paypalConfigured } from "@/lib/paypal/client";
 import { FUNDER, LIMITS } from "@/lib/paypal/payouts";
 import { fundBalance } from "@/lib/paypal/reporting";
 import { usd } from "@/lib/rules";
+import { incomeDay, shownAt, shownDay } from "@/lib/time";
 import "../pages.css";
 import "../try/try.css";
 import "../g/[slug]/gift.css";
@@ -60,7 +61,7 @@ async function Fund({ searchParams }: { searchParams: Promise<{ batch?: string }
         </p>
         <p className="org-balance tabular">{balance ? usd(balance.available) : "Unavailable"}</p>
         <p className="muted">
-          Available in the fund&rsquo;s PayPal account{balance?.asOf ? `, as PayPal reported it at ${new Date(balance.asOf).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" })} ET` : ""}. Sandbox money.
+          Available in the fund&rsquo;s PayPal account{balance?.asOf ? `, as PayPal reported it at ${shownAt(balance.asOf)}` : ""}. Sandbox money.
         </p>
       </div>
       <Info id="org.fund" label="" />
@@ -79,7 +80,7 @@ async function Fund({ searchParams }: { searchParams: Promise<{ batch?: string }
                   {b.batchId}
                 </Link>{" "}
                 <span className="muted">
-                  {usd(Number(b.total))} to {b.items} {b.items === 1 ? "payee" : "payees"}, {new Date(b.at).toLocaleDateString("en-US", { dateStyle: "medium" })}
+                  {usd(Number(b.total))} to {b.items} {b.items === 1 ? "payee" : "payees"}, {shownDay(incomeDay(b.at), { dateStyle: "medium" })}
                 </span>
               </li>
             ))}

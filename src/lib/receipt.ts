@@ -1,5 +1,6 @@
 import { asc, eq, inArray, or, sql } from "drizzle-orm";
 import { db, schema } from "./db";
+import { paymentDay } from "./time";
 
 /**
  * Everything a receipt (/r/{orderId}) shows, read by the order id: its payment rows, the page, the needs they paid
@@ -21,4 +22,13 @@ export async function loadReceipt(orderId: string) {
       .orderBy(asc(schema.auditEvents.id)),
   ]);
   return { rows, household: household as typeof schema.households.$inferSelect | undefined, needs, events, earlierRound: rows.some((r) => r.archivedAt !== null) };
+}
+
+/**
+ * The order's income date and the moment it shows, from its first row: every unit of one order is captured in the same
+ * call (src/lib/paypal/capture.ts), so they share it. The same day the report lists it under (src/lib/time.ts).
+ */
+export function receiptMoment(rows: { capturedAt: Date | null; createdAt: Date }[]) {
+  const first = rows[0];
+  return { date: paymentDay(first), at: first.capturedAt ?? first.createdAt };
 }

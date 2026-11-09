@@ -1,0 +1,207 @@
+{
+  "ran_at": "2026-11-09T14:24:54.628Z",
+  "rules_version": "2026.1",
+  "tolerance_usd": 1,
+  "rates": "Engine amounts are 2026: federal benefit rate $994, presumed maximum value $351.33, one-third reduction $331.33. Dollar figures are what the same help would mean to a person on SSI in 2026.",
+  "source": "United States federal court opinions: GovInfo's USCOURTS collection (govinfo.gov) for the district court opinions, and Public.Resource.Org's copy of the Federal Reporter for the court of appeals opinion. The file calls each person the claimant, replaces names inside quoted passages with bracketed words, and keeps the citation and link to the source.",
+  "summary": {
+    "opinions_downloaded": 23,
+    "opinions_read_closely": 7,
+    "cases": 3,
+    "scored": 3,
+    "not_scored": 0,
+    "agreed": 0,
+    "agreed_on_whether_it_counts": 0,
+    "rule_named_in_opinion": 0,
+    "rule_agreed": 0,
+    "amounts_stated": 0,
+    "amounts_agreed": 0,
+    "dollars": {
+      "cases_computed": 0,
+      "cases_not_computed": [
+        "son-room-and-board-loan",
+        "mother-back-rent-loan",
+        "attorney-monthly-cash-loan"
+      ],
+      "as_shown_in_the_opinions": {
+        "note": "ABLE used only where the opinion shows the disability began before age 46; otherwise only paying the landlord or provider directly.",
+        "cases_where_routing_keeps_money": 0,
+        "kept_per_month_2026": 0,
+        "kept_over_stated_months_2026": 0,
+        "cases_with_stated_months": 0
+      },
+      "if_each_person_is_able_eligible": {
+        "note": "The same cases if each person qualifies for an ABLE account (disability before age 46, the rule from January 1, 2026).",
+        "cases_where_routing_keeps_money": 0,
+        "kept_per_month_2026": 0,
+        "kept_over_stated_months_2026": 0
+      }
+    },
+    "overpayments_stated": {
+      "note": "Overpayments SSA assessed, as stated in the opinions, in that year's dollars.",
+      "scored_total": 0,
+      "scored": []
+    },
+    "misses": [
+      {
+        "id": "son-room-and-board-loan",
+        "ssa_and_court_held": "A valid and enforceable agreement to repay the value of food and shelter received in kind is a loan, and the shelter and maintenance are not income; no one-third reduction.",
+        "engine_said": "counts; rules applied: ism_vtr",
+        "engine_needs": "An input for a bona fide loan of food, shelter or cash (20 CFR 416.1103(f); POMS SI 00835.482, SI 01120.220): help the person must repay is not income. The engine routes gifts and has no input for a loan, so it counts the help."
+      },
+      {
+        "id": "mother-back-rent-loan",
+        "ssa_and_court_held": "A bona fide loan of in-kind support, so the shelter does not count as income.",
+        "engine_said": "counts; rules applied: ism_vtr",
+        "engine_needs": "An input for a bona fide loan of food, shelter or cash (20 CFR 416.1103(f); POMS SI 00835.482, SI 01120.220): help the person must repay is not income. The engine routes gifts and has no input for a loan, so it counts the help."
+      },
+      {
+        "id": "attorney-monthly-cash-loan",
+        "ssa_and_court_held": "Cash lent under an oral agreement to repay from back pay is a loan, not a gift, and is not income.",
+        "engine_said": "counts; rules applied: unearned_cash",
+        "engine_needs": "An input for a bona fide loan of food, shelter or cash (20 CFR 416.1103(f); POMS SI 00835.482, SI 01120.220): help the person must repay is not income. The engine routes gifts and has no input for a loan, so it counts the help."
+      }
+    ],
+    "not_scored_cases": []
+  },
+  "cases": [
+    {
+      "id": "son-room-and-board-loan",
+      "title": "Room and board from her son while her appeal was pending, to be repaid",
+      "citation": "Ceguerra v. Secretary of Health & Human Services, 933 F.2d 735 (9th Cir. 1991)",
+      "url": "https://law.resource.org/pub/us/case/reporter/F2/933/933.F2d.735.89-16720.html",
+      "determination": {
+        "by": "Court of appeals, reversing SSA and the district court",
+        "court_outcome": "reversed and remanded to restore full retroactive benefits",
+        "counts": false,
+        "basis": "none",
+        "values": [],
+        "overpayment": null,
+        "held": "A valid and enforceable agreement to repay the value of food and shelter received in kind is a loan, and the shelter and maintenance are not income; no one-third reduction."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": false,
+        "basis_match": false,
+        "values_match": true,
+        "match": false,
+        "months": [
+          {
+            "month": "1983-06",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": false,
+        "note": "The court held the help was not income, so routing has nothing to keep."
+      },
+      "overpayment": null
+    },
+    {
+      "id": "mother-back-rent-loan",
+      "title": "Back rent owed to his mother, a bona fide loan",
+      "citation": "Michael L. v. Berryhill, No. 3:18-cv-01115 (2019-08-23)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-ord-3_18-cv-01115/pdf/USCOURTS-ord-3_18-cv-01115-0.pdf",
+      "determination": {
+        "by": "Court, reversing SSA",
+        "court_outcome": "reversed and remanded for immediate recalculation and payment of benefits",
+        "counts": false,
+        "basis": "none",
+        "values": [],
+        "overpayment": null,
+        "held": "A bona fide loan of in-kind support, so the shelter does not count as income."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "ism_vtr"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-SHEL-VTR"
+        ],
+        "counts_match": false,
+        "basis_match": false,
+        "values_match": true,
+        "match": false,
+        "months": [
+          {
+            "month": "2015-08",
+            "check_2026": 662.67,
+            "countable_income": 331.33,
+            "ism_value": 0,
+            "one_third_reduction": true,
+            "savings_next_first": 0,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": false,
+        "note": "The court held the help was not income, so routing has nothing to keep."
+      },
+      "overpayment": null
+    },
+    {
+      "id": "attorney-monthly-cash-loan",
+      "title": "About $900 a month lent by her attorney while her claim was pending",
+      "citation": "Linda J R. v. Commissioner of Social Security, No. 1:23-cv-03934 (2024-09-18)",
+      "url": "https://www.govinfo.gov/content/pkg/USCOURTS-cand-1_23-cv-03934/pdf/USCOURTS-cand-1_23-cv-03934-0.pdf",
+      "determination": {
+        "by": "Court, reversing SSA",
+        "court_outcome": "reversed and remanded for the immediate calculation and award of back pay",
+        "counts": false,
+        "basis": "none",
+        "values": [],
+        "overpayment": null,
+        "held": "Cash lent under an oral agreement to repay from back pay is a loan, not a gift, and is not income."
+      },
+      "engine": {
+        "counts": true,
+        "rules_applied": [
+          "unearned_cash"
+        ],
+        "values": [],
+        "rule_ids": [
+          "R-CASH-01",
+          "R-GIE-01",
+          "R-RMA-01"
+        ],
+        "counts_match": false,
+        "basis_match": false,
+        "values_match": true,
+        "match": false,
+        "months": [
+          {
+            "month": "2019-06",
+            "check_2026": 114,
+            "countable_income": 880,
+            "ism_value": 0,
+            "one_third_reduction": false,
+            "savings_next_first": 900,
+            "over_resource_limit": false
+          }
+        ]
+      },
+      "dollars": {
+        "computed": false,
+        "note": "The court held the help was not income, so routing has nothing to keep."
+      },
+      "overpayment": null
+    }
+  ],
+  "ms": 21
+}

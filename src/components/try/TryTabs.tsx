@@ -12,6 +12,7 @@ import { ENDPOINTS } from "@/lib/api/endpoints";
 import { usePrefs } from "../prefs";
 import { modelName } from "@/lib/ai/model-name";
 import { parseDollars, parseOptionalDollars } from "@/lib/parseDollars";
+import { today as pacificToday } from "@/lib/time";
 import { billDescription } from "@/lib/review/bill-route";
 import { DEFAULT_PROFILE, checkMonthName, evaluateGift, fbr, monthName, planMonths, usd, type Category, type Delivery, type Gift, type Profile } from "@/lib/rules";
 
@@ -52,8 +53,8 @@ const PAID_TO: Record<string, Delivery> = { person: "cash", cash: "cash", her: "
 
 const NUMBER_HINT = "Type the amount as a number, like 1000";
 
-/** Today in US Pacific time, YYYY-MM-DD: the same day the gift page and the home page's Gift Checker price a gift. */
-const todayPacific = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+/** Today in US Pacific time, YYYY-MM-DD: the same day the gift page and the home page's Gift Checker price a gift (src/lib/time.ts). */
+const todayPacific = pacificToday;
 const noSubscribeToday = () => () => {};
 /** The day of the build (next.config.ts): the static page paints with it, then the browser's own today takes over. */
 const BUILD_DAY = process.env.NEXT_PUBLIC_BUILD_DAY || "2026-11-08";

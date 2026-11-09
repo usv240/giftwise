@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FeedEvent } from "@/lib/ops";
+import { shownTime } from "@/lib/time";
 
-const TIME = new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+/** Times in Pacific time with the zone named, the one zone and format the site shows (src/lib/time.ts). */
+const TIME = { format: (d: Date) => shownTime(d, { seconds: true }) };
 
 /**
  * The last 50 events, newest first, updated over server-sent events every two seconds. A visitor who asked for

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import heldOut from "../../../content/eval/held-out-results.json";
 import ssa from "../../../content/eval/ssa-examples-results.json";
 import { Info } from "@/components/Info";
 import { COURT_SCORE } from "@/lib/impact";
 import { RECORDED_MONTH_NAME, RECORDED_REPORT_CHECK } from "@/lib/recorded-month";
 import { MAX_UNITS } from "@/lib/routing";
+import { HELD_OUT_COUNT, HELD_OUT_SCORES } from "@/lib/held-out-summary";
 
 /**
  * What is first here, each tied to the comparison rows it rests on (src/components/evidence/Compare.tsx, every row from
@@ -41,7 +41,7 @@ export function WhatIsFirst({
     },
     {
       k: "Accuracy published against SSA's own material",
-      v: `${ssa.summary.engine_matches} of ${ssa.summary.cases} of Social Security's worked examples, ${heldOut.summary.engine_matches} of ${heldOut.summary.cases} the engine never saw, and federal court cases, ${COURT_SCORE}, each on its own page. None of the compared products publishes accuracy against SSA's material.`,
+      v: `${ssa.summary.engine_matches} of ${ssa.summary.cases} of Social Security's worked examples, ${HELD_OUT_SCORES} in the ${HELD_OUT_COUNT} sets the engine never saw, and federal court cases, ${COURT_SCORE}, each on its own page. None of the compared products publishes accuracy against SSA's material.`,
       href: "/evidence/rules",
       link: "How the rules were checked",
     },

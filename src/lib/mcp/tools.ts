@@ -7,6 +7,7 @@ import { API_VERSION } from "@/lib/api/version";
 import { getHousehold, openNeeds, pageProfile } from "@/lib/households";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
 import { distinctPayees, routeGift } from "@/lib/routing";
+import { checkGiftData } from "@/lib/api/check-gift";
 import { giftSubject } from "@/lib/report/data";
 import { buildReport, currentReportMonth, reportJson } from "@/lib/report/ssa";
 import { easyRead } from "@/lib/report/easy";
@@ -100,6 +101,9 @@ export const TOOLS = [
           payment_month: r.paymentMonth,
           best_route: r.bestRoute,
           check_with_best_route: r.checkWithBestRoute,
+          // The same two resource tests as POST /api/v1/check-gift, each with its day (src/lib/api/check-gift.ts).
+          resources_after_gift: checkGiftData(r).resources_after_gift,
+          resources_for_check: checkGiftData(r).resources_for_check,
           savings_on_next_first: r.resourcesNextFirst,
           able_balance_on_next_first: r.resourcesAfter.ableBalance,
           resource_status: r.trace.resources.status,
@@ -229,10 +233,10 @@ export const TOOLS = [
     name: "get_ssa_report",
     title: "Write the monthly report to Social Security",
     description:
-      "Writes one month's report to Social Security for a Giftwise gift page, from the gifts themselves: which gifts to tell SSA about, what counts, the check it decides, and the PayPal record that shows every other gift went straight to a shop or the ABLE account. People on SSI tell Social Security about changes in income, including help from friends and family, within 10 days after the month ends. Read-only; it never contacts Social Security.",
+      "Writes one month's report to Social Security for a Giftwise gift page, from the gifts themselves: which gifts to tell SSA about, what counts, the check it decides, and the record that shows every other gift was paid straight to a shop or clinic through PayPal, or to the ABLE account through the ABLE plan's own gift page. Each gift is dated the day PayPal captured it, in Pacific time, the same day its receipt shows. People on SSI tell Social Security about changes in income, including help from friends and family, within 10 days after the month ends. Read-only; it never contacts Social Security.",
     input: z.object({
       slug,
-      month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional().describe("Income month, YYYY-MM. Defaults to the month whose report is due next."),
+      month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional().describe("Income month, YYYY-MM, with each gift dated in Pacific time. Defaults to the month whose report is due next."),
       view: z.enum(["given", "cash"]).default("given").describe('"given" for the gifts as they were made; "cash" for the report the same gifts would have needed as cash.'),
       reader: z.enum(["helper", "person"]).default("helper").describe('"helper" for the full report a family member or counselor reads; "person" for the Easy Read version written to the person on SSI, one short sentence per idea.'),
       lang: z.enum(["en", "es"]).default("en").describe('Language of the Easy Read version: "en" or "es". The full report is in English.'),
@@ -265,7 +269,7 @@ export const TOOLS = [
     name: "start_gift_checkout",
     title: "Start a PayPal checkout for a gift",
     description:
-      "Create a PayPal checkout that pays every recipient of a gift directly (the shops and the ABLE account), split by the rules so the SSI check stays whole. Returns a PayPal link for the person giving to open and approve. Nothing is charged until that person approves in PayPal; never approve on their behalf. This build uses the PayPal sandbox, so no real money moves.",
+      "Create a PayPal checkout that pays the shops and clinics a gift is for directly, split by the rules so the SSI check stays whole; the share for the person's ABLE account goes through the ABLE plan's own gift page, and in this sandbox build a PayPal test account stands in for the plan. Returns a PayPal link for the person giving to open and approve. Nothing is charged until that person approves in PayPal; never approve on their behalf. This build uses the PayPal sandbox, so no real money moves.",
     input: z.object({ slug, amount: z.number().min(1).max(10000).describe("Total gift in US dollars.") }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     changes: "Creates a sandbox order; nothing is charged until the giver approves",
