@@ -219,6 +219,8 @@ if (AI) {
     await page.getByRole("button", { name: "Use the sample fundraiser" }).click();
     await page.locator(".make-page").waitFor({ timeout: 120000 });
     const carried = (await page.locator(".make-situation-line").innerText()).replace(/\s+/g, " ");
+    // Marked as a test page, so npm run test:clean removes it and /organizations never lists it.
+    await page.getByLabel("Your name (optional)").fill("E2E");
     await page.getByRole("button", { name: "Make the gift page" }).click();
     await page.waitForURL(/\/manage\/[A-Za-z0-9_-]{24}\?new=1$/, { timeout: 60000, waitUntil: "commit" });
     await page.getByText("Keep this link").waitFor({ timeout: 60000 });

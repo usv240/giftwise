@@ -2,6 +2,7 @@
 // reader on the sample letter (made up for this demo; it replays Claude's recorded reading with no key, so no Claude
 // call) and a new gift page made with a profile. Each is written into src/app/developers/docs/recorded.json with the day
 // it was recorded (recorded_on), and the manage token is replaced, as in the other recordings, since it is shown once.
+// The page is made under the test suites' organizer name, so npm run test:clean removes it; the response does not name it.
 // Usage: BASE_URL=http://localhost:3100 npx tsx scripts/record-docs-responses.ts
 import { readFileSync, writeFileSync } from "node:fs";
 import { ENDPOINTS } from "../src/lib/api/endpoints";
@@ -20,7 +21,7 @@ async function main() {
   const read = await (await fetch(`${B}/api/v1/read-letter`, { method: "POST", body: letter, headers: from })).json();
   if (!read.data) throw new Error(`read-letter: ${JSON.stringify(read.error)}`);
 
-  const page = await (await fetch(`${B}/api/v1/gift-pages`, { method: "POST", headers: { "Content-Type": "application/json", ...from }, body: JSON.stringify(ENDPOINTS.find((e) => e.id === "gift-pages")!.example) })).json();
+  const page = await (await fetch(`${B}/api/v1/gift-pages`, { method: "POST", headers: { "Content-Type": "application/json", ...from }, body: JSON.stringify({ ...(ENDPOINTS.find((e) => e.id === "gift-pages")!.example as object), organizer: "E2E" }) })).json();
   if (!page.data) throw new Error(`gift-pages: ${JSON.stringify(page.error)}`);
   page.data.manage_url = "/manage/[private token, shown once]";
 
