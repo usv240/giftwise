@@ -83,12 +83,14 @@ function envelope(id: string, compute: () => unknown) {
   };
 }
 
-export type DocExample = { request: string; response: string; how: "computed" | "recorded"; sampleBill?: string };
+export type DocExample = { request: string; response: string; how: "computed" | "recorded"; sampleBill?: string; sampleLabel?: string; recordedOn?: string };
 
-const SAMPLE_BILL = "/samples/northside-electric-bill.png";
 const PRESET = "electric-bill";
 const RECORDED = recorded.responses as Record<string, unknown>;
-export const RECORDED_ON = new Date(`${recorded.recorded_at}T12:00:00Z`).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
+const longDate = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" });
+export const RECORDED_ON = longDate(recorded.recorded_at);
+/** A response recorded on another day than the rest (a newer endpoint, or a request that changed), by endpoint id. */
+const RECORDED_DAY = ((recorded as { recorded_on?: Record<string, string> }).recorded_on ?? {}) as Record<string, string>;
 
 /** The request line for a GET, with the playground's example query values. */
 function getLine(e: Endpoint) {
@@ -100,7 +102,8 @@ function getLine(e: Endpoint) {
 export function docExamples(): Record<string, DocExample> {
   const out: Record<string, DocExample> = {};
   for (const e of ENDPOINTS) {
-    const request = e.upload ? `POST ${e.path}\nContent-Type: multipart/form-data\n\nfile: northside-electric-bill.png` : e.method === "GET" ? getLine(e) : pretty(e.example);
+    const sample = e.sample ?? { path: "/samples/northside-electric-bill.png", file: "northside-electric-bill.png", label: "the sample electric bill" };
+    const request = e.upload ? `POST ${e.path}\nContent-Type: multipart/form-data\n\nfile: ${sample.file}` : e.method === "GET" ? getLine(e) : pretty(e.example);
     let body: unknown;
     let how: DocExample["how"] = "computed";
     if (e.id === "check-gift") body = envelope(e.id, () => checkGiftData(example(e.id)));
@@ -112,7 +115,7 @@ export function docExamples(): Record<string, DocExample> {
     } else continue;
     // Recorded on a local server: links in the answer point at the address visitors use.
     const response = pretty(body).replaceAll("http://localhost:3200", HOST);
-    out[e.id] = { request, response, how, ...(e.upload ? { sampleBill: SAMPLE_BILL } : {}) };
+    out[e.id] = { request, response, how, ...(e.upload ? { sampleBill: sample.path, sampleLabel: sample.label } : {}), ...(RECORDED_DAY[e.id] ? { recordedOn: longDate(RECORDED_DAY[e.id]) } : {}) };
   }
   return out;
 }

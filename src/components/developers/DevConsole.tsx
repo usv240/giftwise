@@ -13,14 +13,15 @@ const PLAYABLE = ENDPOINTS.filter((e) => e.id !== "health");
 /** The endpoints by what they do. Any endpoint added later and not listed here joins the last row. */
 const ROWS: { label: string; ids: string[] }[] = [
   { label: "Check", ids: ["check-gift", "plan-month", "review-bill", "ask-rules"] },
-  { label: "Read", ids: ["read-bill", "analyze-fundraiser"] },
+  { label: "Read", ids: ["read-bill", "read-letter", "analyze-fundraiser"] },
   { label: "Create", ids: ["gift-pages", "ssa-report", "presets", "ledger"] },
 ];
 const EP_ROWS = ROWS.map((r, i) => ({
   label: r.label,
   items: PLAYABLE.filter((e) => r.ids.includes(e.id) || (i === ROWS.length - 1 && !ROWS.some((x) => x.ids.includes(e.id)))),
 }));
-const SAMPLE_BILL = "/samples/northside-electric-bill.png";
+/** The file an upload sends when none is chosen: the endpoint's own sample (the bill, or the made-up letter). */
+const sampleOf = (e: Endpoint) => e.sample ?? { path: "/samples/northside-electric-bill.png", file: "northside-electric-bill.png", type: "image/png", label: "the sample electric bill" };
 const pretty = (v: unknown) => JSON.stringify(v, null, 2);
 const pathFor = (e: Endpoint) => {
   const q = (e.query ?? []).filter((p) => p.example).map((p) => `${p.name}=${encodeURIComponent(p.example ?? "")}`);
@@ -66,7 +67,8 @@ export function DevConsole() {
       if (key.trim()) headers.Authorization = `Bearer ${key.trim()}`;
       let init: RequestInit = { method: endpoint.method, headers };
       if (endpoint.upload) {
-        const f = file ?? new File([await (await fetch(SAMPLE_BILL)).blob()], "northside-electric-bill.png", { type: "image/png" });
+        const sample = sampleOf(endpoint);
+        const f = file ?? new File([await (await fetch(sample.path)).blob()], sample.file, { type: sample.type });
         const form = new FormData();
         form.append("file", f);
         init = { ...init, body: form };
@@ -158,7 +160,9 @@ export function DevConsole() {
             </label>
             {endpoint.upload ? (
               <label className="dev-field">
-                <span>Bill photo or PDF (leave empty to send the sample electric bill)</span>
+                <span>
+                  {endpoint.id === "read-letter" ? "Letter" : "Bill"} photo or PDF (leave empty to send {sampleOf(endpoint).label})
+                </span>
                 <input type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               </label>
             ) : endpoint.method === "POST" ? (
@@ -301,7 +305,7 @@ function snippetFor(lang: Lang, e: Endpoint, origin: string, key: string, body: 
   })();
   if (lang === "curl") {
     const parts = [`curl${e.method === "POST" ? " -X POST" : ""} "${url}"`, `  -H "Authorization: Bearer ${key}"`];
-    if (e.upload) parts.push(`  -F "file=@northside-electric-bill.png"`);
+    if (e.upload) parts.push(`  -F "file=@${sampleOf(e).file}"`);
     else if (e.method === "POST") parts.push(`  -H "Content-Type: application/json"`, `  -d '${compact}'`);
     return parts.join(" \\\n");
   }
@@ -310,7 +314,7 @@ function snippetFor(lang: Lang, e: Endpoint, origin: string, key: string, body: 
     if (e.method === "GET") return `const res = await fetch("${url}", {\n  headers: { Authorization: "Bearer ${key}" },\n});\nconst data = await res.json();`;
     return `const res = await fetch("${url}", {\n  method: "POST",\n  headers: {\n    Authorization: "Bearer ${key}",\n    "Content-Type": "application/json",\n  },\n  body: JSON.stringify(${compact}),\n});\nconst { data, error } = await res.json();`;
   }
-  if (e.upload) return `import requests\n\nwith open("northside-electric-bill.png", "rb") as f:\n    r = requests.post(\n        "${url}",\n        headers={"Authorization": "Bearer ${key}"},\n        files={"file": f},\n    )\nprint(r.json())`;
+  if (e.upload) return `import requests\n\nwith open("${sampleOf(e).file}", "rb") as f:\n    r = requests.post(\n        "${url}",\n        headers={"Authorization": "Bearer ${key}"},\n        files={"file": f},\n    )\nprint(r.json())`;
   if (e.method === "GET") return `import requests\n\nr = requests.get("${url}", headers={"Authorization": "Bearer ${key}"})\nprint(r.json())`;
   return `import requests\n\nr = requests.post(\n    "${url}",\n    headers={"Authorization": "Bearer ${key}"},\n    json=${compact.replace(/\btrue\b/g, "True").replace(/\bfalse\b/g, "False").replace(/\bnull\b/g, "None")},\n)\nprint(r.json())`;
 }

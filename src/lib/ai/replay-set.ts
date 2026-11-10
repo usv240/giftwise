@@ -1,5 +1,7 @@
 import authorities from "../../../content/authorities.json";
 import billRead from "../../../content/reviews/electric-bill-read.json";
+import letterPdf from "../../../content/reviews/ssa-letter-read-pdf.json";
+import letterPng from "../../../content/reviews/ssa-letter-read-png.json";
 import docs from "../../app/developers/docs/recorded.json";
 import { ENDPOINTS } from "../api/endpoints";
 import { readBundledSample } from "../sponsors/kernel";
@@ -8,12 +10,15 @@ import { replayKey } from "./claude";
 import { reviewRequest, type ReviewCase } from "./reviewers";
 import { sampleBillFile } from "./sample-bill";
 import { billRequest, fundraiserRequest } from "./tasks";
+import { letterRequest } from "./letter";
+import { SAMPLE_LETTER, sampleLetterFile } from "./sample-letter";
 
 /**
  * The committed replay set (content/ai-replay): Claude's recorded answers for the samples a visitor can run, each keyed
  * by the request the current code sends for that sample. Only recordings made with the prompt, schema and rulebook
- * passages the code sends now are used: the sample bill read (November 8), and the two reviewers and the sample
- * fundraiser from the API docs recording (November 5, after the passages were last fetched). scripts/build-ai-replay.ts
+ * passages the code sends now are used: the sample bill read (November 8), the two reviewers and the sample fundraiser
+ * from the API docs recording (November 5, after the passages were last fetched), and the sample letter from Social
+ * Security, as a PDF and as a photo (November 10, scripts/record-letter-read.ts). scripts/build-ai-replay.ts
  * writes the set from here; tests/ai-replay.test.ts checks that every file on disk is one of these keys, so a changed
  * prompt, schema or passage shows up as a failing test until the sample is recorded again.
  */
@@ -73,5 +78,17 @@ export async function replayEntries(): Promise<ReplayEntry[]> {
     model: fr.meta.model,
     parsed_output: fr.data.fundraiser,
   });
+  // The sample letter, made up for the demo and marked so on the page: Claude's reading of each file, recorded once.
+  for (const [kind, rec] of [["pdf", letterPdf], ["png", letterPng]] as const) {
+    const { prepared } = await sampleLetterFile(kind);
+    out.push({
+      key: replayKey(letterRequest(prepared)),
+      what: `Claude reads the sample letter from Social Security (public/samples/${SAMPLE_LETTER[kind]})`,
+      source: `content/reviews/ssa-letter-read-${kind}.json`,
+      recorded_at: rec.recorded_at,
+      model: rec.model,
+      parsed_output: rec.data,
+    });
+  }
   return out;
 }

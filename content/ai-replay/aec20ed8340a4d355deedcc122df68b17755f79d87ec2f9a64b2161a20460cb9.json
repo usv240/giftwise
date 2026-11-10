@@ -1,0 +1,40 @@
+{
+  "what": "Claude reads the sample letter from Social Security (public/samples/sam-ssa-letter-sample.pdf)",
+  "source": "content/reviews/ssa-letter-read-pdf.json",
+  "recorded_at": "2026-11-10T18:14:29.665Z",
+  "model": "claude-opus-5-5",
+  "stop_reason": "end_turn",
+  "usage": null,
+  "parsed_output": {
+    "is_ssa_letter": true,
+    "ssi_payment": {
+      "amount": 106,
+      "month": "2027-01",
+      "quote": "Beginning January 2027, the amount you will receive each month is $106.00."
+    },
+    "other_income": [
+      {
+        "kind": "social_security",
+        "monthly_amount": 600,
+        "quote": "We counted Social Security benefits of $600.00 a month."
+      }
+    ],
+    "wages": {
+      "monthly_amount": 0,
+      "quote": "You told us you have no wages."
+    },
+    "living_arrangement": {
+      "in_anothers_household": true,
+      "gets_all_meals": true,
+      "quote": "One-third reduction, because you live in another person's household and receive food and shelter from them"
+    },
+    "couple": {
+      "is_couple": false,
+      "quote": "We pay you as an individual."
+    },
+    "explanation": {
+      "plain": "This is a notice about Sam's SSI payments. It says that starting January 2027, Sam will receive $106.00 each month.",
+      "technical": "The document is an SSI payment notice. It is marked as a Giftwise demo sample, not a real Social Security letter. ssi_payment: the headline sentence 'Beginning January 2027...' gives $106.00 and January 2027, which matches the 'Your monthly SSI payment' table line. other_income: the 'Your income' paragraph states Social Security benefits of $600.00 a month, counted before the $20 exclusion; kind is social_security. wages: 'You told us you have no wages', recorded as 0. living_arrangement: the table's one-third reduction line says she lives in another person's household and receives food and shelter, so both flags are true. The 'Where you live' paragraph confirms this, naming her mother's household. couple: 'We pay you as an individual', so false. The claim number, address and date of birth were left out of all quotes."
+    }
+  }
+}

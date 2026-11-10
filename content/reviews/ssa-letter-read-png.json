@@ -1,0 +1,37 @@
+{
+  "recorded_at": "2026-11-10T18:15:17.989Z",
+  "model": "claude-opus-5-5",
+  "ms": 5796,
+  "data": {
+    "is_ssa_letter": true,
+    "ssi_payment": {
+      "amount": 106,
+      "month": "2027-01",
+      "quote": "Beginning January 2027, the amount you will receive each month is $106.00."
+    },
+    "other_income": [
+      {
+        "kind": "social_security",
+        "monthly_amount": 600,
+        "quote": "We counted Social Security benefits of $600.00 a month."
+      }
+    ],
+    "wages": {
+      "monthly_amount": null,
+      "quote": "You told us you have no wages."
+    },
+    "living_arrangement": {
+      "in_anothers_household": true,
+      "gets_all_meals": true,
+      "quote": "She provides your food and shelter, and you do not pay your share of the household's expenses."
+    },
+    "couple": {
+      "is_couple": false,
+      "quote": "We pay you as an individual."
+    },
+    "explanation": {
+      "plain": "This is a notice from Social Security about your SSI. It says that starting January 2027, your SSI payment will be $106.00 each month.",
+      "technical": "Payment amount and month come from the headline sentence 'Beginning January 2027...' and match the table total 'Your monthly SSI payment $106.00'. Other income comes from 'Your income': Social Security of $600.00 a month, recorded before the $20 exclusion; the $580 line and the $343 one-third reduction were not recorded as income. Wages are null because the letter says there are no wages. The living arrangement comes from 'Where you live': in the mother's household, with food and shelter provided. The couple field comes from 'Marital status': paid as an individual. The claim number, address and date of birth were left out."
+    }
+  }
+}

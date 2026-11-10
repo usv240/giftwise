@@ -314,31 +314,47 @@
     },
     "gift-pages": {
       "data": {
-        "slug": "jordan-9b041b",
-        "url": "/g/jordan-9b041b",
+        "slug": "jordan-ca93a3",
+        "url": "/g/jordan-ca93a3",
         "manage_url": "/manage/[private token, shown once]",
+        "situation": "own",
+        "profile": {
+          "couple": false,
+          "livesInAnothersHousehold": true,
+          "otherUnearnedMonthly": 600,
+          "earnedMonthly": 0,
+          "ableEligible": true,
+          "ableBalance": 0,
+          "ableContributedThisYear": 0,
+          "savings": 1240,
+          "pronoun": "they"
+        },
+        "check": {
+          "amount": 106,
+          "payment_month": "2027-01"
+        },
         "needs": [
           {
             "title": "Van wheelchair lift",
             "route": "vendor",
             "payee": "Van conversion shop",
             "amount": 1800,
-            "check_after": 1029
+            "check_after": 106
           },
           {
             "title": "Rent, December",
             "route": "able",
             "payee": "Jordan's ABLE account",
             "amount": 650,
-            "check_after": 1029
+            "check_after": 106
           }
         ]
       },
       "meta": {
-        "request_id": "req_c567971fb00e43f9ab43",
-        "version": "2026-11-01",
+        "request_id": "req_c2bf5fc2739e4e149ead",
+        "version": "2026-11-08",
         "rules_version": "2026.1",
-        "latency_ms": 57
+        "latency_ms": 29
       },
       "error": null
     },
@@ -765,6 +781,90 @@
         }
       ],
       "at": "2026-11-05T15:08:02.868Z"
+    },
+    "read-letter": {
+      "data": {
+        "letter": {
+          "is_ssa_letter": true,
+          "ssi_payment": {
+            "amount": 106,
+            "month": "2027-01",
+            "quote": "Beginning January 2027, the amount you will receive each month is $106.00.",
+            "quote_found": true
+          },
+          "other_income": [
+            {
+              "kind": "social_security",
+              "monthly_amount": 600,
+              "quote": "We counted Social Security benefits of $600.00 a month.",
+              "quote_found": true
+            }
+          ],
+          "wages": {
+            "monthly_amount": 0,
+            "quote": "You told us you have no wages.",
+            "quote_found": true
+          },
+          "living_arrangement": {
+            "in_anothers_household": true,
+            "gets_all_meals": true,
+            "quote": "One-third reduction, because you live in another person's household and receive food and shelter from them",
+            "quote_found": true
+          },
+          "couple": {
+            "is_couple": false,
+            "quote": "We pay you as an individual.",
+            "quote_found": true
+          },
+          "explanation": {
+            "plain": "This is a notice about Sam's SSI payments. It says that starting January 2027, Sam will receive $106.00 each month.",
+            "technical": ""
+          }
+        },
+        "answers": {
+          "home": "other",
+          "meals": true,
+          "benefits": 600,
+          "wages": 0,
+          "couple": false
+        },
+        "profile": {
+          "livesInAnothersHousehold": true,
+          "householdProvidesAllMeals": true,
+          "otherUnearnedMonthly": 600,
+          "earnedMonthly": 0,
+          "couple": false
+        },
+        "check": {
+          "month": "2027-01",
+          "monthLabel": "January 2027",
+          "letterSays": 106,
+          "answersGive": 106,
+          "matches": true,
+          "plain": "Matches his letter: $106 for January 2027."
+        },
+        "quotes": {
+          "checked": 5,
+          "found": 5,
+          "set_aside": 0,
+          "text_layer": true
+        },
+        "stored": false
+      },
+      "meta": {
+        "request_id": "req_e76824d816aa4a6e833d",
+        "version": "2026-11-08",
+        "rules_version": "2026.1",
+        "latency_ms": 34,
+        "model": "claude-opus-5-5",
+        "replayed": true,
+        "recorded_at": "2026-11-10T18:14:29.665Z"
+      },
+      "error": null
     }
+  },
+  "recorded_on": {
+    "read-letter": "2026-11-10",
+    "gift-pages": "2026-11-10"
   }
 }

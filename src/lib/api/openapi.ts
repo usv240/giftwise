@@ -3,7 +3,7 @@ import { RULES_VERSION } from "../rules";
 import { CheckGiftData } from "./check-gift";
 import { ENDPOINTS, ERRORS } from "./endpoints";
 import { API_VERSION } from "./version";
-import { AnalyzeFundraiserRequest, CheckGiftRequest, GiftPageRequest, KeyRequest, PlanMonthRequest, ReviewBillRequest, AskRulesRequest } from "./schemas";
+import { AnalyzeFundraiserRequest, CheckGiftRequest, GiftPageRequest, KeyRequest, ManagePageRequest, PlanMonthRequest, ReviewBillRequest, AskRulesRequest } from "./schemas";
 
 const json = (s: z.ZodType) => {
   const { $schema: _drop, ...rest } = z.toJSONSchema(s, { io: "input" }) as Record<string, unknown>;
@@ -56,11 +56,44 @@ export function openapi(server: string) {
     if (e.upload) {
       op.requestBody = {
         required: true,
-        content: { "multipart/form-data": { schema: { type: "object", required: ["file"], properties: { file: { type: "string", format: "binary", description: "JPEG, PNG, WebP or PDF, up to 10 MB." } } } } },
+        content: {
+          "multipart/form-data": {
+            schema: {
+              type: "object",
+              required: ["file"],
+              properties: {
+                file: { type: "string", format: "binary", description: "JPEG, PNG, WebP or PDF, up to 10 MB." },
+                ...(e.id === "read-letter" ? { pronoun: { type: "string", enum: ["she", "he", "they"], description: "How the answer refers to the person. Optional; she/her when left out." } } : {}),
+              },
+            },
+          },
+        },
       };
     }
     paths[e.path] = { [e.method.toLowerCase()]: op };
   }
+  // The organizer's private manage link: the token in the path is the only key to the page (no account, no API key).
+  const token = { name: "token", in: "path", required: true, description: "The page's private manage token, from manage_url when the page was made.", schema: { type: "string" } };
+  paths["/api/manage/{token}"] = {
+    get: {
+      operationId: "getManagedPage",
+      summary: "Read a page you organize",
+      description: "The page, its needs and the gifts received, with the person's situation (situation: own or sample, and the profile every check on the page uses) and their check with no gift.",
+      tags: ["Manage"],
+      parameters: [token],
+      responses: { "200": { description: "The page as its organizer sees it.", content: { "application/json": { schema: { $ref: "#/components/schemas/Envelope" } } } }, default: { $ref: "#/components/responses/Error" } },
+    },
+    patch: {
+      operationId: "updateManagedPage",
+      summary: "Change a page you organize",
+      description:
+        "Change the note, close or reopen the page, or set the person's situation: profile with the fields you know (the rest keep the sample situation's values), or null to go back to the sample situation. Only these confirmed facts are saved; a letter read with /api/v1/read-letter is never stored.",
+      tags: ["Manage"],
+      parameters: [token],
+      requestBody: { required: true, content: { "application/json": { schema: json(ManagePageRequest), example: { profile: { livesInAnothersHousehold: true, otherUnearnedMonthly: 600 }, profile_source: "letter" } } } },
+      responses: { "200": { description: "The page's status, note, situation, profile and check.", content: { "application/json": { schema: { $ref: "#/components/schemas/Envelope" } } } }, default: { $ref: "#/components/responses/Error" } },
+    },
+  };
   paths["/api/keys"] = {
     post: {
       operationId: "createKey",
@@ -84,6 +117,7 @@ export function openapi(server: string) {
       { name: "Checks", description: "The rules engine and the AI readers. A key is optional; with one you get higher limits and usage." },
       { name: "Utilities", description: "Presets, the ledger check and service status." },
       { name: "Keys", description: "Free sandbox keys." },
+      { name: "Manage", description: "A page's organizer, through its private manage link: the needs, the note, and the person's situation." },
     ],
     paths,
     components: {

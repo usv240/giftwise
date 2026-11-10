@@ -105,6 +105,7 @@ else ok(`review-bill ${j.meta?.replayed ? "replayed" : "live"}: both reviewers q
 r = await fetch(B + "/openapi.json");
 j = await r.json();
 ok("openapi lists review-bill with its request schema", Boolean(j.paths?.["/api/v1/review-bill"]?.post?.requestBody));
+ok("openapi lists the letter reader and the manage link's profile", Boolean(j.paths?.["/api/v1/read-letter"]?.post?.requestBody && j.paths?.["/api/manage/{token}"]?.patch?.requestBody?.content?.["application/json"]?.schema?.properties?.profile && j.paths?.["/api/v1/gift-pages"]?.post?.requestBody?.content?.["application/json"]?.schema?.properties?.profile));
 
 // Gift pages from a list of needs: the engine picks each route, and the page uses the chosen pronouns. Each run makes
 // its pages and its key from an address of its own, so the daily limits on new pages and keys for each client are
@@ -123,6 +124,45 @@ r = await post("/api/v1/gift-pages", { name: "Martha", pronoun: "she", organizer
 j = await r.json();
 const homeSlug = j.data?.slug ?? null;
 ok("gift-pages: a need toward a home goes to the ABLE account", r.status === 200 && j.data?.needs?.[0]?.route === "able" && j.data.needs[0].check_after === FULL, `${r.status} ${JSON.stringify(j.data?.needs?.map((n) => n.route))}`);
+// A page on the person's own facts: Sam lives in his mother's home and gets $600 of Social Security, so his check is his
+// own (the full amount less $580 counted and the one-third reduction), every need keeps it, and the page shows it.
+const OWN = Math.round((FULL - 580 - (FULL === 1029 ? 343 : 331.33)) * 100) / 100;
+r = await post("/api/v1/gift-pages", { name: "Sam", pronoun: "he", organizer: "E2E", needs: [{ title: "Wheelchair cushion", amount: 120, category: "equipment", vendor: "a mobility shop" }, { title: "Electric bill", amount: 90, category: "utility", recurring: true }], profile: { livesInAnothersHousehold: true, otherUnearnedMonthly: 600 }, profile_source: "answers" }, runFrom);
+j = await r.json();
+const ownPage = j.data ?? null;
+ok(`gift-pages with his own situation: his check is $${OWN}, not $${FULL}, and both needs keep it`, r.status === 200 && j.data?.situation === "own" && j.data?.check?.amount === OWN && j.data.needs.every((n) => n.check_after === OWN), `${r.status} ${JSON.stringify(j.data?.check ?? j.error)}`);
+if (ownPage) {
+  const html = await (await fetch(B + ownPage.url)).text();
+  const text = (html.match(/<body[\s\S]*<\/body>/)?.[0] ?? "").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ").replace(/&#x27;|&rsquo;|’/g, "'").replace(/\s+/g, " ");
+  const shown = /class="gift-check tabular">([^<]+)</.exec(html)?.[1];
+  ok(
+    `his gift page shows his check, $${OWN.toLocaleString("en-US")}, from his own situation`,
+    shown === `$${OWN.toLocaleString("en-US")}` && /Sam's own situation: lives in someone else's home, \$600 a month/.test(text),
+    `${shown} | ${text.slice(Math.max(0, text.indexOf("own situation") - 10), text.indexOf("own situation") + 120)}`,
+  );
+  const token = ownPage.manage_url.replace("/manage/", "");
+  r = await fetch(`${B}/api/manage/${token}`);
+  j = await r.json();
+  ok("manage link reads his situation: own, from his answers, with the fields given", r.status === 200 && j.data?.situation?.kind === "own" && j.data.situation.source === "answers" && j.data.profile?.otherUnearnedMonthly === 600 && j.data.check?.amount === OWN, JSON.stringify(j.data?.situation ?? j.error));
+  r = await fetch(`${B}/api/manage/${token}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profile: null }) });
+  j = await r.json();
+  ok(`manage link puts the page back on the sample situation: $${FULL}`, r.status === 200 && j.data?.situation?.kind === "sample" && j.data.check?.amount === FULL && j.data.profile?.pronoun === "he", JSON.stringify(j.data?.situation ?? j.error));
+  r = await fetch(`${B}/api/manage/${token}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profile: { livesInAnothersHousehold: true, otherUnearnedMonthly: 600 }, profile_source: "letter" }) });
+  j = await r.json();
+  ok("manage link sets his facts again, read from his letter", r.status === 200 && j.data?.situation?.source === "letter" && j.data.check?.amount === OWN, JSON.stringify(j.data?.situation ?? j.error));
+  r = await fetch(`${B}/api/manage/${token}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profile: { savings: -1 } }) });
+  ok("manage link refuses a negative amount", r.status === 400, `${r.status}`);
+}
+// The letter reader: the sample letter (made up for this demo) read live with a key, or on Claude's recorded answer without one.
+const letter = new FormData();
+letter.append("file", new Blob([await (await import("node:fs/promises")).readFile("public/samples/sam-ssa-letter-sample.pdf")], { type: "application/pdf" }), "sam-ssa-letter-sample.pdf");
+letter.append("pronoun", "he");
+r = await fetch(B + "/api/v1/read-letter", { method: "POST", body: letter, headers: { "x-forwarded-for": "203.0.113.45" } });
+j = await r.json();
+if (r.status === 503) ok("read-letter (skipped: AI not configured)", true);
+else ok(`read-letter ${j.meta?.replayed ? "replayed" : "live"}: the sample letter's $106 for January 2027 matches the engine, every quote is in its text, and nothing private comes back`, r.status === 200 && j.data?.check?.matches === true && j.data.check.answersGive === 106 && j.data.answers?.home === "other" && j.data.answers?.benefits === 600 && j.data.quotes?.found === j.data.quotes?.checked && j.data.quotes.checked >= 4 && j.data.stored === false && !/000-00-0000|Example Lane|1994/.test(JSON.stringify(j.data)), JSON.stringify(j.data?.check ?? j.error).slice(0, 120));
+r = await fetch(B + "/api/v1/read-letter", { method: "POST", body: new FormData(), headers: { "x-forwarded-for": "203.0.113.45" } });
+ok("read-letter with no file -> 400 (or 503 without AI)", r.status === 400 || r.status === 503, `${r.status}`);
 r = await post("/api/v1/gift-pages", { name: "<b>x</b>", pronoun: "she", needs: [{ title: "Chair", amount: 50, category: "equipment" }] });
 ok("gift-pages rejects a name that is not letters", r.status === 400, `${r.status}`);
 
@@ -300,6 +340,14 @@ if (homeSlug) {
   j = await r.json();
   ok(`MCP plan_gift puts $1,500 toward her home through the ABLE account, check stays $${FULL}`, j.result?.structuredContent?.check_with_giftwise === FULL && j.result.structuredContent.check_if_cash < FULL && j.result.structuredContent.lines?.every((l) => /ABLE/.test(l.paid_to)), JSON.stringify(j.result?.structuredContent?.lines ?? j.error ?? j).slice(0, 120));
 } else ok("MCP plan_gift on the home page (the page was not created)", false);
+if (ownPage) {
+  r = await mcp("tools/call", { name: "get_gift_page", arguments: { slug: ownPage.slug } });
+  j = await r.json();
+  ok(`MCP get_gift_page reads his own situation and his $${OWN} check`, j.result?.structuredContent?.situation === "own" && j.result.structuredContent.check?.amount === OWN && /Sam's own situation/.test(j.result?.content?.[0]?.text ?? ""), j.result?.content?.[0]?.text?.slice(0, 120));
+  r = await mcp("tools/call", { name: "plan_gift", arguments: { slug: ownPage.slug, amount: 300 } });
+  j = await r.json();
+  ok(`MCP plan_gift keeps his own check whole at $${OWN}; as cash it would be lower`, j.result?.structuredContent?.check_with_giftwise === OWN && j.result.structuredContent.check_if_cash < OWN, j.result?.content?.[0]?.text?.slice(0, 120));
+} else ok("MCP reads the page on his own facts (the page was not created)", false);
 r = await mcp("tools/call", { name: "get_ssa_report", arguments: { slug: "maya", month: "2026-10" } });
 j = await r.json();
 ok("MCP get_ssa_report: October needs no income report, due November 10", j.result?.structuredContent?.status === "nothing_counts" && j.result?.structuredContent?.due?.date === "2026-11-10" && /Nothing here counts as income/.test(j.result?.content?.[0]?.text ?? ""), j.result?.content?.[0]?.text?.slice(0, 80));

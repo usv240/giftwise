@@ -8,6 +8,8 @@ export type Endpoint = {
   /** JSON body for the playground and the docs example. Absent for GET and for file uploads. */
   example?: unknown;
   upload?: boolean;
+  /** For an upload: the sample file the playground sends when none is chosen, and the docs example names. */
+  sample?: { path: string; file: string; type: string; label: string };
   ai?: boolean;
   keyed: boolean;
   /** Query parameters for GET endpoints. The first example values make the playground's request. */
@@ -47,6 +49,19 @@ export const ENDPOINTS: Endpoint[] = [
     summary:
       "Upload a photo or PDF of a bill (multipart field file). Claude reads it. A bill at or near housing, or one Claude is less than 90% sure of, also goes to the two reviewers, and the referee decides; then the rules engine picks the benefit-safe way to pay it.",
     upload: true,
+    sample: { path: "/samples/northside-electric-bill.png", file: "northside-electric-bill.png", type: "image/png", label: "the sample electric bill" },
+    ai: true,
+    keyed: true,
+  },
+  {
+    id: "read-letter",
+    method: "POST",
+    path: "/api/v1/read-letter",
+    title: "Read a letter from Social Security",
+    summary:
+      "Upload a photo or PDF of the person's letter about their SSI payment (multipart field file, optional field pronoun). Claude reads the facts a gift page asks for, each with a short quote, and never returns an SSN, claim number, address or date of birth. The rules engine computes the check from those facts and compares it with the payment the letter states; for a PDF with a text layer, each quote is checked against the letter's text. Nothing is stored: send the confirmed answers as profile to /api/v1/gift-pages or PATCH /api/manage/{token}.",
+    upload: true,
+    sample: { path: "/samples/sam-ssa-letter-sample.pdf", file: "sam-ssa-letter-sample.pdf", type: "application/pdf", label: "the sample letter (made up for this demo)" },
     ai: true,
     keyed: true,
   },
@@ -88,8 +103,18 @@ export const ENDPOINTS: Endpoint[] = [
     path: "/api/v1/gift-pages",
     title: "Create a gift page",
     summary:
-      "Turn a list of needs, for example from a fundraiser, into a live gift page where every dollar is paid straight to the shop or the ABLE account through PayPal. The rules engine picks each route. Sandbox pages, five a day per visitor.",
-    example: { name: "Jordan", pronoun: "they", organizer: "Sam", needs: [{ title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" }, { title: "Rent, December", amount: 650, category: "rent" }] },
+      "Turn a list of needs, for example from a fundraiser, into a live gift page where every dollar is paid straight to the shop or the ABLE account through PayPal. The rules engine picks each route. Send the person's situation as profile and every check on the page uses it; without it the page names the sample situation it uses. Sandbox pages, five a day per visitor.",
+    example: {
+      name: "Jordan",
+      pronoun: "they",
+      organizer: "Sam",
+      needs: [
+        { title: "Van wheelchair lift", amount: 1800, category: "transport", vendor: "a van conversion shop" },
+        { title: "Rent, December", amount: 650, category: "rent" },
+      ],
+      profile: { livesInAnothersHousehold: true, otherUnearnedMonthly: 600 },
+      profile_source: "answers",
+    },
     keyed: true,
   },
   {

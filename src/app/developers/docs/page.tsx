@@ -187,9 +187,9 @@ export default function DocsPage() {
                               Example request
                               {ex.sampleBill && (
                                 <>
-                                  , with the{" "}
+                                  , with{" "}
                                   <a className="text-link" href={ex.sampleBill}>
-                                    sample electric bill
+                                    {ex.sampleLabel ?? "the sample electric bill"}
                                   </a>
                                 </>
                               )}
@@ -200,7 +200,7 @@ export default function DocsPage() {
                           </figure>
                           <figure className="doc-example">
                             <figcaption className="doc-cap">
-                              Example response <span className="muted">{ex.how === "computed" ? "Computed by the rules engine when this page was built." : `Recorded from the live API on ${RECORDED_ON}.`}</span>
+                              Example response <span className="muted">{ex.how === "computed" ? "Computed by the rules engine when this page was built." : `Recorded from the live API on ${ex.recordedOn ?? RECORDED_ON}.`}</span>
                             </figcaption>
                             <pre className="dev-pre tabular doc-response" tabIndex={0} aria-label={`${e.title}: example response`}>
                               {ex.response}

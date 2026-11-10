@@ -29,6 +29,7 @@ export type Decision = "shelter" | "not_shelter" | "unsure";
 // En and em dashes, built from their code points so the source stays free of them.
 const DASHES = new RegExp(`[${String.fromCharCode(0x2013, 0x2014)}]`, "g");
 
+/** Text as the quote checks compare it: curly quotes and dashes made plain, spaces collapsed, lower case. */
 const norm = (s: string) =>
   s
     .replace(/[‘’]/g, "'")
@@ -37,6 +38,9 @@ const norm = (s: string) =>
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
+
+/** The same normalization, for the other quote checks (a letter's quotes against its text layer, src/lib/ai/letter.ts). */
+export const normalizeQuote = norm;
 
 /** A vote counts only if its quote appears, word for word, in a passage from its own rulebook. */
 export function checkVote(r: Review, passages: Passage[] = PASSAGES): Vote {
