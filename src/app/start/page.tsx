@@ -12,6 +12,10 @@ export const metadata: Metadata = {
 
 const STEPS = [
   { k: "Who it is for", v: "Their first name, and the pronouns the page uses for them." },
+  {
+    k: "Their situation",
+    v: "Where they live and any Social Security or other income, in plain questions, or read from their letter from Social Security. The page then shows their own check. Optional: skip it and add it later.",
+  },
   { k: "What they need", v: "Paste a fundraiser’s link or start from the sample. The rules pick how each need is paid, so the help keeps their check whole." },
   { k: "Share it", v: "Givers see the page and pay through PayPal. You keep a private link to add, change or close needs." },
 ];
@@ -33,7 +37,7 @@ export default function StartPage() {
             </li>
           ))}
         </ol>
-        <CtaDialog heading={null} />
+        <CtaDialog heading={null} situation />
       </div>
       <p className="start-more">
         <Link className="text-link" href="/g/maya">

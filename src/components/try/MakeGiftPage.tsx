@@ -3,9 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Info } from "../Info";
-import { usd, type Category } from "@/lib/rules";
+import { pronounWords, usd, type Category } from "@/lib/rules";
+import { anyAnswer, answersToProfile, checkFor, situationLine } from "@/lib/situation";
+import { today } from "@/lib/time";
+import { clearStartDraft, readStartDraft } from "../situation/draft";
 
 export type FundraiserUse = { use: string; amount: number; category: Category; likely_vendor: string | null };
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Fit a title into 80 characters at a word boundary. */
 const fit = (s: string) => (s.length <= 80 ? s : s.slice(0, s.lastIndexOf(" ", 80) > 40 ? s.lastIndexOf(" ", 80) : 80).replace(/[\s,;:-]+$/, ""));
@@ -21,7 +26,10 @@ export function MakeGiftPage({ uses, sourceUrl, initialName = "" }: { uses: Fund
   const router = useRouter();
   const usable = uses.filter((u) => u.amount > 0).slice(0, 8);
   const [name, setName] = useState(initialName);
-  const [pronoun, setPronoun] = useState<"she" | "he" | "they">("they");
+  // The situation answered on /start for this person, in this tab, if any. This form only appears after a fundraiser
+  // is read, in the browser, so the tab's storage is there to read.
+  const [draft] = useState(() => (initialName ? readStartDraft(initialName) : null));
+  const [pronoun, setPronoun] = useState<"she" | "he" | "they">(draft?.pronoun ?? "they");
   const [organizer, setOrganizer] = useState("");
   const [picked, setPicked] = useState<boolean[]>(usable.map(() => true));
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle");
@@ -29,6 +37,9 @@ export function MakeGiftPage({ uses, sourceUrl, initialName = "" }: { uses: Fund
 
   if (usable.length === 0) return null;
   const chosen = usable.filter((_, i) => picked[i]);
+  const w = pronounWords(pronoun);
+  const own = draft && anyAnswer(draft.answers) ? answersToProfile(draft.answers, pronoun) : null;
+  const ownCheck = own ? checkFor(own.profile, today().slice(0, 7)) : null;
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -44,10 +55,13 @@ export function MakeGiftPage({ uses, sourceUrl, initialName = "" }: { uses: Fund
           organizer: organizer.trim() || undefined,
           source_url: /^https?:\/\//.test(sourceUrl) ? sourceUrl : undefined,
           needs: chosen.map((u) => ({ title: fit(u.use), amount: Math.round(u.amount * 100) / 100, category: u.category, vendor: u.likely_vendor })),
+          // Only the facts answered are sent; the page names the sample situation for the rest.
+          ...(own ? { profile: Object.fromEntries(own.given.map((k) => [k, own.profile[k]])), profile_source: draft!.source } : {}),
         }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error?.message ?? "The page could not be made. Please try again.");
+      clearStartDraft();
       router.push(`${j.data.manage_url}?new=1`);
     } catch (err) {
       setNote((err as Error).message);
@@ -93,6 +107,18 @@ export function MakeGiftPage({ uses, sourceUrl, initialName = "" }: { uses: Fund
           </label>
         ))}
       </fieldset>
+      <div className="make-situation">
+        <p className="try-legend">{(name.trim() || "Their")}{name.trim() ? "'s" : ""} situation</p>
+        {own && ownCheck ? (
+          <p className="make-situation-line">
+            {cap(situationLine(own.profile, own.given))}, {draft!.source === "letter" ? "read from the letter and checked by you" : "from your answers"}. {w.Poss} {ownCheck.label} check: <strong className="tabular">{usd(ownCheck.check)}</strong>.
+          </p>
+        ) : (
+          <p className="make-situation-line muted">
+            The page uses a sample situation until you add {w.hers}: one adult on {w.poss} own, no other income. You can add {w.poss} own facts, or read {w.poss} letter from Social Security, on the page&rsquo;s private link once it is made.
+          </p>
+        )}
+      </div>
       <div className="try-actions">
         <button type="submit" className="btn btn-primary" disabled={status === "working" || chosen.length === 0 || !name.trim()}>
           {status === "working" ? "Making the page…" : "Make the gift page"}

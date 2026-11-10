@@ -554,6 +554,22 @@
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr) auto;
 }
+/* The person's situation, carried from /start, or the sample situation the page names until it is added. */
+.make-situation {
+  display: grid;
+  gap: 2px;
+}
+.make-situation .try-legend {
+  margin-bottom: 0;
+}
+.make-situation-line {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  max-width: 62ch;
+}
+.make-situation-line strong {
+  font-weight: 500;
+}
 .make-page .info-dot {
   background: var(--surface);
 }

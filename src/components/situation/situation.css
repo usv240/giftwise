@@ -1,0 +1,324 @@
+/* Her situation: plain questions, the letter shortcut above them, and the check they give below. The site's own field,
+   segmented-control and button vocabulary; type in rem so the View menu's Large text grows every line. */
+.sit {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.sit-q {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+.sit-set {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.sit-legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.sit-legend .info-trigger,
+.sit-q-head .info-trigger {
+  vertical-align: -0.1em;
+}
+/* A label and its Info dot: the dot follows the last word, wherever the label wraps. */
+.sit-q-head {
+  display: block;
+  min-width: 0;
+}
+.sit-q-head .info-trigger {
+  margin-left: 0.25rem;
+}
+.sit-field > label,
+.sit-q-head > label,
+.sit-follow-k > span {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Where she lives: two plain rows, the chosen one on the card's own surface. */
+.sit-choices {
+  display: grid;
+  gap: 6px;
+}
+.sit-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+.sit-choice input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  flex: none;
+}
+.sit-choice[data-on] {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.sit-choice:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .sit-choice:not([data-on]):hover {
+    background: color-mix(in srgb, var(--surface-2) 88%, var(--ink));
+  }
+}
+
+/* The follow-ups about someone else's home appear only with that answer. */
+.sit-follow {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+  padding-left: 14px;
+  border-left: 1px solid var(--surface-2);
+  animation: sit-in 200ms var(--ease-out);
+}
+.sit-follow-k {
+  margin-bottom: -4px;
+}
+@keyframes sit-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sit-follow {
+    animation: none;
+  }
+}
+
+.sit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 14px 16px;
+  align-items: start;
+}
+.sit-grid-two {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+.sit-field input {
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  border-radius: 10px;
+  padding: 0 12px;
+  min-height: 2.875rem;
+  width: 100%;
+  min-width: 0;
+}
+.sit-money {
+  position: relative;
+  display: block;
+}
+.sit-money > span {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 1rem;
+  pointer-events: none;
+}
+.sit-money input {
+  padding-left: 26px;
+  font-variant-numeric: tabular-nums;
+}
+.sit-field input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.sit-field input[aria-invalid="true"] {
+  border-color: var(--attention);
+}
+.sit-hint {
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.sit-note {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--attention);
+}
+.sit-seg {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* The check these answers give: the one figure the questions are for. */
+.sit-result {
+  border-radius: 14px;
+  background: var(--surface-2);
+  padding: 14px 16px;
+}
+.sit-result-k {
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+.sit-result-v {
+  margin-top: 2px;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--positive);
+}
+.sit-result-note {
+  margin-top: 6px;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: 62ch;
+}
+
+/* The letter shortcut: a tinted note above the questions, then what was read, each fact with its quote. */
+.sit-letter {
+  background: var(--tint-blue);
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+  display: grid;
+  gap: 8px;
+}
+.sit-letter-title {
+  display: inline;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.sit-letter-text {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  max-width: 62ch;
+}
+.sit-letter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 2px;
+}
+.sit-file {
+  position: relative;
+  cursor: pointer;
+}
+.sit-file:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.sit-file[aria-disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+.sit-letter .btn-quiet {
+  background: var(--surface);
+}
+.sit-see {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+/* What was read sits in the same note, below a rule, not in a card of its own. */
+.sit-read {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--tint-blue-ink) 22%, transparent);
+  display: grid;
+  gap: 10px;
+}
+.sit-read-k {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+.sit-read-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.sit-read-list li {
+  display: grid;
+  gap: 2px;
+}
+.sit-read-fact {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+.sit-quote {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--ink) 78%, var(--tint-blue));
+}
+.sit-found {
+  font-size: 0.8125rem;
+  color: var(--attention);
+}
+.sit-found[data-ok] {
+  color: var(--positive);
+}
+.sit-cross {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.sit-cross[data-match] {
+  color: var(--positive);
+}
+.sit-read-source {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--ink) 78%, var(--tint-blue));
+}
+/* Text actions in the form: Back, Skip. A real target around the word. */
+.sit-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  min-height: 44px;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--ink) 40%, transparent);
+  cursor: pointer;
+  transition: opacity 120ms var(--ease-out);
+}
+.sit-link:active {
+  opacity: 0.6;
+}
+.sit-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.sit-lede {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 62ch;
+}

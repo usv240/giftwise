@@ -30,6 +30,10 @@
   grid-column: auto;
   width: 100%;
 }
+/* The situation step is a longer form: the card widens so its amounts sit side by side. */
+.start-grid:has(.cta-situation) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 600px);
+}
 .start-more {
   margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
   display: flex;

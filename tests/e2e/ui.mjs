@@ -189,6 +189,59 @@ if (AI) {
   ok("fundraiser becomes a live gift page with every use as a payable need, managed from its own private link", uses >= 2 && managedNeeds === uses && (await page.locator(".need").count()) === uses, `${uses} uses, ${managedNeeds} managed`);
 } else skip("fundraiser becomes a live gift page with every use as a payable need, managed from its own private link");
 
+// 7c2. A page on the person's own facts, from /start: Sam lives in his mother's home and gets $600 of Social Security.
+// The plain questions give his own check (the full amount less $580 counted and the one-third reduction), the sample
+// letter (made up for this demo) fills the same answers and matches it, and the page he gets shows that check, kept
+// whole by the routing. Maya's sample page keeps the full check.
+{
+  const OWN = Math.round((FULL - 580 - (FULL === 1029 ? 343 : 331.33)) * 100) / 100;
+  await page.goto(B + "/start", { waitUntil: "networkidle" });
+  await page.getByLabel("Who is it for? Their first name").fill("Sam");
+  await page.getByLabel("he/him").check();
+  await page.getByRole("button", { name: "Next: Sam's situation" }).click();
+  await page.getByLabel("In someone else's home, such as a parent's").check();
+  await page.getByLabel("Social Security or other benefits", { exact: true }).fill("600");
+  const live = (await page.locator(".sit-result-v").textContent())?.trim();
+  ok(`start: his situation in plain questions gives his own check, ${usdOf(OWN)}, not ${usdOf(FULL)}`, live === usdOf(OWN) && /reduced by a third/.test((await page.locator(".sit-result").innerText()) ?? ""), live);
+  await page.addScriptTag({ content: AXE });
+  const sitAxe = await page.evaluate(async () => (await window.axe.run(document, { runOnly: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] })).violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => `${v.id}: ${v.nodes[0]?.target}`));
+  ok("start: the situation step has no serious or critical axe issues", sitAxe.length === 0, sitAxe.join("; ").slice(0, 200));
+  if (AI) {
+    await page.getByRole("button", { name: "Use the sample letter" }).click();
+    await page.locator(".sit-cross").waitFor({ timeout: 120000 });
+    const cross = (await page.locator(".sit-cross").innerText()).trim();
+    ok("start: the sample letter fills the answers, every quote is in its text, and its $106 for January 2027 matches the engine", /^Matches his letter: \$106 for January 2027\.$/.test(cross) && (await page.locator(".sit-found[data-ok]").count()) >= 4 && (await page.locator(".sit-found:not([data-ok])").count()) === 0, cross);
+  } else skip("start: the sample letter fills the answers, every quote is in its text, and its $106 for January 2027 matches the engine");
+  await page.getByRole("button", { name: "Next: add the needs" }).click();
+  await page.waitForURL(/\/try\?name=Sam/, { timeout: 30000 });
+  if (AI) {
+    await page.getByRole("tab", { name: "A fundraiser page" }).click();
+    await page.getByRole("button", { name: "Use the sample fundraiser" }).click();
+    await page.locator(".make-page").waitFor({ timeout: 120000 });
+    const carried = (await page.locator(".make-situation-line").innerText()).replace(/\s+/g, " ");
+    await page.getByRole("button", { name: "Make the gift page" }).click();
+    await page.waitForURL(/\/manage\/[A-Za-z0-9_-]{24}\?new=1$/, { timeout: 60000, waitUntil: "commit" });
+    await page.getByText("Keep this link").waitFor({ timeout: 60000 });
+    const managed = (await page.locator(".mg-sum-check .mg-fig").innerText()).trim();
+    await page.getByRole("link", { name: "Open the page givers see" }).click();
+    await page.waitForURL(/\/g\/sam-[0-9a-f]{6}$/, { timeout: 60000, waitUntil: "commit" });
+    await page.locator(".give-input").waitFor({ timeout: 60000 });
+    const shown = (await page.locator(".gift-check").innerText()).trim();
+    const facts = (await page.locator(".gift-situation").first().innerText()).replace(/\s+/g, " ");
+    await page.locator(".give-input").fill("500");
+    await page.waitForTimeout(300);
+    const verdict = (await page.locator(".give-verdict").innerText()).trim();
+    ok(
+      `the page made from /start runs on his facts: ${usdOf(OWN)} on the organizer's page and the gift page, and $500 routed keeps it`,
+      /lives in someone else's home, \$600 a month/i.test(carried) && managed === usdOf(OWN) && shown === usdOf(OWN) && /Sam's own situation/.test(facts) && verdict === `It stays ${usdOf(OWN)} with Giftwise, the same as with no gift.`,
+      `${carried.slice(0, 60)} | ${managed} | ${shown} | ${verdict}`,
+    );
+  } else skip(`the page made from /start runs on his facts: ${usdOf(OWN)} on the organizer's page and the gift page, and $500 routed keeps it`);
+  await page.goto(B + "/g/maya", { waitUntil: "domcontentloaded" });
+  const maya = (await page.locator(".gift-check").first().innerText()).trim();
+  ok(`Maya's sample page keeps her own figures: ${usdOf(FULL)}, with no situation line`, maya === usdOf(FULL) && (await page.locator(".gift-situation").count()) === 0, maya);
+}
+
 // 7d. For AI agents: the recorded conversation shows June, the assistant, and each Giftwise tool it called over MCP
 await page.goto(B + "/agents", { waitUntil: "networkidle" });
 const tools = await page.locator(".ag-tool").allTextContents();

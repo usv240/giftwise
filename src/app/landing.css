@@ -1085,6 +1085,27 @@
   font-size: 0.8125rem;
   color: var(--muted);
 }
+.cta-field legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+.cta-dialog .cta-pronouns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+/* The second step on /start: the person's situation, a longer form in the same card. */
+.cta-step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: -8px;
+}
+.cta-back {
+  margin-right: -4px;
+}
+.cta-skip {
+  justify-self: center;
+}
 @media (max-width: 900px) {
   .cta {
     align-items: start;

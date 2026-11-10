@@ -5,11 +5,14 @@ import QRCode from "qrcode";
 import { Info } from "@/components/Info";
 import { ShareGift } from "@/components/gift/ShareGift";
 import { ManageNeeds, Notifications, PageStatus, type ManageNeed } from "@/components/manage/ManageClient";
+import { SituationPanel } from "@/components/situation/SituationPanel";
 import { dbConfigured } from "@/lib/db";
 import { SAMPLE_MANAGE_TOKEN, manageView } from "@/lib/manage";
 import { ownPayee } from "@/lib/households";
 import { pageOrigin } from "@/lib/origin";
 import { pronounWords, usd } from "@/lib/rules";
+import { checkFor, homeLine, profileToAnswers, situationLine } from "@/lib/situation";
+import { today } from "@/lib/time";
 import "../../pages.css";
 import "../../developers/dev.css";
 import "../../g/[slug]/gift.css";
@@ -56,6 +59,12 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
     removable: !n.hasPayments,
   }));
   const isSampleLink = token === SAMPLE_MANAGE_TOKEN;
+  // Her check with no gift, for a gift made today, from the page's own facts or the sample situation.
+  const day = today();
+  const now = checkFor(v.profile, day.slice(0, 7));
+  const own = Boolean(v.situation);
+  const facts = own || h.isSample ? situationLine(v.profile, v.situation?.given) : "";
+  const situationHeading = h.isSample && !own ? `${h.name}'s situation, fictional, for the demo` : own ? `${h.name}'s own situation${v.situation?.source === "letter" ? `, from ${w.poss} letter as you confirmed it` : v.situation?.source === "api" ? ", given through the API" : ""}` : `A sample situation until you add ${w.hers}`;
 
   return (
     <>
@@ -92,6 +101,14 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
 
       {/* One panel split by hairlines, not four tiles: the four figures are read together. */}
       <section className="mg-summary" aria-label="The page at a glance" data-ui>
+        <div className="mg-sum-check">
+          <p className="mg-k">
+            {w.Poss} {now.label} check
+          </p>
+          <p className="mg-fig tabular" data-kept="">
+            {usd(now.check)}
+          </p>
+        </div>
         <div>
           <p className="mg-k">Given so far</p>
           <p className="mg-fig tabular">{usd(given)}</p>
@@ -117,6 +134,23 @@ async function Manage({ params, searchParams }: { params: Promise<Params>; searc
       {/* The needs and the gifts are the work; sharing, notifications and the page's settings sit beside them on a wide screen. */}
       <div className="mg-cols">
         <div className="mg-main">
+          <section className="page-section" aria-labelledby="mg-sit-h">
+            <div className="title-row">
+              <h2 id="mg-sit-h">{h.name}&rsquo;s situation</h2>
+              <Info id="manage.situation" label="" />
+            </div>
+            <SituationPanel
+              token={token}
+              name={h.name}
+              pronoun={v.profile.pronoun ?? "she"}
+              today={day}
+              initial={own ? profileToAnswers(v.profile, v.situation?.given) : h.isSample ? profileToAnswers(v.profile) : {}}
+              own={own || h.isSample}
+              heading={situationHeading}
+              summary={{ home: homeLine(v.profile, day.slice(0, 7)), line: facts ? `${facts.charAt(0).toUpperCase()}${facts.slice(1)}.` : `One adult on ${w.poss} own, no other income. Add ${w.poss} own facts, or read ${w.poss} letter from Social Security, so the page shows ${w.poss} own check.` }}
+            />
+          </section>
+
           <section className="page-section" aria-labelledby="mg-needs-h">
             <div className="title-row">
               <h2 id="mg-needs-h">What the page asks for</h2>
