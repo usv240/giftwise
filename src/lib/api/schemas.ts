@@ -121,6 +121,19 @@ export const ProfileSchema = z
   .partial()
   .describe("The person who receives SSI. Every field is optional; leave it out for one adult who lives on her own with $1,240 in savings.");
 
+/** How a page's facts were gathered. Only the confirmed facts are saved; a letter read to fill them in is never stored. */
+export const SituationSourceSchema = z
+  .enum(["answers", "letter"])
+  .describe("How the facts were gathered: answers typed by the organizer, or read from the person's letter from Social Security and then confirmed. Optional; the letter itself is never stored.");
+
+/** The fields of a profile the caller actually sent (the schema fills the rest with defaults): the facts a page was given. */
+export function givenProfileKeys(raw: unknown): string[] {
+  const p = raw && typeof raw === "object" ? (raw as { profile?: unknown }).profile : null;
+  if (!p || typeof p !== "object" || Array.isArray(p)) return [];
+  const known = Object.keys(ProfileSchema.shape);
+  return Object.keys(p).filter((k) => known.includes(k) && (p as Record<string, unknown>)[k] !== undefined);
+}
+
 export const CheckGiftRequest = z.object({
   gift: GiftSchema.describe("The gift to check."),
   profile: ProfileSchema.optional(),
@@ -178,6 +191,10 @@ export const GiftPageRequest = z.object({
     .min(1)
     .max(8)
     .describe("What the page asks for. Giftwise decides each route: housing goes to the ABLE account, everything else straight to the shop."),
+  profile: ProfileSchema.optional().describe(
+    "The person's own situation, so every check and route on the page uses their facts: where they live, Social Security or other benefits, wages, savings, a couple, and whether they can have an ABLE account. Send only the fields you know; the rest keep the sample situation's values. Left out, the page says it uses a sample situation (one adult on their own, no other income) until the organizer adds theirs.",
+  ),
+  profile_source: SituationSourceSchema.optional(),
 });
 
 export const KeyRequest = z.object({
@@ -212,8 +229,12 @@ export const ManageNeedRequest = z.object({
 });
 
 export const ManagePageRequest = z.object({
-  note: z.string().trim().max(400).optional(),
-  status: z.enum(["open", "closed"]).optional(),
+  note: z.string().trim().max(400).optional().describe("The note to givers at the top of the page, up to 400 characters."),
+  status: z.enum(["open", "closed"]).optional().describe("closed stops new gifts; open takes them again. Receipts stay public either way."),
+  profile: ProfileSchema.nullable()
+    .optional()
+    .describe("The person's own situation, as for a new page: send the fields you know and the rest keep the sample situation's values. null puts the page back on the sample situation."),
+  profile_source: SituationSourceSchema.optional(),
 });
 
 export const ManageWebhookRequest = z.object({ url: z.string().trim().max(2000).nullable() });

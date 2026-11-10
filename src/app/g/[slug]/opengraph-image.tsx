@@ -4,7 +4,8 @@ import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { getHousehold, openNeeds } from "@/lib/households";
 import { C, OG_SIZE, OgFrame, ogFonts } from "@/lib/og";
-import { DEFAULT_PROFILE, evaluateGift, monthName, pronounWords, usd, type Profile } from "@/lib/rules";
+import { evaluateGift, monthName, pronounWords, usd, type Profile } from "@/lib/rules";
+import { householdProfile } from "@/lib/situation";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
@@ -17,7 +18,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const data = dbConfigured() ? await getHousehold(slug) : null;
   const fonts = await ogFonts();
   const name = data?.household.name ?? "someone";
-  const profile: Profile = { ...DEFAULT_PROFILE, ...((data?.household.profile as Partial<Profile>) ?? {}) };
+  const profile: Profile = householdProfile(data?.household.profile);
   const w = pronounWords(profile.pronoun);
   const check = evaluateGift({ id: "og", date: today(), amount: 0, delivery: "vendor", category: "other" }, profile);
   const needs = data ? openNeeds(data.needs).filter((n) => n.amount - n.funded > 0) : [];

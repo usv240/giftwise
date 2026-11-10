@@ -711,6 +711,8 @@ export function pronounWords(p: Pronoun = "she") {
     obj: p === "he" ? "him" : they ? "them" : "her",
     poss,
     Poss: poss[0].toUpperCase() + poss.slice(1),
+    /** The possessive that stands alone: "until the organizer adds hers". */
+    hers: p === "he" ? "his" : they ? "theirs" : "hers",
     lives: they ? "live" : "lives",
     pays: they ? "pay" : "pays",
     has: they ? "have" : "has",

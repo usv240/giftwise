@@ -6,7 +6,8 @@ import { db, schema } from "@/lib/db";
 import { getNeed, ownPayee, payeeEmail } from "@/lib/households";
 import { createPayeeOrder, describePayPalError } from "@/lib/paypal/orders";
 import { eq } from "drizzle-orm";
-import { DEFAULT_PROFILE, evaluateGift, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { evaluateGift, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { householdProfile } from "@/lib/situation";
 import { api } from "@/lib/api/handler";
 
 const Body = z.object({ needId: z.number().int().positive() });
@@ -24,7 +25,7 @@ async function postRoute(req: Request) {
   if (need.status === "paid") return fail("invalid_request", "This need is already paid. Thank you!", 409);
   const [household] = await db().select().from(schema.households).where(eq(schema.households.id, need.householdId)).limit(1);
   if (household?.status === "closed") return fail("invalid_request", `${household.name}'s page is closed to new gifts. Its receipts stay public.`, 409);
-  const profile: Profile = { ...DEFAULT_PROFILE, ...((household?.profile ?? {}) as Partial<Profile>) };
+  const profile: Profile = householdProfile(household?.profile);
   const name = household?.name ?? "them";
 
   // Check the rule before money moves: the route must keep her full check.
@@ -33,6 +34,10 @@ async function postRoute(req: Request) {
     { id: `need-${need.id}`, date: today(), amount, delivery: need.route as Delivery, category: need.category as Category, recurring: need.recurring },
     profile,
   );
+  // A housing need for someone who cannot have an ABLE account has no benefit-safe route yet (R-ABLE-01).
+  if (check.treatment.kind === "not_possible") {
+    return fail("invalid_request", `${name} cannot have an ABLE account, so this need has no benefit-safe way to be paid yet. The organizer can change it.`, 422);
+  }
   if (check.checkAfter < check.checkBaseline) {
     return fail("invalid_request", `This route would lower ${name}'s check, so Giftwise suggests a different way to give.`, 422);
   }

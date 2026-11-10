@@ -1,7 +1,9 @@
 import { fail, ok } from "@/lib/api/envelope";
-import { ManagePageRequest } from "@/lib/api/schemas";
+import { ManagePageRequest, givenProfileKeys } from "@/lib/api/schemas";
 import { dbConfigured } from "@/lib/db";
 import { manageView, updatePage } from "@/lib/manage";
+import { checkFor, householdProfile, householdSituation, type ProfileKey } from "@/lib/situation";
+import { today } from "@/lib/time";
 import { api } from "@/lib/api/handler";
 
 type Ctx = { params: Promise<{ token: string }> };
@@ -15,9 +17,14 @@ async function getRoute(_req: Request, { params }: Ctx) {
   const v = await manageView((await params).token);
   if (!v) return notFound();
   const { household: h } = v;
+  const now = checkFor(v.profile, today().slice(0, 7));
   return ok(
     {
       page: { name: h.name, slug: h.slug, url: `/g/${h.slug}`, status: h.status, note: h.note, webhook: h.webhookUrl ? { url: h.webhookUrl } : null },
+      // Whose facts the page runs on, the facts themselves, and her check with no gift for a gift made today.
+      situation: situationOf(h),
+      profile: v.profile,
+      check: { amount: now.check, payment_month: now.paymentMonth },
       needs: v.needs.map((n) => ({
         id: n.id,
         title: n.title,
@@ -37,15 +44,27 @@ async function getRoute(_req: Request, { params }: Ctx) {
   );
 }
 
-/** PATCH /api/manage/{token}: change the note, or close and reopen the page. */
+/** "own" with where the facts came from, or "sample" while the page uses the sample situation. */
+function situationOf(h: { profile: unknown; isSample: boolean }) {
+  const meta = householdSituation(h.profile);
+  return { kind: h.isSample ? "sample_page" : meta ? "own" : "sample", source: meta?.source ?? null, saved_at: meta?.saved_at || null, given: meta?.given ?? [] };
+}
+
+/** PATCH /api/manage/{token}: change the note, close and reopen the page, or set the person's situation. */
 async function patchRoute(req: Request, { params }: Ctx) {
   const started = Date.now();
   if (!dbConfigured()) return noDb();
-  const parsed = ManagePageRequest.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return fail("invalid_request", "Send a note of up to 400 characters, or a status of open or closed.", 400, parsed.error.issues);
-  const row = await updatePage((await params).token, parsed.data);
+  const body = await req.json().catch(() => null);
+  const parsed = ManagePageRequest.safeParse(body);
+  if (!parsed.success) return fail("invalid_request", "Send a note of up to 400 characters, a status of open or closed, or the person's situation as a profile.", 400, parsed.error.issues);
+  const { profile, profile_source, ...rest } = parsed.data;
+  // Only the fields sent count as the person's own facts; null puts the page back on the sample situation.
+  const situation = profile === undefined ? undefined : profile === null ? null : { profile, given: givenProfileKeys(body) as ProfileKey[], source: profile_source ?? ("api" as const) };
+  const row = await updatePage((await params).token, { ...rest, situation });
   if (!row) return notFound();
-  return ok({ status: row.status, note: row.note }, started);
+  const p = householdProfile(row.profile);
+  const now = checkFor(p, today().slice(0, 7));
+  return ok({ status: row.status, note: row.note, situation: situationOf(row), profile: p, check: { amount: now.check, payment_month: now.paymentMonth } }, started);
 }
 
 export const GET = api("/api/manage/[token]", getRoute);

@@ -2,7 +2,8 @@ import { today, fail, ok } from "@/lib/api/envelope";
 import { findGifts } from "@/lib/channel3";
 import { dbConfigured } from "@/lib/db";
 import { householdByToken } from "@/lib/manage";
-import { DEFAULT_PROFILE, type Profile } from "@/lib/rules";
+import { type Profile } from "@/lib/rules";
+import { householdProfile } from "@/lib/situation";
 import { api } from "@/lib/api/handler";
 
 /**
@@ -18,7 +19,7 @@ async function getRoute(req: Request, { params }: { params: Promise<{ token: str
   const q = (u.searchParams.get("q") ?? "").trim();
   if (q.length < 2 || q.length > 120) return fail("invalid_request", "Search for what the need is, in a few words.", 400);
   const max = Number(u.searchParams.get("max"));
-  const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
+  const profile: Profile = householdProfile(h.profile);
   const r = await findGifts(q, profile, today(), { maxPrice: max > 0 && max <= 20000 ? max : undefined, user: h.slug });
   return ok(r, started);
 }

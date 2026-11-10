@@ -6,6 +6,12 @@
     "technical": "routeGift() cubre las necesidades abiertas en orden y revisa cada línea con el motor de reglas; se salta cualquier línea que bajaría el cheque. El servidor vuelve a armar el plan y luego crea una sola orden de PayPal Orders v2 con una unidad de compra por destinatario, así un solo pago le paga a cada uno.",
     "sponsor": ["PayPal", "Claude"]
   },
+  "gift.situation": {
+    "title": "Su situación",
+    "what": "Su cheque en esta página sale de su propia situación, como la indicó quien organiza: dónde vive, otros ingresos y ahorros. Hasta que la agregue, la página usa una situación de muestra: una persona adulta que vive sola, sin otros ingresos.",
+    "why": "El Seguro Social y vivir con familiares cambian el cheque, así que la página muestra el suyo y no un cheque completo que tal vez no recibe. Cada regalo se sigue enviando de manera que ese cheque no cambie.",
+    "technical": "households.profile, que pageProfile() lee para la tarjeta de regalo, cada necesidad, el recibo, el informe al Seguro Social y las herramientas MCP."
+  },
   "gift.route.vendor": {
     "title": "Se paga directamente a la tienda",
     "what": "Su pago de PayPal va directamente a la tienda, no a Maya ni a Giftwise.",

@@ -15,13 +15,14 @@ import { SandboxLogin } from "@/components/SandboxLogin";
 import { today } from "@/lib/api/envelope";
 import { dbConfigured } from "@/lib/db";
 import { cache } from "react";
-import { cashExample, getHousehold, maskEmail, openNeeds, ownPayee, pageProfile, publicPayee } from "@/lib/households";
+import { cashExample, getHousehold, maskEmail, openNeeds, ownPayee, pageProfile, pageSituation, publicPayee } from "@/lib/households";
+import { situationLine } from "@/lib/situation";
 import { pageOrigin } from "@/lib/origin";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
 import QRCode from "qrcode";
-import { evaluateGift, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { evaluateGift, fbr, householdSentence, monthOf, pronounWords, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
 import { asLang, checkMonthIn, giftText, monthIn, sampleIn } from "@/lib/i18n/gift";
-import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
+import { householdEs, ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "./gift.css";
 
 type Search = { lang?: string };
@@ -90,6 +91,15 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
   const own = (s: string) => sampleIn(lang, s, household.isSample);
   const date = today();
   const cash = remember(["cash", profile, date], () => cashExample(profile, date));
+  // Whose facts the check comes from: the organizer's own answers, or the sample situation until they add them.
+  const situation = pageSituation(household);
+  const fullCheck = cash.checkBaseline >= fbr(profile.couple, cash.paymentMonth);
+  const factsLine = situation.kind === "own" ? situationLine(profile, situation.meta?.given, lang) : "";
+  // Living in someone else's home without paying her share lowers the check before any gift (R-SHEL-08). The engine
+  // says so in every answer; the page says it once, under her check, and each need's rule line keeps to the need.
+  const home = cash.trace.household;
+  const homeSentence = lang === "es" ? householdEs(home, profile.couple, cash.paymentMonth) : householdSentence(home, profile, cash.paymentMonth);
+  const oneRule = (plain: string) => (homeSentence ? plain.replace(` ${homeSentence}`, "") : plain);
   const giftMonth = monthIn(lang, monthOf(today()));
   const shareUrl = `${await pageOrigin()}/g/${slug}${es}`;
   const qrSvg = await qrFor(shareUrl);
@@ -110,11 +120,12 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
       payeeAccountShown: ownPayee(n.payeeAccount) ? maskEmail(ownPayee(n.payeeAccount)!) : null,
       route: n.route,
       status: n.status,
-      rulePlain: lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain,
+      rulePlain: oneRule(lang === "es" ? ruleSentenceEs(r, profile.couple) : r.explanation.plain),
       ruleIds: r.ruleIds,
       checkAfter: r.checkAfter,
       checkMonth: r.paymentMonth,
       checkStays: r.checkAfter === r.checkBaseline,
+      payable: r.treatment.kind !== "not_possible",
       paidBy: p?.payerName?.split(" ")[0] ?? null,
       orderId: p?.orderId ?? null,
       captureId: p?.captureId ?? null,
@@ -147,7 +158,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
           </Link>
         </div>
         <p className="gift-note">{own(household.note)}</p>
-        <p className="gift-sample muted">{household.isSample ? t.sampleNote : t.madeNote}</p>
+        <p className="gift-sample muted">{household.isSample ? t.sampleNote : t.madeNote(situation.kind === "own")}</p>
         <p className="gift-sample muted gift-able-real">
           {t.ableReal(w)}{" "}
           <a className="text-link" href={UGIFT.url} target="_blank" rel="noreferrer">
@@ -182,6 +193,16 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
             {t.checkMonth(monthIn(lang, cash.paymentMonth), cash.paymentMonth.slice(0, 4), giftMonth)}
           </p>
           <p className="gift-check tabular">{usd(cash.checkBaseline)}</p>
+          {/* Her check comes from her own facts, or from the sample situation until the organizer adds them. */}
+          {situation.kind !== "sample_page" && (
+            <p className="gift-situation" data-own={situation.kind === "own" ? "" : undefined}>
+              {situation.kind === "own"
+                ? t.situationOwn(lang === "es" ? `su situación${factsLine ? `: ${factsLine}` : ", como la indicó quien organiza"}` : `${household.name}'s own situation${factsLine ? `: ${factsLine}` : ", as the organizer gave it"}`)
+                : t.situationSample(w)}{" "}
+              <Info id="gift.situation" label="" topic={lang === "es" ? "Su situación" : `${household.name}'s situation`} lang={lang} />
+            </p>
+          )}
+          {homeSentence && <p className="gift-situation gift-home">{homeSentence}</p>}
           <dl className="gift-facts">
             <div>
               <dt>{t.givenSoFar}</dt>
@@ -241,7 +262,7 @@ async function GiftPage({ params, searchParams }: { params: Promise<{ slug: stri
         <details className="gift-cash">
           <summary>{t.cashQ}</summary>
           <p>
-            {t.cashText(w, usd(cash.checkAfter), usd(cash.checkBaseline), checkMonthIn(lang, cash.paymentMonth))}{" "}
+            {t.cashText(w, usd(cash.checkAfter), usd(cash.checkBaseline), checkMonthIn(lang, cash.paymentMonth), fullCheck)}{" "}
             <Link className="text-link" href="/try">
               {t.checkAny}
             </Link>

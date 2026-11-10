@@ -12,7 +12,8 @@ import { incomeDay, shownAt, shownDay } from "@/lib/time";
 import { distinctPayees } from "@/lib/routing";
 import { maskEmail, ownPayee } from "@/lib/households";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
-import { DEFAULT_PROFILE, RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { RULES, RULES_VERSION, computeMonth, evaluateGift, monthOf, pronounWords, sourcesFor, usd, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { householdProfile } from "@/lib/situation";
 import { asLang, checkMonthIn, monthIn, payeeIn, payeeInline, receiptText, sampleIn, type Lang } from "@/lib/i18n/gift";
 import { ruleSentenceEs } from "@/lib/i18n/gift-rules";
 import "../../pages.css";
@@ -38,7 +39,7 @@ async function Receipt({ params, searchParams }: { params: Promise<{ orderId: st
 
   const name = household?.name ?? "the person";
   const hers = t.possessive(household?.name);
-  const profile: Profile = { ...DEFAULT_PROFILE, ...((household?.profile ?? {}) as Partial<Profile>) };
+  const profile: Profile = householdProfile(household?.profile);
   // The income date and time: the capture, in Pacific time, the day the month's report lists this gift under.
   const { date, at } = receiptMoment(rows);
   const lines = rows.map((r) => {

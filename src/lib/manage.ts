@@ -11,7 +11,8 @@ import { audit } from "./audit";
 import { db, schema } from "./db";
 import { PAYPAL_PAYEE_PREFIX, isPayPalEmail } from "./households";
 import { paymentDay, today as todayPacific } from "./time";
-import { DEFAULT_PROFILE, SHELTER_CATEGORIES, computeMonth, evaluateGift, monthName, monthOf, pronounWords, type Category, type Delivery, type Profile, type Pronoun } from "./rules";
+import { SHELTER_CATEGORIES, computeMonth, evaluateGift, monthName, monthOf, pronounWords, type Category, type Delivery, type Profile, type Pronoun } from "./rules";
+import { householdProfile, householdSituation, sampleProfile, storedProfile, type ProfileKey, type SituationSource } from "./situation";
 
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
 export const newToken = () => randomBytes(18).toString("base64url");
@@ -81,11 +82,13 @@ export async function manageView(token: string) {
     .from(schema.payments)
     .where(and(eq(schema.payments.householdId, h.id), eq(schema.payments.status, "captured"), isNull(schema.payments.archivedAt)))
     .orderBy(sql`${schema.payments.capturedAt} desc nulls last`);
-  const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
+  const profile: Profile = householdProfile(h.profile);
   const today = todayPacific();
   return {
     household: h,
     profile,
+    /** Where the page's facts came from, or null while it uses the sample situation. */
+    situation: householdSituation(h.profile),
     needs: needs.map((n) => {
       const r = evaluateGift({ id: `n${n.id}`, date: today, amount: Number(n.amount), delivery: n.route as "vendor" | "able", category: n.category as Category, recurring: n.recurring }, profile);
       return { ...n, rule: r.explanation.plain, checkAfter: r.checkAfter, hasPayments: payments.some((p) => p.needId === n.id) || Number(n.funded) > 0 };
@@ -167,14 +170,27 @@ export async function removeNeed(token: string, id: number) {
   return { ok: true } as const;
 }
 
-export async function updatePage(token: string, o: { note?: string; status?: "open" | "closed" }) {
+/**
+ * The person's situation as the organizer confirms it: the engine's fields given, which ones, and how they were gathered.
+ * null puts the page back on the sample situation. Only these confirmed facts are saved, never a letter they came from.
+ */
+export type SituationUpdate = { profile: Partial<Profile>; given: ProfileKey[]; source: SituationSource } | null;
+
+export async function updatePage(token: string, o: { note?: string; status?: "open" | "closed"; situation?: SituationUpdate }) {
   const h = await householdByToken(token);
   if (!h) return null;
   const set: Partial<typeof schema.households.$inferInsert> = {};
   if (o.note !== undefined) set.note = o.note.trim().slice(0, 400);
   if (o.status) set.status = o.status;
+  if (o.situation !== undefined) {
+    // The pronoun is the page's, not the form's: it stays as the page was made.
+    const pronoun = ((h.profile as Partial<Profile>).pronoun ?? "she") as Pronoun;
+    set.profile = o.situation && o.situation.given.length ? storedProfile(householdProfile({ ...o.situation.profile, pronoun }), o.situation.given, o.situation.source) : sampleProfile(pronoun);
+  }
   const [row] = await db().update(schema.households).set(set).where(eq(schema.households.id, h.id)).returning();
-  await audit("person", o.status ? `gift_page.${o.status === "closed" ? "closed" : "reopened"}` : "gift_page.edited", `household:${h.id}`, {});
+  // The ledger notes that the situation changed and how it was gathered, never the amounts.
+  const event = o.status ? `gift_page.${o.status === "closed" ? "closed" : "reopened"}` : o.situation !== undefined && o.note === undefined ? "gift_page.situation_set" : "gift_page.edited";
+  await audit("person", event, `household:${h.id}`, o.situation !== undefined ? { situation: o.situation ? o.situation.source : "sample", fields: o.situation?.given.length ?? 0 } : {});
   return row;
 }
 
@@ -293,7 +309,7 @@ export async function notifyGift(orderId: string, origin: string) {
   const [h] = await d.select().from(schema.households).where(eq(schema.households.id, hid)).limit(1);
   if (!h?.webhookUrl) return { sent: false as const, reason: "no_webhook" };
   const needs = await d.select().from(schema.needs).where(eq(schema.needs.householdId, hid));
-  const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
+  const profile: Profile = householdProfile(h.profile);
   const date = paymentDay(rows[0]);
   const month = computeMonth(
     monthOf(date),
@@ -321,7 +337,7 @@ export async function sendTest(token: string, origin: string) {
   const h = await householdByToken(token);
   if (!h) return null;
   if (!h.webhookUrl) return { sent: false as const, reason: "Add a webhook address first." };
-  const profile: Profile = { ...DEFAULT_PROFILE, ...(h.profile as Partial<Profile>) };
+  const profile: Profile = householdProfile(h.profile);
   const m = computeMonth(monthOf(todayPacific()), [], profile);
   return deliver(h.id, {
     event: "gift.test",

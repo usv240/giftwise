@@ -558,6 +558,69 @@
     "why": "Zapier's Catch Hook turns that into a text, an email or a spreadsheet row, so the family knows to say thank you.",
     "technical": "POST with JSON (event gift.received or gift.test) and a Giftwise-Signature header: t=<unix seconds>,v1=<HMAC-SHA256 of \"t.body\" with the page's secret>. HTTPS only; addresses that resolve to private networks are refused."
   },
+  "situation.letter": {
+    "title": "Read her letter from Social Security",
+    "what": "Upload a photo or PDF of the letter that states her SSI payment. Claude reads the facts the questions ask, with a short quote for each, and fills them in. You check them before anything is saved.",
+    "why": "Giftwise then works out her check from those facts and compares it with the payment the letter states, so a wrong reading shows. The file is read in memory and not kept, and Claude never returns her Social Security or claim number, address or date of birth.",
+    "technical": "POST /api/v1/read-letter. Claude (claude-opus-5-5) fills a Zod-checked form; the rules engine computes the check for the letter's month and compares it to the cent. For a PDF with a text layer, each quote is checked word for word against the letter's own text. A state supplement paid with the federal amount shows as a difference. It counts against the daily AI budget; the sample letter replays Claude's recorded answer when there is no key.",
+    "sponsor": [
+      "Claude"
+    ]
+  },
+  "situation.home": {
+    "title": "Where she lives",
+    "what": "Living in someone else's home, such as a parent's, and paying less than her share of its costs lowers her SSI check by up to a third, gift or not. Living on her own, or paying her share, does not.",
+    "why": "It changes her check before any gift arrives, and it is common: 383,015 people on SSI lived in another person's household in December 2024 (SSA, SSI Annual Statistical Report 2024, Table 6).",
+    "technical": "livesInAnothersHousehold and householdProvidesAllMeals (R-SHEL-08; 20 CFR 416.1131 and 416.1133; POMS SI 00835.160). The one-third reduction is $343 a month in 2027; without all her meals from the household, the shelter counts at up to $363 instead."
+  },
+  "situation.share": {
+    "title": "Her share of the home's costs",
+    "what": "Her share is the home's monthly costs for rent or mortgage, property tax and utilities, not food, divided by the people who live there. Paying it, or within $20 of it, means living there does not lower her check.",
+    "why": "With these numbers Giftwise can tell whether she already pays her share. Without them it uses what Social Security presumes: she pays nothing toward the costs.",
+    "technical": "Pro rata share = householdCosts / householdSize, both members' shares for a couple; sharing within $20 (POMS SI 00835.160 C.2). Food left the count on September 30, 2024 (20 CFR 416.1133(c))."
+  },
+  "situation.benefits": {
+    "title": "Social Security and other benefits",
+    "what": "Social Security she receives each month, from disability (SSDI), retirement or a parent's record, and other benefits such as a pension. Social Security counts it after the first $20.",
+    "why": "Many people on SSI also get Social Security: 2,548,159 of the 7,423,856 people paid SSI in December 2024, 34 percent (SSA, SSI Annual Statistical Report 2024, Table 8). For them the check is lower than the full amount, and the page shows theirs.",
+    "technical": "otherUnearnedMonthly, counted as unearned income after the $20 general exclusion (20 CFR 416.1124(c)(12)). Table 8 is Recipients, by type of income, eligibility category, and age, December 2024."
+  },
+  "situation.wages": {
+    "title": "Pay from work",
+    "what": "Her wages each month, before taxes. Social Security counts less than half: it leaves out the first $65, and any of the $20 not used on other income, then counts half of the rest.",
+    "why": "Work changes her check, so a page that knows her wages shows the check she really gets.",
+    "technical": "earnedMonthly (20 CFR 416.1112): the unused part of the $20 general exclusion, then $65, then one half."
+  },
+  "situation.couple": {
+    "title": "A couple on SSI",
+    "what": "When she is married and both receive SSI, they get a couple's check and share a $3,000 savings limit.",
+    "why": "A couple's check is not two single checks, so the page uses theirs.",
+    "technical": "couple: the couple's federal amount ($1,544 a month in 2027) and resource limit (20 CFR 416.1205)."
+  },
+  "situation.savings": {
+    "title": "Savings now",
+    "what": "Money in the bank and cash on hand. Her ABLE account does not count, up to $100,000.",
+    "why": "Over $2,000 on the 1st of a month ($3,000 for a couple), no SSI is paid that month, so Giftwise checks that cash she keeps stays under it.",
+    "technical": "savings (R-RES-01, POMS SI 01110.003). Left out, the page uses $1,240, the sample situation's savings."
+  },
+  "situation.able": {
+    "title": "An ABLE account",
+    "what": "People whose disability began before age 46 can have an ABLE account. Giftwise sends help with housing there, so it does not lower the check.",
+    "why": "Without one, housing help has no benefit-safe route, and the page says so instead of offering one.",
+    "technical": "ableEligible (R-ABLE-01; 26 U.S.C. 529A(e), the age of onset is 46 from January 1, 2026)."
+  },
+  "gift.situation": {
+    "title": "Her situation",
+    "what": "Her check on this page comes from her own situation as the organizer gave it: where she lives, other income and savings. Until the organizer adds it, the page uses a sample situation: one adult on her own with no other income.",
+    "why": "Social Security and living with family change the check, so the page shows hers rather than a full check she may not get. Every gift is still routed so that check stays the same.",
+    "technical": "households.profile, read by pageProfile() for the giving card, each need, the receipt, the report to Social Security and the MCP tools."
+  },
+  "manage.situation": {
+    "title": "Her situation",
+    "what": "Plain questions about where she lives, other income, savings and an ABLE account. Every one is optional, and you can change them at any time.",
+    "why": "Her check, the routes, the receipts and her report to Social Security all use these facts. Many people on SSI also get Social Security: 34 percent in December 2024 (SSA, SSI Annual Statistical Report 2024, Table 8).",
+    "technical": "PATCH /api/manage/{token} with profile (the engine's fields) and profile_source; profile null puts the page back on the sample situation. Only the confirmed facts are saved, with where they came from."
+  },
   "page.verify": {
     "title": "Check a report",
     "what": "Every report to Social Security carries a code. This page rebuilds the report from Giftwise's records, asks PayPal for each payment in it, and checks the audit ledger.",

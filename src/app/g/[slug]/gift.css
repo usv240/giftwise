@@ -247,6 +247,21 @@
   line-height: 1;
   color: var(--positive);
 }
+/* Whose facts her check comes from: her own, as the organizer gave them, or the sample situation until then. */
+.gift-situation {
+  margin-top: 8px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 44ch;
+}
+.gift-situation .info-trigger {
+  vertical-align: -0.1em;
+}
+.gift-home {
+  margin-top: 6px;
+  color: var(--ink);
+}
 .gift-facts {
   margin: 12px 0 0;
   display: grid;

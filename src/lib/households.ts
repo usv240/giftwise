@@ -3,8 +3,9 @@ import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db, schema } from "./db";
 import { paypalEnv } from "./paypal/env";
 import { today } from "./time";
-import { DEFAULT_PROFILE, evaluateGift, pronounWords, type Category, type Profile, type Pronoun } from "./rules";
+import { evaluateGift, pronounWords, type Category, type Profile, type Pronoun } from "./rules";
 import { SAMPLE_MANAGE_TOKEN, hashToken, newToken, resetSampleManage, routeNeed } from "./manage";
+import { checkFor, householdProfile, householdSituation, sampleProfile, storedProfile, type ProfileKey, type SituationSource } from "./situation";
 import { sampleNeedPositions, seedRecordedReceipt } from "./sample-receipt";
 
 export type NeedRow = typeof schema.needs.$inferSelect;
@@ -88,7 +89,17 @@ export function withAbleSoFar(profile: Profile, page: { payments: AblePayment[];
  * the page. The gift button, the MCP tools, the monthly planner and a fund's grants all call this, so they agree.
  */
 export function pageProfile(data: { household: { profile: unknown }; payments: AblePayment[]; payouts?: AblePayout[] }, now = new Date()): Profile {
-  return withAbleSoFar({ ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) }, data, now);
+  return withAbleSoFar(householdProfile(data.household.profile), data, now);
+}
+
+/**
+ * Whose facts a page runs on: "own" when its organizer (or a program through the API) gave the person's situation,
+ * "sample" when it still uses the sample situation (one adult on her own, no other income), and "sample_page" for the
+ * demo household, whose facts are Maya's own fictional ones.
+ */
+export function pageSituation(household: { profile: unknown; isSample: boolean }) {
+  const meta = householdSituation(household.profile);
+  return { kind: household.isSample ? ("sample_page" as const) : meta ? ("own" as const) : ("sample" as const), meta };
 }
 
 /** The sample is created once and never deleted (a reset reopens its needs), so each server process checks for it once. */
@@ -257,7 +268,8 @@ export async function resetSample(slug: string = SAMPLE.slug) {
     // A sample need removed in the manage view comes back too.
     const missing = SAMPLE.needs.map((n, i) => ({ n, i })).filter(({ i }) => !kept.has(i));
     if (missing.length) await tx.insert(schema.needs).values(missing.map(({ n, i }) => ({ householdId: h.id, ...n, sortOrder: i })));
-    await tx.update(schema.households).set({ note: SAMPLE.note }).where(eq(schema.households.id, h.id));
+    // Her situation comes back too: an organizer on the public sample link may have changed it.
+    await tx.update(schema.households).set({ note: SAMPLE.note, profile: SAMPLE.profile }).where(eq(schema.households.id, h.id));
     return true;
   });
   // The sample's public organizer link, its open status and an empty webhook come back once the reset is in.
@@ -270,7 +282,16 @@ export type NewNeed = { title: string; amount: number; category: Category; vendo
  * Create a gift page from a fundraiser's stated uses. The rules engine, not the caller, decides each route:
  * housing goes to the person's ABLE account; everything else is paid straight to the shop.
  */
-export async function createGiftPage(o: { name: string; pronoun: Pronoun; organizer?: string; note?: string; sourceUrl?: string; needs: NewNeed[] }) {
+export async function createGiftPage(o: {
+  name: string;
+  pronoun: Pronoun;
+  organizer?: string;
+  note?: string;
+  sourceUrl?: string;
+  needs: NewNeed[];
+  /** The person's own situation, when the organizer gave it: the engine's fields, which of them were given, and how. */
+  situation?: { profile: Partial<Profile>; given: ProfileKey[]; source: SituationSource };
+}) {
   const d = db();
   const w = pronounWords(o.pronoun);
   const slug = `${o.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "page"}-${randomBytes(3).toString("hex")}`;
@@ -278,13 +299,17 @@ export async function createGiftPage(o: { name: string; pronoun: Pronoun; organi
     o.note?.trim() ||
     `${o.name} receives SSI. Every gift on this page is paid straight to the shop or to ${w.poss} ABLE account, so ${w.poss} SSI check stays the same.${o.organizer ? ` With thanks, ${o.organizer}.` : ""}`;
   const manageToken = newToken();
+  // Her own facts when they were given; otherwise the sample situation, which the page says it uses until they are.
+  const own = o.situation && o.situation.given.length ? o.situation : null;
+  const profile: Profile = own ? householdProfile({ ...own.profile, pronoun: o.pronoun }) : sampleProfile(o.pronoun);
+  const stored = own ? storedProfile(profile, own.given, own.source) : profile;
   const [household] = await d
     .insert(schema.households)
-    .values({ slug, name: o.name, caregiverName: o.organizer ?? "", note, profile: { ...DEFAULT_PROFILE, pronoun: o.pronoun }, isSample: false, manageTokenHash: hashToken(manageToken) })
+    .values({ slug, name: o.name, caregiverName: o.organizer ?? "", note, profile: stored, isSample: false, manageTokenHash: hashToken(manageToken) })
     .returning();
   const rows = o.needs.map((n, i) => {
     const r = routeNeed(o.name, o.pronoun, { ...n, detail: o.sourceUrl ? "From the fundraiser." : "" });
-    const check = evaluateGift({ id: `new-${i}`, date: today(), amount: n.amount, delivery: r.route as "vendor" | "able", category: n.category, recurring: n.recurring }, { ...DEFAULT_PROFILE, pronoun: o.pronoun });
+    const check = evaluateGift({ id: `new-${i}`, date: today(), amount: n.amount, delivery: r.route as "vendor" | "able", category: n.category, recurring: n.recurring }, profile);
     const row = {
       householdId: household.id,
       title: n.title.slice(0, 80),
@@ -300,5 +325,15 @@ export async function createGiftPage(o: { name: string; pronoun: Pronoun; organi
     return { row, checkAfter: check.checkAfter };
   });
   await d.insert(schema.needs).values(rows.map((x) => x.row));
-  return { slug, household, manageToken, needs: rows.map(({ row, checkAfter }) => ({ title: row.title, route: row.route, payee: row.payeeName, amount: Number(row.amount), check_after: checkAfter })) };
+  // Her check with no gift, for a gift made today: paid two months on, at that year's rate, from her own facts.
+  const now = checkFor(profile, today().slice(0, 7));
+  return {
+    slug,
+    household,
+    manageToken,
+    profile,
+    situation: pageSituation(household).kind,
+    check: { amount: now.check, payment_month: now.paymentMonth },
+    needs: rows.map(({ row, checkAfter }) => ({ title: row.title, route: row.route, payee: row.payeeName, amount: Number(row.amount), check_after: checkAfter })),
+  };
 }

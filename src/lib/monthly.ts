@@ -4,7 +4,8 @@ import { audit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
 import { getHousehold, pageProfile } from "@/lib/households";
 import { routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
-import { DEFAULT_PROFILE, addMonths, computeMonth, evaluateGift, monthName, monthOf, usd, type Profile } from "@/lib/rules";
+import { addMonths, computeMonth, evaluateGift, monthName, monthOf, usd, type Profile } from "@/lib/rules";
+import { householdProfile } from "./situation";
 
 /**
  * Monthly gifts: the same amount every month, routed again by the rules engine each month.
@@ -170,7 +171,7 @@ export async function startMonthly(o: { slug: string; amount: number; giverName?
     const rows = await db().select().from(schema.payments).where(eq(schema.payments.orderId, o.firstOrderId));
     // Only an order for this household, already captured and part of the page's current round, becomes the first month.
     if (rows.length && rows.every((r) => r.householdId === data.household.id && r.status === "captured" && !r.archivedAt)) {
-      const profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
+      const profile = householdProfile(data.household.profile);
       const date = `${o.month}-01`;
       const lines: RoutedGift["lines"] = rows.map((r) => {
         const need = data.needs.find((n) => n.id === r.needId);
@@ -220,7 +221,7 @@ export async function monthlyView(token: string, today: string) {
     amount: Number(fresh.gift.amount),
     giverName: fresh.gift.giverName,
     status: fresh.gift.status,
-    household: { id: fresh.data.household.id, slug: fresh.data.household.slug, name: fresh.data.household.name, profile: { ...DEFAULT_PROFILE, ...(fresh.data.household.profile as Partial<Profile>) } },
+    household: { id: fresh.data.household.id, slug: fresh.data.household.slug, name: fresh.data.household.name, profile: householdProfile(fresh.data.household.profile) },
     runs: runs.reverse(),
     nextMonth: addMonths(last, 1),
   };

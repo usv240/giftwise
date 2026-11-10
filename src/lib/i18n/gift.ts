@@ -45,14 +45,17 @@ const SAMPLE_ES: Record<string, string> = {
 };
 export const sampleIn = (lang: Lang, s: string, isSample = true) => (lang === "es" && isSample ? (SAMPLE_ES[s] ?? s) : s);
 
-type Words = { Poss: string; poss: string };
+type Words = { Poss: string; poss: string; hers: string };
 
 const EN = {
   langSwitch: { label: "En español", lang: "es" as Lang },
   help: (n: string) => `Help ${n}`,
   sampleNote: "Sample household for the demo. Names and shops are fictional.",
-  madeNote:
-    `Made from a fundraiser page, in the PayPal sandbox. Figures use the federal SSI amount for the month each check is paid (${fullCheckByYear()}) and assume no other income. In the sandbox, every shop is paid through one test business account.`,
+  madeNote: (own: boolean) =>
+    `Made from a fundraiser page, in the PayPal sandbox. Figures use the federal SSI amount for the month each check is paid (${fullCheckByYear()}) and ${own ? "the person's own situation, as the organizer gave it" : "a sample situation until the organizer adds theirs"}. In the sandbox, every shop is paid through one test business account.`,
+  /** Under her check on the gift page: whose facts it is computed from. */
+  situationOwn: (line: string) => `From ${line}.`,
+  situationSample: (w: Words) => `A sample situation until the organizer adds ${w.hers}: one adult on ${w.poss} own, no other income.`,
   needsH: (n: string) => `What ${n} needs`,
   paidStraightTo: "Paid straight to",
   givenToGo: (g: string, r: string) => `${g} given, ${r} to go`,
@@ -76,7 +79,7 @@ const EN = {
   sendsHere: "Giftwise sends it here",
   checkSetBy: (w: Words, month: string, giftMonth: string) => `${w.Poss} ${month} check (set by gifts in ${giftMonth})`,
   lagNote: (giftMonth: string, month: string) => `Social Security sets each check from the income two months before, so a gift in ${giftMonth} counts toward the ${month} check.`,
-  checkStays: (amt: string, year: string) => `It stays ${amt} with Giftwise, the full ${year} check.`,
+  checkStays: (amt: string, year: string, full = true) => (full ? `It stays ${amt} with Giftwise, the full ${year} check.` : `It stays ${amt} with Giftwise, the same as with no gift.`),
   checkIs: (amt: string) => `With Giftwise it is ${amt}.`,
   asCash: "As cash",
   withGiftwise: "With Giftwise",
@@ -115,7 +118,8 @@ const EN = {
   calendarLink: (n: string) => `${n}'s benefit calendar`,
   yearLink: (n: string) => `See ${n}'s year`,
   cashQ: "Prefer to give cash?",
-  cashText: (w: Words, cashCheck: string, full: string, month: string) => `Cash counts as ${w.poss} income. A $300 cash gift would lower ${w.poss} ${month} check to ${cashCheck}. Paying for one of these needs instead keeps ${w.poss} full ${month} check of ${full}.`,
+  cashText: (w: Words, cashCheck: string, kept: string, month: string, isFull = true) =>
+    `Cash counts as ${w.poss} income. A $300 cash gift would lower ${w.poss} ${month} check to ${cashCheck}. Paying for one of these needs instead keeps ${w.poss} ${isFull ? `full ${month} check of ${kept}` : `${month} check at ${kept}`}.`,
   checkAny: "Check any gift",
   sandboxTitle: "Testing in the sandbox",
   sandboxHolds: (sample: boolean): string => (sample ? "Test login and card, the organizer's view, and reset" : "Test login and card"),
@@ -160,8 +164,10 @@ const ES: GiftText = {
   langSwitch: { label: "In English", lang: "en" },
   help: (n) => `Ayude a ${n}`,
   sampleNote: "Hogar de muestra para la demostración. Los nombres y las tiendas son ficticios.",
-  madeNote:
-    `Hecha a partir de una página de recaudación de fondos, en el sandbox de PayPal. Las cifras usan el monto federal de SSI del mes en que se paga cada cheque (${fullCheckByYear().replace(" in ", " en ").replace(" from January ", " desde enero de ")}) y suponen que no hay otros ingresos. En el sandbox, todas las tiendas reciben el pago en una sola cuenta comercial de prueba.`,
+  madeNote: (own) =>
+    `Hecha a partir de una página de recaudación de fondos, en el sandbox de PayPal. Las cifras usan el monto federal de SSI del mes en que se paga cada cheque (${fullCheckByYear().replace(" in ", " en ").replace(" from January ", " desde enero de ")}) y ${own ? "la situación propia de la persona, como la indicó quien organiza" : "una situación de muestra hasta que quien organiza agregue la suya"}. En el sandbox, todas las tiendas reciben el pago en una sola cuenta comercial de prueba.`,
+  situationOwn: (line) => `Según ${line}.`,
+  situationSample: () => "Una situación de muestra hasta que quien organiza agregue la suya: una persona adulta que vive sola, sin otros ingresos.",
   needsH: (n) => `Lo que ${n} necesita`,
   paidStraightTo: "Se paga directamente a",
   givenToGo: (g, r) => `${g} dado, faltan ${r}`,
@@ -183,7 +189,7 @@ const ES: GiftText = {
   sendsHere: "Giftwise lo envía aquí",
   checkSetBy: (_w, month, giftMonth) => `Su cheque de ${month} (según los regalos de ${giftMonth})`,
   lagNote: (giftMonth, month) => `El Seguro Social calcula cada cheque con los ingresos de dos meses antes, así que un regalo en ${giftMonth} cuenta para el cheque de ${month}.`,
-  checkStays: (amt, year) => `Con Giftwise se mantiene en ${amt}, el cheque completo de ${year}.`,
+  checkStays: (amt, year, full = true) => (full ? `Con Giftwise se mantiene en ${amt}, el cheque completo de ${year}.` : `Con Giftwise se mantiene en ${amt}, lo mismo que sin regalo.`),
   checkIs: (amt) => `Con Giftwise es de ${amt}.`,
   asCash: "En efectivo",
   withGiftwise: "Con Giftwise",
@@ -219,7 +225,8 @@ const ES: GiftText = {
   calendarLink: (n) => `El calendario de beneficios de ${n} (en inglés)`,
   yearLink: (n) => `Ver el año de ${n} (en inglés)`,
   cashQ: "¿Prefiere dar efectivo?",
-  cashText: (_w, cashCheck, full, month) => `El efectivo cuenta como ingreso. Un regalo de $300 en efectivo bajaría su cheque de ${month} a ${cashCheck}. Pagar una de estas necesidades, en cambio, mantiene su cheque completo de ${month}, de ${full}.`,
+  cashText: (_w, cashCheck, kept, month, isFull = true) =>
+    `El efectivo cuenta como ingreso. Un regalo de $300 en efectivo bajaría su cheque de ${month} a ${cashCheck}. Pagar una de estas necesidades, en cambio, mantiene su cheque ${isFull ? `completo de ${month}, de ${kept}` : `de ${month} en ${kept}`}.`,
   checkAny: "Revisar cualquier regalo (en inglés)",
   sandboxTitle: "Pruebas en el sandbox",
   sandboxHolds: (sample) => (sample ? "Acceso y tarjeta de prueba, la vista del organizador y reiniciar" : "Acceso y tarjeta de prueba"),

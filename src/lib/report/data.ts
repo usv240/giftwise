@@ -3,7 +3,8 @@ import sample from "../../../content/sample-year.json";
 import { db, dbConfigured, schema } from "@/lib/db";
 import { SAMPLE, getHousehold } from "@/lib/households";
 import { RECORDED_RECEIPT } from "@/lib/sample-receipt";
-import { DEFAULT_PROFILE, type Category, type Delivery, type Profile } from "@/lib/rules";
+import { type Category, type Delivery, type Profile } from "@/lib/rules";
+import { householdProfile } from "@/lib/situation";
 import { paymentDay, payoutDay } from "@/lib/time";
 import type { ReportGift } from "./ssa";
 
@@ -64,7 +65,7 @@ export async function giftSubject(slug: string): Promise<GiftSubject | null> {
     ? (sample.gifts as Sample[]).map((g, i) => ({ id: `s${i}`, date: g.date, amount: g.amount, delivery: g.delivery, category: g.category, giver: g.giver, need: g.need, paidTo: g.paidTo, recurring: g.recurring, evidence: { kind: "sample" } }))
     : [];
   let name: string = SAMPLE.name;
-  let profile: Profile = { ...DEFAULT_PROFILE, ...(SAMPLE.profile as Partial<Profile>) };
+  let profile: Profile = householdProfile(SAMPLE.profile);
   let isSample = isMaya;
 
   if (dbConfigured()) {
@@ -72,7 +73,7 @@ export async function giftSubject(slug: string): Promise<GiftSubject | null> {
     if (!data) return isMaya ? { slug, name, isSample, profile, gifts } : null;
     name = data.household.name;
     isSample = data.household.isSample;
-    profile = { ...DEFAULT_PROFILE, ...(data.household.profile as Partial<Profile>) };
+    profile = householdProfile(data.household.profile);
     const needOf = (id: number | null) => data.needs.find((n) => n.id === id);
 
     // The current round's captures, then the recorded order's (archived) rows when this page is the sample.

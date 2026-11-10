@@ -4,7 +4,8 @@ import { reviewPayload, runReviewers } from "@/lib/ai/reviewers";
 import { today } from "@/lib/api/envelope";
 import { CategorySchema, CoversSchema, DeliverySchema, EverySchema } from "@/lib/api/schemas";
 import { API_VERSION } from "@/lib/api/version";
-import { getHousehold, openNeeds, pageProfile } from "@/lib/households";
+import { getHousehold, openNeeds, pageProfile, pageSituation } from "@/lib/households";
+import { checkFor, situationLine } from "@/lib/situation";
 import { startRoutedGift } from "@/lib/paypal/gift-order";
 import { distinctPayees, routeGift } from "@/lib/routing";
 import { checkGiftData, householdData } from "@/lib/api/check-gift";
@@ -159,7 +160,8 @@ export const TOOLS = [
   tool({
     name: "get_gift_page",
     title: "Read a gift page",
-    description: "Read a Giftwise gift page: who it is for, what they still need, how much, and who gets paid for each need (a shop, a clinic or their ABLE account). Use it before suggesting a gift.",
+    description:
+      "Read a Giftwise gift page: who it is for, what they still need, how much, and who gets paid for each need (a shop, a clinic or their ABLE account), with their SSI check from their own situation as the organizer gave it (or a sample situation, which the answer names). Use it before suggesting a gift.",
     input: z.object({ slug }),
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     run: async (i, ctx) => {
@@ -167,9 +169,26 @@ export const TOOLS = [
       if (!p) return { text: `No gift page named "${i.slug}".`, isError: true };
       const open = openNeeds(p.needs).map((n) => ({ title: n.title, still_needed: Math.max(0, n.amount - n.funded), paid_to: n.payeeName, route: n.route }));
       const list = open.map((n) => `${n.title}: ${usd(n.still_needed)} still needed, paid to ${n.paid_to}`).join("; ");
+      const w = pronounWords(p.profile.pronoun);
+      // Her check with no gift, for a gift made today, from the page's own facts (or the sample situation, said so).
+      const now = checkFor(p.profile, monthOf(today()));
+      const sit = pageSituation(p.household);
+      const situation = sit.kind;
+      const facts =
+        situation === "sample"
+          ? `The page uses a sample situation until the organizer adds ${w.hers}: one adult on ${w.poss} own, no other income, so ${w.poss} ${now.label} check is ${usd(now.check)}.`
+          : `${situation === "own" ? `${p.household.name}'s own situation, as the organizer gave it` : `${p.household.name}'s situation`}: ${situationLine(p.profile, sit.meta?.given) || "the sample situation"}. ${w.Poss} ${now.label} check is ${usd(now.check)} before any gift.`;
       return {
-        text: `Gift page for ${p.household.name} (${ctx.origin}/g/${p.household.slug}). ${open.length ? `Open needs: ${list}.` : "Every need is covered right now."} Any amount can also go to ${pronounWords(p.profile.pronoun).poss} ABLE account.`,
-        data: { name: p.household.name, pronoun: p.profile.pronoun ?? "she", url: `${ctx.origin}/g/${p.household.slug}`, open_needs: open, sample: p.household.isSample },
+        text: `Gift page for ${p.household.name} (${ctx.origin}/g/${p.household.slug}). ${facts} ${open.length ? `Open needs: ${list}.` : "Every need is covered right now."} Any amount can also go to ${w.poss} ABLE account.`,
+        data: {
+          name: p.household.name,
+          pronoun: p.profile.pronoun ?? "she",
+          url: `${ctx.origin}/g/${p.household.slug}`,
+          open_needs: open,
+          sample: p.household.isSample,
+          situation,
+          check: { amount: now.check, payment_month: now.paymentMonth },
+        },
       };
     },
   }),

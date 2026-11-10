@@ -26,7 +26,7 @@ export function ruleSentenceEs(r: GiftResult, couple = false) {
 }
 
 /** The household sentence (R-SHEL-08), as householdSentence() says it in English. */
-function householdEs(h: HouseholdTest | null, couple: boolean, payMonth: string) {
+export function householdEs(h: HouseholdTest | null, couple: boolean, payMonth: string) {
   if (!h || h.rule === "none") return "";
   const mes = checkMonthIn("es", payMonth);
   const paid =

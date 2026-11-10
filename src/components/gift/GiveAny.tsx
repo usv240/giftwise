@@ -9,7 +9,7 @@ import { DEFAULT_GIFT, MAX_GIFT, asTyped, readAmount, suggestedAmounts, type Chi
 import { StartMonthly } from "./MonthlyActions";
 import { PayPalPay, requestOrder, type Receipt } from "./PayPalPay";
 import { byPayee, routeGift, type OpenNeed, type RoutedGift } from "@/lib/routing";
-import { DEFAULT_PROFILE, P, addMonths, monthOf, pronounWords, usd, type Profile } from "@/lib/rules";
+import { DEFAULT_PROFILE, P, addMonths, fbr, monthOf, pronounWords, usd, type Profile } from "@/lib/rules";
 import { checkMonthIn, giftText, monthIn, payeeIn, payeeInline, type Lang } from "@/lib/i18n/gift";
 
 /**
@@ -183,7 +183,7 @@ export function GiveAny({
               <div className="give-check">
                 <p className="give-k">{t.checkSetBy(w, checkMonth, giftMonth)}</p>
                 {prefs.mode !== "technical" && <p className="give-lag">{t.lagNote(giftMonth, checkMonth)}</p>}
-                <p className="give-verdict tabular">{plan.checkWithRouting === plan.baseline ? t.checkStays(usd(plan.checkWithRouting), checkMonthKey.slice(0, 4)) : t.checkIs(usd(plan.checkWithRouting))}</p>
+                <p className="give-verdict tabular">{plan.checkWithRouting === plan.baseline ? t.checkStays(usd(plan.checkWithRouting), checkMonthKey.slice(0, 4), plan.baseline >= fbr(profile.couple, checkMonthKey)) : t.checkIs(usd(plan.checkWithRouting))}</p>
               </div>
               <div className="give-compare">
                 <div>

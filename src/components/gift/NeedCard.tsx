@@ -29,6 +29,8 @@ export type NeedView = {
   orderId: string | null;
   captureId: string | null;
   link?: string | null;
+  /** False when the need has no benefit-safe way to be paid for this person (a housing need with no ABLE account). */
+  payable?: boolean;
 };
 
 /**
@@ -86,7 +88,7 @@ export function NeedCard({ need, pronoun = "she", lang = "en", closed = false }:
               </>
             )}
           </div>
-        ) : closed ? null : (
+        ) : closed || need.payable === false ? null : (
           <>
             <p className="need-pay">
               {/* The amount above is what this button pays, unless part is given already: then the line says the rest. */}
