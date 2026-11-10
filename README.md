@@ -63,6 +63,7 @@ npm test                      # a fresh clone with no .env.local: 436 pass and 7
 | Webhooks | Captures a payment the giver never returned for, after checking PayPal's signature | `src/app/api/paypal/webhook/route.ts` |
 | PayPal MCP server | The assistant reads each checkout back through `get_order`; Giftwise's MCP server at `/api/mcp`, with nine tools, starts a checkout only the giver can approve | `src/lib/agent/paypal-mcp.ts`, `src/lib/mcp/tools.ts` |
 | Claude | Reads bills and fundraiser pages into checked data and acts as two reviewers; it never decides money. With no key or the budget spent, the samples replay its recorded answers, labelled Replayed | `src/lib/ai/tasks.ts`, `src/lib/ai/bill-review.ts`, `src/lib/ai/claude.ts` (`content/ai-replay`), `src/lib/rules/engine.ts` |
+| The rules engine on npm | [`ssi-gift-rules`](https://www.npmjs.com/package/ssi-gift-rules): `npm install ssi-gift-rules` gives any app the same engine, with no dependencies, checked against SSA's 40 worked examples on every build | `packages/ssi-gift-rules` |
 | AG Studio, Bryntum, Channel3, KERNEL, Elasticsearch, Federal Register, Postman, Zapier, Render Workflows, Sentry | Each with its job and file on [`/stack`](https://giftwise-405i.onrender.com/stack) | [docs/inside.md](docs/inside.md) |
 
 Every commit is from November 2026 (`git log --date=short`).
