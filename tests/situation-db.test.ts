@@ -61,7 +61,8 @@ describe.skipIf(!database.ok)(suiteName("a page on the person's own facts: the A
     const { db, schema } = m.db;
     const [h] = await db().select({ id: schema.households.id }).from(schema.households).where(eq(schema.households.slug, page.slug));
     made.push(h.id);
-  });
+    // Loading the routes and the MCP tools takes a while on a busy machine; the default hook timeout is 10 seconds.
+  }, 60_000);
 
   afterAll(async () => {
     if (!made.length) return;

@@ -95,6 +95,14 @@ The runner can be started again 20 seconds after the last run.
 2. The line under the button says whether the next run is live and how much of today's AI budget is left (`GET /api/live/ai-budget`, from the `ai_usage` table). With no `ANTHROPIC_API_KEY`, or once the day's AI spend reaches the budget, the same reader runs on Claude's recorded answer to this exact request (`content/ai-replay`), labelled **Replayed** with the date it was recorded and the reason; a checkout without that recording shows the saved run from `content/reviews/electric-bill-read.json`. `npx tsx --env-file=.env.local scripts/record-bill-read.ts` records a new reading (one Claude call), and `npx tsx scripts/build-ai-replay.ts` rebuilds the replay set with no call.
 3. With no key, **Use the sample electric bill** on `/try` (A bill or quote) runs the reader and both reviewers on their recorded answers: the two quotes, checked by code, the referee's verdict and the route, each labelled Replayed. Any other upload needs the key.
 
+## A page on the person's own situation
+
+1. Open `/start`, type `Sam`, choose **he/him** and press **Next: Sam's situation**. Every question is optional, and each has an **i** that says why it matters.
+2. Choose **In someone else's home, such as a parent's** and type `600` under **Social Security or other benefits**. The figure below moves from $1,029 to $106: his January 2027 check with these facts, from the same rules engine ($1,029, less $580 of Social Security counted after the $20 exclusion, less the one-third reduction of $343 for living in his mother's home).
+3. Or press **Use the sample letter**. Claude reads a letter made up for this demo (`public/samples/sam-ssa-letter-sample.pdf`, marked on the page as not from Social Security) and fills the same answers, each with its quote. Code checks every quote against the PDF's own text and compares the payment the letter states with the engine's check: **Matches his letter: $106 for January 2027.** With no key it runs on Claude's recorded answer, labelled Replayed. The file is read in memory and not kept; only the answers you confirm are saved.
+4. Press **Next: add the needs**, then **Use the sample fundraiser** and **Make the gift page**. The organizer's page and the gift page show $106, and **Give any amount** keeps it: "It stays $106 with Giftwise, the same as with no gift." Maya's page still shows her full January 2027 check, $1,029.
+5. On the organizer's page, **Change his situation** edits the answers or reads a letter, and **Use the sample situation** puts the page back on the sample. The API takes the same facts: `profile` on `POST /api/v1/gift-pages` and `PATCH /api/manage/{token}`; `POST /api/v1/read-letter` reads a letter and stores nothing.
+
 ## Maya's benefit calendar, in Bryntum
 
 Open `/g/maya/calendar`. Gifts are green when they do not count and orange when they do; Social Security's dates are blue (the check on the 1st, the report due on the 10th). Press **As cash**, then drag Aunt June's $150 on October 28 to November 2, or use **Move a gift** below the calendar. **What moving it did** lists each check that changed: December rises from $456 to $606 and January drops from $1,029 to $899, because the gift moved to a later income month (January is paid at the 2027 rate). The calendar is Bryntum Calendar 7.3.7 (the free trial, so it shows a trial watermark), and its theme follows the site's light and dark mode.
@@ -175,17 +183,17 @@ The PayPal checkout and API suites write a redacted transcript as they run, `con
 
 | Suite | Command | Expected |
 |---|---|---|
-| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 443 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 436 pass and 7 skip (6 need a database) |
+| Rules engine, routing, monthly gifts, the SSA report and its Easy Read version, the checks workflow, the cited answers, the report code, the Spanish rule sentences, manage links and signatures, the gift finder, the rulebook search, the calendar planner and 1,000 random gifts, and the AI fallbacks | `npm test` | 469 passed when `.env.local` names a reachable database (no keys needed; `tests/helpers/needs.ts` reads the file); in a fresh clone with no `.env.local`, 459 pass and 10 skip (10 need a database) |
 | Social Security's own worked examples | `npm run eval:ssa` | 40 of 40 match SSA (Claude alone 32 of 40) |
 | Real SSI cases from federal courts | `npx tsx scripts/run-field-cases.ts` | 14 of 14 scored, of 36 cases, agree with SSA and the court |
 | 100,000 random gifts, needs and people | `npx tsx scripts/run-invariants.ts` | All thirteen promises kept by all 100,000 |
 | The rules watch, asked live | `GET /api/rules-watch` | Every Federal Register document reviewed; 2026 and 2027 amounts in use |
 | A monthly gift, two months, as the sandbox buyer | `npm run e2e:monthly` | 8 of 8 |
-| API end to end | `npm run e2e:api` | 119 passed |
+| API end to end | `npm run e2e:api` | 130 passed |
 | The organizer's side, with a signed webhook from a real sandbox capture (start the server with `GIFTWISE_WEBHOOK_ALLOW_LOCAL=1`) | `npm run e2e:manage` | 21 passed |
 | The Postman collection, with Newman | `npm run test:postman` | 20 assertions over 16 requests |
-| Browser end to end (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers) | `npm run e2e:ui` | 66 passed |
-| Accessibility and layout | `npm run e2e:a11y` | All 140 page views pass |
+| Browser end to end (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers) | `npm run e2e:ui` | 71 passed |
+| Accessibility and layout | `npm run e2e:a11y` | All 144 page views pass |
 | Every page and public endpoint with no service keys, each integration on its fallback | `npm run e2e:smoke` | 72 passed |
 | PayPal checkout as the sandbox buyer | `npm run e2e:paypal` | 14 passed |
 | An agent starts a checkout over MCP, the buyer approves the link | `npm run e2e:agent` | 5 passed |

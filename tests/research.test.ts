@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import facts from "../content/facts.json";
 import sources from "../content/sources.json";
 import { IMPACT } from "@/lib/impact";
-import { ABLE_MARKET, EXCESS_RESOURCES, ISM_COUNTED, ISM_IMPROPER, LAW, LIMIT, RECOVERY_RATE, SCALE, UPTAKE, repayMonths } from "@/lib/research";
+import { ABLE_MARKET, CONCURRENT, CONCURRENT_PERCENT, EXCESS_RESOURCES, ISM_COUNTED, ISM_IMPROPER, LAW, LIMIT, RECOVERY_RATE, SCALE, UPTAKE, repayMonths } from "@/lib/research";
 
 /**
  * The measured-problem figures on /evidence/impact#stake and in the README: every one names a source that has a url,
@@ -74,5 +74,15 @@ describe("the problem, measured by Social Security", () => {
     expect(block).toContain(EXCESS_RESOURCES.suspended.toLocaleString("en-US"));
     expect(block).toContain(ABLE_MARKET.accounts);
     expect(block).toContain("10 percent");
+    expect(block).toContain(`**${CONCURRENT_PERCENT} percent** of people paid SSI in ${CONCURRENT.month} also got Social Security, ${CONCURRENT.socialSecurity.toLocaleString("en-US")} of ${CONCURRENT.recipients.toLocaleString("en-US")}, and ${CONCURRENT.anothersHousehold.toLocaleString("en-US")} lived in another person's household`);
+    expect(block).toContain(CONCURRENT.tables);
+  });
+
+  it("the situation questions' Info text states the same SSA figures, with the table", () => {
+    const info = JSON.parse(readFileSync("content/info.json", "utf8")) as Record<string, { why: string; technical?: string }>;
+    expect(info["situation.benefits"].why).toContain(`${CONCURRENT.socialSecurity.toLocaleString("en-US")} of the ${CONCURRENT.recipients.toLocaleString("en-US")} people paid SSI in ${CONCURRENT.month}, ${CONCURRENT_PERCENT} percent (SSA, SSI Annual Statistical Report 2024, Table 8)`);
+    expect(info["situation.home"].why).toContain(`${CONCURRENT.anothersHousehold.toLocaleString("en-US")} people on SSI lived in another person's household in ${CONCURRENT.month} (SSA, SSI Annual Statistical Report 2024, Table 6)`);
+    expect(info["manage.situation"].why).toContain(`${CONCURRENT_PERCENT} percent in ${CONCURRENT.month}`);
+    expect(SRC[CONCURRENT.source].url).toBe("https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect02.html");
   });
 });

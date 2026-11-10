@@ -14,7 +14,7 @@ Benefit-safe giving for people on SSI, their families and their benefits counsel
 - **14 of 14 scored, of 36 cases:** of 36 federal court cases about help from others, 14 turn on whether a gift counts, and the engine reaches the outcome SSA and the court did in all 14; the other 22 turn on a loan, shared rent, a trust or a remand ([`/evidence/court-cases`](https://giftwise-405i.onrender.com/evidence/court-cases)).
 - **0 of 3** in a second class of court cases, where the court held the help was not income, on the first run, before the engine had a loan field: each is a loan. With each court's finding in the new loan field, 3 of 3, after the fix ([`/evidence/court-cases#not-income`](https://giftwise-405i.onrender.com/evidence/court-cases#not-income)).
 - **40 of 40** of Social Security's own worked examples match SSA's answer; Claude with no rulebook matches 32 of 40 ([`/evidence/ssa-examples`](https://giftwise-405i.onrender.com/evidence/ssa-examples)).
-- **20 groups** of SSA's examples are listed apart and not scored, each with its reason in `content/eval/ssa-examples.json`: they turn on something other than a gift to one person, or on a rule the engine added later, which the held-out sets then tested.
+- **20 groups** of SSA's examples are listed apart and not scored, each with its reason in `content/eval/ssa-examples.json`.
 - **Four held-out sets of SSA examples, each run once on a frozen engine: 4 of 5, 1 of 5, 1 of 5 and 6 of 15.** The first ran at commit `3f3ea60`; its first run matched 1 of 5, and two expected answers were then corrected to SSA's text, with reasons in `content/eval/held-out.json`. The others were written before their run: `content/eval/held-out-2.json` (git blob `715607f`, frozen at `c5e94eb`), `content/eval/held-out-3.json` (git blob `b9a5ece`, frozen at `7e24ed8`, 5 of 5 on whether the gift counts) and `content/eval/held-out-4.json` (git blob `49ba930`, frozen at `201128b`, 7 of 15 on whether the help counts). The rules they showed are now in the engine ([docs/results.md](docs/results.md)).
 - **0 of 55** gifts that would lower the check were let through, over every case whose right answer is known ([`/evidence/rules#errors`](https://giftwise-405i.onrender.com/evidence/rules#errors)).
 - **6 of 51** fine gifts were sent another way, each with her check whole (`src/lib/error-rates.ts`).
@@ -36,7 +36,7 @@ docker compose up -d          # Postgres 17
 cp .env.example .env.local    # PayPal sandbox keys, payee accounts, ANTHROPIC_API_KEY, DATABASE_URL (TESTING.md names each)
 npm run db:push               # create the tables; Maya's sample page is seeded the first time /g/maya opens
 npm run dev -- -p 3100        # http://localhost:3100
-npm test                      # a fresh clone with no .env.local: 436 pass and 7 skip (7 need a database); when .env.local names a reachable database: 443 of 443, no keys needed
+npm test                      # a fresh clone with no .env.local: 459 pass and 10 skip (10 need a database); when .env.local names a reachable database: 469 of 469, no keys needed
 ```
 
 `npm test` needs no keys: tests that need Postgres skip with the reason in their names; no test calls Claude or PayPal. [TESTING.md](TESTING.md) explains every variable and suite; `npm run checks:local` runs the same 25 outside checks as the nightly Render Workflow ([`render.yaml`](render.yaml)).
@@ -47,8 +47,8 @@ npm test                      # a fresh clone with no .env.local: 436 pass and 7
 
 | | Open | Then run |
 |---|---|---|
-| PayPal | [`src/lib/paypal/gift-order.ts`](src/lib/paypal/gift-order.ts), a payee per purchase unit; [`src/lib/paypal/capture.ts`](src/lib/paypal/capture.ts), captured once | `npm run e2e:api`, 119 of 119; `npm run e2e:paypal`, 14 of 14 (sandbox keys), with redacted transcripts ([`/evidence/operations#transcripts`](https://giftwise-405i.onrender.com/evidence/operations#transcripts)) |
-| The product | [`/g/maya`](https://giftwise-405i.onrender.com/g/maya), [the month's report](https://giftwise-405i.onrender.com/g/maya/report?month=2026-10), the [organizer's page](https://giftwise-405i.onrender.com/manage/maya-sample-organizer) | `npm run e2e:ui`, 66 of 66 (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers); `npm run e2e:a11y`, 140 of 140 page views |
+| PayPal | [`src/lib/paypal/gift-order.ts`](src/lib/paypal/gift-order.ts), a payee per purchase unit; [`src/lib/paypal/capture.ts`](src/lib/paypal/capture.ts), captured once | `npm run e2e:api`, 130 of 130; `npm run e2e:paypal`, 14 of 14 (sandbox keys), with redacted transcripts ([`/evidence/operations#transcripts`](https://giftwise-405i.onrender.com/evidence/operations#transcripts)) |
+| The product | [`/g/maya`](https://giftwise-405i.onrender.com/g/maya), [the month's report](https://giftwise-405i.onrender.com/g/maya/report?month=2026-10), the [organizer's page](https://giftwise-405i.onrender.com/manage/maya-sample-organizer) | `npm run e2e:ui`, 71 of 71 (Claude's four document steps run live with a key and on its recorded answers without one, and skip only when the server has no AI key and no recorded answers); `npm run e2e:a11y`, 144 of 144 page views |
 | Who it helps | [`src/lib/impact.ts`](src/lib/impact.ts), [`src/lib/research.ts`](src/lib/research.ts), [`/evidence/impact`](https://giftwise-405i.onrender.com/evidence/impact) | `tests/docs-numbers.test.ts`; `tests/research.test.ts` |
 
 ## PayPal and AI, file by file
@@ -83,18 +83,19 @@ SSI counts cash gifts as income, and a gift sets the check paid two months later
 Measured by the agency itself ([`/evidence/impact#stake`](https://giftwise-405i.onrender.com/evidence/impact#stake); `src/lib/research.ts`, `tests/research.test.ts`):
 
 - **454,843** people on SSI had their check lowered in December 2024 for shelter someone else helped with, by $247 a month on average ([SSI Annual Statistical Report 2024](https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect02.html), Tables 8 and 12; [88 FR 9779](https://www.govinfo.gov/content/pkg/FR-2023-02-15/html/2023-02731.htm)).
-- **8.59 percent** of SSI improper payments in fiscal years 2020 through 2024 came from in-kind support, $1.5 billion paid too much and $1.3 billion too little; ([FY 2025 Agency Financial Report](https://www.ssa.gov/finance/2025/Other%20Reporting%20Requirements.pdf), pages 184 and 186). SSA told its Inspector General it has no tools to identify living arrangement errors ([OIG 152601](https://oig.ssa.gov/~assets/uploads/152601.pdf), July 2026), and attributed 9 percent of the SSI overpayments assessed in 2020 through 2023 to unreported living arrangements or in-kind support ([OIG 062405](https://oig.ssa.gov/~assets/uploads/062405.pdf), February 2025).
-- **$132 a month** is SSA's own pricing of housing help from others, the average rise it projected for about 41,000 people under its 2024 rental subsidy rule ([89 FR 25507](https://www.govinfo.gov/content/pkg/FR-2024-04-11/html/2024-07675.htm)).
+- **34 percent** of people paid SSI in December 2024 also got Social Security, 2,548,159 of 7,423,856, and 383,015 lived in another person's household ([SSI Annual Statistical Report 2024](https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect02.html), Tables 8 and 6), so each gift page runs on the person's own situation.
+- **8.59 percent** of SSI improper payments in fiscal years 2020 through 2024 came from in-kind support, $1.5 billion paid too much and $1.3 billion too little; ([FY 2025 Agency Financial Report](https://www.ssa.gov/finance/2025/Other%20Reporting%20Requirements.pdf), pages 184 and 186). SSA told its Inspector General it has no tools to find living arrangement errors ([OIG 152601](https://oig.ssa.gov/~assets/uploads/152601.pdf)), and traced 9 percent of 2020 to 2023 SSI overpayments to them ([OIG 062405](https://oig.ssa.gov/~assets/uploads/062405.pdf)).
+- **$132 a month** is the average rise SSA projected for about 41,000 people under its 2024 rental subsidy rule ([89 FR 25507](https://www.govinfo.gov/content/pkg/FR-2024-04-11/html/2024-07675.htm)).
 - **83,110** people had payments suspended in 2024 for savings over a $2,000 limit unchanged since 1989, and 45,146 had them ended ([SSI Annual Statistical Report 2024](https://www.ssa.gov/policy/docs/statcomps/ssi_asr/2024/sect11.html), Tables 76 and 77; [POMS SI 01110.003](https://secure.ssa.gov/poms.nsf/lnx/0501110003)). **263,000** ABLE accounts held $3.6 billion on June 30, 2026, against roughly 14 million people who can open one since the age limit rose to 46 ([ISS Market Intelligence](https://www.529conference.com/2q-2026-529-and-able-market-sizing-highlights/); [POMS SI 01130.740](https://secure.ssa.gov/poms.nsf/lnx/0501130740)).
 - **10 percent** of the check is the rate at which an SSI overpayment is recovered ([EM-25029 REV](https://secure.ssa.gov/apps10/reference.nsf/links/08282025031929PM)), so the $4,870.00 and $11,442.20 asked back in two court cases would take 49 and 116 months to repay.
 
 ## Design
 
-On a phone, the total and payees sit beside the PayPal button. The person on SSI gets her report in Easy Read and Spanish (`tests/easy-read.test.ts`, `tests/gift-es.test.ts`). 140 of 140 page views pass axe (WCAG 2.2 AA), phone and desktop, light and dark. Light is the default; dark and Large text are one tap away ([`/evidence`](https://giftwise-405i.onrender.com/evidence#design), [docs/inside.md](docs/inside.md)).
+The person on SSI gets her report in Easy Read and Spanish (`tests/easy-read.test.ts`, `tests/gift-es.test.ts`). 144 of 144 page views pass axe (WCAG 2.2 AA), phone and desktop, light and dark. Light is the default; dark and Large text are one tap away ([`/evidence`](https://giftwise-405i.onrender.com/evidence#design), [docs/inside.md](docs/inside.md)).
 
 ## What is first here
 
-Of the products compared on [`/evidence/impact#compare`](https://giftwise-405i.onrender.com/evidence/impact#compare), each from its own dated page, none does these three or publishes accuracy against SSA's own material:
+None of the products compared on [`/evidence/impact#compare`](https://giftwise-405i.onrender.com/evidence/impact#compare) does these three or publishes accuracy against SSA's own material:
 
 - **A third party's gift is routed by a rules engine built from the statute to the payee before it becomes the person's money**, and one PayPal order pays up to ten payees.
 - **A monthly report to Social Security anyone can verify against PayPal's records, with no login.**
@@ -108,4 +109,4 @@ Of the products compared on [`/evidence/impact#compare`](https://giftwise-405i.o
 
 ## Sources and credits
 
-More: [docs/results.md](docs/results.md), [docs/real-world.md](docs/real-world.md) (real money, who it reaches, a first pilot), [docs/inside.md](docs/inside.md) (what the AI never decides, every feature), [docs/tests.md](docs/tests.md). Photographs and video are from open collections, credited in [`public/images/credits.json`](public/images/credits.json) and [`public/media/credits.json`](public/media/credits.json). Maya, her family and the shops are fictional. [MIT license](LICENSE).
+More: [docs/results.md](docs/results.md), [docs/real-world.md](docs/real-world.md), [docs/inside.md](docs/inside.md), [docs/tests.md](docs/tests.md). Photographs and video are from open collections, credited in [`public/images/credits.json`](public/images/credits.json) and [`public/media/credits.json`](public/media/credits.json). Maya, her family and the shops are fictional. [MIT license](LICENSE).

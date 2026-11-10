@@ -35,6 +35,15 @@ const cents = (n: number) => n.toLocaleString("en-US", { style: "currency", curr
 
 /** SSI Annual Statistical Report 2024, Tables 8 and 12: people whose check was lowered for support and maintenance, and the average counted. */
 export const ISM_COUNTED = { people: 454_843, averageMonthly: 247, month: "December 2024" };
+/**
+ * SSI Annual Statistical Report 2024, Table 8 (Recipients, by type of income, eligibility category, and age, December
+ * 2024) and Table 6 (Recipients and their average monthly payment, by selected characteristics, eligibility category,
+ * and age, December 2024): the people paid SSI who also got Social Security, and those living in another person's
+ * household. For them the check is not the full amount, which is why every gift page runs on the person's own facts.
+ */
+export const CONCURRENT = { recipients: 7_423_856, socialSecurity: 2_548_159, anothersHousehold: 383_015, month: "December 2024", source: "ssa-asr-2024-sect02", tables: "Tables 8 and 6" };
+/** The share who also got Social Security, in whole percent, as the report's own summary states it. */
+export const CONCURRENT_PERCENT = Math.round((CONCURRENT.socialSecurity / CONCURRENT.recipients) * 100);
 /** FY 2025 Agency Financial Report, SSI improper payment causes FY 2020 to 2024, in millions of dollars. */
 export const ISM_IMPROPER = { over: 1527.29, under: 1315.12, total: 2842.41, yearlyAverage: 568.48, share: 8.59 };
 /** SSI Annual Statistical Report 2024, Tables 76 and 77: payments suspended and ended for savings over the limit, in 2024. */
