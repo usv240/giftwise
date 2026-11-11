@@ -6,12 +6,20 @@ import { IMPACT } from "@/lib/impact";
 import { ABLE_MARKET, CONCURRENT, CONCURRENT_PERCENT, EXCESS_RESOURCES, ISM_COUNTED, ISM_IMPROPER, LAW, LIMIT, RECOVERY_RATE, SCALE, UPTAKE, repayMonths } from "@/lib/research";
 
 /**
- * The measured-problem figures on /evidence/impact#stake and in the README: every one names a source that has a url,
- * a publisher and a page date, and code that exists; the arithmetic follows from the stated inputs; the README carries
- * the same figures.
+ * The measured-problem figures on /evidence/impact#stake, in docs/real-world.md and in the README: every one names a
+ * source that has a url, a publisher and a page date, and code that exists; the arithmetic follows from the stated
+ * inputs; the documents carry the same figures.
  */
 const SRC = sources as Record<string, { title: string; url: string; publisher: string; date?: string }>;
 const readme = readFileSync("README.md", "utf8");
+const realWorld = readFileSync("docs/real-world.md", "utf8");
+/** One `## ` section of a Markdown document, from its heading to the next one. */
+const section = (doc: string, heading: string) => {
+  const from = doc.indexOf(`\n${heading}\n`);
+  expect(from, heading).toBeGreaterThanOrEqual(0);
+  const next = doc.indexOf("\n## ", from + heading.length + 1);
+  return doc.slice(from, next < 0 ? undefined : next);
+};
 
 describe("the problem, measured by Social Security", () => {
   it("every figure has a dated primary source and names code that exists", () => {
@@ -63,8 +71,27 @@ describe("the problem, measured by Social Security", () => {
     }
   });
 
-  it("the README's what-is-at-stake block carries the same figures", () => {
-    const block = readme.slice(readme.indexOf("## What is at stake"), readme.indexOf("## Design"));
+  it("the README's Why it matters block carries the same figures, each linked to its source", () => {
+    const block = section(readme, "## Why it matters");
+    const line = (figure: string) => block.split(/\r?\n/).find((l) => l.startsWith(`- **${figure}**`)) ?? "";
+    const url = (key: string) => SRC[key].url.replace(/ /g, "%20");
+    expect(line(ISM_COUNTED.people.toLocaleString("en-US"))).toContain(`${ISM_COUNTED.month} for help with shelter, by $${ISM_COUNTED.averageMonthly} a month on average`);
+    expect(line(ISM_COUNTED.people.toLocaleString("en-US"))).toContain(url("ssa-asr-2024-sect02"));
+    expect(line(`${ISM_IMPROPER.share} percent`)).toContain(url("ssa-afr-2025-payment-integrity"));
+    expect(line(EXCESS_RESOURCES.suspended.toLocaleString("en-US"))).toContain(`savings over the ${`$${EXCESS_RESOURCES.limit.toLocaleString("en-US")}`} limit`);
+    expect(line(EXCESS_RESOURCES.suspended.toLocaleString("en-US"))).toContain(url("ssa-asr-2024-sect11"));
+    expect(line(ABLE_MARKET.accounts)).toContain(`on ${ABLE_MARKET.asOf}`);
+    expect(line(ABLE_MARKET.accounts)).toContain(url("iss-able-2q-2026"));
+    expect(line(ABLE_MARKET.accounts)).toContain(url("able-nrc-accounts-2026"));
+    // The size of SSI, from content/facts.json and its source.
+    const total = facts.audience.ssi_jan2025_total;
+    expect(line(total.value)).toContain(`received SSI in ${/\(([^)]+)\)/.exec(total.label)![1]}`);
+    expect(line(total.value)).toContain(url(total.source));
+    expect(block.split(/\r?\n/).filter((l) => l.startsWith("- **"))).toHaveLength(5);
+  });
+
+  it("docs/real-world.md's what-is-at-stake block carries the same figures", () => {
+    const block = section(realWorld, "## What is at stake, measured by Social Security");
     expect(block).toContain(ISM_COUNTED.people.toLocaleString("en-US"));
     expect(block).toContain(`$${ISM_COUNTED.averageMonthly}`);
     expect(block).toContain(`${ISM_IMPROPER.share} percent`);

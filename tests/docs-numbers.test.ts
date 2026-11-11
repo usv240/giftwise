@@ -23,13 +23,24 @@ import invariantRun from "../content/eval/invariants-results.json";
 import { INVARIANTS } from "@/lib/invariants";
 import { HELD_OUT_4_NEW_FIELDS, heldOut2AfterFix, heldOut3AfterFix, heldOut4AfterFix, type HeldOutCase } from "@/lib/held-out";
 import * as rules from "@/lib/rules";
+import ssaRun from "../content/eval/ssa-examples-results.json";
+import { SAMPLE, pageProfile } from "@/lib/households";
+import { routeGift, type OpenNeed } from "@/lib/routing";
 
 /**
  * Every number the README, its docs/ pages and TESTING.md state about tests, checks, tools and dollars has one source: test counts in
  * content/test-results.json (written by scripts/test-results.mjs after the suites run), the outside checks and MCP
- * tools in the code that runs them, and the dollar figures in src/lib/impact.ts. These fail when a document disagrees.
+ * tools in the code that runs them, the evaluation results in content/eval, and the dollar figures in src/lib/impact.ts.
+ * These fail when a document disagrees.
  */
 const readme = readFileSync("README.md", "utf8");
+/** One `## ` section of a Markdown document, from its heading to the next one. */
+const section = (doc: string, heading: string) => {
+  const from = doc.indexOf(`\n${heading}\n`);
+  expect(from, heading).toBeGreaterThanOrEqual(0);
+  const next = doc.indexOf("\n## ", from + heading.length + 1);
+  return doc.slice(from, next < 0 ? undefined : next);
+};
 const testing = readFileSync("TESTING.md", "utf8");
 /** The README's detail lives in docs/: the test table, the results, how it works for real, and everything inside. */
 const tests = readFileSync("docs/tests.md", "utf8");
@@ -87,7 +98,7 @@ describe("one source for every test number", () => {
     expect(inside).toContain(`${pm.requests} requests`);
   });
 
-  it("the README states the unit counts a reader sees with nothing set and with everything set", () => {
+  it("the README states the unit counts a fresh clone sees, and docs/tests.md the count with a database", () => {
     type Run = { passed: number; skipped: number; failed: number; needs: { database: number; claude: number; paypal: number } };
     const unit = suite("unit") as { command: string; passed: number; total: number; bare?: Run; with_database?: Run };
     expect(unit.bare, "scripts/test-results.mjs unit records the bare run").toBeDefined();
@@ -96,27 +107,28 @@ describe("one source for every test number", () => {
     expect(bare.passed + bare.skipped + bare.failed).toBe(unit.total);
     expect(bare.needs.database + bare.needs.claude + bare.needs.paypal).toBe(bare.skipped);
     const line = `${bare.passed} pass and ${bare.skipped} skip`;
-    expect(readme).toContain(line);
-    expect(readme).toContain(`${bare.needs.database} need a database`);
-    // The with-database count is the run that read .env.local, as it ran: whole only when the database answered.
+    // The README's one test line: what `npm test` does in a fresh clone with no keys (scripts/test-results.mjs rewrites it).
+    expect(readme).toContain(`no keys needed: a fresh clone runs ${line} (${bare.needs.database} need a database)`);
+    // The with-database count is the run that read .env.local, as it ran: claimed only when the database answered.
     const w = unit.with_database!;
     expect(w, "scripts/test-results.mjs unit records the run with .env.local").toBeDefined();
     expect([w.passed, w.passed + w.skipped + w.failed]).toEqual([unit.passed, unit.total]);
-    expect(readme).toContain(
+    const row = rows(tests, unit.command)[0];
+    expect(row).toContain(
       w.skipped === 0
-        ? `when .env.local names a reachable database: ${n(unit.passed)} of ${n(unit.total)}, no keys needed`
-        : `with .env.local: ${n(w.passed)} of ${n(unit.total)}, ${w.skipped} skipped because the database did not answer`,
+        ? `${n(unit.passed)} of ${n(unit.total)} when \`.env.local\` names a reachable database`
+        : `${n(w.passed)} of ${n(unit.total)} with \`.env.local\`, ${w.skipped} skipped because the database did not answer`,
     );
-    expect(rows(tests, unit.command)[0]).toContain(line);
+    expect(row).toContain(line);
     expect(rows(testing, unit.command)[0]).toContain(line);
   });
 
-  it("the browser suite's count and its one skip reason read the same in the README, docs/tests.md, TESTING.md and the suite", () => {
+  it("the browser suite's count and its one skip reason read the same in docs/tests.md, TESTING.md and the suite", () => {
     const ui = suite("ui");
     const why = /const SKIP_WHY = "([^"]+)"/.exec(readFileSync("tests/e2e/ui.mjs", "utf8"))?.[1];
     expect(why).toBeTruthy();
     const sentence = `Claude's four document steps run live with a key and on its recorded answers without one, and skip only when ${why}`;
-    expect(readme).toContain(`\`npm run e2e:ui\`, ${ui.passed} of ${ui.total} (${sentence})`);
+    expect(rows(tests, ui.command)[0]).toContain(`${ui.passed} of ${ui.total}`);
     expect(rows(tests, ui.command)[0]).toContain(sentence);
     expect(rows(testing, ui.command)[0]).toContain(sentence);
     for (const doc of [readme, tests, testing]) expect(doc).not.toMatch(/AG Studio widget steps|three steps where Claude reads/);
@@ -150,7 +162,7 @@ describe("one source for every test number", () => {
     const total = CASES.length + PATH.length + API.length;
     expect(suite("outside").total).toBe(total);
     expect(resultsDoc).toContain(`(${total} in all)`);
-    expect(readme).toContain(`the same ${total} outside checks`);
+    expect(readme).toContain(`a Render Workflow runs ${total} outside checks on the live site`);
     expect(testing).toContain(`Workflow: ${total} checks`);
     expect(testing).toContain(`All ${total} checks, with each result`);
   });
@@ -172,30 +184,57 @@ describe("one source for every dollar figure", () => {
     expect(ASKED_SENTENCE).toContain(cents(IMPACT.askedCases[0].amount));
   });
 
-  it("the README's dollar section is the three sentences the engine computes, below Results, with the counterfactual labelled", () => {
-    const dollars = readme.slice(readme.indexOf("## What it changes, in dollars"), readme.indexOf("## What is at stake"));
-    expect(readme.indexOf("## Results")).toBeLessThan(readme.indexOf("## What it changes, in dollars"));
-    expect(dollars).toContain(FAMILY_SENTENCE);
-    expect(dollars).toContain(FAMILY_BASIS);
-    expect(dollars).toContain(sampleYearSentence());
-    expect(IMPACT.familyTotal).toBe(38103.32);
-    // Results: one plain sentence per number, the court result led by what it shows.
-    const strip = readme.slice(readme.indexOf("## Results"), readme.indexOf("## What the AI adds"));
+  it("the README's Results are the figures the code computes, one per line, with the counterfactual labelled", () => {
+    const strip = section(readme, "## Results");
     const whole = (x: number) => `$${Math.round(x).toLocaleString("en-US")}`;
+    // SSA's own worked examples, from the recorded run: the engine, and Claude with no rulebook.
+    expect(strip).toContain(`- **${ssaRun.summary.engine_matches} of ${ssaRun.summary.cases}** of Social Security's own worked examples match SSA's answer; Claude with no rulebook, ${ssaRun.summary.claude_matches} of ${ssaRun.summary.cases}`);
+    // The court cases: the score, led by what it shows, and what the rest turn on.
+    const S = fieldRun.summary;
+    expect(S.agreed).toBe(S.scored);
+    expect(strip).toContain(`- **${COURT_SCORE}:** every federal court case that turns on whether a gift counts reaches SSA's and the court's outcome; the other ${S.not_scored} turn on`);
+    // The engine's counterfactual on those cases, in dollars, labelled as one.
     expect(IMPACT.countedCases).toBe(IMPACT.scoredCases);
     expect(IMPACT.keptIfAbleCases).toBe(IMPACT.computedCases);
     expect(strip).toContain(
-      `- **${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month.** Help from family was counted against the person in all ${IMPACT.countedCases} real SSI court cases scored; routed through Giftwise, the same help keeps money in ${IMPACT.routedCases} as the opinions state the facts, and in ${IMPACT.keptIfAbleCases - IMPACT.routedCases} more, ${IMPACT.keptIfAbleCases} in all, when the person can open an ABLE account.`,
+      `- **${whole(IMPACT.keptMin)} to ${whole(IMPACT.keptMax)} a month.** Family help was counted against the person in all ${IMPACT.countedCases} scored court cases; routed through Giftwise, it keeps money in ${IMPACT.routedCases}, and in ${IMPACT.keptIfAbleCases} with an ABLE account. The engine's counterfactual at 2026 rates, not an observed outcome`,
     );
-    const S = fieldRun.summary;
-    expect(strip).toContain(`- **${COURT_SCORE}:** of ${S.cases} federal court cases about help from others, ${S.scored} turn on whether a gift counts`);
-    expect(strip).toContain(`the other ${S.not_scored} turn on`);
-    expect(strip).toContain(`- **${COURT_NOT_INCOME.score}** in a second class of court cases, where the court held the help was not income`);
-    expect(secondClass.cases.every((c) => /loan/i.test(c.determination.held))).toBe(true);
-    expect(strip).toContain(`- **${ssaSet.out_of_scope.length} groups** of SSA's examples are listed apart and not scored`);
+    // The random-gift run: its size and the number of promises each gift is held to.
+    expect(strip).toContain(`- **${n(invariantRun.gifts)} random gifts** each keep all ${WORDS[INVARIANTS.length]} promises`);
     // Each result line is one figure: no line carries a table cell's stack of qualified lines.
     for (const line of strip.split(/\r?\n/).filter((l) => l.startsWith("- **"))) expect(line, line.slice(0, 40)).not.toContain("<br>");
+  });
+
+  it("the figures the README leaves to the docs are stated there, as the code computes them", () => {
+    // The per-family court figures, in docs/results.md.
+    expect(resultsDoc).toContain(FAMILY_SENTENCE);
+    expect(resultsDoc).toContain(FAMILY_BASIS);
+    expect(IMPACT.familyTotal).toBe(38103.32);
     expect(resultsDoc).toContain(`${cents(IMPACT.familyTotal)} in all`);
+    // The sample year against each giver paying on their own, in docs/real-world.md.
+    expect(realWorld).toContain(sampleYearSentence());
+    // The second class of court cases (each one a loan), first run and after the fix, in docs/results.md (held below).
+    expect(secondClass.cases.every((c) => /loan/i.test(c.determination.held))).toBe(true);
+    expect(resultsDoc).toContain(`On its first run, before the engine had a loan field, the engine agreed on ${COURT_NOT_INCOME.score}.`);
+    // The groups of SSA's examples kept out of the score, each with its reason in the set.
+    expect(ssaSet.out_of_scope.length).toBe(ssaRun.summary.out_of_scope_groups);
+    expect(resultsDoc).toContain(`${ssaSet.out_of_scope.length} groups of SSA's examples are listed apart and not scored`);
+  });
+
+  it("the README's three-minute test is the split the router makes on Maya's page", () => {
+    const needs: OpenNeed[] = SAMPLE.needs.map((x, i) => ({ id: i + 1, title: x.title, category: x.category, route: x.route, payeeName: x.payeeName, payeeAccount: x.payeeAccount, amount: Number(x.amount), funded: 0, recurring: x.recurring }));
+    const r = routeGift(1500, needs, "2026-11-10", pageProfile({ household: { profile: SAMPLE.profile }, payments: [] }));
+    expect(r.unplaced).toBe(0);
+    // One amount per payee, in the order the page lists them; the ABLE account's lines (the bill and savings) added together.
+    const byPayee = new Map<string, number>();
+    for (const l of r.lines) byPayee.set(l.payeeName, (byPayee.get(l.payeeName) ?? 0) + l.amount);
+    const [shop1, shop2, able, shop3] = [...byPayee.entries()];
+    expect(able[0]).toBe("Maya's ABLE account");
+    const step = section(readme, "## Test it");
+    expect(step).toContain(`four payees (${usd(shop1[1])}, ${usd(shop2[1])}, ${usd(able[1])} to her ABLE account, ${usd(shop3[1])})`);
+    expect(byPayee.size).toBe(4);
+    expect(step).toContain(`her check two months later stays ${usd(r.checkWithRouting)} (the ${addMonths(monthOf("2026-11-10"), 2).slice(0, 4)} amount); as cash it would be ${usd(r.checkIfCash)}`);
+    expect(r.checkWithRouting).toBe(r.baseline);
   });
 
   it("the README stays short enough to read in one sitting", () => {
@@ -207,15 +246,21 @@ describe("one source for every dollar figure", () => {
 
   it("the What the AI adds tables in docs/results.md, and the README's summary of them, are the code's", () => {
     const ai = resultsDoc.slice(resultsDoc.indexOf("### What the AI adds, measured"), resultsDoc.indexOf("## The two errors that cost money"));
-    const summary = readme.slice(readme.indexOf("## What the AI adds"), readme.indexOf("## Run it yourself"));
+    const summaries = section(readme, "## Results").split(/\r?\n/).filter((l) => l.includes("AI reviewers"));
+    expect(summaries).toHaveLength(1);
+    const [summary] = summaries;
     const t = whatAiAdds();
     const [none, regs, poms, ref] = t.columns;
     const row = (k: string, f: (c: typeof none) => string) => `| ${k} | ${[none, regs, poms, ref].map(f).join(" | ")} |`;
     expect(ai).toContain(row("Her check kept whole", (c) => `${c.whole} of ${t.bills}`));
     expect(ai).toContain(row("Wrong routes accepted", (c) => String(c.wrong)));
     expect(ai).toContain(row(`Settled with nothing left for her to do: paid straight to the business, of the ${t.payable} that are not housing`, (c) => `${c.direct} of ${t.payable}`));
-    expect(summary).toContain(`a router with no AI keeps her check whole on ${none.whole} of ${t.bills} with ${none.wrong} wrong routes, as the referee does`);
-    expect(summary).toContain(`${ref.direct} of the ${t.payable} that are not housing paid straight to the business, against ${none.direct} of ${t.payable} with no AI`);
+    // docs/results.md says it in full: the router with no AI is as safe as the referee, and the AI adds settling bills.
+    expect(ai).toContain(`keeps her check whole on ${none.whole} of ${t.bills} bills with ${none.wrong} wrong routes, the same as the referee`);
+    expect(ai).toContain(`the referee pays ${ref.direct} of the ${t.payable} bills that are not housing straight to the business`);
+    // The README's one line: bills settled with and without the AI, and her check whole on every bill either way.
+    expect(summary).toContain(`**${ref.direct} of ${t.payable} bills settled by the two AI reviewers, against ${none.direct} of ${t.payable} with no AI,** her check whole on ${ref.whole} of ${t.bills} bills either way`);
+    expect([none.whole, ref.whole]).toEqual([t.bills, t.bills]);
     // The design's reason holds only while the data shows it: no AI as safe, the manual reviewer alone settling more.
     expect(none.whole === ref.whole && none.wrong === ref.wrong).toBe(true);
     expect(poms.direct).toBeGreaterThan(ref.direct);
@@ -228,7 +273,7 @@ describe("one source for every dollar figure", () => {
       ["Both reviewers and the referee", "referee"],
     ] as const;
     for (const [label, k] of labels) expect(ai).toContain(`| ${label} | ${a[k].whole} of ${a.cases} |`);
-    expect(summary).toContain(`the referee keeps her check whole on ${a.referee.whole} of ${a.cases} and the manual reviewer alone on ${a.poms.whole} of ${a.cases}`);
+    expect(summary).toContain(`On ${WORDS[a.cases]} adversarial cases, the referee keeps it whole on ${a.referee.whole} of ${a.cases} and the manual reviewer alone on ${a.poms.whole} of ${a.cases}`);
     expect(a.regs.whole).toBe(a.referee.whole);
     expect(a.poms.wrong).toEqual(["disagree"]);
     const low = a.rows.find((r) => r.id === "disagree")!.outcome.poms.check;
@@ -252,9 +297,9 @@ describe("one source for every dollar figure", () => {
     expect(later.rentThroughAble).toBe(later.full);
   });
 
-  it("the README and docs/results.md state the held-out result as recorded", () => {
-    // One README line for the four sets together, each figure from its results file.
-    const lines = readme.split(/\r?\n/).filter((l) => l.includes("content/eval/held-out"));
+  it("docs/results.md states the held-out result as recorded", () => {
+    // One summary line for the four sets together, each figure from its results file.
+    const lines = resultsDoc.split(/\r?\n/).filter((l) => l.startsWith("**Four held-out sets"));
     expect(lines).toHaveLength(1);
     const [line] = lines;
     const tally = (r: { summary: { engine_matches: number; cases: number } }) => `${r.summary.engine_matches} of ${r.summary.cases}`;
@@ -310,7 +355,6 @@ describe("one source for every dollar figure", () => {
     // The second class of court cases: the first run as recorded, then the current engine, labelled.
     expect(resultsDoc).toContain(`On its first run, before the engine had a loan field, the engine agreed on ${COURT_NOT_INCOME.score}.`);
     expect(resultsDoc).toContain(`${COURT_NOT_INCOME.now.asWritten.agreed} of ${COURT_NOT_INCOME.now.asWritten.scored} as the cases record the help, and ${COURT_NOT_INCOME.withLoans} with the loan each court found`);
-    expect(readme).toContain(`With each court's finding in the new loan field, ${COURT_NOT_INCOME.withLoans}, after the fix`);
   });
 
   it("every document names the number of promises the invariant run holds each gift to", () => {
@@ -332,11 +376,11 @@ describe("one source for every dollar figure", () => {
     expect(realWorld).toContain(`${y.reportMonthsAlone} months with income or housing help to tell Social Security about, against ${y.reportMonthsGiftwise}`);
   });
 
-  it("the README and /about state PayPal's share of the sample year as the engine splits it", () => {
+  it("docs/real-world.md and /about state PayPal's share of the sample year as the engine splits it", () => {
     const y = sampleYearSplit();
     const pct = Math.round((y.paypal.amount / y.total) * 100);
     expect(paypalShareSentence()).toBe(`PayPal carries ${pct} percent of the sample year's dollars today: ${usd(y.paypal.amount)} of ${usd(y.total)}, everything paid to shops and clinics.`);
-    expect(readme).toContain(paypalShareSentence());
+    expect(realWorld).toContain(paypalShareSentence());
     expect(readFileSync("src/app/about/page.tsx", "utf8")).toContain("{paypalShareSentence()}");
     expect(realWorld).toContain(`${usd(y.paypal.amount)} (${y.paypal.gifts} gifts)`);
   });

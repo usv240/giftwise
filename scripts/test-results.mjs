@@ -71,34 +71,30 @@ function writeDocs(suite) {
         cells[last] = cells[last].replace(re, to);
         if (suite.requests) cells[last] = cells[last].replace(/\d+ requests/, `${suite.requests} requests`);
         if (suite.bare) cells[last] = cells[last].replace(/\d+ pass and \d+ skip/, `${suite.bare.passed} pass and ${suite.bare.skipped} skip`);
+        // docs/tests.md states the run with .env.local as it ran (see withDatabaseLine).
+        if (suite.with_database && file === "docs/tests.md")
+          cells[last] = cells[last].replace(/\d[\d,]* of \d[\d,]* (when `\.env\.local` names a reachable database|with `\.env\.local`, \d+ skipped because the database did not answer)/, withDatabaseLine(suite));
         return cells.join("|");
       })
       .join("\n");
     if (out !== text) writeFileSync(file, out);
   }
-  // The README's "Where to look" table names suites as "`command`, N of M"; each is rewritten from the record.
-  {
+  // The README's one test line: what `npm test` does in a fresh clone, from the bare run.
+  if (suite.bare) {
     const text = readFileSync("README.md", "utf8");
-    const esc = suite.command.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const out = text.replace(new RegExp(`(\`${esc}\`, )\\d[\\d,]* of \\d[\\d,]*`, "g"), `$1${n(suite.passed)} of ${n(suite.total)}`);
-    if (out !== text) writeFileSync("README.md", out);
-  }
-  // The README's "Run it yourself" line states both unit counts, each from its own recorded run.
-  if (suite.bare && suite.with_database) {
-    const text = readFileSync("README.md", "utf8");
-    const out = text.replace(/a fresh clone with no \.env\.local: .*$/m, `a fresh clone with no .env.local: ${suite.bare.passed} pass and ${suite.bare.skipped} skip (${suite.bare.needs.database} need a database); ${withDatabaseLine(suite)}`);
+    const out = text.replace(/a fresh clone runs \d+ pass and \d+ skip \(\d+ need a database\)/, `a fresh clone runs ${suite.bare.passed} pass and ${suite.bare.skipped} skip (${suite.bare.needs.database} need a database)`);
     if (out !== text) writeFileSync("README.md", out);
   }
 }
 
 /**
- * The second half of the README's unit line, from the run with .env.local: every test when the database answered, and
- * otherwise what skipped and why, so the line never claims a database run that did not happen.
+ * The unit count with .env.local, as docs/tests.md states it: every test when the database answered, and otherwise
+ * what skipped and why, so the page never claims a database run that did not happen.
  */
 export function withDatabaseLine(suite) {
   const w = suite.with_database;
-  if (w.skipped === 0) return `when .env.local names a reachable database: ${n(w.passed)} of ${n(suite.total)}, no keys needed`;
-  return `with .env.local: ${n(w.passed)} of ${n(suite.total)}, ${w.skipped} skipped because the database did not answer`;
+  if (w.skipped === 0) return `${n(w.passed)} of ${n(suite.total)} when \`.env.local\` names a reachable database`;
+  return `${n(w.passed)} of ${n(suite.total)} with \`.env.local\`, ${w.skipped} skipped because the database did not answer`;
 }
 
 /**

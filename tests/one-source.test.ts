@@ -53,8 +53,8 @@ describe("the held-out summary has one source", () => {
     expect(HELD_OUT_SENTENCE).toContain(HELD_OUT_SCORES);
   });
 
-  it("the /evidence card, the headline and the README state every set", () => {
-    expect(readme).toContain(HELD_OUT_SCORES);
+  it("the /evidence card, the headline and docs/results.md state every set", () => {
+    expect(readFileSync("docs/results.md", "utf8")).toContain(HELD_OUT_SCORES);
     // Only the held-out section itself reads the result files; every other page and component takes the summary.
     const readers = [...files("src/app"), ...files("src/components")].filter((f) => /\.tsx?$/.test(f) && /held-out(-\d)?-results\.json/.test(readFileSync(f, "utf8")));
     expect(readers.map((f) => f.replace(/\\/g, "/"))).toEqual(["src/components/evidence/HeldOut.tsx"]);
@@ -92,8 +92,9 @@ describe("check-gift names each resource test for the day it is for", () => {
     expect(d.able_balance_on_next_first).toBe(d.resources_after_gift.able_balance);
     expect(d.resource_status).toBe(d.resources_for_check.status);
     const r = evaluateGift({ id: "p", date: "2026-11-10", amount: 1000, delivery: "cash", category: "other" }, DEFAULT_PROFILE);
-    expect(readme).toContain(`takes her savings to ${usd(r.resourcesAfter.countable)} on December 1, over the ${usd(r.resourcesAfter.limit)} limit`);
-    expect(readme).toContain("`resources_after_gift`");
+    // The README states what this call returns as resources_after_gift: the savings on December 1 and the limit.
+    expect(readme).toContain(`takes her savings to ${usd(d.resources_after_gift.countable)} on December 1, over the ${usd(r.resourcesAfter.limit)} limit`);
+    expect(d.resources_after_gift.countable).toBe(r.resourcesAfter.countable);
   });
 
   it("the OpenAPI document describes both tests and marks the old fields deprecated", () => {
@@ -117,8 +118,8 @@ describe("one start path", () => {
     const links = [...actions.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
     expect(links.slice(0, 2)).toEqual(["/start", "/evidence#path"]);
     expect(actions).toContain("See it work in five minutes");
-    expect(readme).toContain("- **Start here:** [the five-minute path](https://giftwise-405i.onrender.com/evidence#path), the home page's **See it work in five minutes**.");
-    // The path's first step is the home page's Gift Checker, as the README says.
+    expect(readme).toContain("- **Start here:** [the five-minute path](https://giftwise-405i.onrender.com/evidence#path)");
+    // The path's first step is the home page's Gift Checker.
     expect(readFileSync("src/app/evidence/page.tsx", "utf8")).toMatch(/const PATH = \[\s*\{ href: "\/", label: "The problem in one number"/);
   });
 });

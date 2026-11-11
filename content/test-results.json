@@ -1,20 +1,20 @@
 {
-  "ranAt": "2026-11-10",
+  "ranAt": "2026-11-11",
   "build": "Production build on localhost, PayPal sandbox, Postgres 17",
   "suites": [
     {
       "id": "unit",
       "name": "Rules engine, routing, the SSA report, the checks workflow and the cited answers",
       "command": "npm test",
-      "passed": 469,
-      "total": 469,
+      "passed": 472,
+      "total": 472,
       "what": "Every rule row, the 2026 values and the 2027 values for January and February checks, 1,000 random gifts held to all {promises} promises, the report code that lets anyone check a report, the Spanish rule sentences, the $60 quarterly exclusion in the order gifts arrive, shelter and the one-third reduction's meals test, prepaid housing bills, ABLE, gift routing, monthly gifts month by month, the Easy Read report in English and Spanish (every sentence 15 words or fewer) and its calendar reminder, pronouns, the reviewers' referee and what it does when one reviewer is wrong, the monthly report to Social Security, the checks workflow's fan-out and retries, the AG Studio to Claude translation, a known source behind every real-world answer, Social Security's own worked examples, and the benefit calendar, the logger's masking, the Postgres rate-limit table, the operations page's id shortening, the For agents recording against the gift page, the outside checks against the MCP server and render.yaml, and every test number in the README and TESTING.md against this file",
-      "ranAt": "2026-11-10",
+      "ranAt": "2026-11-11",
       "bare": {
-        "passed": 459,
+        "passed": 462,
         "failed": 0,
         "skipped": 10,
-        "total": 469,
+        "total": 472,
         "needs": {
           "database": 10,
           "claude": 0,
@@ -22,7 +22,7 @@
         }
       },
       "with_database": {
-        "passed": 469,
+        "passed": 472,
         "failed": 0,
         "skipped": 0,
         "needs": {
