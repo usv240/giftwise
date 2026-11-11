@@ -2,6 +2,7 @@
 
 Benefit-safe giving for people on SSI, their families and their benefits counselors. Family and friends give through PayPal, which pays the shops and clinics directly; the share for the person's ABLE account goes through the ABLE plan's own gift page. The monthly check stays whole.
 
+- **Demo video (3 min):** [youtu.be/L4s_d4p7Td8](https://youtu.be/L4s_d4p7Td8)
 - **Live:** [giftwise-405i.onrender.com](https://giftwise-405i.onrender.com), PayPal sandbox, no login. The sandbox buyer login is in [TESTING.md](TESTING.md).
 - **Start here:** [the five-minute path](https://giftwise-405i.onrender.com/evidence#path), the home page's **See it work in five minutes**. Its first step is the home page's Gift Checker: $1,000 as cash, then **Pay the shop**.
 - **Claims to evidence:** [docs/evidence-index.md](docs/evidence-index.md): ten claims, each with the live page, the file and line, and the test.

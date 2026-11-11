@@ -240,7 +240,8 @@ describe("one source for every dollar figure", () => {
     const shop = evaluateGift({ id: "p", date: "2026-11-10", amount: 1000, delivery: "vendor", category: "equipment" }, DEFAULT_PROFILE);
     expect(readme).toContain(`her ${checkMonthName(cash.paymentMonth)} check drops from ${usd(cash.checkBaseline)} to ${usd(cash.checkAfter)}`);
     expect(readme).toContain(`leaves that ${checkMonthName(shop.paymentMonth)} check at ${usd(shop.checkAfter)}`);
-    expect(readme).not.toContain("youtu.be");
+    // The demo video, public on YouTube since Nov 11, 2026; the only video the README links to.
+    expect(readme.match(/youtu\.be\/[\w-]+/g)).toEqual(["youtu.be/L4s_d4p7Td8", "youtu.be/L4s_d4p7Td8"]);
   });
 
   it("the README's housing reach is the engine's, with and without ABLE", () => {
