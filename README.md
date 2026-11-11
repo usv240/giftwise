@@ -113,7 +113,7 @@ About three minutes on the live site. PayPal's sandbox moves no real money.
 
    Or choose **Debit or Credit Card**: test card `4012 8888 8888 1881`, any future date, any CVV.
 4. **See the receipt** lists each payee's PayPal capture ID; **Check with PayPal now** asks PayPal live.
-5. To see Claude read a document: on [`/start`](https://giftwise-405i.onrender.com/start), type a name, press **Next**, then **Use the sample letter** (made up for the demo); code checks each quote against the PDF.
+5. To see Claude read a document: on [`/start`](https://giftwise-405i.onrender.com/start), press **Next: Maya's situation**, then **Use the sample letter** (made up for the demo); code checks each quote against the PDF, and the check the rules work out matches the letter's $106.
 
 Every other flow, step by step: [TESTING.md](TESTING.md).
 
